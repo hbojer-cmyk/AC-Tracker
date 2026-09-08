@@ -197,15 +197,15 @@ const formatTimestamp = (ts: number) => {
 };
 
 const CATEGORY_ICONS: Record<string, string> = {
-  'All Destinations': '/Map-icons/standard_icon.png',
-  'Regular Flights': '/icons/flights_icon.png',
-  'Helicopter Flights': '/icons/helicopter_icon.png',
-  'Adventure Map Flights': '/icons/adventure_icon.png',
-  'Alliance Map Flights': '/icons/alliance__icon.png',
-  'Alliance Task Flights': '/icons/alliance__icon.png',
-  'Space Map Flights': '/Map-icons/space_map_icon.png',
-  'Space Launches': '/Map-icons/space_icon.png',
-  'Event Flights': '/icons/event_icon.png'
+  'All Destinations': 'Map-icons/standard_icon.png',
+  'Regular Flights': 'icons/flights_icon.png',
+  'Helicopter Flights': 'icons/helicopter_icon.png',
+  'Adventure Map Flights': 'icons/adventure_icon.png',
+  'Alliance Map Flights': 'icons/alliance__icon.png',
+  'Alliance Task Flights': 'icons/alliance__icon.png',
+  'Space Map Flights': 'Map-icons/space_map_icon.png',
+  'Space Launches': 'Map-icons/space_icon.png',
+  'Event Flights': 'icons/event_icon.png'
 };
 
 const AeroQuest = () => {
@@ -286,7 +286,7 @@ const AeroQuest = () => {
       }
 
       return {
-        id, aircraft, category, group: group || 'None', destination: dest, icon: icon || undefined,
+        id, aircraft, category, group: group || 'None', destination: dest, icon: icon ? icon.replace(/^\//, '') : undefined,
         star1Req, star2Req, star3Req, star4Req, star5Req, maxStars,
         flightsDone, mapsDone, needsMap, lastUpdated, isCustomList
       };
@@ -811,7 +811,7 @@ const AeroQuest = () => {
             >
               <div className="relative">
                 <div className="absolute inset-0 bg-amber-400/20 rounded-full blur-md" />
-                <img src="/icons/star-icon.png" alt="Star" className="w-12 h-12 relative z-10 object-contain" referrerPolicy="no-referrer" />
+                <img src="icons/star-icon.png" alt="Star" className="w-12 h-12 relative z-10 object-contain" referrerPolicy="no-referrer" />
               </div>
               <div className="flex flex-col">
                 <span className="text-lg font-black text-[var(--text-main)] leading-none">Stars</span>
@@ -827,7 +827,7 @@ const AeroQuest = () => {
             >
               <div className="relative">
                 <div className="absolute inset-0 bg-blue-400/20 rounded-full blur-md" />
-                <img src="/icons/map-icon.png" alt="Map" className="w-12 h-12 relative z-10 object-contain" referrerPolicy="no-referrer" />
+                <img src="icons/map-icon.png" alt="Map" className="w-12 h-12 relative z-10 object-contain" referrerPolicy="no-referrer" />
               </div>
               <div className="flex flex-col">
                 <span className="text-lg font-black text-[var(--text-main)] leading-none">Maps</span>
@@ -842,7 +842,7 @@ const AeroQuest = () => {
             >
               <div className="relative">
                 <div className="absolute inset-0 bg-amber-400/20 rounded-full blur-md" />
-                <img src="/icons/star-icon.png" alt="Next Star" className="w-12 h-12 relative z-10 object-contain" referrerPolicy="no-referrer" />
+                <img src="icons/star-icon.png" alt="Next Star" className="w-12 h-12 relative z-10 object-contain" referrerPolicy="no-referrer" />
               </div>
               <div className="flex flex-col">
                 <span className="text-lg font-black text-[var(--text-main)] leading-none">Next Stars</span>
@@ -856,7 +856,7 @@ const AeroQuest = () => {
             >
               <div className="relative">
                 <div className="absolute inset-0 bg-blue-400/20 rounded-full blur-md" />
-                <img src="/icons/airplane-icon.png" alt="Airplane" className="w-12 h-12 relative z-10 object-contain" referrerPolicy="no-referrer" />
+                <img src="icons/airplane-icon.png" alt="Airplane" className="w-12 h-12 relative z-10 object-contain" referrerPolicy="no-referrer" />
               </div>
               <div className="flex flex-col">
                 <span className="text-lg font-black text-[var(--text-main)] leading-none">My Hangar</span>
@@ -1057,7 +1057,7 @@ const AeroQuest = () => {
 
                     {/* Map Type Collection Progress */}
                     <div className="rounded-[2.5rem] bg-[var(--card)] border border-[var(--border)] p-8 shadow-lg">
-                      <center>  <img src="/Headers/maps-by-collection.png" alt="Most owned Maps" referrerPolicy="no-referrer" /> </center>
+                      <center>  <img src="Headers/maps-by-collection.png" alt="Most owned Maps" referrerPolicy="no-referrer" /> </center>
                       <div className="space-y-8">
                         {mapCollectionStats.typeStats.map((type, idx) => (
                           <div key={type.name} className="space-y-2">
@@ -1081,7 +1081,7 @@ const AeroQuest = () => {
                     <div className="space-y-8">
                       {/* Maps Per Airplane Bar Chart */}
                       <div className="rounded-[2.5rem] bg-[var(--card)] border border-[var(--border)] p-8 shadow-lg">
-                        <center>  <img src="/Headers/maps-by-aircraft.png" alt="Most owned Maps" referrerPolicy="no-referrer" /> </center>
+                        <center>  <img src="Headers/maps-by-aircraft.png" alt="Most owned Maps" referrerPolicy="no-referrer" /> </center>
                         <div className="h-[300px] w-full">
                           <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={mapCollectionStats.airplaneStats} margin={{ top: 10, right: 10, left: -20, bottom: 20 }}>
@@ -1111,7 +1111,7 @@ const AeroQuest = () => {
                       <div className="rounded-[2rem] border border-[var(--border)] bg-[var(--card)] shadow-lg overflow-hidden">
 
                         <div className="p-6 border-b border-[var(--border)] text-center">
-                          <center>  <img src="/Headers/most-owned-maps.png" alt="Most owned Maps" referrerPolicy="no-referrer" /> </center>
+                          <center>  <img src="Headers/most-owned-maps.png" alt="Most owned Maps" referrerPolicy="no-referrer" /> </center>
                         </div>
 
                         <div className="divide-y divide-[var(--border)]">
@@ -1139,7 +1139,7 @@ const AeroQuest = () => {
                       {/* Missing Maps Card */}
                       <div className="rounded-[2rem] border border-[var(--border)] bg-[var(--card)] shadow-lg overflow-hidden">
                         <div className="py-6 px-6 border-b border-[var(--border)] flex flex-col items-center gap-4">
-                          <center>  <img src="/Headers/missing-maps.png" alt="Most owned Maps" referrerPolicy="no-referrer" /> </center>
+                          <center>  <img src="Headers/missing-maps.png" alt="Most owned Maps" referrerPolicy="no-referrer" /> </center>
 
                           <label className="flex items-center cursor-pointer group">
                             <div className="relative flex items-center justify-center">
@@ -1306,7 +1306,7 @@ const AeroQuest = () => {
                           <div className="flex items-center gap-6 mb-6 relative z-10">
                             <div className="relative group">
                               <div className="absolute inset-0 bg-amber-400/20 rounded-full blur-xl group-hover:bg-amber-400/40 transition-all duration-500" />
-                              <img src="/icons/star-icon.png" alt="Star" className="w-20 h-20 relative z-10 object-contain drop-shadow-[0_0_10px_rgba(251,191,36,0.6)]" referrerPolicy="no-referrer" />
+                              <img src="icons/star-icon.png" alt="Star" className="w-20 h-20 relative z-10 object-contain drop-shadow-[0_0_10px_rgba(251,191,36,0.6)]" referrerPolicy="no-referrer" />
                             </div>
                             <div className="flex flex-col">
                               <h4 className="text-3xl font-medium tracking-tight text-[var(--text-main)] mb-1">Skill Stars</h4>
