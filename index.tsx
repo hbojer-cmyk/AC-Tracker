@@ -736,7 +736,7 @@ const AeroQuest = () => {
         }}>
           <img src="icons/AC-Tracker-By-Soupha.png" alt="AC Tracker Logo" className="w-full max-w-[340px] object-contain drop-shadow-lg transition-transform group-hover:scale-125" referrerPolicy="no-referrer" />
           <span className="text-[10px] font-black uppercase tracking-[0.1em] text-[#4A606C] mt-1">
-            Version 10, 07.30.26
+            Version 10.1, 08.06.26
           </span>
         </div>
 
@@ -1016,7 +1016,7 @@ const AeroQuest = () => {
                               <div className="w-4 h-4 border-2 border-[var(--border)] rounded bg-[var(--card)] peer-checked:bg-[var(--accent)] peer-checked:border-[var(--accent)] transition-all" />
                               <Star className="absolute w-2.5 h-2.5 text-white opacity-0 peer-checked:opacity-100 transition-opacity fill-white" />
                             </div>
-                            <span className="text-[11px] font-bold text-[var(--text-muted)] group-hover:text-[var(--text-main)] transition-colors whitespace-nowrap">Hide 3 Star Locations</span>
+                            <span className="text-[11px] font-bold text-[var(--text-muted)] group-hover:text-[var(--text-main)] transition-colors whitespace-nowrap">Hide Completed</span>
                           </label>
 
                           <button
@@ -1076,7 +1076,7 @@ const AeroQuest = () => {
                             </div>
                           </div>
                         ))}
-                      </div>y-ccol
+                      </div>
                     </div>                  {/* Charts Section */}
                     <div className="space-y-8">
                       {/* Maps Per Airplane Bar Chart */}
@@ -1116,7 +1116,7 @@ const AeroQuest = () => {
 
                         <div className="divide-y divide-[var(--border)]">
                           {mapCollectionStats.topStock.map((stock, idx) => (
-                            <div key={stock.id} className="p-4 hover:bg-[var(--bg)] transition-colors group cursor -pointer" onClick={() => { setView('list'); setSearchQuery(stock.destination); }}>
+                            <div key={stock.id} className="p-4 hover:bg-[var(--bg)] transition-colors group cursor-pointer" onClick={() => { setView('list'); setSearchQuery(stock.destination); }}>
                               <div className="flex items-center gap-4">
                                 <div className="w-8 h-8 rounded-full bg-[var(--accent-muted)] flex items-center justify-center text-[var(--accent)] font-black text-xs shrink-0">
                                   {idx + 1}

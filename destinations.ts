@@ -196,203 +196,200 @@ Eagle|Alliance Task Flights|The Power of Suggestion|Dresden||250|500|1000|2500|7
 Eagle|Alliance Task Flights|The Power of Suggestion|Fortaleza||250|500|1000|2500|7500
 Eagle|Alliance Task Flights|The Power of Suggestion|Santo Domingo||250|500|1000|2500|7500
 Eagle|Alliance Task Flights|The Power of Suggestion|Varanasi||250|500|1000|2500|7500
-Condor|Event Flights|A Walk In The Clouds|Bridgetown||200|300|600||
-Eagle|Event Flights|A Walk In The Clouds|Linz||23|46|92||
-Falcon|Event Flights|A Walk In The Clouds|The Seychelles||100|200|400||
-Giant|Event Flights|A Walk In The Clouds|Salt Lake City||50|100|150||
-Hawk|Event Flights|A Walk In The Clouds|The Bahamas||23|46|92||
-Jumbo|Event Flights|A Walk In The Clouds|Karlovy Vary||30|60|120||
-Owl|Event Flights|A Walk In The Clouds|Atlantic City||10|20|40||
-Raven|Event Flights|A Walk In The Clouds|Porto||20|41|81||
-Swift|Event Flights|A Walk In The Clouds|Podgorica||10|20|39||
-Thunderbird|Event Flights|A Walk In The Clouds|Tuscany||150|250|500||
-Condor|Event Flights|Age of Ash|Popocatépetl||200|300|600||
-Eagle|Event Flights|Age of Ash|Mount Etna||30|60|120||
-Falcon|Event Flights|Age of Ash|Mauna Loa||100|200|400||
-Giant|Event Flights|Age of Ash|Krakatoa||50|100|150||
-Hawk|Event Flights|Age of Ash|Mount Fuji||23|46|92||
-Jumbo|Event Flights|Age of Ash|Mount Vesuvius||30|60|120||
-Owl|Event Flights|Age of Ash|Mount Elbrus||17|35|69||
-Raven|Event Flights|Age of Ash|Mount Kilimanjaro||20|41|81||
-Thunderbird|Event Flights|Age of Ash|Eyjafjallajökull||150|250|500||
-Crossbill|Event Flights|Airport City|Bellevue||50|400|1000||
-Crossbill|Event Flights|Airport City|Bethesda||50|400|1000||
-Crossbill|Event Flights|Airport City|Guildford||50|400|1000||
-Crossbill|Event Flights|Airport City|Montreuil||50|400|1000||
-Crossbill|Event Flights|Airport City|Redwood City||50|400|1000||
-Goldfinch|Event Flights|Airport City|Espoo||50|400|1000||
-Goldfinch|Event Flights|Airport City|Garland||50|400|1000||
-Goldfinch|Event Flights|Airport City|Irvine||50|400|1000||
-Goldfinch|Event Flights|Airport City|Lyon||50|400|1000||
-Goldfinch|Event Flights|Airport City|Shreveport||50|400|1000||
-Sparrow|Event Flights|Airport City|Agoura Hills||50|400|1000||
-Sparrow|Event Flights|Airport City|Cary||50|400|1000||
-Sparrow|Event Flights|Airport City|Hunt Valley||50|400|1000||
-Sparrow|Event Flights|Airport City|McLean||50|400|1000||
-Sparrow|Event Flights|Airport City|Southam||50|400|1000||
-Condor|Event Flights|Back To School|New Haven||200|300|600||
-Eagle|Event Flights|Back To School|Edinburgh||23|46|92||
-Falcon|Event Flights|Back To School|Oxford||100|200|400||
-Giant|Event Flights|Back To School|Kyoto||50|100|150||
-Hawk|Event Flights|Back To School|Sorbonne||19|38|75||
-Jumbo|Event Flights|Back To School|Leuven||30|60|120||
-Owl|Event Flights|Back To School|Cambridge||10|20|39||
-Raven|Event Flights|Back To School|Stanford||23|46|92||
-Thunderbird|Event Flights|Back To School|Princeton||150|250|500||
-Condor|Event Flights|Celestial Festival|Fez||200|300|500||
-Crossbill|Event Flights|Celestial Festival|Kaieteur Falls||23|46|92||
-Crossbill|Event Flights|Celestial Festival|Ruacana Falls||20|39|79||
-Eagle|Event Flights|Celestial Festival|Ottawa||23|46|92||
-Falcon|Event Flights|Celestial Festival|Tunisia||100|200|400||
-Giant|Event Flights|Celestial Festival|Lahore||50|100|150||
-Goldfinch|Event Flights|Celestial Festival|Matterhorn||30|60|120||
-Goldfinch|Event Flights|Celestial Festival|Mount Cook||30|60|120||
-Hawk|Event Flights|Celestial Festival|Brussels||20|40|75||
-Jumbo|Event Flights|Celestial Festival|Turin||30|60|120||
-Owl|Event Flights|Celestial Festival|Madrid||10|20|40||
-Raven|Event Flights|Celestial Festival|Ljubljana||20|41|81||
-Sparrow|Event Flights|Celestial Festival|Huanglong||17|35|69||
-Sparrow|Event Flights|Celestial Festival|Sequoia||15|30|60||
-Swift|Event Flights|Celestial Festival|Warsaw||10|20|39||
-Thunderbird|Event Flights|Celestial Festival|Belgrade||150|250|500||
-Condor|Event Flights|Dancing With Leprechauns|Galway||200|300|600||
-Eagle|Event Flights|Dancing With Leprechauns|Navan||23|46|92||
-Falcon|Event Flights|Dancing With Leprechauns|Waterford||100|200|400||
-Giant|Event Flights|Dancing With Leprechauns|Bray||50|100|150||
-Hawk|Event Flights|Dancing With Leprechauns|Limerick||19|38|75||
-Jumbo|Event Flights|Dancing With Leprechauns|Swords||30|60|120||
-Owl|Event Flights|Dancing With Leprechauns|Dublin||10|20|40||
-Raven|Event Flights|Dancing With Leprechauns|Cork||23|46|92||
-Swift|Event Flights|Dancing With Leprechauns|Tullamore||10|20|40||
-Thunderbird|Event Flights|Dancing With Leprechauns|Kilkenny||150|250|500||
-Condor|Event Flights|Dark Skies|Oaxaca City||200|300|600||
-Eagle|Event Flights|Dark Skies|Fountainbleau||23|46|92||
-Falcon|Event Flights|Dark Skies|Savannah||100|200|400||
-Giant|Event Flights|Dark Skies|Portland||50|100|150||
-Hawk|Event Flights|Dark Skies|Machu-Pichu||19|38|75||
-Jumbo|Event Flights|Dark Skies|Windsor||30|60|120||
-Owl|Event Flights|Dark Skies|Transylvania||10|20|40||
-Raven|Event Flights|Dark Skies|Salem||20|41|81||
-Thunderbird|Event Flights|Dark Skies|Aokigahara||150|250|500||
-Condor|Event Flights|Down The Rabbit Hole|Bradford||200|300|600||
-Eagle|Event Flights|Down The Rabbit Hole|Bristol||23|46|92||
-Falcon|Event Flights|Down The Rabbit Hole|Salisbury||100|200|400||
-Giant|Event Flights|Down The Rabbit Hole|Leeds||50|100|150||
-Hawk|Event Flights|Down The Rabbit Hole|Chichester||23|46|92||
-Jumbo|Event Flights|Down The Rabbit Hole|Durham||30|60|120||
-Owl|Event Flights|Down The Rabbit Hole|Cheltenham||10|20|40||
-Raven|Event Flights|Down The Rabbit Hole|Lichfield||23|46|92||
-Swift|Event Flights|Down The Rabbit Hole|Wonderland||100|250|500||
-Thunderbird|Event Flights|Down The Rabbit Hole|Southampton||150|250|500||
-Condor|Event Flights|Dragon Rising|Tianjin||200|300|600||
-Eagle|Event Flights|Dragon Rising|Hangzhou||23|46|92||
-Falcon|Event Flights|Dragon Rising|Wuhan||100|200|400||
-Giant|Event Flights|Dragon Rising|Chongqing||50|100|150||
-Hawk|Event Flights|Dragon Rising|Wenzhou||23|46|92||
-Jumbo|Event Flights|Dragon Rising|Harbin||30|60|120||
-Owl|Event Flights|Dragon Rising|Qingdao||17|35|69||
-Raven|Event Flights|Dragon Rising|Shenyang||23|46|92||
-Swift|Event Flights|Dragon Rising|Dalian||10|20|39||
-Thunderbird|Event Flights|Dragon Rising|Jinan||150|250|500||
-Condor|Event Flights|Easter Cheer|Corfu||199|299|599||
-Eagle|Event Flights|Easter Cheer|Copacabana||23|46|92||
-Falcon|Event Flights|Easter Cheer|Cartago||99|199|399||
-Giant|Event Flights|Easter Cheer|Bari||49|99|149||
-Hawk|Event Flights|Easter Cheer|Le Puy-en-Velay||19|38|75||
-Jumbo|Event Flights|Easter Cheer|Pamplona||30|60|120||
-Owl|Event Flights|Easter Cheer|Fatima|/Map-icons/fatima.png|20|50|70||
-Owl|Event Flights|Easter Cheer|Ohrid||10|20|40||
-Raven|Event Flights|Easter Cheer|Tivat||20|39|79||
-Swift|Event Flights|Easter Cheer|Lourdes||10|20|39||
-Thunderbird|Event Flights|Easter Cheer|Santiago de Compostela||149|249|499||
-Swift|Event Flights|Holiday Rush|Rovaneimi|/Map-icons/rovaniemi.png|10|20|39||
-Condor|Event Flights|It Came From Outer Space|Bohol||200|300|600||
-Eagle|Event Flights|It Came From Outer Space|Roswell||23|46|92||
-Falcon|Event Flights|It Came From Outer Space|Nazca||100|200|400||
-Giant|Event Flights|It Came From Outer Space|Niterói||50|100|150||
-Hawk|Event Flights|It Came From Outer Space|Tunguska||23|46|92||
-Jumbo|Event Flights|It Came From Outer Space|Bermuda||30|60|120||
-Owl|Event Flights|It Came From Outer Space|Area 51|/Map-icons/area 51.png|23|46|92||
-Owl|Event Flights|It Came From Outer Space|Bodie||17|35|69||
-Raven|Event Flights|It Came From Outer Space|Barsa-Kelmes||23|46|92||
-Thunderbird|Event Flights|It Came From Outer Space|Flatwoods||150|250|400||
-Condor|Event Flights|Long-awaited Mail|Jamaica||200|300|600||
-Eagle|Event Flights|Long-awaited Mail|Phuket||23|46|92||
-Giant|Event Flights|Long-awaited Mail|Majorca||50|100|150||
-Hawk|Event Flights|Long-awaited Mail|Madagascar||19|38|75||
-Owl|Event Flights|Long-awaited Mail|Fiji||10|20|40||
-Raven|Event Flights|Long-awaited Mail|Easter Island||23|46|92||
-Thunderbird|Event Flights|Long-awaited Mail|Mauritius||150|250|500||
-Falcon|Event Flights|Long-awaited Mail; Spring is Here|Zanzibar||100|200|400||
-Jumbo|Event Flights|Long-awaited Mail; Spring is Here|Bora-Bora||30|60|120||
-Condor|Event Flights|On The Wings Of Love|Marrakech||200|300|600||
-Eagle|Event Flights|On The Wings Of Love|Charleston||23|46|92||
-Falcon|Event Flights|On The Wings Of Love|Dubrovnik||100|200|400||
-Giant|Event Flights|On The Wings Of Love|Brugge||50|100|150||
-Jumbo|Event Flights|On The Wings Of Love|Riviera||30|60|120||
-Raven|Event Flights|On The Wings Of Love|Verona||23|46|92||
-Hawk|Event Flights|On The Wings Of Love; Spring is Here|Provence||19|38|75||
-Owl|Event Flights|On The Wings Of Love; Spring is Here|Maldive Islands||10|20|40||
-Swift|Event Flights|On The Wings Of Love; Spring is Here|Venice||10|20|40||
-Thunderbird|Event Flights|On The Wings Of Love; Spring is Here|San Sebastián||150|250|500||
-Condor|Event Flights|Rock The Sky|Milwaukee||200|300|600||
-Eagle|Event Flights|Rock The Sky|Boom||23|46|92||
-Falcon|Event Flights|Rock The Sky|Roskilde||100|200|400||
-Giant|Event Flights|Rock The Sky|Rabat||50|100|150||
-Hawk|Event Flights|Rock The Sky|Nyon||23|46|92||
-Jumbo|Event Flights|Rock The Sky|Indio||30|60|120||
-Owl|Event Flights|Rock The Sky|Woodstock||17|35|69||
-Raven|Event Flights|Rock The Sky|Novi Sad||23|46|92||
-Thunderbird|Event Flights|Rock The Sky|Pula||150|250|500||
-Sleigh|Event Flights|Santa's Bad Day|Africa||10|20|40||
-Sleigh|Event Flights|Santa's Bad Day|Australia||10|20|40||
-Sleigh|Event Flights|Santa's Bad Day|Eurasia||10|20|40||
-Sleigh|Event Flights|Santa's Bad Day|Lapland||10|20|40||
-Sleigh|Event Flights|Santa's Bad Day|North America||10|20|40||
-Sleigh|Event Flights|Santa's Bad Day|South America||10|20|40||
-Condor|Event Flights|Thanksgiving Day|Castries||200|300|600||
-Falcon|Event Flights|Thanksgiving Day|Leiden||100|200|400||
-Jumbo|Event Flights|Thanksgiving Day|Richmond||30|60|120||
-Owl|Event Flights|Thanksgiving Day|Monrovia||10|20|40||
-Raven|Event Flights|Thanksgiving Day|Kitchener||23|46|92||
-Thunderbird|Event Flights|Thanksgiving Day|Manila||150|250|500||
-Condor|Event Flights|The Land of Opportunity|Orlando||200|300|600|1500|3750
-Eagle|Event Flights|The Land of Opportunity|St Louis||25|50|100|250|630
-Falcon|Event Flights|The Land of Opportunity|Detroit||100|200|400|1000|2500
-Giant|Event Flights|The Land of Opportunity|Nashville||50|100|200|500|1250
-Hawk|Event Flights|The Land of Opportunity|Pittsburgh||20|40|80|200|500
-Jumbo|Event Flights|The Land of Opportunity|San Antonio||30|60|120|300|750
-Owl|Event Flights|The Land of Opportunity|Cincinatti||10|20|40|100|250
-Raven|Event Flights|The Land of Opportunity|Cleveland||20|40|80|200|550
-Thunderbird|Event Flights|The Land of Opportunity|Atlanta||150|250|500|1250|3130
-Crossbill|Event Flights|Time to Rock|Peak District||23|46|92||
-Crossbill|Event Flights|Time to Rock|Thorsmork||23|46|92||
-Goldfinch|Event Flights|Time to Rock|Hoggar Mountains||30|60|120||
-Goldfinch|Event Flights|Time to Rock|Namib-Naukluft National Park||30|60|120||
-Sparrow|Event Flights|Time to Rock|Glacier National Park||17|35|69||
-Sparrow|Event Flights|Time to Rock|Great Sand Dunes||17|35|69||
-Condor|Event Flights|Valley Of The Kings Curse|Jedars||200|300|600||
-Giant|Event Flights|Valley Of The Kings Curse|Tyre||50|100|150||
-Hawk|Event Flights|Valley Of The Kings Curse|Giza||17|35|69||
-Jumbo|Event Flights|Valley Of The Kings Curse|Mycenae||30|60|120||
-Owl|Event Flights|Valley Of The Kings Curse|Dashur||50|250|400||
-Raven|Event Flights|Valley Of The Kings Curse|Cerveteri||20|41|81||
-Thunderbird|Event Flights|Valley Of The Kings Curse|Paphos||150|250|500||
-Condor|Event Flights|Winter Dream|Vancouver||200|300|600||
-Eagle|Event Flights|Winter Dream|Copenhagen||23|46|92||
-Falcon|Event Flights|Winter Dream|Nuremberg||10|200|400||
-Giant|Event Flights|Winter Dream|Khabarovsk||50|100|150||
-Hawk|Event Flights|Winter Dream|Innsbruck||23|46|92||
-Jumbo|Event Flights|Winter Dream|Reykjavik||30|60|120||
-Owl|Event Flights|Winter Dream|Quebec||17|35|69||
-Raven|Event Flights|Winter Dream|Fargo||23|46|92||
-Thunderbird|Event Flights|Winter Dream|Sapporo||150|250|500||
-Crossbill|Event Flights|World of Wildlife|Jasper National Park||20|39|79||
-Crossbill|Event Flights|World of Wildlife|Serengeti National Park||26|53|105||
-Goldfinch|Event Flights|World of Wildlife|Jim Corbett National Park||30|60|120||
-Goldfinch|Event Flights|World of Wildlife|Mount Lu||30|60|120||
-Sparrow|Event Flights|World of Wildlife|Alatau||17|35|69||
-Sparrow|Event Flights|World of Wildlife|Lake Neusiedl||9|17|35||
+Condor|Event Flights|A Walk In The Clouds|Bridgetown|/event-icons/awalkintheclouds.png|200|300|600||
+Eagle|Event Flights|A Walk In The Clouds|Linz|/event-icons/awalkintheclouds.png|23|46|92||
+Falcon|Event Flights|A Walk In The Clouds|The Seychelles|/event-icons/awalkintheclouds.png|100|200|400||
+Giant|Event Flights|A Walk In The Clouds|Salt Lake City|/event-icons/awalkintheclouds.png|50|100|150||
+Hawk|Event Flights|A Walk In The Clouds|The Bahamas|/event-icons/awalkintheclouds.png|23|46|92||
+Jumbo|Event Flights|A Walk In The Clouds|Karlovy Vary|/event-icons/awalkintheclouds.png|30|60|120||
+Owl|Event Flights|A Walk In The Clouds|Atlantic City|/event-icons/awalkintheclouds.png|10|20|40||
+Raven|Event Flights|A Walk In The Clouds|Porto|/event-icons/awalkintheclouds.png|20|41|81||
+Swift|Event Flights|A Walk In The Clouds|Podgorica|/event-icons/awalkintheclouds.png|10|20|39||
+Thunderbird|Event Flights|A Walk In The Clouds|Tuscany|/event-icons/awalkintheclouds.png|150|250|500||
+Condor|Event Flights|Age of Ash|Popocatépetl|/event-icons/ageofash.png|200|300|600||
+Eagle|Event Flights|Age of Ash|Mount Etna|/event-icons/ageofash.png|30|60|120||
+Falcon|Event Flights|Age of Ash|Mauna Loa|/event-icons/ageofash.png|100|200|400||
+Giant|Event Flights|Age of Ash|Krakatoa|/event-icons/ageofash.png|50|100|150||
+Hawk|Event Flights|Age of Ash|Mount Fuji|/event-icons/ageofash.png|23|46|92||
+Jumbo|Event Flights|Age of Ash|Mount Vesuvius|/event-icons/ageofash.png|30|60|120||
+Owl|Event Flights|Age of Ash|Mount Elbrus|/event-icons/ageofash.png|17|35|69||
+Raven|Event Flights|Age of Ash|Mount Kilimanjaro|/event-icons/ageofash.png|20|41|81||
+Thunderbird|Event Flights|Age of Ash|Eyjafjallajökull|/event-icons/ageofash.png|150|250|500||
+Crossbill|Event Flights|Airport City|Bellevue|/event-icons/airportcity.png|50|400|1000||
+Crossbill|Event Flights|Airport City|Bethesda|/event-icons/airportcity.png|50|400|1000||
+Crossbill|Event Flights|Airport City|Guildford|/event-icons/airportcity.png|50|400|1000||
+Crossbill|Event Flights|Airport City|Montreuil|/event-icons/airportcity.png|50|400|1000||
+Crossbill|Event Flights|Airport City|Redwood City|/event-icons/airportcity.png|50|400|1000||
+Goldfinch|Event Flights|Airport City|Espoo|/event-icons/airportcity.png|50|400|1000||
+Goldfinch|Event Flights|Airport City|Garland|/event-icons/airportcity.png|50|400|1000||
+Goldfinch|Event Flights|Airport City|Irvine|/event-icons/airportcity.png|50|400|1000||
+Goldfinch|Event Flights|Airport City|Lyon|/event-icons/airportcity.png|50|400|1000||
+Goldfinch|Event Flights|Airport City|Shreveport|/event-icons/airportcity.png|50|400|1000||
+Sparrow|Event Flights|Airport City|Agoura Hills|/event-icons/airportcity.png|50|400|1000||
+Sparrow|Event Flights|Airport City|Cary|/event-icons/airportcity.png|50|400|1000||
+Sparrow|Event Flights|Airport City|Hunt Valley|/event-icons/airportcity.png|50|400|1000||
+Sparrow|Event Flights|Airport City|McLean|/event-icons/airportcity.png|50|400|1000||
+Sparrow|Event Flights|Airport City|Southam|/event-icons/airportcity.png|50|400|1000||
+Condor|Event Flights|Back To School|New Haven|/event-icons/backtoschool.png|200|300|600|150|3750
+Eagle|Event Flights|Back To School|Edinburgh|/event-icons/backtoschool.png|23|46|92|230|580
+Falcon|Event Flights|Back To School|Oxford|/event-icons/backtoschool.png|100|200|400|1000|2500
+Giant|Event Flights|Back To School|Kyoto|/event-icons/backtoschool.png|50|100|150|380|950
+Hawk|Event Flights|Back To School|Sorbonne|/event-icons/backtoschool.png|19|38|75|190|480
+Jumbo|Event Flights|Back To School|Leuven|/event-icons/backtoschool.png|30|60|120|300|750
+Owl|Event Flights|Back To School|Cambridge|/event-icons/backtoschool.png|10|20|39|100|250
+Raven|Event Flights|Back To School|Stanford|/event-icons/backtoschool.png|23|46|92|230|580
+Thunderbird|Event Flights|Back To School|Princeton|/event-icons/backtoschool.png|150|250|500|1250|3130
+Condor|Event Flights|Celestial Festival|Fez|/event-icons/celestialfestival.png|200|300|500|1500|3750
+Crossbill|Event Flights|Celestial Festival|Kaieteur Falls|/event-icons/celestialfestival.png|23|46|92||
+Crossbill|Event Flights|Celestial Festival|Ruacana Falls|/event-icons/celestialfestival.png|20|39|79||
+Eagle|Event Flights|Celestial Festival|Ottawa|/event-icons/celestialfestival.png|23|46|92|230|580
+Falcon|Event Flights|Celestial Festival|Tunisia|/event-icons/celestialfestival.png|100|200|400|1000|2500
+Giant|Event Flights|Celestial Festival|Lahore|/event-icons/celestialfestival.png|50|100|150|380|950
+Goldfinch|Event Flights|Celestial Festival|Matterhorn|/event-icons/celestialfestival.png|30|60|120||
+Goldfinch|Event Flights|Celestial Festival|Mount Cook|/event-icons/celestialfestival.png|30|60|120||
+Hawk|Event Flights|Celestial Festival|Brussels|/event-icons/celestialfestival.png|20|40|75|190|480
+Jumbo|Event Flights|Celestial Festival|Turin|/event-icons/celestialfestival.png|30|60|120|300|750
+Owl|Event Flights|Celestial Festival|Madrid|/event-icons/celestialfestival.png|10|20|40|100|250
+Raven|Event Flights|Celestial Festival|Ljubljana|/event-icons/celestialfestival.png|20|41|81|200|500
+Sparrow|Event Flights|Celestial Festival|Huanglong|/event-icons/celestialfestival.png|17|35|69||
+Sparrow|Event Flights|Celestial Festival|Sequoia|/event-icons/celestialfestival.png|15|30|60||
+Swift|Event Flights|Celestial Festival|Warsaw|/event-icons/celestialfestival.png|10|20|39|100|250
+Thunderbird|Event Flights|Celestial Festival|Belgrade|/event-icons/celestialfestival.png|150|250|500|1250|3130
+Condor|Event Flights|Dancing With Leprechauns|Galway|/event-icons/dancingwiththeleprechauns.png|200|300|600||
+Eagle|Event Flights|Dancing With Leprechauns|Navan|/event-icons/dancingwiththeleprechauns.png|23|46|92||
+Falcon|Event Flights|Dancing With Leprechauns|Waterford|/event-icons/dancingwiththeleprechauns.png|100|200|400||
+Giant|Event Flights|Dancing With Leprechauns|Bray|/event-icons/dancingwiththeleprechauns.png|50|100|150||
+Hawk|Event Flights|Dancing With Leprechauns|Limerick|/event-icons/dancingwiththeleprechauns.png|19|38|75||
+Jumbo|Event Flights|Dancing With Leprechauns|Swords|/event-icons/dancingwiththeleprechauns.png|30|60|120||
+Owl|Event Flights|Dancing With Leprechauns|Dublin|/event-icons/dancingwiththeleprechauns.png|10|20|40||
+Raven|Event Flights|Dancing With Leprechauns|Cork|/event-icons/dancingwiththeleprechauns.png|23|46|92||
+Swift|Event Flights|Dancing With Leprechauns|Tullamore|/event-icons/dancingwiththeleprechauns.png|10|20|40||
+Thunderbird|Event Flights|Dancing With Leprechauns|Kilkenny|/event-icons/dancingwiththeleprechauns.png|150|250|500||
+Condor|Event Flights|Dark Skies|Oaxaca City|/event-icons/darkskies.png|200|300|600||
+Eagle|Event Flights|Dark Skies|Fountainbleau|/event-icons/darkskies.png|23|46|92||
+Falcon|Event Flights|Dark Skies|Savannah|/event-icons/darkskies.png|100|200|400||
+Giant|Event Flights|Dark Skies|Portland|/event-icons/darkskies.png|50|100|150||
+Hawk|Event Flights|Dark Skies|Machu-Pichu|/event-icons/darkskies.png|19|38|75||
+Jumbo|Event Flights|Dark Skies|Windsor|/event-icons/darkskies.png|30|60|120||
+Owl|Event Flights|Dark Skies|Transylvania|/event-icons/darkskies.png|10|20|40||
+Raven|Event Flights|Dark Skies|Salem|/event-icons/darkskies.png|20|41|81||
+Thunderbird|Event Flights|Dark Skies|Aokigahara|/event-icons/darkskies.png|150|250|500||
+Condor|Event Flights|Down The Rabbit Hole|Bradford|/event-icons/downtherabbithole.png|200|300|600||
+Eagle|Event Flights|Down The Rabbit Hole|Bristol|/event-icons/downtherabbithole.png|23|46|92||
+Falcon|Event Flights|Down The Rabbit Hole|Salisbury|/event-icons/downtherabbithole.png|100|200|400||
+Giant|Event Flights|Down The Rabbit Hole|Leeds|/event-icons/downtherabbithole.png|50|100|150||
+Hawk|Event Flights|Down The Rabbit Hole|Chichester|/event-icons/downtherabbithole.png|23|46|92||
+Jumbo|Event Flights|Down The Rabbit Hole|Durham|/event-icons/downtherabbithole.png|30|60|120||
+Owl|Event Flights|Down The Rabbit Hole|Cheltenham|/event-icons/downtherabbithole.png|10|20|40||
+Raven|Event Flights|Down The Rabbit Hole|Lichfield|/event-icons/downtherabbithole.png|23|46|92||
+Swift|Event Flights|Down The Rabbit Hole|Wonderland|/event-icons/downtherabbithole.png|100|250|500||
+Thunderbird|Event Flights|Down The Rabbit Hole|Southampton|/event-icons/downtherabbithole.png|150|250|500||
+Condor|Event Flights|Dragon Rising|Tianjin|/event-icons/dragonrising.png|200|300|600||
+Eagle|Event Flights|Dragon Rising|Hangzhou|/event-icons/dragonrising.png|23|46|92||
+Falcon|Event Flights|Dragon Rising|Wuhan|/event-icons/dragonrising.png|100|200|400||
+Giant|Event Flights|Dragon Rising|Chongqing|/event-icons/dragonrising.png|50|100|150||
+Hawk|Event Flights|Dragon Rising|Wenzhou|/event-icons/dragonrising.png|23|46|92||
+Jumbo|Event Flights|Dragon Rising|Harbin|/event-icons/dragonrising.png|30|60|120||
+Owl|Event Flights|Dragon Rising|Qingdao|/event-icons/dragonrising.png|17|35|69||
+Raven|Event Flights|Dragon Rising|Shenyang|/event-icons/dragonrising.png|23|46|92||
+Swift|Event Flights|Dragon Rising|Dalian|/event-icons/dragonrising.png|10|20|39||
+Thunderbird|Event Flights|Dragon Rising|Jinan|/event-icons/dragonrising.png|150|250|500||
+Condor|Event Flights|Easter Cheer|Corfu|/event-icons/eastercheer.png|199|299|599||
+Eagle|Event Flights|Easter Cheer|Copacabana|/event-icons/eastercheer.png|23|46|92||
+Falcon|Event Flights|Easter Cheer|Cartago|/event-icons/eastercheer.png|99|199|399||
+Giant|Event Flights|Easter Cheer|Bari|/event-icons/eastercheer.png|49|99|149||
+Hawk|Event Flights|Easter Cheer|Le Puy-en-Velay|/event-icons/eastercheer.png|19|38|75||
+Jumbo|Event Flights|Easter Cheer|Pamplona|/event-icons/eastercheer.png|30|60|120||
+Owl|Event Flights|Easter Cheer|Fatima|/event-icons/eastercheer.png|20|50|70||
+Owl|Event Flights|Easter Cheer|Ohrid|/event-icons/eastercheer.png|10|20|40||
+Raven|Event Flights|Easter Cheer|Tivat|/event-icons/eastercheer.png|20|39|79||
+Swift|Event Flights|Easter Cheer|Lourdes|/event-icons/eastercheer.png|10|20|39||
+Thunderbird|Event Flights|Easter Cheer|Santiago de Compostela|/event-icons/eastercheer.png|149|249|499||
+Swift|Event Flights|Holiday Rush|Rovaneimi|/event-icons/holidayrush.png|10|20|39||
+Condor|Event Flights|It Came From Outer Space|Bohol|/event-icons/itcamefromouterspace.png|200|300|600||
+Eagle|Event Flights|It Came From Outer Space|Roswell|/event-icons/itcamefromouterspace.png|23|46|92||
+Falcon|Event Flights|It Came From Outer Space|Nazca|/event-icons/itcamefromouterspace.png|100|200|400||
+Giant|Event Flights|It Came From Outer Space|Niterói|/event-icons/itcamefromouterspace.png|50|100|150||
+Hawk|Event Flights|It Came From Outer Space|Tunguska|/event-icons/itcamefromouterspace.png|23|46|92||
+Jumbo|Event Flights|It Came From Outer Space|Bermuda|/event-icons/itcamefromouterspace.png|30|60|120||
+Owl|Event Flights|It Came From Outer Space|Area 51|/event-icons/itcamefromouterspace.png|23|46|92||
+Owl|Event Flights|It Came From Outer Space|Bodie|/event-icons/itcamefromouterspace.png|17|35|69||
+Raven|Event Flights|It Came From Outer Space|Barsa-Kelmes|/event-icons/itcamefromouterspace.png|23|46|92||
+Thunderbird|Event Flights|It Came From Outer Space|Flatwoods|/event-icons/itcamefromouterspace.png|150|250|400||
+Condor|Event Flights|Long-awaited Mail|Jamaica|/event-icons/longawaitedmail.png|200|300|600||
+Eagle|Event Flights|Long-awaited Mail|Phuket|/event-icons/longawaitedmail.png|23|46|92||
+Giant|Event Flights|Long-awaited Mail|Majorca|/event-icons/longawaitedmail.png|50|100|150||
+Hawk|Event Flights|Long-awaited Mail|Madagascar|/event-icons/longawaitedmail.png|19|38|75||
+Owl|Event Flights|Long-awaited Mail|Fiji|/event-icons/longawaitedmail.png|10|20|40||
+Raven|Event Flights|Long-awaited Mail|Easter Island|/event-icons/longawaitedmail.png|23|46|92||
+Thunderbird|Event Flights|Long-awaited Mail|Mauritius|/event-icons/longawaitedmail.png|150|250|500||
+Falcon|Event Flights|Long-awaited Mail; Spring is Here|Zanzibar|/event-icons/longawaitedmail.png|100|200|400||
+Jumbo|Event Flights|Long-awaited Mail; Spring is Here|Bora-Bora|/event-icons/longawaitedmail.png|30|60|120||
+Condor|Event Flights|On The Wings Of Love|Marrakech|/event-icons/onthewingsoflove.png|200|300|600||
+Eagle|Event Flights|On The Wings Of Love|Charleston|/event-icons/onthewingsoflove.png|23|46|92||
+Falcon|Event Flights|On The Wings Of Love|Dubrovnik|/event-icons/onthewingsoflove.png|100|200|400||
+Giant|Event Flights|On The Wings Of Love|Brugge|/event-icons/onthewingsoflove.png|50|100|150||
+Jumbo|Event Flights|On The Wings Of Love|Riviera|/event-icons/onthewingsoflove.png|30|60|120||
+Raven|Event Flights|On The Wings Of Love|Verona|/event-icons/onthewingsoflove.png|23|46|92||
+Hawk|Event Flights|On The Wings Of Love; Spring is Here|Provence|/event-icons/onthewingsoflove.png|19|38|75||
+Owl|Event Flights|On The Wings Of Love; Spring is Here|Maldive Islands|/event-icons/onthewingsoflove.png|10|20|40||
+Swift|Event Flights|On The Wings Of Love; Spring is Here|Venice|/event-icons/onthewingsoflove.png|10|20|40||
+Thunderbird|Event Flights|On The Wings Of Love; Spring is Here|San Sebastián|/event-icons/onthewingsoflove.png|150|250|500||
+Condor|Event Flights|Rock The Sky|Milwaukee|/event-icons/rockthesky.png|200|300|600|1500|3750
+Eagle|Event Flights|Rock The Sky|Boom|/event-icons/rockthesky.png|23|46|92|230|580
+Falcon|Event Flights|Rock The Sky|Roskilde|/event-icons/rockthesky.png|100|200|400|1000|2500
+Giant|Event Flights|Rock The Sky|Rabat|/event-icons/rockthesky.png|50|100|150|380|950
+Raven|Event Flights|Rock The Sky|Novi Sad|/event-icons/rockthesky.png|23|46|92|230|580
+Thunderbird|Event Flights|Rock The Sky|Pula|/event-icons/rockthesky.png|150|250|500|1250|3130
+Sleigh|Event Flights|Santa's Bad Day|Africa|/event-icons/santasbadday.png|10|20|40||
+Sleigh|Event Flights|Santa's Bad Day|Australia|/event-icons/santasbadday.png|10|20|40||
+Sleigh|Event Flights|Santa's Bad Day|Eurasia|/event-icons/santasbadday.png|10|20|40||
+Sleigh|Event Flights|Santa's Bad Day|Lapland|/event-icons/santasbadday.png|10|20|40||
+Sleigh|Event Flights|Santa's Bad Day|North America|/event-icons/santasbadday.png|10|20|40||
+Sleigh|Event Flights|Santa's Bad Day|South America|/event-icons/santasbadday.png||
+Condor|Event Flights|Thanksgiving Day|Castries|/event-icons/thanksgivingday.png||
+Falcon|Event Flights|Thanksgiving Day|Leiden|/event-icons/thanksgivingday.png||
+Jumbo|Event Flights|Thanksgiving Day|Richmond|/event-icons/thanksgivingday.png|30|60|120||
+Owl|Event Flights|Thanksgiving Day|Monrovia|/event-icons/thanksgivingday.png|10|20|40||
+Raven|Event Flights|Thanksgiving Day|Kitchener|/event-icons/thanksgivingday.png|23|46|92||
+Thunderbird|Event Flights|Thanksgiving Day|Manila|/event-icons/thanksgivingday.png|150|250|500||
+Condor|Event Flights|The Land of Opportunity|Orlando|/event-icons/thelandofopportunity.png|200|300|600|1500|3750
+Eagle|Event Flights|The Land of Opportunity|St Louis|/event-icons/thelandofopportunity.png|25|50|100|250|630
+Falcon|Event Flights|The Land of Opportunity|Detroit|/event-icons/thelandofopportunity.png|100|200|400|1000|2500
+Giant|Event Flights|The Land of Opportunity|Nashville|/event-icons/thelandofopportunity.png|50|100|200|500|1250
+Hawk|Event Flights|The Land of Opportunity|Pittsburgh|/event-icons/thelandofopportunity.png|20|40|80|200|500
+Jumbo|Event Flights|The Land of Opportunity|San Antonio|/event-icons/thelandofopportunity.png|30|60|120|300|750
+Owl|Event Flights|The Land of Opportunity|Cincinatti|/event-icons/thelandofopportunity.png|17|35|69|170|430
+Raven|Event Flights|The Land of Opportunity|Cleveland|/event-icons/thelandofopportunity.png|20|40|80|200|550
+Thunderbird|Event Flights|The Land of Opportunity|Atlanta|/event-icons/thelandofopportunity.png|150|250|500|1250|3130
+Crossbill|Event Flights|Time to Rock|Peak District|/event-icons/timetorock.png|23|46|92||
+Crossbill|Event Flights|Time to Rock|Thorsmork|/event-icons/timetorock.png|23|46|92||
+Goldfinch|Event Flights|Time to Rock|Hoggar Mountains|/event-icons/timetorock.png|30|60|120||
+Goldfinch|Event Flights|Time to Rock|Namib-Naukluft National Park|/event-icons/timetorock.png|30|60|120||
+Sparrow|Event Flights|Time to Rock|Glacier National Park|/event-icons/timetorock.png|17|35|69||
+Sparrow|Event Flights|Time to Rock|Great Sand Dunes|/event-icons/timetorock.png|17|35|69||
+Condor|Event Flights|Valley Of The Kings Curse|Jedars|/event-icons/valleyofthekingscurse.png|200|300|600||
+Giant|Event Flights|Valley Of The Kings Curse|Tyre|/event-icons/valleyofthekingscurse.png|50|100|150||
+Hawk|Event Flights|Valley Of The Kings Curse|Giza|/event-icons/valleyofthekingscurse.png|17|35|69||
+Jumbo|Event Flights|Valley Of The Kings Curse|Mycenae|/event-icons/valleyofthekingscurse.png|30|60|120||
+Owl|Event Flights|Valley Of The Kings Curse|Dashur|/event-icons/valleyofthekingscurse.png|50|250|400||
+Raven|Event Flights|Valley Of The Kings Curse|Cerveteri|/event-icons/valleyofthekingscurse.png|20|41|81||
+Thunderbird|Event Flights|Valley Of The Kings Curse|Paphos|/event-icons/valleyofthekingscurse.png|150|250|500|
+Condor|Event Flights|Winter Dream|Vancouver|/event-icons/winterdream.png|200|300|600||
+Eagle|Event Flights|Winter Dream|Copenhagen|/event-icons/winterdream.png|23|46|92||
+Falcon|Event Flights|Winter Dream|Nuremberg|/event-icons/winterdream.png|10|200|400||
+Giant|Event Flights|Winter Dream|Khabarovsk|/event-icons/winterdream.png|50|100|150||
+Hawk|Event Flights|Winter Dream|Innsbruck|/event-icons/winterdream.png|23|46|92||
+Jumbo|Event Flights|Winter Dream|Reykjavik|/event-icons/winterdream.png|30|60|120||
+Owl|Event Flights|Winter Dream|Quebec|/event-icons/winterdream.png|17|35|69||
+Raven|Event Flights|Winter Dream|Fargo|/event-icons/winterdream.png|23|46|92||
+Thunderbird|Event Flights|Winter Dream|Sapporo|/event-icons/winterdream.png|150|250|500||
+Crossbill|Event Flights|World of Wildlife|Jasper National Park|/event-icons/worldofwildlife.png|20|39|79||
+Crossbill|Event Flights|World of Wildlife|Serengeti National Park|/event-icons/worldofwildlife.png|26|53|105||
+Goldfinch|Event Flights|World of Wildlife|Jim Corbett National Park|/event-icons/worldofwildlife.png|30|60|120||
+Goldfinch|Event Flights|World of Wildlife|Mount Lu|/event-icons/worldofwildlife.png|30|60|120||
+Sparrow|Event Flights|World of Wildlife|Alatau|/event-icons/worldofwildlife.png|17|35|69||
+Sparrow|Event Flights|World of Wildlife|Lake Neusiedl|/event-icons/worldofwildlife.png|9|17|35||
 Crossbill|Helicopter Flights|Crossbill Flights|Angel Falls||23|46|92||
 Crossbill|Helicopter Flights|Crossbill Flights|Iguazu Falls||20|39|79||
 Crossbill|Helicopter Flights|Crossbill Flights|Niagara Falls||30|60|120||
@@ -519,9 +516,9 @@ Thunderbird|Regular Flights|Thunderbird Flights|Osaka||150|250|500|1250|3750
 Thunderbird|Regular Flights|Thunderbird Flights|Pyongyang||150|250|500|1250|3750
 Thunderbird|Regular Flights|Thunderbird Flights|Riyadh||150|250|500|1250|3750
 Thunderbird|Regular Flights|Thunderbird Flights|Tehran||150|250|500|1250|3750
-Green Launch Rocket|Space Launches|Apogee|Apogee||10|50|100||
-Red Launch Shuttle|Space Launches|Lunar|Lunar||10|50|100||
-Blue Launch Rocket|Space Launches|Promotheus|Prometheus||10|50|100||
+Green Launch Rocket|Space Launches|Apogee|Apogee|/Map-icons/apogee.png|10|50|100||
+Red Launch Shuttle|Space Launches|Lunar|Lunar|/Map-icons/lunar.png|10|50|100||
+Blue Launch Rocket|Space Launches|Promotheus|Prometheus|/Map-icons/promotheus.png|10|50|100||
 Jumbo|Space Map Flights|Edge of Tomorrow|Beverly Hills|/Map-icons/red space maps.png|30|60|120||
 Jumbo|Space Map Flights|Edge of Tomorrow|Glasgow|/Map-icons/red space maps.png|30|60|120||
 Jumbo|Space Map Flights|Edge of Tomorrow|Potsdam|/Map-icons/red space maps.png|30|60|120||
