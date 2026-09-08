@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && node -e \"const fs = require('fs'); ['Map-icons','icons','Headers','event-icons'].forEach(d => fs.cpSync(d, 'dist/' + d, {recursive: true}));\"",
     "lint": "tsc --noEmit",
     "preview": "vite preview"
   },
