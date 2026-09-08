@@ -736,7 +736,7 @@ const AeroQuest = () => {
         }}>
           <img src="icons/AC-Tracker-By-Soupha.png" alt="AC Tracker Logo" className="w-full max-w-[340px] object-contain drop-shadow-lg transition-transform group-hover:scale-125" referrerPolicy="no-referrer" />
           <span className="text-[10px] font-black uppercase tracking-[0.1em] text-[#4A606C] mt-1">
-            Version 10.1, 08.06.26
+            Version 10.2, September 8 2026
           </span>
         </div>
 
