@@ -715,7 +715,7 @@ Giant|Regular Flights|Giant Flights|Tortuga||50|100|150|375|1125
 Giant|Regular Flights|Giant Flights|Yokohama||50|100|150|375|1125
 Hawk|Regular Flights|Hawk Flights|London||17|35|69|175|525
 Hawk|Regular Flights|Hawk Flights|Baikonur||19|38|75|190|575
-Hawk|Regular Flights|Hawk Flights|Buenos Aires||19|38|75|190|575
+Hawk|Regular Flights|Hawk Flights|Aswan||19|38|75|190|575
 Hawk|Regular Flights|Hawk Flights|Corsica||19|38|75|190|575
 Hawk|Regular Flights|Hawk Flights|Los Angees||19|38|75|190|575
 Hawk|Regular Flights|Hawk Flights|Rome||19|38|75|190|575
@@ -741,7 +741,7 @@ Jumbo|Regular Flights|Jumbo Flights|Tokyo||30|60|120|300|900
 Jumbo|Regular Flights|Jumbo Flights|Vladivostok||30|60|120|300|900
 Owl|Regular Flights|Owl Flights|Bali Island||9|17|35|90|275
 Owl|Regular Flights|Owl Flights|Sao Paulo||10|20|40|100|300
-Owl|Regular Flights|Owl Flights|Sri Lanka||10|20|40|100|300
+Owl|Regular Flights|Owl Flights|Hurghada||10|20|40|100|300
 Owl|Regular Flights|Owl Flights|Turkish Coast||10|20|40|100|300
 Owl|Regular Flights|Owl Flights|Washington DC||10|20|40|100|300
 Owl|Regular Flights|Owl Flights|Arctic Station||16|32|65|165|500
@@ -758,11 +758,11 @@ Raven|Regular Flights|Raven Flights|Paris||23|46|92|230|700
 Raven|Regular Flights|Raven Flights|South Observatory||23|46|92|230|700
 Raven|Regular Flights|Raven Flights|Barcelona||27|54|107|270|800
 Raven|Regular Flights|Raven Flights|Seoul||27|54|107|270|800
-Raven|Regular Flights|Raven Flights|Galapagos Island||30|59|118|295|875
+Raven|Regular Flights|Raven Flights|Sharm El Sheikh||30|59|118|295|875
 Raven|Regular Flights|Raven Flights|Moscow||30|59|118|295|875
 Swallow|Regular Flights|Swallow Flights|Training Flight||2|4|8|16|32
 Swallow|Regular Flights|Swallow Flights|Small Village||4|8|16|32|64
-Swift|Regular Flights|Swift Flights|Egypt||8|16|36|90|275
+Swift|Regular Flights|Swift Flights|Giza||8|16|36|90|275
 Swift|Regular Flights|Swift Flights|Cyprus||10|20|39|100|300
 Thunderbird|Regular Flights|Thunderbird Flights|Aruba||150|250|500|1250|3750
 Thunderbird|Regular Flights|Thunderbird Flights|Baghdad||150|250|500|1250|3750
