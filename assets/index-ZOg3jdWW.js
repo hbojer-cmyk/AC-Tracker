@@ -630,7 +630,7 @@ Sparrow|Event Flights|Time to Rock|Glacier National Park|/event-icons/timetorock
 Sparrow|Event Flights|Time to Rock|Great Sand Dunes|/event-icons/timetorock.png|17|35|69||
 Condor|Event Flights|Valley Of The Kings Curse|Jedars|/event-icons/valleyofthekingscurse.png|200|300|600||
 Giant|Event Flights|Valley Of The Kings Curse|Tyre|/event-icons/valleyofthekingscurse.png|50|100|150||
-Hawk|Event Flights|Valley Of The Kings Curse|Giza|/event-icons/valleyofthekingscurse.png|17|35|69||
+Hawk|Event Flights|Valley Of The Kings Curse|Giza (Event)|/event-icons/valleyofthekingscurse.png|17|35|69||
 Jumbo|Event Flights|Valley Of The Kings Curse|Mycenae|/event-icons/valleyofthekingscurse.png|30|60|120||
 Owl|Event Flights|Valley Of The Kings Curse|Dashur|/event-icons/valleyofthekingscurse.png|50|250|400||
 Raven|Event Flights|Valley Of The Kings Curse|Cerveteri|/event-icons/valleyofthekingscurse.png|20|41|81||
