@@ -1,4 +1,4 @@
-// Master List Data (All 527 Destinations)
+// Master List Data (All 535 Destinations)
 // Format: Aircraft|Category|Group|Destination|Icon|Star1Req|Star2Req|Star3Req|Star4Req|Star5Req
 export const RAW_MASTER_LIST = `Owl|Adventure Map Flights|Aztec Legacy|Chichen Itza|/Map-icons/ex01 mesoamerica.png|20|50|100|250|750
 Owl|Adventure Map Flights|Aztec Legacy|Excavations: Mesoamerica|/Map-icons/ex01 mesoamerica.png|20|50|100|250|750
@@ -346,9 +346,9 @@ Sleigh|Event Flights|Santa's Bad Day|Australia|/event-icons/santasbadday.png|10|
 Sleigh|Event Flights|Santa's Bad Day|Eurasia|/event-icons/santasbadday.png|10|20|40||
 Sleigh|Event Flights|Santa's Bad Day|Lapland|/event-icons/santasbadday.png|10|20|40||
 Sleigh|Event Flights|Santa's Bad Day|North America|/event-icons/santasbadday.png|10|20|40||
-Sleigh|Event Flights|Santa's Bad Day|South America|/event-icons/santasbadday.png||
-Condor|Event Flights|Thanksgiving Day|Castries|/event-icons/thanksgivingday.png||
-Falcon|Event Flights|Thanksgiving Day|Leiden|/event-icons/thanksgivingday.png||
+Sleigh|Event Flights|Santa's Bad Day|South America|/event-icons/santasbadday.png|10|20|40||
+Condor|Event Flights|Thanksgiving Day|Castries|/event-icons/thanksgivingday.png|200|300|600||
+Falcon|Event Flights|Thanksgiving Day|Leiden|/event-icons/thanksgivingday.png|100|200|400||
 Jumbo|Event Flights|Thanksgiving Day|Richmond|/event-icons/thanksgivingday.png|30|60|120||
 Owl|Event Flights|Thanksgiving Day|Monrovia|/event-icons/thanksgivingday.png|10|20|40||
 Raven|Event Flights|Thanksgiving Day|Kitchener|/event-icons/thanksgivingday.png|23|46|92||
@@ -368,13 +368,13 @@ Goldfinch|Event Flights|Time to Rock|Hoggar Mountains|/event-icons/timetorock.pn
 Goldfinch|Event Flights|Time to Rock|Namib-Naukluft National Park|/event-icons/timetorock.png|30|60|120||
 Sparrow|Event Flights|Time to Rock|Glacier National Park|/event-icons/timetorock.png|17|35|69||
 Sparrow|Event Flights|Time to Rock|Great Sand Dunes|/event-icons/timetorock.png|17|35|69||
-Condor|Event Flights|Valley Of The Kings Curse|Jedars|/event-icons/valleyofthekingscurse.png|200|300|600||
-Giant|Event Flights|Valley Of The Kings Curse|Tyre|/event-icons/valleyofthekingscurse.png|50|100|150||
-Hawk|Event Flights|Valley Of The Kings Curse|Giza (Event)|/event-icons/valleyofthekingscurse.png|17|35|69||
-Jumbo|Event Flights|Valley Of The Kings Curse|Mycenae|/event-icons/valleyofthekingscurse.png|30|60|120||
-Owl|Event Flights|Valley Of The Kings Curse|Dashur|/event-icons/valleyofthekingscurse.png|50|250|400||
-Raven|Event Flights|Valley Of The Kings Curse|Cerveteri|/event-icons/valleyofthekingscurse.png|20|41|81||
-Thunderbird|Event Flights|Valley Of The Kings Curse|Paphos|/event-icons/valleyofthekingscurse.png|150|250|500|
+Condor|Event Flights|Valley Of The Kings Curse|Jedars|/event-icons/valleyofthekingscurse.png|200|300|600|1500|3750
+Giant|Event Flights|Valley Of The Kings Curse|Tyre|/event-icons/valleyofthekingscurse.png|50|100|150|380|950
+Owl|Event Flights|Valley Of The Kings Curse|Abydos|/event-icons/valleyofthekingscurse.png|17|35|69|170|430
+Jumbo|Event Flights|Valley Of The Kings Curse|Mycenae|/event-icons/valleyofthekingscurse.png|30|60|120|300|750
+Owl|Event Flights|Valley Of The Kings Curse|Dashur|/event-icons/valleyofthekingscurse.png|50|250|400|1000|2500
+Raven|Event Flights|Valley Of The Kings Curse|Cerveteri|/event-icons/valleyofthekingscurse.png|20|41|81|200|500
+Thunderbird|Event Flights|Valley Of The Kings Curse|Paphos|/event-icons/valleyofthekingscurse.png|150|250|500|1250|3130
 Condor|Event Flights|Winter Dream|Vancouver|/event-icons/winterdream.png|200|300|600||
 Eagle|Event Flights|Winter Dream|Copenhagen|/event-icons/winterdream.png|23|46|92||
 Falcon|Event Flights|Winter Dream|Nuremberg|/event-icons/winterdream.png|10|200|400||
