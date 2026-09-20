@@ -29,7 +29,10 @@ import {
   Trash2,
   MapPin,
   Home,
-  Bookmark
+  Bookmark,
+  PanelLeftClose,
+  PanelLeftOpen,
+  PanelLeft
 } from 'lucide-react';
 import {
   BarChart,
@@ -74,7 +77,7 @@ interface UserDataEntry {
   isCustomList?: boolean;
 }
 
-type SortField = 'destination' | 'aircraft' | 'group' | 'flightsDone' | 'stars' | 'mastery' | 'lastUpdated' | 'maps';
+type SortField = 'destination' | 'aircraft' | 'group' | 'flightsDone' | 'stars' | 'mastery' | 'lastUpdated' | 'maps' | 'neededToNextStar';
 type SortDirection = 'asc' | 'desc';
 
 type ThemeId =
@@ -84,19 +87,9 @@ type ThemeId =
   | 'nord'
   | 'dracula'
   | 'gruvbox'
-  | 'synthwave'
   | 'forest'
-  | 'coffee'
-  | 'minimal'
   | 'sunset'
-  | 'cyberpunk'
-  | 'lavender'
-  | 'monochrome'
-  | 'autumn'
-  | 'matrix'
-  | 'rose'
   | 'abyss'
-  | 'solarized_light'
   | 'solarized_dark';
 
 const THEME_CONFIGS: Record<ThemeId, { name: string, isDark: boolean }> = {
@@ -106,19 +99,9 @@ const THEME_CONFIGS: Record<ThemeId, { name: string, isDark: boolean }> = {
   nord: { name: 'Nordic Frost', isDark: true },
   dracula: { name: 'Vampire Night', isDark: true },
   gruvbox: { name: 'Retro Earth', isDark: true },
-  synthwave: { name: 'Neon Dreams', isDark: true },
   forest: { name: 'Mossy Pine', isDark: true },
-  coffee: { name: 'Coffee', isDark: false },
-  minimal: { name: 'Minimal', isDark: false },
   sunset: { name: 'Sunset Glow', isDark: true },
-  cyberpunk: { name: 'Cyberpunk', isDark: true },
-  lavender: { name: 'Lavender', isDark: false },
-  monochrome: { name: 'Monochrome', isDark: true },
-  autumn: { name: 'Autumn Leaves', isDark: false },
-  matrix: { name: 'The Matrix', isDark: true },
-  rose: { name: 'Rose Gold', isDark: false },
   abyss: { name: 'Ocean Abyss', isDark: true },
-  solarized_light: { name: 'Solarized Light', isDark: false },
   solarized_dark: { name: 'Solarized Dark', isDark: true }
 };
 
@@ -218,6 +201,10 @@ const AeroQuest = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [view, setView] = useState<'grid' | 'list' | 'stats' | 'maps' | 'almost-next-star' | 'airplanes'>('list');
 
+  const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
+    const saved = localStorage.getItem('aeroquest_sidebar_open');
+    return saved !== null ? saved === 'true' : true;
+  });
   const [theme, setTheme] = useState<ThemeId>('classic');
   const [isLoaded, setIsLoaded] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
@@ -307,6 +294,7 @@ const AeroQuest = () => {
   useEffect(() => {
     if (isLoaded) {
       localStorage.setItem('aeroquest_theme_id', theme);
+      localStorage.setItem('aeroquest_sidebar_open', String(isSidebarOpen));
       localStorage.setItem('aeroquest_include_event_tasks', String(includeEventTasks));
       localStorage.setItem('aeroquest_include_alliance_tasks', String(includeAllianceTasks));
       localStorage.setItem('aeroquest_hide_zero_maps', String(hideZeroMaps));
@@ -318,7 +306,7 @@ const AeroQuest = () => {
       if (THEME_CONFIGS[theme].isDark) html.classList.add('dark');
       else html.classList.remove('dark');
     }
-  }, [theme, includeEventTasks, includeAllianceTasks, hideZeroMaps, showMissingAlliance, showMissingAdventure, isLoaded]);
+  }, [theme, isSidebarOpen, includeEventTasks, includeAllianceTasks, hideZeroMaps, showMissingAlliance, showMissingAdventure, isLoaded]);
 
   // Persistence layer for destinations
   useEffect(() => {
@@ -587,6 +575,22 @@ const AeroQuest = () => {
           break;
         }
         case 'maps': valA = a.mapsDone || 0; valB = b.mapsDone || 0; break;
+        case 'neededToNextStar': {
+          const infoA = getNextStarInfo(a);
+          const infoB = getNextStarInfo(b);
+          const starsA = getStars(a.flightsDone, a.star1Req, a.star2Req, a.star3Req, a.star4Req, a.star5Req);
+          const maxStarsA = getMaxStars(a);
+          const starsB = getStars(b.flightsDone, b.star1Req, b.star2Req, b.star3Req, b.star4Req, b.star5Req);
+          const maxStarsB = getMaxStars(b);
+          const isMaxA = starsA >= maxStarsA || infoA.needed <= 0;
+          const isMaxB = starsB >= maxStarsB || infoB.needed <= 0;
+          if (isMaxA && !isMaxB) return 1;
+          if (!isMaxA && isMaxB) return -1;
+          if (isMaxA && isMaxB) return 0;
+          valA = infoA.needed;
+          valB = infoB.needed;
+          break;
+        }
         case 'lastUpdated': valA = a.lastUpdated; valB = b.lastUpdated; break;
         default: valA = a.destination; valB = b.destination; break;
       }
@@ -726,18 +730,27 @@ const AeroQuest = () => {
     // Fix: Updated font-family in the main container class to Lexend
     <div className={`theme-${theme} h-screen flex flex-col lg:flex-row transition-colors duration-300 bg-[var(--bg)] text-[var(--text-main)] font-['Lexend',_sans-serif] overflow-hidden`}>
       {/* Sidebar */}
-      <aside className="w-full lg:w-80 border-b lg:border-b-0 lg:border-r border-[var(--border)] flex flex-col p-6 lg:h-screen z-20 shrink-0 bg-[var(--sidebar)] backdrop-blur-xl">
-        <div className="flex flex-col items-center mb-8 shrink-0 group cursor-pointer" onClick={() => {
-          setView('list');
-          setActiveCategory('All Destinations');
-          setFilterAircraft('All');
-          setFilterGroup('All');
-          setSearchQuery('');
-        }}>
-          <img src="icons/AC-Tracker-By-Soupha.png" alt="AC Tracker Logo" className="w-full max-w-[340px] object-contain drop-shadow-lg transition-transform group-hover:scale-125" referrerPolicy="no-referrer" />
-          <span className="text-[10px] font-black uppercase tracking-[0.1em] text-[#4A606C] mt-1">
-            Version 10.3, September 18 2026
-          </span>
+      <aside className={`w-full lg:w-80 border-b lg:border-b-0 lg:border-r border-[var(--border)] flex flex-col p-6 lg:h-screen z-20 shrink-0 bg-[var(--sidebar)] backdrop-blur-xl transition-all duration-300 ${!isSidebarOpen ? 'hidden' : ''}`}>
+        <div className="flex items-center justify-between mb-8 shrink-0">
+          <div className="flex flex-col items-center flex-1 group cursor-pointer" onClick={() => {
+            setView('list');
+            setActiveCategory('All Destinations');
+            setFilterAircraft('All');
+            setFilterGroup('All');
+            setSearchQuery('');
+          }}>
+            <img src="icons/AC-Tracker-By-Soupha.png" alt="AC Tracker Logo" className="w-full max-w-[340px] object-contain drop-shadow-lg transition-transform group-hover:scale-125" referrerPolicy="no-referrer" />
+            <span className="text-[10px] font-black uppercase tracking-[0.1em] text-[#4A606C] mt-1">
+              Version 10.3, September 18 2026
+            </span>
+          </div>
+          <button
+            onClick={() => setIsSidebarOpen(false)}
+            className="p-2 rounded-xl text-white/60 hover:text-white hover:bg-white/10 transition-all shrink-0 ml-2"
+            title="Hide Sidebar"
+          >
+            <PanelLeftClose className="w-5 h-5" />
+          </button>
         </div>
 
         {/* Stats Summary from Mockup */}
@@ -804,6 +817,18 @@ const AeroQuest = () => {
       <main className="flex-1 overflow-y-auto custom-scrollbar bg-[var(--bg)] relative" id="main-scroll-container">
         {/* Top 4 Large Buttons */}
         <div className="px-6 pt-6 lg:px-10 lg:pt-10 pb-2">
+          {!isSidebarOpen && (
+            <div className="mb-4">
+              <button
+                onClick={() => setIsSidebarOpen(true)}
+                className="px-3.5 py-2 rounded-xl border border-[var(--border)] bg-[#00A0D6] text-white shadow-md hover:bg-sky-600 transition-all flex items-center gap-2 text-xs font-bold"
+                title="Show Sidebar"
+              >
+                <PanelLeftOpen className="w-4 h-4" />
+                <span>Show Sidebar</span>
+              </button>
+            </div>
+          )}
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
             <div
               onClick={() => setView('stats')}
@@ -875,6 +900,14 @@ const AeroQuest = () => {
                 <header className="flex flex-col gap-4 mb-6">
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
                     <div className="flex items-center flex-wrap gap-1.5">
+                      <button
+                        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                        className={`px-3 py-2 rounded-xl border border-[var(--border)] transition-all flex items-center gap-1.5 text-xs font-bold shadow-sm ${!isSidebarOpen ? 'bg-[#00A0D6] text-white border-sky-500' : 'bg-[var(--card)] text-[var(--text-main)] hover:bg-[var(--accent-muted)]'}`}
+                        title={isSidebarOpen ? "Hide Sidebar" : "Show Sidebar"}
+                      >
+                        {isSidebarOpen ? <PanelLeftClose className="w-4 h-4" /> : <PanelLeftOpen className="w-4 h-4" />}
+                        <span className="hidden sm:inline">{isSidebarOpen ? "Hide Sidebar" : "Sidebar"}</span>
+                      </button>
                       <button onClick={() => setView('list')} className={`px-3 py-2 rounded-xl border border-[var(--border)] transition-all flex items-center gap-1.5 text-xs font-bold shadow-sm ${view === 'list' ? 'bg-[#00A0D6] text-white border-sky-500' : 'bg-[var(--card)] text-[var(--text-main)] hover:bg-[var(--accent-muted)]'}`}>
                         <List className="w-4 h-4" />List
                       </button>
@@ -1141,37 +1174,40 @@ const AeroQuest = () => {
                         <div className="py-6 px-6 border-b border-[var(--border)] flex flex-col items-center gap-4">
                           <center>  <img src="Headers/missing-maps.png" alt="Most owned Maps" referrerPolicy="no-referrer" /> </center>
 
-                          <label className="flex items-center cursor-pointer group">
-                            <div className="relative flex items-center justify-center">
-                              <input
-                                type="checkbox"
-                                className="peer sr-only"
-                                checked={showMissingAdventure}
-                                onChange={() => setShowMissingAdventure(!showMissingAdventure)}
-                              />
-                              <div className="w-4 h-4 border-2 border-[var(--border)] rounded bg-[var(--card)] peer-checked:bg-[var(--accent)] peer-checked:border-[var(--accent)] transition-all" />
-                              <CheckCircle2 className="absolute w-2.5 h-2.5 text-white opacity-0 peer-checked:opacity-100 transition-opacity" />
+                          <div className="flex items-center gap-6 flex-wrap justify-center">
+                            <label className="flex items-center cursor-pointer group">
+                              <div className="relative flex items-center justify-center">
+                                <input
+                                  type="checkbox"
+                                  className="peer sr-only"
+                                  checked={showMissingAdventure}
+                                  onChange={() => setShowMissingAdventure(!showMissingAdventure)}
+                                />
+                                <div className="w-4 h-4 border-2 border-[var(--border)] rounded bg-[var(--card)] peer-checked:bg-[var(--accent)] peer-checked:border-[var(--accent)] transition-all" />
+                                <CheckCircle2 className="absolute w-2.5 h-2.5 text-white opacity-0 peer-checked:opacity-100 transition-opacity" />
+                              </div>
+                              <span className="px-2 py-1 text-[14px] font-bold text-[var(--text-muted)] group-hover:text-[var(--text-main)] transition-colors whitespace-nowrap">Show Adventure Maps</span>
+                            </label>
 
-                            </div>
-                            <span className="px-3 py-3 text-[14px] font-bold text-[var(--text-muted)] group-hover:text-[var(--text-main)] transition-colors whitespace-nowrap">  Show Adventure Maps        </span>
-                            <div className="relative flex items-center justify-center">
-                              <input
-                                type="checkbox"
-                                className="peer sr-only"
-                                checked={showMissingAlliance}
-                                onChange={() => setShowMissingAlliance(!showMissingAlliance)}
-                              />
-                              <div className="w-4 h-4 border-2 border-[var(--border)] rounded bg-[var(--card)] peer-checked:bg-[var(--accent)] peer-checked:border-[var(--accent)] transition-all" />
-                              <CheckCircle2 className="absolute w-2.5 h-2.5 text-white opacity-0 peer-checked:opacity-100 transition-opacity" />
-                            </div>
-                            <span className="px-3 py-3 text-[14px] font-bold text-[var(--text-muted)] group-hover:text-[var(--text-main)] transition-colors">  Show Alliance Maps         </span>
-                          </label>
-
+                            <label className="flex items-center cursor-pointer group">
+                              <div className="relative flex items-center justify-center">
+                                <input
+                                  type="checkbox"
+                                  className="peer sr-only"
+                                  checked={showMissingAlliance}
+                                  onChange={() => setShowMissingAlliance(!showMissingAlliance)}
+                                />
+                                <div className="w-4 h-4 border-2 border-[var(--border)] rounded bg-[var(--card)] peer-checked:bg-[var(--accent)] peer-checked:border-[var(--accent)] transition-all" />
+                                <CheckCircle2 className="absolute w-2.5 h-2.5 text-white opacity-0 peer-checked:opacity-100 transition-opacity" />
+                              </div>
+                              <span className="px-2 py-1 text-[14px] font-bold text-[var(--text-muted)] group-hover:text-[var(--text-main)] transition-colors whitespace-nowrap">Show Alliance Maps</span>
+                            </label>
+                          </div>
 
                         </div>
                         <div className="divide-y divide-[var(--border)]">
                           {mapCollectionStats.missingMaps.filter(d => {
-                            if (d.category === 'Alliance Map Flights' && !showMissingAlliance) return false;
+                            if ((d.category === 'Alliance Map Flights' || d.category === 'Alliance Task Flights') && !showMissingAlliance) return false;
                             if (d.category === 'Adventure Map Flights' && !showMissingAdventure) return false;
                             return true;
                           }).length === 0 ? (
@@ -1180,7 +1216,7 @@ const AeroQuest = () => {
                             </div>
                           ) : (
                             mapCollectionStats.missingMaps.filter(d => {
-                              if (d.category === 'Alliance Map Flights' && !showMissingAlliance) return false;
+                              if ((d.category === 'Alliance Map Flights' || d.category === 'Alliance Task Flights') && !showMissingAlliance) return false;
                               if (d.category === 'Adventure Map Flights' && !showMissingAdventure) return false;
                               return true;
                             }).map((dest, idx) => (
@@ -1410,7 +1446,7 @@ const AeroQuest = () => {
                 <>
                   <div className={`${view === 'grid' ? 'grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4' : 'flex flex-col space-y-2'}`}>
                     {view === 'list' && (
-                      <div className="hidden lg:grid sticky top-0 z-40 bg-[var(--bg)]/95 backdrop-blur-md grid-cols-[minmax(250px,2fr)_minmax(100px,1fr)_minmax(150px,1.5fr)_minmax(100px,1fr)_auto] gap-4 items-center px-4 py-4 mb-2 text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] border-b border-[var(--border)] shadow-sm">
+                      <div className="hidden lg:grid sticky top-0 z-40 bg-[var(--bg)]/95 backdrop-blur-md grid-cols-[minmax(220px,2fr)_minmax(90px,1fr)_minmax(130px,1.2fr)_minmax(90px,0.8fr)_minmax(90px,1fr)_auto] gap-4 items-center px-4 py-4 mb-2 text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] border-b border-[var(--border)] shadow-sm">
                         <div className="flex items-center gap-4">
                           <div className="cursor-pointer hover:text-[var(--text-main)] transition-colors flex items-center gap-1 group/col" onClick={() => handleSort('destination')}>
                             Destination {sortConfig.field === 'destination' ? (sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3 text-[var(--accent)]" /> : <ChevronDown className="w-3 h-3 text-[var(--accent)]" />) : <ArrowUpDown className="w-3 h-3 opacity-20 group-hover/col:opacity-50" />}
@@ -1419,11 +1455,14 @@ const AeroQuest = () => {
                             Map Set {sortConfig.field === 'group' ? (sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3 text-[var(--accent)]" /> : <ChevronDown className="w-3 h-3 text-[var(--accent)]" />) : <ArrowUpDown className="w-3 h-3 opacity-20 group-hover/col:opacity-50" />}
                           </div>
                         </div>
-                        <div className="text-center cursor-pointer hover:text-[var(--text-main)] transition-colors flex items-center justify-center gap-1 group/col pr-[30px]" onClick={() => handleSort('aircraft')}>
+                        <div className="text-center cursor-pointer hover:text-[var(--text-main)] transition-colors flex items-center justify-center gap-1 group/col" onClick={() => handleSort('aircraft')}>
                           Aircraft {sortConfig.field === 'aircraft' ? (sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3 text-[var(--accent)]" /> : <ChevronDown className="w-3 h-3 text-[var(--accent)]" />) : <ArrowUpDown className="w-3 h-3 opacity-20 group-hover/col:opacity-50" />}
                         </div>
                         <div />
-                        <div className="text-center cursor-pointer hover:text-[var(--text-main)] transition-colors flex items-center justify-center gap-1 group/col pr-[30px]" onClick={() => handleSort('maps')}>
+                        <div className="text-center cursor-pointer hover:text-[var(--text-main)] transition-colors flex items-center justify-center gap-1 group/col" onClick={() => handleSort('neededToNextStar')}>
+                          To Next Star {sortConfig.field === 'neededToNextStar' ? (sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3 text-[var(--accent)]" /> : <ChevronDown className="w-3 h-3 text-[var(--accent)]" />) : <ArrowUpDown className="w-3 h-3 opacity-20 group-hover/col:opacity-50" />}
+                        </div>
+                        <div className="text-center cursor-pointer hover:text-[var(--text-main)] transition-colors flex items-center justify-center gap-1 group/col" onClick={() => handleSort('maps')}>
                           Maps {sortConfig.field === 'maps' ? (sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3 text-[var(--accent)]" /> : <ChevronDown className="w-3 h-3 text-[var(--accent)]" />) : <ArrowUpDown className="w-3 h-3 opacity-20 group-hover/col:opacity-50" />}
                         </div>
                         <div className="text-right cursor-pointer hover:text-[var(--text-main)] transition-colors flex items-center justify-end gap-1 group/col pr-[44px]" onClick={() => handleSort('flightsDone')}>
@@ -1604,7 +1643,7 @@ const AeroQuest = () => {
                           className={`group rounded-xl border border-[var(--border)] bg-[var(--card)] transition-all cursor-pointer overflow-hidden ${isExpanded ? 'shadow-lg ring-2 ring-[var(--accent)]' : 'hover:bg-[var(--bg)] shadow-sm'}`}
                         >
                           {/* Main Row Content */}
-                          <div className="px-4 py-3 grid grid-cols-1 lg:grid-cols-[minmax(250px,2fr)_minmax(100px,1fr)_minmax(150px,1.5fr)_minmax(100px,1fr)_auto] gap-4 items-center">
+                          <div className="px-4 py-3 grid grid-cols-1 lg:grid-cols-[minmax(220px,2fr)_minmax(90px,1fr)_minmax(130px,1.2fr)_minmax(90px,0.8fr)_minmax(90px,1fr)_auto] gap-4 items-center">
                             {/* Destination & Mission */}
                             <div className="min-w-0 flex items-center gap-3">
                               <button onClick={(e) => toggleBookmark(dest.id, e)} className="hover:scale-110 transition-transform shrink-0" title={dest.isCustomList ? "Remove from Bookmarks" : "Add to Bookmarks"}>
@@ -1661,6 +1700,19 @@ const AeroQuest = () => {
                                   );
                                 })}
                               </div>
+                            </div>
+
+                            {/* Needed To Next Star */}
+                            <div className="hidden lg:flex items-center justify-center">
+                              {(() => {
+                                const info = getNextStarInfo(dest);
+                                const isMax = stars >= maxStars || info.needed <= 0;
+                                return isMax ? null : (
+                                  <span className="text-xs font-black text-amber-500 bg-amber-500/10 px-2.5 py-1 rounded-lg border border-amber-500/20">
+                                    {info.needed}
+                                  </span>
+                                );
+                              })()}
                             </div>
 
                             {/* Inline Map Counter (Editable in List Mode) */}
@@ -1826,23 +1878,13 @@ const AeroQuest = () => {
         :root { --bg: #7A98A8; --sidebar: #5C7C8C; --card: #B0C4CE; --text-main: #1A2B34; --text-muted: #4A606C; --accent: #00A0D6; --accent-muted: #FFB833; --border: #5C7C8C; }
         .theme-classic { --bg: #7A98A8; --sidebar: #5C7C8C; --card: #B0C4CE; --text-main: #1A2B34; --text-muted: #4A606C; --accent: #00A0D6; --accent-muted: #FFB833; --border: #5C7C8C; }
         .theme-dark { --bg: #0a0e17; --sidebar: #111827; --card: #1f2937; --text-main: #f1f5f9; --text-muted: #94a3b8; --accent: #818cf8; --accent-muted: #1e1b4b; --border: #334155; }
-        .theme-coffee { --bg: #faf7f5; --sidebar: #ffffff; --card: #ffffff; --text-main: #433422; --text-muted: #8c7851; --accent: #7c2d12; --accent-muted: #fff7ed; --border: #eaddd7; }
         .theme-ocean { --bg: #0c1c2e; --sidebar: #13273e; --card: #1a365d; --text-main: #ffffff; --text-muted: #94a3b8; --accent: #38bdf8; --accent-muted: #082f49; --border: #1e40af; }
         .theme-nord { --bg: #2e3440; --sidebar: #3b4252; --card: #434c5e; --text-main: #eceff4; --text-muted: #d8dee9; --accent: #88c0d0; --accent-muted: #4c566a; --border: #4c566a; }
         .theme-dracula { --bg: #282a36; --sidebar: #44475a; --card: #282a36; --text-main: #f8f8f2; --text-muted: #a695e7; --accent: #bd93f9; --accent-muted: #44475a; --border: #6272a4; }
         .theme-gruvbox { --bg: #282828; --sidebar: #3c3836; --card: #282828; --text-main: #ebdbb2; --text-muted: #a89984; --accent: #fabd2f; --accent-muted: #3c3836; --border: #504945; }
-        .theme-synthwave { --bg: #2b065a; --sidebar: #1b043a; --card: #2b065a; --text-main: #ffffff; --text-muted: #d1d5db; --accent: #00ffff; --accent-muted: #1b043a; --border: #ff00ff; }
         .theme-forest { --bg: #061a06; --sidebar: #0b2e0b; --card: #061a06; --text-main: #e8f5e9; --text-muted: #bbf7d0; --accent: #4caf50; --accent-muted: #0b2e0b; --border: #1b5e20; }
-        .theme-minimal { --bg: #ffffff; --sidebar: #f8fafc; --card: #ffffff; --text-main: #000000; --text-muted: #64748b; --accent: #000000; --accent-muted: #f1f5f9; --border: #e2e8f0; }
         .theme-sunset { --bg: #2d1b2e; --sidebar: #1a0f1c; --card: #3d263f; --text-main: #fceabb; --text-muted: #f8b500; --accent: #ff6b6b; --accent-muted: #592e3c; --border: #592e3c; }
-        .theme-cyberpunk { --bg: #0f0f0f; --sidebar: #050505; --card: #141414; --text-main: #fcee0a; --text-muted: #00ff9f; --accent: #00ffff; --accent-muted: #2b00ff; --border: #fcee0a; }
-        .theme-lavender { --bg: #f3e8ff; --sidebar: #faf5ff; --card: #ffffff; --text-main: #4c1d95; --text-muted: #7c3aed; --accent: #8b5cf6; --accent-muted: #ddd6fe; --border: #c4b5fd; }
-        .theme-monochrome { --bg: #000000; --sidebar: #0a0a0a; --card: #111111; --text-main: #ffffff; --text-muted: #a3a3a3; --accent: #ffffff; --accent-muted: #262626; --border: #404040; }
-        .theme-autumn { --bg: #fff7ed; --sidebar: #ffedd5; --card: #ffffff; --text-main: #7c2d12; --text-muted: #9a3412; --accent: #ea580c; --accent-muted: #fed7aa; --border: #fdba74; }
-        .theme-matrix { --bg: #000000; --sidebar: #001100; --card: #000a00; --text-main: #00ff41; --text-muted: #008f11; --accent: #00ff41; --accent-muted: #003b00; --border: #008f11; }
-        .theme-rose { --bg: #fff1f2; --sidebar: #ffe4e6; --card: #ffffff; --text-main: #881337; --text-muted: #be123c; --accent: #e11d48; --accent-muted: #fecdd3; --border: #fda4af; }
         .theme-abyss { --bg: #000814; --sidebar: #000000; --card: #001233; --text-main: #e0fbfc; --text-muted: #98c1d9; --accent: #ee6c4d; --accent-muted: #002855; --border: #002855; }
-        .theme-solarized_light { --bg: #fdf6e3; --sidebar: #eee8d5; --card: #fdf6e3; --text-main: #657b83; --text-muted: #93a1a1; --accent: #268bd2; --accent-muted: #eee8d5; --border: #93a1a1; }
         .theme-solarized_dark { --bg: #002b36; --sidebar: #073642; --card: #002b36; --text-main: #839496; --text-muted: #586e75; --accent: #b58900; --accent-muted: #073642; --border: #586e75; }
         .custom-scrollbar::-webkit-scrollbar { width: 5px; height: 5px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
