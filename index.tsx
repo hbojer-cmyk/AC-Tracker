@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { createRoot } from 'react-dom/client';
 import {
@@ -32,7 +31,21 @@ import {
   Bookmark,
   PanelLeftClose,
   PanelLeftOpen,
-  PanelLeft
+  PanelLeft,
+  Crosshair,
+  Compass,
+  Sparkles,
+  Sliders,
+  Filter,
+  Check,
+  AlertTriangle,
+  X,
+  ExternalLink,
+  ShieldCheck,
+  Zap,
+  RefreshCw,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import {
   BarChart,
@@ -46,10 +59,10 @@ import {
 } from 'recharts';
 import { RAW_MASTER_LIST } from './destinations';
 import { MAP_LOCATIONS } from './MAPLOCATIONS';
-import { AirplanesPage } from './AirplanesPage';
+import { AirplanesPage, AIRCRAFT_SPRITES } from './AirplanesPage';
 import { adjustAircraftList } from './src/aircraftData';
 
-// --- Types & Themes ---
+// --- Types & Interfaces ---
 interface FlightDestination {
   id: string;
   aircraft: string;
@@ -77,39 +90,233 @@ interface UserDataEntry {
   isCustomList?: boolean;
 }
 
-type SortField = 'destination' | 'aircraft' | 'group' | 'flightsDone' | 'stars' | 'mastery' | 'lastUpdated' | 'maps' | 'neededToNextStar';
+type SortField =
+  | 'destination'
+  | 'aircraft'
+  | 'group'
+  | 'flightsDone'
+  | 'stars'
+  | 'mastery'
+  | 'lastUpdated'
+  | 'maps'
+  | 'neededToNextStar';
+
 type SortDirection = 'asc' | 'desc';
 
-type ThemeId =
-  | 'classic'
-  | 'dark'
-  | 'ocean'
-  | 'nord'
-  | 'dracula'
-  | 'gruvbox'
-  | 'forest'
-  | 'sunset'
-  | 'abyss'
-  | 'solarized_dark';
+type ViewMode = 'list' | 'grid' | 'almost-next-star' | 'maps' | 'airplanes' | 'stats';
 
-const THEME_CONFIGS: Record<ThemeId, { name: string, isDark: boolean }> = {
-  classic: { name: 'Airport Classic', isDark: false },
-  dark: { name: 'Midnight', isDark: true },
-  ocean: { name: 'Deep Sea', isDark: true },
-  nord: { name: 'Nordic Frost', isDark: true },
-  dracula: { name: 'Vampire Night', isDark: true },
-  gruvbox: { name: 'Retro Earth', isDark: true },
-  forest: { name: 'Mossy Pine', isDark: true },
-  sunset: { name: 'Sunset Glow', isDark: true },
-  abyss: { name: 'Ocean Abyss', isDark: true },
-  solarized_dark: { name: 'Solarized Dark', isDark: true }
+export type ThemeId =
+  | 'mach-blue'
+  | 'blackbird'
+  | 'golden-hour'
+  | 'aurora'
+  | 'cyber-runway'
+  | 'first-class'
+  | 'red-flag'
+  | 'orbital'
+  | 'storm-chaser'
+  | 'pacific-clipper'
+  | 'mojave-dusk'
+  | 'stealth-ghost'
+  | 'alpine-flight';
+
+export interface ThemeConfig {
+  name: string;
+  isDark: boolean;
+  tag: string;
+  desc: string;
+  bgPreview: string;
+  surfacePreview: string;
+  accentPreview: string;
+  badgePreview: string;
+}
+
+export const THEME_CONFIGS: Record<ThemeId, ThemeConfig> = {
+  'mach-blue': {
+    name: 'Mach 3 Stratosphere',
+    isDark: true,
+    tag: 'SUPERSONIC',
+    desc: 'Midnight void with electric horizon cyan & afterburner gold',
+    bgPreview: '#030712',
+    surfacePreview: '#0a1931',
+    accentPreview: '#00e5ff',
+    badgePreview: '#38bdf8',
+  },
+  'blackbird': {
+    name: 'SR-71 Blackbird',
+    isDark: true,
+    tag: 'STEALTH TITANIUM',
+    desc: 'Titanium carbon matte with amber gold avionics displays',
+    bgPreview: '#0b0d11',
+    surfacePreview: '#1a1e27',
+    accentPreview: '#f59e0b',
+    badgePreview: '#fbbf24',
+  },
+  'golden-hour': {
+    name: 'Cruising FL380',
+    isDark: true,
+    tag: 'FL380 SUNSET',
+    desc: 'Transcontinental dusk with warm coral glow & amber stars',
+    bgPreview: '#120a1c',
+    surfacePreview: '#26163b',
+    accentPreview: '#ff6b4a',
+    badgePreview: '#ff8a65',
+  },
+  'aurora': {
+    name: 'Aurora Borealis',
+    isDark: true,
+    tag: 'POLAR RADAR',
+    desc: 'Deep spruce arctic night with radiant emerald & mint aurora',
+    bgPreview: '#03100d',
+    surfacePreview: '#0d2822',
+    accentPreview: '#00ffb3',
+    badgePreview: '#34d399',
+  },
+  'cyber-runway': {
+    name: 'Tokyo Haneda Night',
+    isDark: true,
+    tag: 'NIGHT ATC',
+    desc: 'Rainy runway tarmac with neon magenta beacon & cyan vectors',
+    bgPreview: '#05050a',
+    surfacePreview: '#161226',
+    accentPreview: '#f72585',
+    badgePreview: '#4cc9f0',
+  },
+  'first-class': {
+    name: 'First Class Suite',
+    isDark: false,
+    tag: 'DAYLIGHT LUXURY',
+    desc: 'Daylight frosted alabaster with presidential navy & champagne gold',
+    bgPreview: '#f4f6fa',
+    surfacePreview: '#ffffff',
+    accentPreview: '#c29438',
+    badgePreview: '#87641c',
+  },
+  'red-flag': {
+    name: 'Red Flag Combat',
+    isDark: true,
+    tag: 'COMBAT FLIR',
+    desc: 'Covert night vision tactical HUD with phosphor green displays',
+    bgPreview: '#020803',
+    surfacePreview: '#0a200e',
+    accentPreview: '#39ff14',
+    badgePreview: '#39ff14',
+  },
+  'orbital': {
+    name: 'Cosmic Orbital',
+    isDark: true,
+    tag: 'SPACE PROGRAM',
+    desc: 'Deep space void with solar plasma purple & supernova gold',
+    bgPreview: '#080312',
+    surfacePreview: '#1a0f35',
+    accentPreview: '#e040fb',
+    badgePreview: '#ea80fc',
+  },
+  'storm-chaser': {
+    name: 'Storm Chaser',
+    isDark: true,
+    tag: 'THUNDERSTORM',
+    desc: 'Deep squall-line slate with electric lightning volt accents',
+    bgPreview: '#070b14',
+    surfacePreview: '#142036',
+    accentPreview: '#facc15',
+    badgePreview: '#fde047',
+  },
+  'pacific-clipper': {
+    name: 'Pan Am Clipper',
+    isDark: true,
+    tag: 'OCEANIC TRANSIT',
+    desc: 'Maritime nautical deep abyss with luminous seafoam turquoise',
+    bgPreview: '#030d13',
+    surfacePreview: '#0e2736',
+    accentPreview: '#14b8a6',
+    badgePreview: '#2dd4bf',
+  },
+  'mojave-dusk': {
+    name: 'Mojave Airfield',
+    isDark: true,
+    tag: 'DESERT RUNWAY',
+    desc: 'Sunbaked desert dark roast with terracotta copper & warm amber flare',
+    bgPreview: '#100b08',
+    surfacePreview: '#291c14',
+    accentPreview: '#f97316',
+    badgePreview: '#fb923c',
+  },
+  'stealth-ghost': {
+    name: 'Ghost Radar OLED',
+    isDark: true,
+    tag: 'MINIMAL MONOCHROME',
+    desc: 'Pure OLED deep black with surgical monochrome silver & frost accents',
+    bgPreview: '#000000',
+    surfacePreview: '#141414',
+    accentPreview: '#e2e8f0',
+    badgePreview: '#94a3b8',
+  },
+  'alpine-flight': {
+    name: 'Alpine Snow Flight',
+    isDark: false,
+    tag: 'GLACIAL DAYLIGHT',
+    desc: 'Daylight glacial frost with crisp cobalt sky & ice crest highlights',
+    bgPreview: '#f1f5f9',
+    surfacePreview: '#ffffff',
+    accentPreview: '#0284c7',
+    badgePreview: '#0369a1',
+  },
+};
+
+// Legacy Theme Fallbacks
+const THEME_FALLBACK_MAP: Record<string, ThemeId> = {
+  classic: 'first-class',
+  daylight: 'first-class',
+  dark: 'mach-blue',
+  stealth: 'blackbird',
+  abyss: 'mach-blue',
+  nord: 'aurora',
+  nordic: 'aurora',
+  dracula: 'orbital',
+  nebula: 'orbital',
+  gruvbox: 'blackbird',
+  forest: 'red-flag',
+  tactical: 'red-flag',
+  sunset: 'golden-hour',
+  ocean: 'mach-blue',
+  solarized_dark: 'blackbird',
+  cyber: 'cyber-runway',
+  slate: 'storm-chaser',
+  storm: 'storm-chaser',
+  thunder: 'storm-chaser',
+  clipper: 'pacific-clipper',
+  teal: 'pacific-clipper',
+  mojave: 'mojave-dusk',
+  desert: 'mojave-dusk',
+  copper: 'mojave-dusk',
+  oled: 'stealth-ghost',
+  monochrome: 'stealth-ghost',
+  ghost: 'stealth-ghost',
+  alpine: 'alpine-flight',
+  snow: 'alpine-flight',
+  ice: 'alpine-flight',
 };
 
 const AIRCRAFT_ORDER: Record<string, number> = {
-  'Swallow': 1, 'Swift': 2, 'Owl': 3, 'Hawk': 4, 'Raven': 5, 'Eagle': 6,
-  'Jumbo': 7, 'Giant': 8, 'Falcon': 9, 'Thunderbird': 10, 'Condor': 11,
-  'Sparrow': 12, 'Crossbill': 13, 'Goldfinch': 14, 'Sleigh': 15, 'LP1': 16,
-  'LP2': 17, 'LP3': 18
+  Swallow: 1,
+  Swift: 2,
+  Owl: 3,
+  Hawk: 4,
+  Raven: 5,
+  Eagle: 6,
+  Jumbo: 7,
+  Giant: 8,
+  Falcon: 9,
+  Thunderbird: 10,
+  Condor: 11,
+  Sparrow: 12,
+  Crossbill: 13,
+  Goldfinch: 14,
+  Sleigh: 15,
+  LP1: 16,
+  LP2: 17,
+  LP3: 18,
 };
 
 const CATEGORY_ORDER = [
@@ -121,15 +328,43 @@ const CATEGORY_ORDER = [
   'Alliance Task Flights',
   'Space Map Flights',
   'Space Launches',
-  'Event Flights'
+  'Event Flights',
 ];
 
 const QUICK_FILTERS = [
-  { id: 'regular', label: 'Regular & Helicopter', match: (d: FlightDestination) => d.category === 'Regular Flights' || d.category === 'Helicopter Flights' },
-  { id: 'adventure', label: 'Adventure & Space', match: (d: FlightDestination) => d.category === 'Adventure Map Flights' || d.category === 'Space Map Flights' || d.category === 'Space Launches' },
-  { id: 'alliance', label: 'Alliance Flights', match: (d: FlightDestination) => d.category === 'Alliance Task Flights' || d.category === 'Alliance Map Flights' },
-  { id: 'event', label: 'Event Flights', match: (d: FlightDestination) => d.category === 'Event Flights' }
+  {
+    id: 'regular',
+    label: 'Regular & Heli',
+    match: (d: FlightDestination) => d.category === 'Regular Flights' || d.category === 'Helicopter Flights',
+  },
+  {
+    id: 'adventure',
+    label: 'Adventure & Space',
+    match: (d: FlightDestination) =>
+      d.category === 'Adventure Map Flights' ||
+      d.category === 'Space Map Flights' ||
+      d.category === 'Space Launches',
+  },
+  {
+    id: 'alliance',
+    label: 'Alliance Flights',
+    match: (d: FlightDestination) =>
+      d.category === 'Alliance Task Flights' || d.category === 'Alliance Map Flights',
+  },
+  { id: 'event', label: 'Event Flights', match: (d: FlightDestination) => d.category === 'Event Flights' },
 ];
+
+const CATEGORY_ICONS: Record<string, string> = {
+  'All Destinations': 'Map-icons/standard_icon.png',
+  'Regular Flights': 'icons/flights_icon.png',
+  'Helicopter Flights': 'icons/helicopter_icon.png',
+  'Adventure Map Flights': 'icons/adventure_icon.png',
+  'Alliance Map Flights': 'icons/alliance__icon.png',
+  'Alliance Task Flights': 'icons/alliance__icon.png',
+  'Space Map Flights': 'Map-icons/space_map_icon.png',
+  'Space Launches': 'Map-icons/space_icon.png',
+  'Event Flights': 'icons/event_icon.png',
+};
 
 const getMaxStars = (d: { star4Req?: number; star5Req?: number; maxStars?: number }) => {
   if (d.maxStars) return d.maxStars;
@@ -147,26 +382,38 @@ const getStars = (done: number, s1: number, s2: number, s3: number, s4?: number,
   return 0;
 };
 
+const STAR_RANKS = [
+  { star: 1, name: 'Specialist', short: 'Spec' },
+  { star: 2, name: 'Master', short: 'Mast' },
+  { star: 3, name: 'Expert', short: 'Exp' },
+  { star: 4, name: 'Captain', short: 'Capt' },
+  { star: 5, name: 'Ace', short: 'Ace' },
+];
+
 const getNextStarInfo = (d: FlightDestination) => {
-  const reqs: { req: number; star: number }[] = [
-    { req: d.star1Req, star: 1 },
-    { req: d.star2Req, star: 2 },
-    { req: d.star3Req, star: 3 }
+  const reqs: { req: number; star: number; rank: string }[] = [
+    { req: d.star1Req, star: 1, rank: 'Specialist' },
+    { req: d.star2Req, star: 2, rank: 'Master' },
+    { req: d.star3Req, star: 3, rank: 'Expert' },
   ];
-  if (d.star4Req && d.star4Req > 0) reqs.push({ req: d.star4Req, star: 4 });
-  if (d.star5Req && d.star5Req > 0) reqs.push({ req: d.star5Req, star: 5 });
+  if (d.star4Req && d.star4Req > 0) reqs.push({ req: d.star4Req, star: 4, rank: 'Captain' });
+  if (d.star5Req && d.star5Req > 0) reqs.push({ req: d.star5Req, star: 5, rank: 'Ace' });
 
   for (const item of reqs) {
     if (d.flightsDone < item.req) {
-      return { nextReq: item.req, nextStar: item.star, needed: item.req - d.flightsDone };
+      return {
+        nextReq: item.req,
+        nextStar: item.star,
+        rank: item.rank,
+        needed: item.req - d.flightsDone,
+      };
     }
   }
   const maxReq = reqs[reqs.length - 1].req;
   const maxStar = reqs[reqs.length - 1].star;
-  return { nextReq: maxReq, nextStar: maxStar, needed: 0 };
+  const maxRank = reqs[reqs.length - 1].rank;
+  return { nextReq: maxReq, nextStar: maxStar, rank: maxRank, needed: 0 };
 };
-
-
 
 const formatTimestamp = (ts: number) => {
   if (!ts) return 'Never';
@@ -179,62 +426,70 @@ const formatTimestamp = (ts: number) => {
   }).format(date);
 };
 
-const CATEGORY_ICONS: Record<string, string> = {
-  'All Destinations': 'Map-icons/standard_icon.png',
-  'Regular Flights': 'icons/flights_icon.png',
-  'Helicopter Flights': 'icons/helicopter_icon.png',
-  'Adventure Map Flights': 'icons/adventure_icon.png',
-  'Alliance Map Flights': 'icons/alliance__icon.png',
-  'Alliance Task Flights': 'icons/alliance__icon.png',
-  'Space Map Flights': 'Map-icons/space_map_icon.png',
-  'Space Launches': 'Map-icons/space_icon.png',
-  'Event Flights': 'icons/event_icon.png'
-};
-
-const AeroQuest = () => {
+export const AeroQuest = () => {
   const [destinations, setDestinations] = useState<FlightDestination[]>([]);
   const [activeCategory, setActiveCategory] = useState<string>('All Destinations');
-  const [selectedQuickFilters, setSelectedQuickFilters] = useState<string[]>(['regular', 'adventure', 'alliance', 'event']);
+  const [selectedQuickFilters, setSelectedQuickFilters] = useState<string[]>([
+    'regular',
+    'adventure',
+    'alliance',
+    'event',
+  ]);
   const [filterAircraft, setFilterAircraft] = useState<string>('All');
   const [filterGroup, setFilterGroup] = useState<string>('All');
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [view, setView] = useState<'grid' | 'list' | 'stats' | 'maps' | 'almost-next-star' | 'airplanes'>('list');
+  const [view, setView] = useState<ViewMode>('list');
+  const [density, setDensity] = useState<'compact' | 'comfortable'>(() => {
+    const saved = localStorage.getItem('aeroquest_density');
+    return saved === 'comfortable' ? 'comfortable' : 'compact';
+  });
+  const [isOverviewCollapsed, setIsOverviewCollapsed] = useState<boolean>(() => {
+    const saved = localStorage.getItem('aeroquest_overview_collapsed');
+    return saved !== null ? saved === 'true' : false;
+  });
+
+  const toggleDensity = (newDensity: 'compact' | 'comfortable') => {
+    setDensity(newDensity);
+    localStorage.setItem('aeroquest_density', newDensity);
+  };
+
+  const toggleOverviewCollapse = () => {
+    setIsOverviewCollapsed(prev => {
+      const next = !prev;
+      localStorage.setItem('aeroquest_overview_collapsed', String(next));
+      return next;
+    });
+  };
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
     const saved = localStorage.getItem('aeroquest_sidebar_open');
-    return saved !== null ? saved === 'true' : true;
+    return saved !== null ? saved === 'true' : false;
   });
-  const [theme, setTheme] = useState<ThemeId>('classic');
+  const [theme, setTheme] = useState<ThemeId>('stealth');
   const [isLoaded, setIsLoaded] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [showBackupModal, setShowBackupModal] = useState(false);
+  const [showThemeModal, setShowThemeModal] = useState(false);
   const [expandedRowId, setExpandedRowId] = useState<string | null>(null);
   const [showOnlyMaps, setShowOnlyMaps] = useState(false);
   const [hide3Star, setHide3Star] = useState(false);
-  const [includeEventTasks, setIncludeEventTasks] = useState(false);
-  const [includeAllianceTasks, setIncludeAllianceTasks] = useState(false);
-  const [hideZeroMaps, setHideZeroMaps] = useState(false);
+  const [missingSearch, setMissingSearch] = useState('');
   const [showMissingAlliance, setShowMissingAlliance] = useState(true);
   const [showMissingAdventure, setShowMissingAdventure] = useState(true);
   const [sortConfig, setSortConfig] = useState<{ field: SortField; direction: SortDirection }>({
     field: 'destination',
-    direction: 'asc'
+    direction: 'asc',
   });
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Load Saved Data
   useEffect(() => {
     const rawData = localStorage.getItem('aeroquest_user_data');
     const savedData: Record<string, any> = rawData ? JSON.parse(rawData) : {};
-    const savedTheme = localStorage.getItem('aeroquest_theme_id') as ThemeId;
-    if (savedTheme && THEME_CONFIGS[savedTheme]) setTheme(savedTheme);
-
-    const savedIncludeEvent = localStorage.getItem('aeroquest_include_event_tasks');
-    if (savedIncludeEvent !== null) setIncludeEventTasks(savedIncludeEvent === 'true');
-    const savedIncludeAlliance = localStorage.getItem('aeroquest_include_alliance_tasks');
-    if (savedIncludeAlliance !== null) setIncludeAllianceTasks(savedIncludeAlliance === 'true');
-
-    const savedHideZero = localStorage.getItem('aeroquest_hide_zero_maps');
-    if (savedHideZero !== null) setHideZeroMaps(savedHideZero === 'true');
+    const savedTheme = localStorage.getItem('aeroquest_theme_id') || 'stealth';
+    const mappedTheme = THEME_FALLBACK_MAP[savedTheme] || (THEME_CONFIGS[savedTheme] ? (savedTheme as ThemeId) : 'stealth');
+    setTheme(mappedTheme);
 
     const savedShowMissingAlliance = localStorage.getItem('aeroquest_show_missing_alliance');
     if (savedShowMissingAlliance !== null) setShowMissingAlliance(savedShowMissingAlliance === 'true');
@@ -242,73 +497,79 @@ const AeroQuest = () => {
     const savedShowMissingAdventure = localStorage.getItem('aeroquest_show_missing_adventure');
     if (savedShowMissingAdventure !== null) setShowMissingAdventure(savedShowMissingAdventure === 'true');
 
-    const parsed: FlightDestination[] = RAW_MASTER_LIST.split('\n').map((line, idx) => {
-      const parts = line.split('|');
-      if (parts.length < 8) return null;
-      const [aircraft, category, group, dest, icon, s1, s2, s3, s4, s5] = parts;
-      const id = `f-${idx}`;
-      const needsMap = MAP_LOCATIONS.includes(dest);
+    const parsed: FlightDestination[] = RAW_MASTER_LIST.split('\n')
+      .map((line, idx) => {
+        const parts = line.split('|');
+        if (parts.length < 8) return null;
+        const [aircraft, category, group, dest, icon, s1, s2, s3, s4, s5] = parts;
+        const id = `f-${idx}`;
+        const needsMap = MAP_LOCATIONS.includes(dest);
 
-      const star1Req = parseInt(s1) || 0;
-      const star2Req = parseInt(s2) || 0;
-      const star3Req = parseInt(s3) || 0;
-      const star4Req = s4 && parseInt(s4) > 0 ? parseInt(s4) : undefined;
-      const star5Req = s5 && parseInt(s5) > 0 ? parseInt(s5) : undefined;
-      const maxStars = star5Req ? 5 : star4Req ? 4 : 3;
+        const star1Req = parseInt(s1) || 0;
+        const star2Req = parseInt(s2) || 0;
+        const star3Req = parseInt(s3) || 0;
+        const star4Req = s4 && parseInt(s4) > 0 ? parseInt(s4) : undefined;
+        const star5Req = s5 && parseInt(s5) > 0 ? parseInt(s5) : undefined;
+        const maxStars = star5Req ? 5 : star4Req ? 4 : 3;
 
-      // Try loading by destination name first, then by old ID for migration
-      const entry = savedData[dest] || savedData[id];
-      let flightsDone = 0;
-      let mapsDone = 0;
-      let lastUpdated = 0;
-      let isCustomList = false;
+        const entry = savedData[dest] || savedData[id];
+        let flightsDone = 0;
+        let mapsDone = 0;
+        let lastUpdated = 0;
+        let isCustomList = false;
 
-      if (typeof entry === 'number') {
-        flightsDone = entry;
-      } else if (entry && typeof entry === 'object') {
-        flightsDone = entry.count;
-        mapsDone = entry.maps || 0;
-        lastUpdated = entry.lastUpdated || 0;
-        isCustomList = entry.isCustomList || false;
-      }
+        if (typeof entry === 'number') {
+          flightsDone = entry;
+        } else if (entry && typeof entry === 'object') {
+          flightsDone = entry.count || 0;
+          mapsDone = entry.maps || 0;
+          lastUpdated = entry.lastUpdated || 0;
+          isCustomList = entry.isCustomList || false;
+        }
 
-      return {
-        id, aircraft, category, group: group || 'None', destination: dest, icon: icon ? icon.replace(/^\//, '') : undefined,
-        star1Req, star2Req, star3Req, star4Req, star5Req, maxStars,
-        flightsDone, mapsDone, needsMap, lastUpdated, isCustomList
-      };
-    }).filter(Boolean) as FlightDestination[];
+        return {
+          id,
+          aircraft,
+          category,
+          group: group || 'None',
+          destination: dest,
+          icon: icon ? icon.replace(/^\//, '') : undefined,
+          star1Req,
+          star2Req,
+          star3Req,
+          star4Req,
+          star5Req,
+          maxStars,
+          flightsDone,
+          mapsDone,
+          needsMap,
+          lastUpdated,
+          isCustomList,
+        };
+      })
+      .filter(Boolean) as FlightDestination[];
+
     setDestinations(parsed);
     setIsLoaded(true);
   }, []);
 
-  useEffect(() => {
-    if (expandedRowId) {
-      const element = document.getElementById(expandedRowId);
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    }
-  }, [expandedRowId]);
-
+  // Theme & Preference Persistence
   useEffect(() => {
     if (isLoaded) {
       localStorage.setItem('aeroquest_theme_id', theme);
       localStorage.setItem('aeroquest_sidebar_open', String(isSidebarOpen));
-      localStorage.setItem('aeroquest_include_event_tasks', String(includeEventTasks));
-      localStorage.setItem('aeroquest_include_alliance_tasks', String(includeAllianceTasks));
-      localStorage.setItem('aeroquest_hide_zero_maps', String(hideZeroMaps));
       localStorage.setItem('aeroquest_show_missing_alliance', String(showMissingAlliance));
       localStorage.setItem('aeroquest_show_missing_adventure', String(showMissingAdventure));
+
       const html = document.documentElement;
       Object.keys(THEME_CONFIGS).forEach(id => html.classList.remove(`theme-${id}`));
       html.classList.add(`theme-${theme}`);
-      if (THEME_CONFIGS[theme].isDark) html.classList.add('dark');
+      if (THEME_CONFIGS[theme]?.isDark) html.classList.add('dark');
       else html.classList.remove('dark');
     }
-  }, [theme, isSidebarOpen, includeEventTasks, includeAllianceTasks, hideZeroMaps, showMissingAlliance, showMissingAdventure, isLoaded]);
+  }, [theme, isSidebarOpen, showMissingAlliance, showMissingAdventure, isLoaded]);
 
-  // Persistence layer for destinations
+  // Destination Progress Persistence
   useEffect(() => {
     if (isLoaded) {
       const storageObj: Record<string, UserDataEntry> = {};
@@ -318,13 +579,36 @@ const AeroQuest = () => {
             count: d.flightsDone,
             lastUpdated: d.lastUpdated,
             ...(d.needsMap ? { maps: d.mapsDone } : {}),
-            ...(d.isCustomList ? { isCustomList: true } : {})
+            ...(d.isCustomList ? { isCustomList: true } : {}),
           };
         }
       });
       localStorage.setItem('aeroquest_user_data', JSON.stringify(storageObj));
     }
   }, [destinations, isLoaded]);
+
+  // Scroll into view on expand
+  useEffect(() => {
+    if (expandedRowId) {
+      const element = document.getElementById(expandedRowId);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }
+  }, [expandedRowId]);
+
+  // Keyboard shortcut '/' to search
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === '/' && document.activeElement?.tagName !== 'INPUT') {
+        e.preventDefault();
+        const searchInput = document.getElementById('command-search-input') as HTMLInputElement;
+        if (searchInput) searchInput.focus();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const updateFlightCount = (id: string, newVal: number) => {
     const safeVal = Math.max(0, isNaN(newVal) ? 0 : newVal);
@@ -338,34 +622,33 @@ const AeroQuest = () => {
     setDestinations(prev => prev.map(d => (d.id === id ? { ...d, mapsDone: safeVal, lastUpdated: now } : d)));
   };
 
-  const toggleBookmark = (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    setDestinations(prev => prev.map(d => (d.id === id ? { ...d, isCustomList: !d.isCustomList, lastUpdated: Date.now() } : d)));
+  const toggleBookmark = (id: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    setDestinations(prev =>
+      prev.map(d => (d.id === id ? { ...d, isCustomList: !d.isCustomList, lastUpdated: Date.now() } : d))
+    );
   };
 
+  // Categories
   const categories = useMemo(() => {
     const activeFilters = QUICK_FILTERS.filter(f => selectedQuickFilters.includes(f.id));
-
-    const unique = Array.from(new Set(destinations.map(d => d.category)))
-      .filter(c => {
-        // A category is allowed if at least one destination in it matches an active filter
-        return destinations.some(d => d.category === c && activeFilters.some(f => f.match(d)));
-      });
-
+    const unique = (Array.from(new Set(destinations.map(d => d.category))) as string[]).filter(c =>
+      destinations.some(d => d.category === c && activeFilters.some(f => f.match(d)))
+    );
     const sorted = unique.sort((a, b) => {
-      const idxA = CATEGORY_ORDER.indexOf(a as string);
-      const idxB = CATEGORY_ORDER.indexOf(b as string);
-      const safeA = idxA === -1 ? 999 : idxA;
-      const safeB = idxB === -1 ? 999 : idxB;
-      return safeA - safeB;
+      const idxA = CATEGORY_ORDER.indexOf(a);
+      const idxB = CATEGORY_ORDER.indexOf(b);
+      return (idxA === -1 ? 999 : idxA) - (idxB === -1 ? 999 : idxB);
     });
     return ['All Destinations', ...sorted];
   }, [destinations, selectedQuickFilters]);
 
+  // Groups and Aircraft filters
   const allGroups = useMemo(() => {
-    const filtered = activeCategory === 'All Destinations'
-      ? destinations
-      : activeCategory === 'Bookmarks'
+    const filtered =
+      activeCategory === 'All Destinations'
+        ? destinations
+        : activeCategory === 'Bookmarks'
         ? destinations.filter(d => d.isCustomList)
         : destinations.filter(d => d.category === activeCategory);
     const unique = new Set<string>();
@@ -376,40 +659,40 @@ const AeroQuest = () => {
   }, [destinations, activeCategory]);
 
   const allAircraft = useMemo(() => {
-    const filtered = activeCategory === 'All Destinations'
-      ? destinations
-      : activeCategory === 'Bookmarks'
+    const filtered =
+      activeCategory === 'All Destinations'
+        ? destinations
+        : activeCategory === 'Bookmarks'
         ? destinations.filter(d => d.isCustomList)
         : destinations.filter(d => d.category === activeCategory);
-    const unique = Array.from(new Set(filtered.map(d => d.aircraft)));
-    return ['All', ...unique.sort((a, b) => (AIRCRAFT_ORDER[a as string] || 999) - (AIRCRAFT_ORDER[b as string] || 999))];
+    const unique = Array.from(new Set(filtered.map(d => d.aircraft))) as string[];
+    return ['All', ...unique.sort((a, b) => (AIRCRAFT_ORDER[a] || 999) - (AIRCRAFT_ORDER[b] || 999))];
   }, [destinations, activeCategory]);
 
-  // Memoized stars for each sub-item (aircraft or group) within each category
+  // Stars per sub-item
   const subItemStatsByCategory = useMemo(() => {
-    const stats: Record<string, Record<string, { earned: number, max: number }>> = {};
+    const stats: Record<string, Record<string, { earned: number; max: number }>> = {};
     destinations.forEach(d => {
-      // Regular category entry
       if (!stats[d.category]) stats[d.category] = {};
-
       const stars = getStars(d.flightsDone, d.star1Req, d.star2Req, d.star3Req, d.star4Req, d.star5Req);
       const destMax = getMaxStars(d);
 
       if (d.category === 'Event Flights') {
-        const groups = d.group.split(/[;,]/).map(g => g.trim());
-        groups.forEach(g => {
-          if (!stats[d.category][g]) stats[d.category][g] = { earned: 0, max: 0 };
-          stats[d.category][g].earned += stars;
-          stats[d.category][g].max += destMax;
-        });
+        d.group
+          .split(/[;,]/)
+          .map(g => g.trim())
+          .forEach(g => {
+            if (!stats[d.category][g]) stats[d.category][g] = { earned: 0, max: 0 };
+            stats[d.category][g].earned += stars;
+            stats[d.category][g].max += destMax;
+          });
       } else {
-        const subItem = d.aircraft;
-        if (!stats[d.category][subItem]) stats[d.category][subItem] = { earned: 0, max: 0 };
-        stats[d.category][subItem].earned += stars;
-        stats[d.category][subItem].max += destMax;
+        const sub = d.aircraft;
+        if (!stats[d.category][sub]) stats[d.category][sub] = { earned: 0, max: 0 };
+        stats[d.category][sub].earned += stars;
+        stats[d.category][sub].max += destMax;
       }
 
-      // All Destinations entry (always by aircraft)
       if (!stats['All Destinations']) stats['All Destinations'] = {};
       if (!stats['All Destinations'][d.aircraft]) stats['All Destinations'][d.aircraft] = { earned: 0, max: 0 };
       stats['All Destinations'][d.aircraft].earned += stars;
@@ -423,10 +706,8 @@ const AeroQuest = () => {
     Object.keys(subItemStatsByCategory).forEach(cat => {
       const items = Object.keys(subItemStatsByCategory[cat]);
       if (cat === 'Event Flights') {
-        // Sort missions alphabetically
         map[cat] = items.sort((a, b) => a.localeCompare(b));
       } else {
-        // Sort aircraft by predefined order
         map[cat] = items.sort((a, b) => (AIRCRAFT_ORDER[a] || 999) - (AIRCRAFT_ORDER[b] || 999));
       }
     });
@@ -434,10 +715,13 @@ const AeroQuest = () => {
   }, [subItemStatsByCategory]);
 
   const categoryStarsMap = useMemo(() => {
-    const map: Record<string, { earned: number, max: number }> = {};
+    const map: Record<string, { earned: number; max: number }> = {};
     categories.forEach(cat => {
       const catDests = cat === 'All Destinations' ? destinations : destinations.filter(d => d.category === cat);
-      const earned = catDests.reduce((acc, d) => acc + getStars(d.flightsDone, d.star1Req, d.star2Req, d.star3Req, d.star4Req, d.star5Req), 0);
+      const earned = catDests.reduce(
+        (acc, d) => acc + getStars(d.flightsDone, d.star1Req, d.star2Req, d.star3Req, d.star4Req, d.star5Req),
+        0
+      );
       const max = catDests.reduce((acc, d) => acc + getMaxStars(d), 0);
       map[cat] = { earned, max };
     });
@@ -445,7 +729,11 @@ const AeroQuest = () => {
   }, [destinations, categories]);
 
   const starCounts = useMemo(() => {
-    let ace = 0, captain = 0, expert = 0, master = 0, specialist = 0;
+    let ace = 0,
+      captain = 0,
+      expert = 0,
+      master = 0,
+      specialist = 0;
     destinations.forEach(d => {
       const s = getStars(d.flightsDone, d.star1Req, d.star2Req, d.star3Req, d.star4Req, d.star5Req);
       if (s === 5) ace++;
@@ -457,51 +745,53 @@ const AeroQuest = () => {
     return { ace, captain, expert, master, specialist };
   }, [destinations]);
 
-  const statsBreakdown = useMemo(() => {
-    return categories.map(catName => {
-      const catDests = catName === 'All Destinations' ? destinations : destinations.filter(d => d.category === catName);
-      const total = catDests.length;
-      const starsGained = catDests.reduce((acc, d) => acc + getStars(d.flightsDone, d.star1Req, d.star2Req, d.star3Req, d.star4Req, d.star5Req), 0);
-      const maxStars = catDests.reduce((acc, d) => acc + getMaxStars(d), 0);
-      const mapsCollected = catDests.reduce((acc, d) => acc + (d.mapsDone || 0), 0);
-      const uniqueMaps = catDests.filter(d => (d.mapsDone || 0) > 0).length;
-      return {
-        name: catName,
-        total,
-        starsGained,
-        maxStars,
-        percentage: Math.round((starsGained / (maxStars || 1)) * 100) || 0,
-        mapsCollected,
-        uniqueMaps
-      };
-    }).filter(s => s.total > 0);
-  }, [destinations, categories]);
+  const globalStars = useMemo(() => {
+    return destinations.reduce(
+      (acc, d) => acc + getStars(d.flightsDone, d.star1Req, d.star2Req, d.star3Req, d.star4Req, d.star5Req),
+      0
+    );
+  }, [destinations]);
 
+  const maxGlobalStars = useMemo(() => {
+    return destinations.reduce((acc, d) => acc + getMaxStars(d), 0);
+  }, [destinations]);
+
+  const globalPercentage = useMemo(() => {
+    return maxGlobalStars > 0 ? Math.round((globalStars / maxGlobalStars) * 100) : 0;
+  }, [globalStars, maxGlobalStars]);
+
+  // Maps Dashboard Statistics
   const mapCollectionStats = useMemo(() => {
     const uniqueMaps = destinations.filter(d => (d.mapsDone || 0) > 0).length;
     const totalMaps = destinations.reduce((acc, d) => acc + (d.mapsDone || 0), 0);
-    const completionRate = (uniqueMaps / destinations.length) * 100;
+    const mapLocationsCount = MAP_LOCATIONS.length || 148;
+    const completionRate = Math.round((uniqueMaps / mapLocationsCount) * 100);
 
     const topStock = [...destinations]
       .filter(d => (d.mapsDone || 0) > 0)
       .sort((a, b) => (b.mapsDone || 0) - (a.mapsDone || 0))
       .slice(0, 10);
 
-    const airplaneStats = Object.keys(AIRCRAFT_ORDER).map(ac => {
-      const acDests = destinations.filter(d => d.aircraft === ac);
-      const maps = acDests.filter(d => (d.mapsDone || 0) > 0).length;
-      return { name: ac, maps };
-    }).filter(s => s.maps > 0);
+    const airplaneStats = Object.keys(AIRCRAFT_ORDER)
+      .map(ac => {
+        const acDests = destinations.filter(d => d.aircraft === ac);
+        const maps = acDests.filter(d => (d.mapsDone || 0) > 0).length;
+        return { name: ac, maps };
+      })
+      .filter(s => s.maps > 0);
 
     const typeStats = [
       { name: 'ADVENTURE', cat: 'Adventure Map Flights' },
       { name: 'ALLIANCE', cat: 'Alliance Map Flights' },
       { name: 'SPACE', cat: 'Space Map Flights' },
-      { name: 'EVENT', cat: 'Event Flights' }
+      { name: 'EVENT', cat: 'Event Flights' },
     ].map(type => {
       const catDests = destinations.filter(d => {
         if (type.cat === 'Event Flights') {
-          return d.category === 'Event Flights' && (d.destination === 'Area 51' || d.destination === 'Rovaneimi' || d.destination === 'Fatima');
+          return (
+            d.category === 'Event Flights' &&
+            (d.destination === 'Area 51' || d.destination === 'Rovaniemi' || d.destination === 'Fatima')
+          );
         }
         return d.category === type.cat;
       });
@@ -511,70 +801,80 @@ const AeroQuest = () => {
       return { ...type, collected, total, percentage };
     });
 
-    const missingMaps = destinations.filter(d =>
-      d.needsMap &&
-      (d.mapsDone || 0) === 0 &&
-      getStars(d.flightsDone, d.star1Req, d.star2Req, d.star3Req, d.star4Req, d.star5Req) < getMaxStars(d)
-    ).sort((a, b) => {
-      const acA = AIRCRAFT_ORDER[a.aircraft] || 999;
-      const acB = AIRCRAFT_ORDER[b.aircraft] || 999;
-      if (acA !== acB) return acA - acB;
-
-      const catA = CATEGORY_ORDER.indexOf(a.category) !== -1 ? CATEGORY_ORDER.indexOf(a.category) : 999;
-      const catB = CATEGORY_ORDER.indexOf(b.category) !== -1 ? CATEGORY_ORDER.indexOf(b.category) : 999;
-      if (catA !== catB) return catA - catB;
-
-      const groupA = a.group.split(/[;,]/)[0].trim();
-      const groupB = b.group.split(/[;,]/)[0].trim();
-      if (groupA !== groupB) return groupA.localeCompare(groupB);
-
-      return a.destination.localeCompare(b.destination);
-    });
+    const missingMaps = destinations
+      .filter(
+        d =>
+          d.needsMap &&
+          (d.mapsDone || 0) === 0 &&
+          getStars(d.flightsDone, d.star1Req, d.star2Req, d.star3Req, d.star4Req, d.star5Req) < getMaxStars(d)
+      )
+      .sort((a, b) => {
+        const acA = AIRCRAFT_ORDER[a.aircraft] || 999;
+        const acB = AIRCRAFT_ORDER[b.aircraft] || 999;
+        if (acA !== acB) return acA - acB;
+        const catA = CATEGORY_ORDER.indexOf(a.category);
+        const catB = CATEGORY_ORDER.indexOf(b.category);
+        if (catA !== catB) return catA - catB;
+        return a.destination.localeCompare(b.destination);
+      });
 
     return { uniqueMaps, totalMaps, completionRate, topStock, airplaneStats, typeStats, missingMaps };
   }, [destinations]);
 
-
+  // Filtered & Sorted Destinations
   const sortedAndFilteredDestinations = useMemo(() => {
     const activeFilters = QUICK_FILTERS.filter(f => selectedQuickFilters.includes(f.id));
 
-    let result = destinations.filter(d =>
-      activeFilters.some(f => f.match(d)) &&
-      (activeCategory === 'All Destinations' || (activeCategory === 'Bookmarks' ? d.isCustomList : d.category === activeCategory)) &&
-      (filterAircraft === 'All' || d.aircraft === filterAircraft) &&
-      (filterGroup === 'All' || d.group.split(/[;,]/).map(g => g.trim()).includes(filterGroup)) &&
-      (!showOnlyMaps || d.needsMap) &&
-      (!hide3Star || getStars(d.flightsDone, d.star1Req, d.star2Req, d.star3Req, d.star4Req, d.star5Req) < getMaxStars(d)) &&
-      (d.destination.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        d.aircraft.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        d.group.toLowerCase().includes(searchQuery.toLowerCase()))
+    let result = destinations.filter(
+      d =>
+        activeFilters.some(f => f.match(d)) &&
+        (activeCategory === 'All Destinations' ||
+          (activeCategory === 'Bookmarks' ? d.isCustomList : d.category === activeCategory)) &&
+        (filterAircraft === 'All' || d.aircraft === filterAircraft) &&
+        (filterGroup === 'All' || d.group.split(/[;,]/).map(g => g.trim()).includes(filterGroup)) &&
+        (!showOnlyMaps || d.needsMap) &&
+        (!hide3Star || getStars(d.flightsDone, d.star1Req, d.star2Req, d.star3Req, d.star4Req, d.star5Req) < getMaxStars(d)) &&
+        (d.destination.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          d.aircraft.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          d.group.toLowerCase().includes(searchQuery.toLowerCase()))
     );
 
     result.sort((a, b) => {
-      // If we are in Event Flights and using default sort (destination), 
-      // sort by group (mission) first for better organization
       if (activeCategory === 'Event Flights' && sortConfig.field === 'destination') {
         const aGroup = a.group.split(/[;,]/)[0].trim();
         const bGroup = b.group.split(/[;,]/)[0].trim();
-        if (aGroup !== bGroup) {
-          return aGroup.localeCompare(bGroup);
-        }
+        if (aGroup !== bGroup) return aGroup.localeCompare(bGroup);
       }
 
       let valA: unknown, valB: unknown;
       switch (sortConfig.field) {
-        case 'group': valA = a.group.split(/[;,]/).map(g => g.trim()).join(', '); valB = b.group.split(/[;,]/).map(g => g.trim()).join(', '); break;
-        case 'flightsDone': valA = a.flightsDone; valB = b.flightsDone; break;
-        case 'aircraft': valA = AIRCRAFT_ORDER[a.aircraft] || 999; valB = AIRCRAFT_ORDER[b.aircraft] || 999; break;
-        case 'stars': valA = getStars(a.flightsDone, a.star1Req, a.star2Req, a.star3Req, a.star4Req, a.star5Req); valB = getStars(b.flightsDone, b.star1Req, b.star2Req, b.star3Req, b.star4Req, b.star5Req); break;
+        case 'group':
+          valA = a.group.split(/[;,]/).map(g => g.trim()).join(', ');
+          valB = b.group.split(/[;,]/).map(g => g.trim()).join(', ');
+          break;
+        case 'flightsDone':
+          valA = a.flightsDone;
+          valB = b.flightsDone;
+          break;
+        case 'aircraft':
+          valA = AIRCRAFT_ORDER[a.aircraft] || 999;
+          valB = AIRCRAFT_ORDER[b.aircraft] || 999;
+          break;
+        case 'stars':
+          valA = getStars(a.flightsDone, a.star1Req, a.star2Req, a.star3Req, a.star4Req, a.star5Req);
+          valB = getStars(b.flightsDone, b.star1Req, b.star2Req, b.star3Req, b.star4Req, b.star5Req);
+          break;
         case 'mastery': {
-          const maxA = (a.star5Req || a.star4Req || a.star3Req);
-          const maxB = (b.star5Req || b.star4Req || b.star3Req);
+          const maxA = a.star5Req || a.star4Req || a.star3Req;
+          const maxB = b.star5Req || b.star4Req || b.star3Req;
           valA = a.flightsDone / maxA;
           valB = b.flightsDone / maxB;
           break;
         }
-        case 'maps': valA = a.mapsDone || 0; valB = b.mapsDone || 0; break;
+        case 'maps':
+          valA = a.mapsDone || 0;
+          valB = b.mapsDone || 0;
+          break;
         case 'neededToNextStar': {
           const infoA = getNextStarInfo(a);
           const infoB = getNextStarInfo(b);
@@ -591,31 +891,60 @@ const AeroQuest = () => {
           valB = infoB.needed;
           break;
         }
-        case 'lastUpdated': valA = a.lastUpdated; valB = b.lastUpdated; break;
-        default: valA = a.destination; valB = b.destination; break;
+        case 'lastUpdated':
+          valA = a.lastUpdated;
+          valB = b.lastUpdated;
+          break;
+        default:
+          valA = a.destination;
+          valB = b.destination;
+          break;
       }
 
       if (typeof valA === 'string' && typeof valB === 'string') {
-        return sortConfig.direction === 'asc'
-          ? valA.localeCompare(valB)
-          : valB.localeCompare(valA);
+        return sortConfig.direction === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
       }
-
       if (typeof valA === 'number' && typeof valB === 'number') {
-        if (valA < valB) return sortConfig.direction === 'asc' ? -1 : 1;
-        if (valA > valB) return sortConfig.direction === 'asc' ? 1 : -1;
+        return sortConfig.direction === 'asc' ? (valA < valB ? -1 : 1) : valA > valB ? -1 : 1;
       }
       return 0;
     });
+
     return result;
-  }, [activeCategory, filterAircraft, filterGroup, searchQuery, destinations, sortConfig, showOnlyMaps, hide3Star]);
+  }, [
+    activeCategory,
+    filterAircraft,
+    filterGroup,
+    searchQuery,
+    destinations,
+    sortConfig,
+    showOnlyMaps,
+    hide3Star,
+    selectedQuickFilters,
+  ]);
 
-  const globalStars = destinations.reduce((acc, d) => acc + getStars(d.flightsDone, d.star1Req, d.star2Req, d.star3Req, d.star4Req, d.star5Req), 0);
-  const totalMaps = destinations.reduce((acc, d) => acc + (d.mapsDone || 0), 0);
-  const maxGlobalStars = destinations.reduce((acc, d) => acc + getMaxStars(d), 0);
+  // Priority Radar destinations (close to next star)
+  const priorityDestinations = useMemo(() => {
+    return destinations
+      .filter(d => {
+        const stars = getStars(d.flightsDone, d.star1Req, d.star2Req, d.star3Req, d.star4Req, d.star5Req);
+        const maxStars = getMaxStars(d);
+        if (stars >= maxStars) return false;
+        const info = getNextStarInfo(d);
+        return info.needed > 0;
+      })
+      .sort((a, b) => {
+        const infoA = getNextStarInfo(a);
+        const infoB = getNextStarInfo(b);
+        return infoA.needed - infoB.needed;
+      });
+  }, [destinations]);
 
+  // Handlers
   const handleCategoryClick = (cat: string) => {
-    if (view === 'stats' || view === 'almost-next-star' || view === 'airplanes' || view === 'maps') setView('list');
+    if (view === 'stats' || view === 'almost-next-star' || view === 'airplanes' || view === 'maps') {
+      setView('list');
+    }
     setActiveCategory(cat);
     setFilterAircraft('All');
     setFilterGroup('All');
@@ -623,7 +952,9 @@ const AeroQuest = () => {
   };
 
   const handleSubItemClick = (cat: string, item: string) => {
-    if (view === 'stats' || view === 'almost-next-star' || view === 'airplanes' || view === 'maps') setView('list');
+    if (view === 'stats' || view === 'almost-next-star' || view === 'airplanes' || view === 'maps') {
+      setView('list');
+    }
     setActiveCategory(cat);
     if (cat === 'Event Flights') {
       setFilterGroup(item);
@@ -637,10 +968,11 @@ const AeroQuest = () => {
   const handleSort = (field: SortField) => {
     setSortConfig(prev => ({
       field,
-      direction: prev.field === field && prev.direction === 'asc' ? 'desc' : 'asc'
+      direction: prev.field === field && prev.direction === 'asc' ? 'desc' : 'asc',
     }));
   };
 
+  // Export JSON
   const exportToJSON = () => {
     const storageObj: Record<string, any> = {};
     destinations.forEach(d => {
@@ -649,7 +981,7 @@ const AeroQuest = () => {
           count: d.flightsDone,
           lastUpdated: d.lastUpdated,
           ...(d.needsMap ? { maps: d.mapsDone } : {}),
-          ...(d.isCustomList ? { isCustomList: true } : {})
+          ...(d.isCustomList ? { isCustomList: true } : {}),
         };
       }
     });
@@ -660,26 +992,27 @@ const AeroQuest = () => {
         const parsed = JSON.parse(savedAirplanes);
         const adjusted = adjustAircraftList(parsed);
         storageObj['airplanes'] = adjusted;
-        localStorage.setItem('aeroquest_owned_airplanes_v2', JSON.stringify(adjusted));
-      } catch (e) {
-        // ignore JSON parse error
-      }
+      } catch (e) {}
     }
 
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(storageObj, null, 2));
+    const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(storageObj, null, 2));
     const downloadAnchorNode = document.createElement('a');
-    downloadAnchorNode.setAttribute("href", dataStr);
-    downloadAnchorNode.setAttribute("download", `star_tracker_backup_${new Date().toISOString().split('T')[0]}.json`);
+    downloadAnchorNode.setAttribute('href', dataStr);
+    downloadAnchorNode.setAttribute(
+      'download',
+      `star_tracker_backup_${new Date().toISOString().split('T')[0]}.json`
+    );
     document.body.appendChild(downloadAnchorNode);
     downloadAnchorNode.click();
     downloadAnchorNode.remove();
   };
 
+  // Import JSON
   const handleImportJSON = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = e => {
       try {
         const json = JSON.parse(e.target?.result as string) as Record<string, any>;
         const sanitizedJson: Record<string, UserDataEntry> = {};
@@ -687,34 +1020,46 @@ const AeroQuest = () => {
           if (id === 'airplanes') {
             const adjusted = adjustAircraftList(Array.isArray(val) ? val : []);
             localStorage.setItem('aeroquest_owned_airplanes_v2', JSON.stringify(adjusted));
-          } else if (typeof val === 'number') sanitizedJson[id] = { count: val, lastUpdated: 0 };
-          else if (typeof val === 'object' && val !== null) sanitizedJson[id] = val as UserDataEntry;
+          } else if (typeof val === 'number') {
+            sanitizedJson[id] = { count: val, lastUpdated: 0 };
+          } else if (typeof val === 'object' && val !== null) {
+            sanitizedJson[id] = val as UserDataEntry;
+          }
         });
-        setDestinations(prev => prev.map(d => {
-          const entry = sanitizedJson[d.destination] || sanitizedJson[d.id];
-          return entry ? {
-            ...d,
-            flightsDone: entry.count,
-            mapsDone: entry.maps || 0,
-            lastUpdated: entry.lastUpdated || 0,
-            isCustomList: entry.isCustomList || false
-          } : d;
-        }));
-        alert('Data imported successfully!');
-      } catch (err) { alert('Error importing JSON'); }
+        setDestinations(prev =>
+          prev.map(d => {
+            const entry = sanitizedJson[d.destination] || sanitizedJson[d.id];
+            return entry
+              ? {
+                  ...d,
+                  flightsDone: entry.count || 0,
+                  mapsDone: entry.maps || 0,
+                  lastUpdated: entry.lastUpdated || 0,
+                  isCustomList: entry.isCustomList || false,
+                }
+              : d;
+          })
+        );
+        setShowBackupModal(false);
+        alert('Flight data imported successfully!');
+      } catch (err) {
+        alert('Error parsing JSON backup file.');
+      }
     };
     reader.readAsText(file);
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
+  // Reset Data
   const resetAllData = () => {
     if (!showResetConfirm) {
       setShowResetConfirm(true);
-      setTimeout(() => setShowResetConfirm(false), 3000); // Reset after 3 seconds
+      setTimeout(() => setShowResetConfirm(false), 4000);
       return;
     }
-
-    setDestinations(prev => prev.map(d => ({ ...d, flightsDone: 0, mapsDone: 0, lastUpdated: 0, isCustomList: false })));
+    setDestinations(prev =>
+      prev.map(d => ({ ...d, flightsDone: 0, mapsDone: 0, lastUpdated: 0, isCustomList: false }))
+    );
     setActiveCategory('All Destinations');
     setFilterAircraft('All');
     setFilterGroup('All');
@@ -727,1135 +1072,1698 @@ const AeroQuest = () => {
   if (!isLoaded) return null;
 
   return (
-    // Fix: Updated font-family in the main container class to Lexend
-    <div className={`theme-${theme} h-screen flex flex-col lg:flex-row transition-colors duration-300 bg-[var(--bg)] text-[var(--text-main)] font-['Lexend',_sans-serif] overflow-hidden`}>
-      {/* Sidebar */}
-      <aside className={`w-full lg:w-80 border-b lg:border-b-0 lg:border-r border-[var(--border)] flex flex-col p-6 lg:h-screen z-20 shrink-0 bg-[var(--sidebar)] backdrop-blur-xl transition-all duration-300 ${!isSidebarOpen ? 'hidden' : ''}`}>
-        <div className="flex items-center justify-between mb-8 shrink-0">
-          <div className="flex flex-col items-center flex-1 group cursor-pointer" onClick={() => {
-            setView('list');
-            setActiveCategory('All Destinations');
-            setFilterAircraft('All');
-            setFilterGroup('All');
-            setSearchQuery('');
-          }}>
-            <img src="icons/AC-Tracker-By-Soupha.png" alt="AC Tracker Logo" className="w-full max-w-[340px] object-contain drop-shadow-lg transition-transform group-hover:scale-125" referrerPolicy="no-referrer" />
-            <span className="text-[10px] font-black uppercase tracking-[0.1em] text-[#4A606C] mt-1">
-              Version 10.3, September 18 2026
-            </span>
-          </div>
-          <button
-            onClick={() => setIsSidebarOpen(false)}
-            className="p-2 rounded-xl text-white/60 hover:text-white hover:bg-white/10 transition-all shrink-0 ml-2"
-            title="Hide Sidebar"
-          >
-            <PanelLeftClose className="w-5 h-5" />
-          </button>
-        </div>
-
-        {/* Stats Summary from Mockup */}
-
-
-        <nav className="flex-1 overflow-y-auto custom-scrollbar pr-2 hidden lg:flex flex-col border-t border-[var(--border)] pt-6 no-scrollbar">
-          <div className="space-y-1">
-            {categories.map(cat => {
-              const isExpanded = expandedCategory === cat;
-              const isActive = activeCategory === cat;
-              return (
-                <div key={cat} className="flex flex-col">
-                  <button onClick={() => handleCategoryClick(cat)} className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl transition-all text-xs font-bold ${isActive ? 'bg-[#00A0D6] text-white shadow-md' : 'text-white/80 hover:text-white hover:bg-white/10'}`}>
-                    <div className="flex items-center space-x-2 min-w-0">
-                      {CATEGORY_ICONS[cat] ? (
-                        <img src={CATEGORY_ICONS[cat]} alt={cat} className="w-10 h-10 object-contain" referrerPolicy="no-referrer" />
-                      ) : (
-                        cat === 'All Destinations' ? <Navigation className="w-10 h-10" /> : <MapIcon className="w-10 h-10" />
-                      )}
-                      <div className="flex flex-col items-start min-w-0">
-                        <span className="truncate w-full font-bold">{cat}</span>
-                        <span className="text-[11px] font-black tracking-tight uppercase opacity-80">{categoryStarsMap[cat].earned}/{categoryStarsMap[cat].max} Stars</span>
-                      </div>
-                    </div>
-                    {isExpanded ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
-                  </button>
-                  {isExpanded && (
-                    <div className="flex flex-col pl-6 py-1 space-y-0.5">
-                      {(categorySubItemsMap[cat] || []).map(item => {
-                        const s = subItemStatsByCategory[cat]?.[item];
-                        const statStr = s ? ` (${s.earned}/${s.max})` : '';
-                        const isActive = cat === 'Event Flights' ? filterGroup === item : filterAircraft === item;
-                        return (
-                          <button key={item} onClick={() => handleSubItemClick(cat, item)} className={`text-left px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${isActive ? 'text-[var(--accent)]' : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'}`}>
-                            {item}<span className="opacity-70 ml-1 font-black">({s?.earned}/{s?.max})</span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  )}
+    <div className={`theme-${theme} min-h-screen bg-[var(--bg-base)] text-[var(--text-main)] flex flex-col font-ui selection:bg-[var(--accent)] selection:text-white transition-colors duration-300`}>
+      {/* Top Operations Command Header */}
+      <header className="sticky top-0 z-40 glass-panel border-b border-[var(--border-subtle)] shadow-lg backdrop-blur-xl">
+        <div className="max-w-[1700px] mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-14 sm:h-16 gap-4">
+            {/* Brand Logo */}
+            <div
+              onClick={() => {
+                setView('list');
+                setActiveCategory('All Destinations');
+                setFilterAircraft('All');
+                setFilterGroup('All');
+                setSearchQuery('');
+              }}
+              className="flex items-center gap-3 cursor-pointer group shrink-0"
+            >
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl theme-btn-accent p-0.5 shadow-lg group-hover:scale-105 transition-all">
+                <div className="w-full h-full bg-slate-950/75 rounded-[14px] flex items-center justify-center">
+                  <Plane className="w-4 h-4 sm:w-5 sm:h-5 theme-accent-text -rotate-45 group-hover:scale-110 transition-transform" />
                 </div>
-              );
-            })}
-
-            {/* Bookmarks Button */}
-            <div className="flex flex-col mt-4 pt-4 border-t border-[var(--border)]">
-              <button onClick={() => handleCategoryClick('Bookmarks')} className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl transition-all text-xs font-bold ${activeCategory === 'Bookmarks' ? 'bg-[#00A0D6] text-white shadow-md' : 'text-white/80 hover:text-white hover:bg-white/10'}`}>
-                <div className="flex items-center space-x-2 min-w-0">
-                  <Bookmark className="w-4 h-4" />
-                  <div className="flex flex-col items-start min-w-0">
-                    <span className="truncate w-full font-bold">Bookmarks</span>
-                    <span className="text-[11px] font-black tracking-tight uppercase opacity-80">{destinations.filter(d => d.isCustomList).length} Destinations</span>
-                  </div>
+              </div>
+              <div className="flex flex-col justify-center">
+                <span className="font-heading font-bold text-base sm:text-lg tracking-tight text-[var(--text-main)] leading-none">
+                  AC-TRACKER
+                </span>
+                <div className="flex items-center gap-1.5 mt-1">
+                  <span className="text-[11px] font-medium text-[var(--text-muted)] leading-none">
+                    by Soupha
+                  </span>
+                  <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-medium theme-badge leading-none">
+                    v10.4
+                  </span>
                 </div>
-              </button>
+                <span className="text-[9px] font-mono text-[var(--text-muted)] opacity-75 mt-0.5 leading-none">
+                  Updated: Sep 22, 2026
+                </span>
+              </div>
             </div>
-          </div>
-        </nav>
 
-
-      </aside>
-
-      {/* Main Content */}
-      <main className="flex-1 overflow-y-auto custom-scrollbar bg-[var(--bg)] relative" id="main-scroll-container">
-        {/* Top 4 Large Buttons */}
-        <div className="px-6 pt-6 lg:px-10 lg:pt-10 pb-2">
-          {!isSidebarOpen && (
-            <div className="mb-4">
+            {/* View Switcher Tabs */}
+            <nav className="hidden md:flex items-center gap-1.5 bg-black/25 p-1 rounded-2xl border border-white/5">
               <button
-                onClick={() => setIsSidebarOpen(true)}
-                className="px-3.5 py-2 rounded-xl border border-[var(--border)] bg-[#00A0D6] text-white shadow-md hover:bg-sky-600 transition-all flex items-center gap-2 text-xs font-bold"
-                title="Show Sidebar"
+                onClick={() => setView('list')}
+                className={`tactile-btn px-3.5 py-1.5 rounded-xl text-xs font-medium flex items-center gap-2 transition-all ${
+                  view === 'list' || view === 'grid'
+                    ? 'theme-btn-accent font-semibold shadow-md'
+                    : 'text-[var(--text-muted)] hover:text-white hover:bg-white/5'
+                }`}
               >
-                <PanelLeftOpen className="w-4 h-4" />
-                <span>Show Sidebar</span>
+                <Compass className="w-4 h-4" /> Flight Deck
               </button>
-            </div>
-          )}
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
-            <div
-              onClick={() => setView('stats')}
-              className={`flex items-center gap-4 p-4 rounded-2xl border-2 cursor-pointer transition-all duration-200 ${view === 'stats' ? 'bg-[var(--accent-muted)] border-[var(--accent)] translate-y-1 shadow-none' : 'bg-[var(--card)] border-[var(--border)] shadow-[0_4px_0_0_var(--border)] hover:bg-[var(--bg)] hover:-translate-y-0.5 hover:shadow-[0_6px_0_0_var(--border)] active:translate-y-1 active:shadow-none'}`}
-            >
-              <div className="relative">
-                <div className="absolute inset-0 bg-amber-400/20 rounded-full blur-md" />
-                <img src="icons/star-icon.png" alt="Star" className="w-12 h-12 relative z-10 object-contain" referrerPolicy="no-referrer" />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-lg font-black text-[var(--text-main)] leading-none">Stars</span>
-                <span className="text-l font-light text-[var(--text-muted)] tracking-tighter">
-                  {globalStars.toLocaleString()} / {maxGlobalStars.toLocaleString()} - ({Math.round((globalStars / maxGlobalStars) * 100)} %)
+
+              <button
+                onClick={() => setView('almost-next-star')}
+                className={`tactile-btn px-3.5 py-1.5 rounded-xl text-xs font-medium flex items-center gap-2 transition-all relative ${
+                  view === 'almost-next-star'
+                    ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-md shadow-amber-500/25 font-semibold'
+                    : 'text-[var(--text-muted)] hover:text-white hover:bg-white/5'
+                }`}
+              >
+                <Crosshair className="w-4 h-4" /> Priority Radar
+                {priorityDestinations.length > 0 && (
+                  <span className="px-1.5 py-0.2 rounded-full bg-amber-400 text-slate-950 text-[10px] font-mono font-semibold">
+                    {priorityDestinations.length}
+                  </span>
+                )}
+              </button>
+
+              <button
+                onClick={() => setView('maps')}
+                className={`tactile-btn px-3.5 py-1.5 rounded-xl text-xs font-medium flex items-center gap-2 transition-all ${
+                  view === 'maps'
+                    ? 'theme-btn-accent font-semibold shadow-md'
+                    : 'text-[var(--text-muted)] hover:text-white hover:bg-white/5'
+                }`}
+              >
+                <MapIcon className="w-4 h-4" /> Map Depot
+                <span className="px-1.5 py-0.2 rounded-full theme-badge text-[10px] font-mono font-medium">
+                  {mapCollectionStats.uniqueMaps}
                 </span>
-              </div>
-            </div>
+              </button>
 
-            <div
-              onClick={() => setView('maps')}
-              className={`flex items-center gap-4 p-4 rounded-2xl border-2 cursor-pointer transition-all duration-200 ${view === 'maps' ? 'bg-[var(--accent-muted)] border-[var(--accent)] translate-y-1 shadow-none' : 'bg-[var(--card)] border-[var(--border)] shadow-[0_4px_0_0_var(--border)] hover:bg-[var(--bg)] hover:-translate-y-0.5 hover:shadow-[0_6px_0_0_var(--border)] active:translate-y-1 active:shadow-none'}`}
-            >
-              <div className="relative">
-                <div className="absolute inset-0 bg-blue-400/20 rounded-full blur-md" />
-                <img src="icons/map-icon.png" alt="Map" className="w-12 h-12 relative z-10 object-contain" referrerPolicy="no-referrer" />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-lg font-black text-[var(--text-main)] leading-none">Maps</span>
-                <span className="text-l font-light text-[var(--text-muted)] tracking-tighter">{mapCollectionStats.uniqueMaps.toLocaleString()} / 148 - ({Math.round((mapCollectionStats.uniqueMaps / 148) * 100)} %)
-                </span>
-              </div>
-            </div>
+              <button
+                onClick={() => setView('airplanes')}
+                className={`tactile-btn px-3.5 py-1.5 rounded-xl text-xs font-medium flex items-center gap-2 transition-all ${
+                  view === 'airplanes'
+                    ? 'theme-btn-accent font-semibold shadow-md'
+                    : 'text-[var(--text-muted)] hover:text-white hover:bg-white/5'
+                }`}
+              >
+                <Layers className="w-4 h-4" /> Fleet Hangar
+              </button>
 
-            <div
-              onClick={() => setView('almost-next-star')}
-              className={`flex items-center gap-4 p-4 rounded-2xl border-2 cursor-pointer transition-all duration-200 ${view === 'almost-next-star' ? 'bg-[var(--accent-muted)] border-[var(--accent)] translate-y-1 shadow-none' : 'bg-[var(--card)] border-[var(--border)] shadow-[0_4px_0_0_var(--border)] hover:bg-[var(--bg)] hover:-translate-y-0.5 hover:shadow-[0_6px_0_0_var(--border)] active:translate-y-1 active:shadow-none'}`}
-            >
-              <div className="relative">
-                <div className="absolute inset-0 bg-amber-400/20 rounded-full blur-md" />
-                <img src="icons/star-icon.png" alt="Next Star" className="w-12 h-12 relative z-10 object-contain" referrerPolicy="no-referrer" />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-lg font-black text-[var(--text-main)] leading-none">Next Stars</span>
-                <span className="text-l font-light text-[var(--text-muted)] tracking-tighter">View destinations</span>
-              </div>
-            </div>
+              <button
+                onClick={() => setView('stats')}
+                className={`tactile-btn px-3.5 py-1.5 rounded-xl text-xs font-medium flex items-center gap-2 transition-all ${
+                  view === 'stats'
+                    ? 'theme-btn-accent font-semibold shadow-md'
+                    : 'text-[var(--text-muted)] hover:text-white hover:bg-white/5'
+                }`}
+              >
+                <BarChart3 className="w-4 h-4" /> Stats
+              </button>
+            </nav>
 
-            <div
-              onClick={() => setView('airplanes')}
-              className={`flex items-center gap-4 p-4 rounded-2xl border-2 cursor-pointer transition-all duration-200 ${view === 'airplanes' ? 'bg-[var(--accent-muted)] border-[var(--accent)] translate-y-1 shadow-none' : 'bg-[var(--card)] border-[var(--border)] shadow-[0_4px_0_0_var(--border)] hover:bg-[var(--bg)] hover:-translate-y-0.5 hover:shadow-[0_6px_0_0_var(--border)] active:translate-y-1 active:shadow-none'}`}
-            >
-              <div className="relative">
-                <div className="absolute inset-0 bg-blue-400/20 rounded-full blur-md" />
-                <img src="icons/airplane-icon.png" alt="Airplane" className="w-12 h-12 relative z-10 object-contain" referrerPolicy="no-referrer" />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-lg font-black text-[var(--text-main)] leading-none">My Hangar</span>
-                <span className="text-l font-light text-[var(--text-muted)] tracking-tighter">View your aircraft</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {view === 'airplanes' ? (
-          <AirplanesPage />
-        ) : (
-          <div className="min-h-full flex flex-col">
-            <div className="px-6 pb-6 lg:px-10 lg:pb-10 pt-2 flex-1">
-              {(view === 'list' || view === 'grid') && (
-                <header className="flex flex-col gap-4 mb-6">
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-                    <div className="flex items-center flex-wrap gap-1.5">
-                      <button
-                        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                        className={`px-3 py-2 rounded-xl border border-[var(--border)] transition-all flex items-center gap-1.5 text-xs font-bold shadow-sm ${!isSidebarOpen ? 'bg-[#00A0D6] text-white border-sky-500' : 'bg-[var(--card)] text-[var(--text-main)] hover:bg-[var(--accent-muted)]'}`}
-                        title={isSidebarOpen ? "Hide Sidebar" : "Show Sidebar"}
-                      >
-                        {isSidebarOpen ? <PanelLeftClose className="w-4 h-4" /> : <PanelLeftOpen className="w-4 h-4" />}
-                        <span className="hidden sm:inline">{isSidebarOpen ? "Hide Sidebar" : "Sidebar"}</span>
-                      </button>
-                      <button onClick={() => setView('list')} className={`px-3 py-2 rounded-xl border border-[var(--border)] transition-all flex items-center gap-1.5 text-xs font-bold shadow-sm ${view === 'list' ? 'bg-[#00A0D6] text-white border-sky-500' : 'bg-[var(--card)] text-[var(--text-main)] hover:bg-[var(--accent-muted)]'}`}>
-                        <List className="w-4 h-4" />List
-                      </button>
-                      <button onClick={() => setView('grid')} className={`px-3 py-2 rounded-xl border border-[var(--border)] transition-all flex items-center gap-1.5 text-xs font-bold shadow-sm ${view === 'grid' ? 'bg-[#00A0D6] text-white border-sky-500' : 'bg-[var(--card)] text-[var(--text-main)] hover:bg-[var(--accent-muted)]'}`}>
-                        <Grid className="w-4 h-4" />Grid
-                      </button>
-                      <div className="relative group">
-                        <button className="px-3 py-2 rounded-xl border border-[var(--border)] bg-[var(--card)] text-[var(--text-main)] hover:bg-[var(--accent-muted)] transition-all flex items-center gap-1.5 text-xs font-bold shadow-sm"><Palette className="w-4 h-4" />{THEME_CONFIGS[theme].name}</button>
-                        <div className="absolute right-0 top-full mt-2 w-48 bg-[var(--card)] border border-[var(--border)] rounded-2xl shadow-xl p-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
-                          {Object.entries(THEME_CONFIGS).map(([id, cfg]) => (
-                            <button key={id} onClick={() => setTheme(id as ThemeId)} className={`w-full text-left px-3 py-2 rounded-xl text-xs font-bold ${theme === id ? 'bg-[var(--accent)] text-white' : 'text-[var(--text-main)] hover:bg-[var(--bg)]'}`}>{cfg.name}</button>
-                          ))}
-                        </div>
-                      </div>
-                      <button onClick={exportToJSON} title="Export Data to JSON" className="p-2 rounded-xl border border-[var(--border)] bg-[var(--card)] text-[var(--text-main)] hover:bg-[var(--accent-muted)] shadow-sm flex items-center gap-1.5 transition-all">
-                        <Download className="w-4 h-4" />
-                        <span className="text-[10px] font-black uppercase tracking-wider">Export</span>
-                      </button>
-                      <label title="Import Data from JSON" className="p-2 rounded-xl border border-[var(--border)] bg-[var(--card)] text-[var(--text-main)] hover:bg-[var(--accent-muted)] cursor-pointer shadow-sm flex items-center gap-1.5 transition-all">
-                        <Upload className="w-4 h-4" />
-                        <span className="text-[10px] font-black uppercase tracking-wider">Import</span>
-                        <input ref={fileInputRef} type="file" accept=".json" className="hidden" onChange={handleImportJSON} />
-                      </label>
-                      <button
-                        onClick={resetAllData}
-                        title={showResetConfirm ? "Click again to confirm" : "Delete All Data"}
-                        className={`p-2 rounded-xl border transition-all shadow-sm flex items-center gap-1.5 ${showResetConfirm
-                          ? 'bg-red-600 border-red-700 text-white animate-pulse'
-                          : 'border-red-200 bg-red-50 text-red-600 hover:bg-red-100'
-                          }`}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                        <span className="text-[10px] font-black uppercase tracking-wider">
-                          {showResetConfirm ? 'Confirm?' : 'Reset'}
-                        </span>
-                      </button>
-                      <div className="relative w-full md:w-56">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
-                        <input type="text" placeholder="Search routes..." className="pl-9 pr-3 py-2 text-sm w-full rounded-xl border border-[var(--border)] bg-[var(--card)] outline-none focus:border-[var(--accent)] focus:ring-4 focus:ring-[var(--accent-muted)] transition-all shadow-sm" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
-                      </div>
-                    </div>
-                  </div>
-
-                  {activeCategory === 'Bookmarks' && (
-                    <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-                      <img src="icons/Header-Bookmarks.png" alt="Bookmarks" className="mx-auto max-w-[450px] w-full object-contain drop-shadow-lg" referrerPolicy="no-referrer" />
-                    </div>
-                  )}
-
-                  {view !== 'stats' && view !== 'maps' && (
-                    <div className="flex flex-col gap-3">
-                      <div className="flex flex-col gap-4 p-4 rounded-2xl border border-[var(--border)] bg-[var(--card)]/50 backdrop-blur-sm shadow-sm">
-                        <div className="flex flex-row items-center gap-4">
-                          <div className="flex flex-col gap-1.5">
-                            <label className="text-[9px] font-black uppercase tracking-widest text-[var(--text-muted)] px-1">Map Type</label>
-                            <select
-                              value={activeCategory}
-                              onChange={(e) => handleCategoryClick(e.target.value)}
-                              className="bg-[var(--bg)] border border-[var(--border)] rounded-xl px-3 py-2 text-xs font-bold text-[var(--text-main)] outline-none focus:ring-2 focus:ring-[var(--accent-muted)] transition-all min-w-[160px]"
-                            >
-                              {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-                              <option value="Bookmarks">Bookmarks</option>
-                            </select>
-                          </div>
-
-                          <div className="flex flex-col gap-1.5">
-                            <label className="text-[9px] font-black uppercase tracking-widest text-[var(--text-muted)] px-1">Map Set</label>
-                            <select
-                              value={filterGroup}
-                              onChange={(e) => setFilterGroup(e.target.value)}
-                              className="bg-[var(--bg)] border border-[var(--border)] rounded-xl px-3 py-2 text-xs font-bold text-[var(--text-main)] outline-none focus:ring-2 focus:ring-[var(--accent-muted)] transition-all min-w-[160px]"
-                            >
-                              {allGroups.map(group => <option key={group} value={group}>{group}</option>)}
-                            </select>
-                          </div>
-
-                          <div className="flex flex-col gap-1.5">
-                            <label className="text-[9px] font-black uppercase tracking-widest text-[var(--text-muted)] px-1">Aircraft</label>
-                            <select
-                              value={filterAircraft}
-                              onChange={(e) => setFilterAircraft(e.target.value)}
-                              className="bg-[var(--bg)] border border-[var(--border)] rounded-xl px-3 py-2 text-xs font-bold text-[var(--text-main)] outline-none focus:ring-2 focus:ring-[var(--accent-muted)] transition-all min-w-[160px]"
-                            >
-                              {allAircraft.map(ac => <option key={ac} value={ac}>{ac}</option>)}
-                            </select>
-                          </div>
-
-                          <div className="flex flex-col gap-1.5">
-                            <label className="text-[9px] font-black uppercase tracking-widest text-[var(--text-muted)] px-1">Sort By</label>
-                            <div className="flex items-center gap-2">
-                              <select
-                                value={sortConfig.field}
-                                onChange={(e) => handleSort(e.target.value as SortField)}
-                                className="bg-[var(--bg)] border border-[var(--border)] rounded-xl px-3 py-2 text-xs font-bold text-[var(--text-main)] outline-none focus:ring-2 focus:ring-[var(--accent-muted)] transition-all min-w-[140px]"
-                              >
-                                <option value="destination">Destination</option>
-                                <option value="aircraft">Aircraft Type</option>
-                                <option value="group">Map Set / Mission</option>
-                                <option value="flightsDone">Total Flights</option>
-                                <option value="stars">Star Rating</option>
-                                <option value="mastery">Mastery %</option>
-                                <option value="maps">Maps Collected</option>
-                                <option value="lastUpdated">Last Updated</option>
-                              </select>
-                              <button
-                                onClick={() => setSortConfig(prev => ({ ...prev, direction: prev.direction === 'asc' ? 'desc' : 'asc' }))}
-                                className="p-2 rounded-xl border border-[var(--border)] bg-[var(--bg)] text-[var(--text-main)] hover:bg-[var(--accent-muted)] transition-all shadow-sm"
-                                title={`Sort ${sortConfig.direction === 'asc' ? 'Descending' : 'Ascending'}`}
-                              >
-                                {sortConfig.direction === 'asc' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="flex flex-row items-center gap-4 pt-2 border-t border-[var(--border)]/50">
-                          <label className="flex items-center gap-2 cursor-pointer group">
-                            <div className="relative flex items-center justify-center">
-                              <input
-                                type="checkbox"
-                                className="peer sr-only"
-                                checked={showOnlyMaps}
-                                onChange={() => setShowOnlyMaps(!showOnlyMaps)}
-                              />
-                              <div className="w-4 h-4 border-2 border-[var(--border)] rounded bg-[var(--card)] peer-checked:bg-[var(--accent)] peer-checked:border-[var(--accent)] transition-all" />
-                              <MapPin className="absolute w-2.5 h-2.5 text-white opacity-0 peer-checked:opacity-100 transition-opacity fill-white" />
-                            </div>
-                            <span className="text-[11px] font-bold text-[var(--text-muted)] group-hover:text-[var(--text-main)] transition-colors whitespace-nowrap">Only Map Locations</span>
-                          </label>
-
-                          <label className="flex items-center gap-2 cursor-pointer group">
-                            <div className="relative flex items-center justify-center">
-                              <input
-                                type="checkbox"
-                                className="peer sr-only"
-                                checked={hide3Star}
-                                onChange={() => setHide3Star(!hide3Star)}
-                              />
-                              <div className="w-4 h-4 border-2 border-[var(--border)] rounded bg-[var(--card)] peer-checked:bg-[var(--accent)] peer-checked:border-[var(--accent)] transition-all" />
-                              <Star className="absolute w-2.5 h-2.5 text-white opacity-0 peer-checked:opacity-100 transition-opacity fill-white" />
-                            </div>
-                            <span className="text-[11px] font-bold text-[var(--text-muted)] group-hover:text-[var(--text-main)] transition-colors whitespace-nowrap">Hide Completed</span>
-                          </label>
-
-                          <button
-                            onClick={() => {
-                              setActiveCategory('All Destinations');
-                              setFilterAircraft('All');
-                              setFilterGroup('All');
-                              setSearchQuery('');
-                            }}
-                            className="ml-auto px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] hover:text-[var(--accent)] transition-colors"
-                          >
-                            Clear Filters
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                </header>
+            {/* Utility Actions */}
+            <div className="flex items-center gap-2">
+              {/* Density Toggle (Dense Table vs Cards in List Mode) */}
+              {view === 'list' && (
+                <div className="hidden sm:flex items-center bg-black/25 rounded-xl p-0.5 border border-white/5" title="Display Density">
+                  <button
+                    onClick={() => toggleDensity('compact')}
+                    className={`px-2 py-1 rounded-lg text-xs font-mono transition-all ${
+                      density === 'compact' ? 'theme-btn-soft shadow-sm font-semibold' : 'text-[var(--text-muted)] hover:text-white'
+                    }`}
+                    title="Compact High-Density Table (25+ destinations visible)"
+                  >
+                    Dense
+                  </button>
+                  <button
+                    onClick={() => toggleDensity('comfortable')}
+                    className={`px-2 py-1 rounded-lg text-xs font-mono transition-all ${
+                      density === 'comfortable' ? 'theme-btn-soft shadow-sm font-semibold' : 'text-[var(--text-muted)] hover:text-white'
+                    }`}
+                    title="Comfortable Cards"
+                  >
+                    Cards
+                  </button>
+                </div>
               )}
 
-              {view === 'maps' ? (
-                <div className="p-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
-                  <div className="max-w-4xl mx-auto space-y-8">
+              {/* Tactical List vs Grid Switcher */}
+              {(view === 'list' || view === 'grid') && (
+                <div className="flex items-center bg-black/25 rounded-xl p-0.5 border border-white/5">
+                  <button
+                    onClick={() => setView('list')}
+                    title="Tactical List View"
+                    className={`p-1.5 sm:p-2 rounded-lg transition-all ${
+                      view === 'list' ? 'theme-btn-soft shadow-sm' : 'text-[var(--text-muted)] hover:text-white'
+                    }`}
+                  >
+                    <List className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => setView('grid')}
+                    title="Radar Grid View"
+                    className={`p-1.5 sm:p-2 rounded-lg transition-all ${
+                      view === 'grid' ? 'theme-btn-soft shadow-sm' : 'text-[var(--text-muted)] hover:text-white'
+                    }`}
+                  >
+                    <Grid className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
 
+              {/* Theme Picker Button */}
+              <button
+                onClick={() => setShowThemeModal(true)}
+                title="Change Cockpit Theme"
+                className="tactile-btn p-2 sm:p-2.5 rounded-xl glass-panel border border-[var(--border-subtle)] hover:border-[var(--border-active)] text-[var(--text-main)] transition-all flex items-center gap-1.5"
+              >
+                <Palette className="w-4 h-4 theme-accent-text" />
+                <span className="text-xs font-medium hidden xl:inline">
+                  {THEME_CONFIGS[theme]?.name}
+                </span>
+              </button>
 
-                    {/* Key Metrics Row */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="rounded-[2rem] bg-[var(--card)] border border-[var(--border)] p-6 text-center shadow-sm">
-                        <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] mb-2">Unique Maps</p>
-                        <p className="text-4xl font-black text-[var(--accent)]">{mapCollectionStats.uniqueMaps}</p>
-                      </div>
-                      <div className="rounded-[2rem] bg-[var(--card)] border border-[var(--border)] p-6 text-center shadow-sm">
-                        <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] mb-2">Total Maps</p>
-                        <p className="text-4xl font-black text-[var(--accent)]">{mapCollectionStats.totalMaps}</p>
-                      </div>
-                    </div>
+              {/* Backup & Tools Modal Button */}
+              <button
+                onClick={() => setShowBackupModal(true)}
+                title="Data Backup & JSON Tools"
+                className="tactile-btn p-2 sm:p-2.5 rounded-xl glass-panel border border-[var(--border-subtle)] hover:border-[var(--border-active)] text-[var(--text-main)] transition-all flex items-center gap-1.5"
+              >
+                <Download className="w-4 h-4 theme-accent-text" />
+                <span className="text-xs font-medium hidden lg:inline">Data</span>
+              </button>
 
-                    {/* Map Type Collection Progress */}
-                    <div className="rounded-[2.5rem] bg-[var(--card)] border border-[var(--border)] p-8 shadow-lg">
-                      <center>  <img src="Headers/maps-by-collection.png" alt="Most owned Maps" referrerPolicy="no-referrer" /> </center>
-                      <div className="space-y-8">
-                        {mapCollectionStats.typeStats.map((type, idx) => (
-                          <div key={type.name} className="space-y-2">
-                            <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest">
-                              <span className="text-[var(--text-main)]">{type.name}</span>
-                              <span className="text-[var(--text-muted)]">{type.collected}/{type.total} <span className="text-[var(--accent)]">({type.percentage}%)</span></span>
-                            </div>
-                            <div className="h-2 w-full bg-[var(--bg)] rounded-full overflow-hidden">
-                              <div
-                                className={`h-full rounded-full transition-all duration-1000 ${idx === 0 ? 'bg-emerald-500' :
-                                  idx === 1 ? 'bg-indigo-500' :
-                                    idx === 2 ? 'bg-cyan-500' : 'bg-amber-500'
-                                  }`}
-                                style={{ width: `${type.percentage}%` }}
-                              />
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>                  {/* Charts Section */}
-                    <div className="space-y-8">
-                      {/* Maps Per Airplane Bar Chart */}
-                      <div className="rounded-[2.5rem] bg-[var(--card)] border border-[var(--border)] p-8 shadow-lg">
-                        <center>  <img src="Headers/maps-by-aircraft.png" alt="Most owned Maps" referrerPolicy="no-referrer" /> </center>
-                        <div className="h-[300px] w-full">
-                          <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={mapCollectionStats.airplaneStats} margin={{ top: 10, right: 10, left: -20, bottom: 20 }}>
-                              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" opacity={0.5} />
-                              <XAxis
-                                dataKey="name"
-                                axisLine={false}
-                                tickLine={false}
-                                tick={{ fill: 'var(--text-muted)', fontSize: 10, fontWeight: 700 }}
-                                interval={0}
-                                angle={-45}
-                                textAnchor="end"
-                                height={80}
-                              />
-                              <YAxis axisLine={false} tickLine={false} tick={{ fill: 'var(--text-muted)', fontSize: 10, fontWeight: 700 }} />
-                              <Tooltip
-                                cursor={{ fill: 'var(--bg)', opacity: 0.5 }}
-                                contentStyle={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)', borderRadius: '12px', fontSize: '12px', fontWeight: 700 }}
-                              />
-                              <Bar dataKey="maps" fill="var(--accent)" radius={[4, 4, 0, 0]} barSize={24} />
-                            </BarChart>
-                          </ResponsiveContainer>
-                        </div>
-                      </div>
+              {/* Sidebar toggle button (for category navigation) */}
+              <button
+                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                title={isSidebarOpen ? 'Hide Category Drawer' : 'Show Category Drawer'}
+                className={`tactile-btn p-2 sm:p-2.5 rounded-xl border transition-all ${
+                  isSidebarOpen
+                    ? 'theme-btn-soft'
+                    : 'glass-panel border-[var(--border-subtle)] text-[var(--text-muted)] hover:text-white'
+                }`}
+              >
+                <PanelLeft className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </div>
 
-                      {/* Collection Status Header Card */}
-                      <div className="rounded-[2rem] border border-[var(--border)] bg-[var(--card)] shadow-lg overflow-hidden">
+        {/* Mobile View Switcher Bar */}
+        <div className="md:hidden flex items-center overflow-x-auto px-4 py-2 border-t border-white/5 gap-1.5 no-scrollbar bg-black/20">
+          <button
+            onClick={() => setView('list')}
+            className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap flex items-center gap-1.5 ${
+              view === 'list' || view === 'grid'
+                ? 'theme-btn-accent font-semibold shadow-sm'
+                : 'text-[var(--text-muted)] hover:bg-white/5'
+            }`}
+          >
+            <Compass className="w-3.5 h-3.5" /> Routes
+          </button>
+          <button
+            onClick={() => setView('almost-next-star')}
+            className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap flex items-center gap-1.5 ${
+              view === 'almost-next-star'
+                ? 'bg-amber-500 text-white font-semibold'
+                : 'text-[var(--text-muted)] hover:bg-white/5'
+            }`}
+          >
+            <Crosshair className="w-3.5 h-3.5" /> Next Stars ({priorityDestinations.length})
+          </button>
+          <button
+            onClick={() => setView('maps')}
+            className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap flex items-center gap-1.5 ${
+              view === 'maps' ? 'theme-btn-accent font-semibold shadow-sm' : 'text-[var(--text-muted)] hover:bg-white/5'
+            }`}
+          >
+            <MapIcon className="w-3.5 h-3.5" /> Maps ({mapCollectionStats.uniqueMaps})
+          </button>
+          <button
+            onClick={() => setView('airplanes')}
+            className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap flex items-center gap-1.5 ${
+              view === 'airplanes' ? 'theme-btn-accent font-semibold shadow-sm' : 'text-[var(--text-muted)] hover:bg-white/5'
+            }`}
+          >
+            <Layers className="w-3.5 h-3.5" /> Fleet
+          </button>
+          <button
+            onClick={() => setView('stats')}
+            className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap flex items-center gap-1.5 ${
+              view === 'stats' ? 'theme-btn-accent font-semibold shadow-sm' : 'text-[var(--text-muted)] hover:bg-white/5'
+            }`}
+          >
+            <BarChart3 className="w-3.5 h-3.5" /> Stats
+          </button>
+        </div>
+      </header>
 
-                        <div className="p-6 border-b border-[var(--border)] text-center">
-                          <center>  <img src="Headers/most-owned-maps.png" alt="Most owned Maps" referrerPolicy="no-referrer" /> </center>
-                        </div>
+      {/* Global Mission Overview Strip */}
+      {isOverviewCollapsed ? (
+        <section className="bg-black/30 border-b border-white/5 py-1.5 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-[1700px] mx-auto flex items-center justify-between text-xs gap-3">
+            <div className="flex items-center gap-3 sm:gap-5 overflow-x-auto no-scrollbar font-mono text-[11px] py-0.5">
+              <div
+                onClick={() => setView('stats')}
+                className="flex items-center gap-1.5 cursor-pointer hover:text-amber-300 transition-colors shrink-0 group"
+                title="Star Mastery: Click for full stats"
+              >
+                <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400 glow-star" />
+                <span className="text-[var(--text-muted)]">Stars:</span>
+                <span className="font-semibold text-amber-300">{globalStars.toLocaleString()}/{maxGlobalStars.toLocaleString()}</span>
+                <span className="text-[10px] text-amber-400/80">({globalPercentage}%)</span>
+              </div>
+              <span className="text-white/10 hidden sm:inline">|</span>
+              <div
+                onClick={() => setView('maps')}
+                className="flex items-center gap-1.5 cursor-pointer hover:text-[var(--accent)] transition-colors shrink-0 group"
+                title="Map Stock: Click for Map Depot"
+              >
+                <MapIcon className="w-3.5 h-3.5 theme-accent-text" />
+                <span className="text-[var(--text-muted)]">Maps:</span>
+                <span className="font-semibold text-[var(--text-main)]">{mapCollectionStats.uniqueMaps}/148</span>
+                <span className="text-[10px] theme-accent-text">({mapCollectionStats.completionRate}%)</span>
+              </div>
+              <span className="text-white/10 hidden sm:inline">|</span>
+              <div
+                onClick={() => setView('almost-next-star')}
+                className="flex items-center gap-1.5 cursor-pointer hover:text-amber-300 transition-colors shrink-0 group"
+                title="Priority Star Targets: Click for Radar"
+              >
+                <Crosshair className="w-3.5 h-3.5 text-amber-400" />
+                <span className="text-[var(--text-muted)]">Radar:</span>
+                <span className="font-semibold text-amber-300">{priorityDestinations.length} routes</span>
+              </div>
+              <span className="text-white/10 hidden md:inline">|</span>
+              <div
+                onClick={() => setView('airplanes')}
+                className="flex items-center gap-1.5 cursor-pointer hover:text-[var(--accent)] transition-colors shrink-0 group"
+                title="Active Fleet: Click for Fleet Hangar"
+              >
+                <Plane className="w-3.5 h-3.5 theme-accent-text" />
+                <span className="text-[var(--text-muted)]">Fleet:</span>
+                <span className="font-semibold text-[var(--text-main)]">{allAircraft.length - 1} models</span>
+              </div>
+              <span className="text-white/10 hidden lg:inline">|</span>
+              <div
+                onClick={() => handleCategoryClick('Bookmarks')}
+                className="flex items-center gap-1.5 cursor-pointer hover:text-amber-300 transition-colors shrink-0 group"
+                title="Bookmarked Routes"
+              >
+                <Bookmark className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+                <span className="text-[var(--text-muted)]">Pinned:</span>
+                <span className="font-semibold text-amber-300">{destinations.filter(d => d.isCustomList).length}</span>
+              </div>
+            </div>
 
-                        <div className="divide-y divide-[var(--border)]">
-                          {mapCollectionStats.topStock.map((stock, idx) => (
-                            <div key={stock.id} className="p-4 hover:bg-[var(--bg)] transition-colors group cursor-pointer" onClick={() => { setView('list'); setSearchQuery(stock.destination); }}>
-                              <div className="flex items-center gap-4">
-                                <div className="w-8 h-8 rounded-full bg-[var(--accent-muted)] flex items-center justify-center text-[var(--accent)] font-black text-xs shrink-0">
-                                  {idx + 1}
-                                </div>
-                                {stock.icon && (
-                                  <img src={stock.icon} alt={stock.destination} className="w-8 h-8 object-contain shrink-0" referrerPolicy="no-referrer" />
-                                )}
-                                <div className="flex-1 min-w-0">
-                                  <h4 className="font-black text-sm text-[var(--text-main)] truncate group-hover:text-[var(--accent)] transition-colors">{stock.destination}</h4>
-                                </div>
-                                <div className="text-right shrink-0">
-                                  <p className="text-sm font-black text-[var(--accent)]">{stock.mapsDone} maps</p>
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
+            <button
+              onClick={toggleOverviewCollapse}
+              className="tactile-btn py-1 px-2.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-[11px] font-mono theme-accent-text flex items-center gap-1 shrink-0 transition-all"
+              title="Expand overview cards"
+            >
+              <span>Expand Stats</span>
+              <ChevronDown className="w-3 h-3" />
+            </button>
+          </div>
+        </section>
+      ) : (
+        <section className="bg-black/20 border-b border-white/5 py-2.5">
+          <div className="max-w-[1700px] mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[10px] font-mono tracking-widest uppercase text-[var(--text-muted)]">
+                Global Mission Overview
+              </span>
+              <button
+                onClick={toggleOverviewCollapse}
+                className="text-[11px] font-mono text-[var(--text-muted)] hover:text-white flex items-center gap-1 transition-colors"
+                title="Collapse to compact ticker"
+              >
+                <span>Compact Ticker</span>
+                <ChevronUp className="w-3 h-3" />
+              </button>
+            </div>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
+              {/* Global Star Progress */}
+              <div
+                onClick={() => setView('stats')}
+                className="glass-card rounded-2xl p-2.5 sm:p-3 cursor-pointer hover:border-amber-400/40 transition-all group"
+              >
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)] flex items-center gap-1.5">
+                    <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400 glow-star" /> Star Mastery
+                  </span>
+                  <span className="text-xs font-mono font-medium text-amber-300">
+                    {globalPercentage}%
+                  </span>
+                </div>
+                <div className="flex items-baseline gap-1.5 mb-1.5">
+                  <span className="text-base sm:text-lg font-heading font-semibold text-[var(--text-main)]">
+                    {globalStars.toLocaleString()}
+                  </span>
+                  <span className="text-xs text-[var(--text-muted)] font-mono">
+                    / {maxGlobalStars.toLocaleString()} ★
+                  </span>
+                </div>
+                <div className="h-1.5 w-full bg-black/40 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-amber-500 to-amber-300 rounded-full transition-all duration-700"
+                    style={{ width: `${globalPercentage}%` }}
+                  />
+                </div>
+              </div>
 
-                      {/* Missing Maps Card */}
-                      <div className="rounded-[2rem] border border-[var(--border)] bg-[var(--card)] shadow-lg overflow-hidden">
-                        <div className="py-6 px-6 border-b border-[var(--border)] flex flex-col items-center gap-4">
-                          <center>  <img src="Headers/missing-maps.png" alt="Most owned Maps" referrerPolicy="no-referrer" /> </center>
+              {/* Map Vault Stock */}
+              <div
+                onClick={() => setView('maps')}
+                className="glass-card rounded-2xl p-2.5 sm:p-3 cursor-pointer hover:border-[var(--border-active)] transition-all group"
+              >
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)] flex items-center gap-1.5">
+                    <MapIcon className="w-3.5 h-3.5 theme-accent-text" /> Map Depot
+                  </span>
+                  <span className="text-xs font-mono font-medium theme-accent-text">
+                    {mapCollectionStats.completionRate}%
+                  </span>
+                </div>
+                <div className="flex items-baseline gap-1.5 mb-1.5">
+                  <span className="text-base sm:text-lg font-heading font-semibold text-[var(--text-main)]">
+                    {mapCollectionStats.uniqueMaps}
+                  </span>
+                  <span className="text-xs text-[var(--text-muted)] font-mono">
+                    / 148 ({mapCollectionStats.totalMaps.toLocaleString()} Total)
+                  </span>
+                </div>
+                <div className="h-1.5 w-full bg-black/40 rounded-full overflow-hidden">
+                  <div
+                    className="h-full theme-progress-fill rounded-full transition-all duration-700"
+                    style={{ width: `${mapCollectionStats.completionRate}%` }}
+                  />
+                </div>
+              </div>
 
-                          <div className="flex items-center gap-6 flex-wrap justify-center">
-                            <label className="flex items-center cursor-pointer group">
-                              <div className="relative flex items-center justify-center">
-                                <input
-                                  type="checkbox"
-                                  className="peer sr-only"
-                                  checked={showMissingAdventure}
-                                  onChange={() => setShowMissingAdventure(!showMissingAdventure)}
-                                />
-                                <div className="w-4 h-4 border-2 border-[var(--border)] rounded bg-[var(--card)] peer-checked:bg-[var(--accent)] peer-checked:border-[var(--accent)] transition-all" />
-                                <CheckCircle2 className="absolute w-2.5 h-2.5 text-white opacity-0 peer-checked:opacity-100 transition-opacity" />
-                              </div>
-                              <span className="px-2 py-1 text-[14px] font-bold text-[var(--text-muted)] group-hover:text-[var(--text-main)] transition-colors whitespace-nowrap">Show Adventure Maps</span>
-                            </label>
+              {/* Priority Targets Radar */}
+              <div
+                onClick={() => setView('almost-next-star')}
+                className="glass-card rounded-2xl p-2.5 sm:p-3 cursor-pointer hover:border-amber-400/40 transition-all group"
+              >
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)] flex items-center gap-1.5">
+                    <Crosshair className="w-3.5 h-3.5 text-amber-400" /> Star Radar
+                  </span>
+                  <span className="text-[10px] font-mono text-amber-400 font-medium px-1.5 py-0.2 rounded bg-amber-400/15">
+                    Active
+                  </span>
+                </div>
+                <div className="flex items-baseline gap-1.5 mb-1.5">
+                  <span className="text-base sm:text-lg font-heading font-semibold text-amber-300">
+                    {priorityDestinations.length}
+                  </span>
+                  <span className="text-xs text-[var(--text-muted)]">
+                    Routes approaching star
+                  </span>
+                </div>
+                <div className="text-[10px] text-[var(--text-muted)] truncate">
+                  {priorityDestinations[0]
+                    ? `Closest: ${priorityDestinations[0].destination} (${getNextStarInfo(priorityDestinations[0]).needed} left)`
+                    : 'All current routes up to date'}
+                </div>
+              </div>
 
-                            <label className="flex items-center cursor-pointer group">
-                              <div className="relative flex items-center justify-center">
-                                <input
-                                  type="checkbox"
-                                  className="peer sr-only"
-                                  checked={showMissingAlliance}
-                                  onChange={() => setShowMissingAlliance(!showMissingAlliance)}
-                                />
-                                <div className="w-4 h-4 border-2 border-[var(--border)] rounded bg-[var(--card)] peer-checked:bg-[var(--accent)] peer-checked:border-[var(--accent)] transition-all" />
-                                <CheckCircle2 className="absolute w-2.5 h-2.5 text-white opacity-0 peer-checked:opacity-100 transition-opacity" />
-                              </div>
-                              <span className="px-2 py-1 text-[14px] font-bold text-[var(--text-muted)] group-hover:text-[var(--text-main)] transition-colors whitespace-nowrap">Show Alliance Maps</span>
-                            </label>
-                          </div>
+              {/* Fleet & Bookmarks Summary */}
+              <div
+                onClick={() => setView('airplanes')}
+                className="glass-card rounded-2xl p-2.5 sm:p-3 cursor-pointer hover:border-[var(--border-active)] transition-all group"
+              >
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)] flex items-center gap-1.5">
+                    <Plane className="w-3.5 h-3.5 theme-accent-text" /> Active Hangar
+                  </span>
+                  <span
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleCategoryClick('Bookmarks');
+                    }}
+                    className="text-xs font-mono font-medium text-amber-300 hover:underline flex items-center gap-1"
+                  >
+                    <Bookmark className="w-3 h-3 text-amber-400 fill-amber-400" />
+                    {destinations.filter(d => d.isCustomList).length}
+                  </span>
+                </div>
+                <div className="flex items-baseline gap-1.5 mb-1.5">
+                  <span className="text-base sm:text-lg font-heading font-semibold text-[var(--text-main)]">
+                    Fleet Roster
+                  </span>
+                  <span className="text-xs text-[var(--text-muted)]">
+                    & Bookmarks
+                  </span>
+                </div>
+                <div className="text-[10px] text-[var(--text-muted)] truncate flex items-center justify-between">
+                  <span>Manage upgrades</span>
+                  <ChevronRight className="w-3.5 h-3.5 theme-accent-text group-hover:translate-x-1 transition-transform" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
-                        </div>
-                        <div className="divide-y divide-[var(--border)]">
-                          {mapCollectionStats.missingMaps.filter(d => {
-                            if ((d.category === 'Alliance Map Flights' || d.category === 'Alliance Task Flights') && !showMissingAlliance) return false;
-                            if (d.category === 'Adventure Map Flights' && !showMissingAdventure) return false;
-                            return true;
-                          }).length === 0 ? (
-                            <div className="p-6 text-center text-[var(--text-muted)] font-bold">
-                              You have at least 1 map for all non-3-star locations!
-                            </div>
+      {/* Main Body with Optional Category Drawer */}
+      <div className="flex-1 max-w-[1700px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4 flex gap-5">
+        {/* Collapsible Category Drawer */}
+        {isSidebarOpen && (
+          <aside className="w-72 shrink-0 space-y-4 animate-in slide-in-from-left duration-200">
+            <div className="glass-panel rounded-3xl p-4 border border-[var(--border-card)]">
+              <div className="flex items-center justify-between pb-3 mb-3 border-b border-white/10">
+                <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+                  Flight Categories
+                </span>
+                <button
+                  onClick={() => setIsSidebarOpen(false)}
+                  className="p-1 text-[var(--text-muted)] hover:text-white rounded-lg hover:bg-white/10"
+                >
+                  <PanelLeftClose className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="space-y-1 max-h-[calc(100vh-280px)] overflow-y-auto custom-scrollbar pr-1">
+                {categories.map(cat => {
+                  const isActive = activeCategory === cat;
+                  const isExpanded = expandedCategory === cat;
+                  const stats = categoryStarsMap[cat];
+                  const icon = CATEGORY_ICONS[cat];
+
+                  return (
+                    <div key={cat} className="rounded-xl overflow-hidden">
+                      <button
+                        onClick={() => handleCategoryClick(cat)}
+                        className={`w-full px-3 py-2.5 rounded-xl text-left text-xs font-medium transition-all flex items-center justify-between ${
+                          isActive
+                            ? 'theme-btn-accent font-semibold shadow-md'
+                            : 'hover:bg-white/5 text-[var(--text-main)]'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          {icon ? (
+                            <img src={icon} alt={cat} className="w-5 h-5 object-contain shrink-0" />
                           ) : (
-                            mapCollectionStats.missingMaps.filter(d => {
-                              if ((d.category === 'Alliance Map Flights' || d.category === 'Alliance Task Flights') && !showMissingAlliance) return false;
-                              if (d.category === 'Adventure Map Flights' && !showMissingAdventure) return false;
-                              return true;
-                            }).map((dest, idx) => (
-                              <div key={dest.id} className="p-4 hover:bg-[var(--bg)] transition-colors group cursor-pointer" onClick={() => { setView('list'); setSearchQuery(dest.destination); }}>
-                                <div className="flex items-center gap-4">
-                                  <div className="w-8 h-8 rounded-full bg-[var(--accent-muted)] flex items-center justify-center text-[var(--accent)] font-black text-xs shrink-0">
-                                    {idx + 1}
-                                  </div>
-                                  {dest.icon && (
-                                    <img src={dest.icon} alt={dest.destination} className="w-8 h-8 object-contain shrink-0" referrerPolicy="no-referrer" />
-                                  )}
-                                  <div className="flex-1 min-w-0">
-                                    <h4 className="font-black text-sm text-[var(--text-main)] truncate group-hover:text-[var(--accent)] transition-colors">{dest.destination}</h4>
-                                    <p className="text-[10px] font-bold text-[var(--text-muted)] opacity-60 truncate">
-                                      {dest.category} • {dest.group.split(/[;,]/).map(g => g.trim()).join(', ')}
-                                    </p>
-                                  </div>
-                                  <div className="flex flex-col items-center shrink-0">
-                                    <span className="text-[10px] font-black uppercase tracking-wider text-[var(--accent)] bg-[var(--accent-muted)] px-2.5 py-1 rounded-lg border border-[var(--accent)]/10">{dest.aircraft}</span>
-                                  </div>
-                                </div>
-                              </div>
-                            ))
+                            <Navigation className="w-5 h-5 theme-accent-text shrink-0" />
+                          )}
+                          <span className="truncate">{cat}</span>
+                        </div>
+                        <div className="flex items-center gap-1 shrink-0">
+                          {stats && (
+                            <span className="text-[10px] font-mono opacity-80">
+                              {stats.earned}/{stats.max}★
+                            </span>
+                          )}
+                          {isExpanded ? (
+                            <ChevronDown className="w-3.5 h-3.5" />
+                          ) : (
+                            <ChevronRight className="w-3.5 h-3.5 opacity-50" />
                           )}
                         </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ) : view === 'almost-next-star' ? (
-                <div className="p-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
-                  <div className="rounded-[2rem] border border-[var(--border)] bg-[var(--card)] shadow-lg overflow-hidden">
-                    <img src="icons/AC-Header-NextStars.png" alt="Next Stars" className="mx-auto max-w-[450px] w-full object-contain drop-shadow-lg p-6 pb-0" referrerPolicy="no-referrer" />
-                    <div className="flex items-center gap-6 px-6 pb-6">
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          id="include-event-tasks"
-                          checked={includeEventTasks}
-                          onChange={() => setIncludeEventTasks(!includeEventTasks)}
-                          className="w-5 h-5 accent-[var(--accent)]"
-                        />
-                        <label htmlFor="include-event-tasks" className="text-sm font-bold text-[var(--text-main)]">Include Event Tasks</label>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          id="include-alliance-tasks"
-                          checked={includeAllianceTasks}
-                          onChange={() => setIncludeAllianceTasks(!includeAllianceTasks)}
-                          className="w-5 h-5 accent-[var(--accent)]"
-                        />
-                        <label htmlFor="include-alliance-tasks" className="text-sm font-bold text-[var(--text-main)]">Include Alliance Tasks</label>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          id="hide-zero-maps"
-                          checked={hideZeroMaps}
-                          onChange={() => setHideZeroMaps(!hideZeroMaps)}
-                          className="w-5 h-5 accent-[var(--accent)]"
-                        />
-                        <label htmlFor="hide-zero-maps" className="text-sm font-bold text-[var(--text-main)]">Hide destinations with 0 maps</label>
-                      </div>
-                    </div>
-                    <div className="divide-y divide-[var(--border)]">
-                      {destinations
-                        .filter(d => (includeEventTasks || d.category !== 'Event Flights') && (includeAllianceTasks || (d.category !== 'Alliance Task Flights' && d.category !== 'Alliance Map Flights')))
-                        .filter(d => !hideZeroMaps || !d.needsMap || (d.mapsDone || 0) > 0)
-                        .map(d => {
-                          const info = getNextStarInfo(d);
-                          return { ...d, needed: info.needed, nextStar: info.nextStar };
-                        })
-                        .filter(d => d.needed > 0)
-                        .sort((a, b) => a.needed - b.needed)
-                        .slice(0, 20)
-                        .map((d, idx) => (
-                          <div key={d.id} className="p-4 flex items-center gap-4 hover:bg-[var(--bg)] transition-colors cursor-pointer" onClick={() => {
-                            setView('list');
-                            setSearchQuery('');
-                            setActiveCategory('All Destinations');
-                            setFilterAircraft('All');
-                            setFilterGroup('All');
-                            setExpandedRowId(d.id);
-                          }}>
-                            <div className="w-8 h-8 rounded-full bg-[var(--accent-muted)] flex items-center justify-center text-[var(--accent)] font-black text-xs shrink-0">
-                              {idx + 1}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2">
-                                <button onClick={(e) => toggleBookmark(d.id, e)} className="hover:scale-110 transition-transform shrink-0" title={d.isCustomList ? "Remove from Bookmarks" : "Add to Bookmarks"}>
-                                  <Bookmark className={`w-4 h-4 ${d.isCustomList ? 'fill-[var(--accent)] text-[var(--accent)]' : 'text-[var(--text-muted)] opacity-30 hover:opacity-100'}`} />
-                                </button>
-                                <h4 className="font-black text-sm text-[var(--text-main)] truncate">{d.destination}</h4>
-                              </div>
-                              <p className="text-xs text-[var(--text-muted)] truncate">
-                                {d.group.split(/[;,]/).map(g => g.trim()).join(', ')} - {d.aircraft}
-                                {d.needsMap && (
-                                  <span className={(d.mapsDone || 0) === 0 ? 'text-red-500' : ''}>
-                                    {` (${d.mapsDone || 0} map${(d.mapsDone || 0) === 1 ? '' : 's'} owned)`}
+                      </button>
+
+                      {/* Sub-item Filter List */}
+                      {isExpanded && (
+                        <div className="pl-6 pr-2 py-1 space-y-0.5 bg-black/20 rounded-b-xl">
+                          {(categorySubItemsMap[cat] || []).map(item => {
+                            const subStat = subItemStatsByCategory[cat]?.[item];
+                            const isSubActive =
+                              cat === 'Event Flights' ? filterGroup === item : filterAircraft === item;
+                            return (
+                              <button
+                                key={item}
+                                onClick={() => handleSubItemClick(cat, item)}
+                                className={`w-full text-left px-2 py-1.5 rounded-lg text-[11px] font-normal transition-all flex items-center justify-between ${
+                                  isSubActive
+                                    ? 'theme-btn-soft font-medium'
+                                    : 'text-[var(--text-muted)] hover:text-white hover:bg-white/5'
+                                }`}
+                              >
+                                <span className="truncate">{item}</span>
+                                {subStat && (
+                                  <span className="text-[9px] font-mono opacity-70">
+                                    {subStat.earned}/{subStat.max}
                                   </span>
                                 )}
-                              </p>
-                            </div>
-                            <div className="text-right">
-                              <p className="text-sm font-black text-[var(--accent)]">{d.needed} flights to ⭐{d.nextStar}</p>
-                            </div>
-                          </div>
-                        ))}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+
+                {/* Bookmarks Row in Drawer */}
+                <button
+                  onClick={() => handleCategoryClick('Bookmarks')}
+                  className={`w-full px-3 py-2.5 rounded-xl text-left text-xs font-medium transition-all flex items-center justify-between mt-2 border-t border-white/10 ${
+                    activeCategory === 'Bookmarks'
+                      ? 'bg-amber-500 text-slate-950 font-semibold shadow-md'
+                      : 'hover:bg-white/5 text-[var(--text-main)]'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <Bookmark className="w-4 h-4 text-amber-400 fill-amber-400" />
+                    <span>Bookmarks Playlist</span>
+                  </div>
+                  <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-full bg-black/30">
+                    {destinations.filter(d => d.isCustomList).length}
+                  </span>
+                </button>
+              </div>
+            </div>
+          </aside>
+        )}
+
+        {/* Main Content Area */}
+        <main className="flex-1 min-w-0 space-y-6">
+          {/* VIEW: FLEET HANGAR */}
+          {view === 'airplanes' && <AirplanesPage />}
+
+          {/* VIEW: MAP DEPOT */}
+          {view === 'maps' && (
+            <div className="space-y-6 animate-in fade-in duration-300">
+              {/* Map Depot Vector HUD Header */}
+              <div className="glass-panel rounded-3xl p-6 sm:p-8 relative overflow-hidden border border-[var(--border-card)] shadow-xl">
+                <div
+                  className="absolute -right-10 -bottom-10 w-64 h-64 rounded-full blur-3xl pointer-events-none opacity-20"
+                  style={{ backgroundColor: 'var(--accent)' }}
+                />
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
+                  <div className="flex items-center gap-4">
+                    <div className="w-16 h-16 rounded-2xl theme-badge flex items-center justify-center shadow-inner shrink-0">
+                      <MapIcon className="w-8 h-8 theme-accent-text" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-medium uppercase tracking-wider theme-badge">
+                          Logistics & Inventory
+                        </span>
+                        <span className="text-xs text-[var(--text-muted)] font-mono">
+                          {mapCollectionStats.uniqueMaps} / 148 Unique Maps
+                        </span>
+                      </div>
+                      <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-[var(--text-main)] font-heading">
+                        Flight Map Depot
+                      </h1>
+                      <p className="text-xs sm:text-sm text-[var(--text-muted)] mt-0.5">
+                        Inventory tracking for adventure, alliance, space, and event flight maps.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3 bg-black/20 p-3 rounded-2xl border border-white/5 shrink-0">
+                    <div className="text-center px-4 py-1">
+                      <div className="text-[10px] font-medium uppercase theme-accent-text tracking-wider">
+                        Unique Maps
+                      </div>
+                      <div className="text-2xl font-heading font-semibold theme-accent-text mt-0.5">
+                        {mapCollectionStats.uniqueMaps}
+                        <span className="text-xs text-[var(--text-muted)] font-mono"> / 148</span>
+                      </div>
+                    </div>
+                    <div className="text-center px-4 py-1 border-l border-white/10">
+                      <div className="text-[10px] font-medium uppercase text-amber-400 tracking-wider">
+                        Physical Stock
+                      </div>
+                      <div className="text-2xl font-heading font-semibold text-amber-300 mt-0.5">
+                        {mapCollectionStats.totalMaps.toLocaleString()}
+                      </div>
                     </div>
                   </div>
                 </div>
-              ) : view === 'stats' ? (
-                <div className="p-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
-                  <div className="max-w-4xl mx-auto space-y-12">
-                    <div className="grid grid-cols-1 gap-8 items-start">
-                      {/* Star Statistics Column */}
-                      <div className="space-y-4">
-                        <img src="icons/AC-Header-MyStars.png" alt="Star Stats" className="mx-auto max-w-[450px] w-full object-contain drop-shadow-lg" referrerPolicy="no-referrer" />
+              </div>
 
-                        {/* Skill Stars Overview */}
-                        <div className="rounded-3xl p-6 border border-[var(--border)] bg-[var(--card)] shadow-sm text-[var(--text-main)] relative overflow-hidden">
-                          <div className="flex items-center gap-6 mb-6 relative z-10">
-                            <div className="relative group">
-                              <div className="absolute inset-0 bg-amber-400/20 rounded-full blur-xl group-hover:bg-amber-400/40 transition-all duration-500" />
-                              <img src="icons/star-icon.png" alt="Star" className="w-20 h-20 relative z-10 object-contain drop-shadow-[0_0_10px_rgba(251,191,36,0.6)]" referrerPolicy="no-referrer" />
-                            </div>
-                            <div className="flex flex-col">
-                              <h4 className="text-3xl font-medium tracking-tight text-[var(--text-main)] mb-1">Skill Stars</h4>
-                              <p className="text-4xl font-black text-[var(--text-muted)] tracking-tighter">{globalStars.toLocaleString()}</p>
-                            </div>
-                          </div>
-                          <div className="space-y-4 relative z-10">
-                            {starCounts.ace > 0 && (
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-4">
-                                  <div className="flex -space-x-1">
-                                    {[1, 2, 3, 4, 5].map(s => (
-                                      <Star key={s} className="w-6 h-6 fill-amber-400 text-amber-500/50 stroke-[1.5px] stroke-black" />
-                                    ))}
-                                  </div>
-                                  <span className="text-lg font-black text-[var(--text-main)] tracking-tight">Ace</span>
-                                </div>
-                                <span className="text-xl font-black text-[var(--text-muted)] tabular-nums">{starCounts.ace} ({starCounts.ace * 5} Stars)</span>
-                              </div>
-                            )}
-                            {starCounts.captain > 0 && (
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-4">
-                                  <div className="flex -space-x-1">
-                                    {[1, 2, 3, 4].map(s => (
-                                      <Star key={s} className="w-6 h-6 fill-amber-400 text-amber-500/50 stroke-[1.5px] stroke-black" />
-                                    ))}
-                                  </div>
-                                  <span className="text-lg font-black text-[var(--text-main)] tracking-tight">Captain</span>
-                                </div>
-                                <span className="text-xl font-black text-[var(--text-muted)] tabular-nums">{starCounts.captain} ({starCounts.captain * 4} Stars)</span>
-                              </div>
-                            )}
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-4">
-                                <div className="flex -space-x-1">
-                                  {[1, 2, 3].map(s => (
-                                    <Star key={s} className="w-6 h-6 fill-amber-400 text-amber-500/50 stroke-[1.5px] stroke-black" />
-                                  ))}
-                                </div>
-                                <span className="text-lg font-black text-[var(--text-main)] tracking-tight">Expert</span>
-                              </div>
-                              <span className="text-xl font-black text-[var(--text-muted)] tabular-nums">{starCounts.expert} ({starCounts.expert * 3} Stars)</span>
-                            </div>
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-4">
-                                <div className="flex -space-x-1">
-                                  {[1, 2].map(s => (
-                                    <Star key={s} className="w-6 h-6 fill-amber-400 text-amber-500/50 stroke-[1.5px] stroke-black" />
-                                  ))}
-                                </div>
-                                <span className="text-lg font-black text-[var(--text-main)] tracking-tight">Master</span>
-                              </div>
-                              <span className="text-xl font-black text-[var(--text-muted)] tabular-nums">{starCounts.master} ({starCounts.master * 2} Stars)</span>
-                            </div>
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-4">
-                                <div className="flex -space-x-1">
-                                  <Star className="w-6 h-6 fill-amber-400 text-amber-500/50 stroke-[1.5px] stroke-black" />
-                                </div>
-                                <span className="text-lg font-black text-[var(--text-main)] tracking-tight">Specialist</span>
-                              </div>
-                              <span className="text-xl font-black text-[var(--text-muted)] tabular-nums">{starCounts.specialist} ({starCounts.specialist * 1} Stars)</span>
-                            </div>
-                          </div>
+              {/* Collections Progress */}
+              <div className="glass-panel rounded-3xl p-6 border border-[var(--border-card)] space-y-4">
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] flex items-center gap-2">
+                  <Compass className="w-4 h-4 theme-accent-text" /> Map Progress by Collection
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {mapCollectionStats.typeStats.map((col, idx) => (
+                    <div key={col.name} className="bg-black/20 p-4 rounded-2xl border border-white/5 space-y-2">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="font-heading font-medium tracking-wide text-[var(--text-main)]">
+                          {col.name}
+                        </span>
+                        <span className="font-mono font-medium theme-accent-text">
+                          {col.percentage}%
+                        </span>
+                      </div>
+                      <div className="h-2 w-full bg-black/40 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full rounded-full transition-all duration-700 ${
+                            idx === 0
+                              ? 'bg-emerald-500'
+                              : idx === 1
+                              ? 'bg-indigo-500'
+                              : idx === 2
+                              ? 'theme-progress-fill'
+                              : 'bg-amber-500'
+                          }`}
+                          style={{ width: `${col.percentage}%` }}
+                        />
+                      </div>
+                      <div className="text-[11px] font-mono text-[var(--text-muted)] flex justify-between">
+                        <span>Unlocked:</span>
+                        <span className="text-[var(--text-main)] font-medium">
+                          {col.collected} / {col.total}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Map Stock by Aircraft Class Chart */}
+              <div className="glass-panel rounded-3xl p-6 border border-[var(--border-card)] space-y-4">
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] flex items-center gap-2">
+                  <Plane className="w-4 h-4 theme-accent-text" /> Maps In Stock by Aircraft Class
+                </h3>
+                <div className="h-64 w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={mapCollectionStats.airplaneStats} margin={{ top: 10, right: 10, left: -20, bottom: 20 }}>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.06)" />
+                      <XAxis
+                        dataKey="name"
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fill: 'var(--text-muted)', fontSize: 11, fontWeight: 500 }}
+                        angle={-30}
+                        textAnchor="end"
+                        height={40}
+                      />
+                      <YAxis axisLine={false} tickLine={false} tick={{ fill: 'var(--text-muted)', fontSize: 11 }} />
+                      <Tooltip
+                        cursor={{ fill: 'rgba(255,255,255,0.04)' }}
+                        contentStyle={{
+                          backgroundColor: 'var(--bg-surface)',
+                          borderColor: 'var(--border-card)',
+                          borderRadius: '16px',
+                          color: 'var(--text-main)',
+                          fontSize: '12px',
+                          fontWeight: '500',
+                        }}
+                      />
+                      <Bar dataKey="maps" fill="var(--accent)" radius={[6, 6, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+
+              {/* Top Stocked Maps Leaderboard */}
+              <div className="glass-panel rounded-3xl p-6 border border-[var(--border-card)] space-y-4">
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] flex items-center gap-2">
+                  <Trophy className="w-4 h-4 text-amber-400" /> Most Stocked Flight Maps
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+                  {mapCollectionStats.topStock.map((dest, idx) => (
+                    <div
+                      key={dest.id}
+                      onClick={() => {
+                        setView('list');
+                        setSearchQuery(dest.destination);
+                      }}
+                      className="bg-black/20 hover:bg-white/5 p-3.5 rounded-2xl border border-white/5 cursor-pointer transition-all flex items-center gap-3 group"
+                    >
+                      <div className="w-7 h-7 rounded-xl theme-badge flex items-center justify-center font-mono font-medium text-xs shrink-0">
+                        #{idx + 1}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="text-xs font-medium text-[var(--text-main)] truncate group-hover:text-[var(--accent)] transition-colors">
+                          {dest.destination}
                         </div>
-
-
-                        <div className="rounded-3xl p-6 border border-[var(--border)] bg-[var(--card)] shadow-lg">
-                          <h3 className="text-2xl font-black mb-8 text-[var(--text-main)] text-center">Stars by Destination Category</h3>
-                          <div className="overflow-x-auto custom-scrollbar">
-                            <table className="w-full text-left whitespace-nowrap">
-                              <thead>
-                                <tr className="border-b border-[var(--border)] text-[var(--text-muted)] font-black uppercase text-[10px] tracking-widest">
-                                  <th className="pb-4 px-4">Map Category</th>
-                                  <th className="pb-4 px-4">Completion</th>
-                                  <th className="pb-4 px-4 text-center">Stars Completed</th>
-                                  <th className="pb-4 px-4 text-center">Stars Left</th>
-                                </tr>
-                              </thead>
-                              <tbody className="divide-y divide-[var(--border)]">
-                                {statsBreakdown.map(cat => (
-                                  <tr key={cat.name} className={`hover:bg-[var(--bg)] transition-all ${cat.name === 'All Destinations' ? 'bg-[var(--accent-muted)]' : ''}`}>
-                                    <td className="py-6 px-4 font-bold text-lg text-[var(--text-main)]">{cat.name}</td>
-                                    <td className="py-6 px-4 text-4xl font-black text-[var(--accent)]">{cat.percentage}%</td>
-                                    <td className="py-6 px-4 text-center"><div className="flex flex-col"><span className="text-2xl font-black">{cat.starsGained.toLocaleString()}</span><span className="text-[10px] font-bold text-[var(--text-muted)] uppercase opacity-40">of {cat.maxStars.toLocaleString()} Total</span></div></td>
-                                    <td className="py-6 px-4 text-center text-2xl font-black text-[var(--text-main)]">{(cat.maxStars - cat.starsGained).toLocaleString()}</td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
-                          </div>
+                        <div className="text-[10px] text-[var(--text-muted)] font-mono">
+                          {dest.mapsDone} maps in stock
                         </div>
                       </div>
                     </div>
+                  ))}
+                </div>
+              </div>
 
-                    {/* Removed Top 10 Near Star section */}
+              {/* Missing Maps Radar Checklist */}
+              <div className="glass-panel rounded-3xl p-6 border border-[var(--border-card)] space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-white/10">
+                  <div>
+                    <h3 className="text-sm font-semibold text-[var(--text-main)] font-heading flex items-center gap-2">
+                      <AlertTriangle className="w-4 h-4 text-rose-400" /> Missing Maps Radar
+                    </h3>
+                    <p className="text-xs text-[var(--text-muted)]">
+                      Routes requiring maps where you currently have 0 inventory and incomplete stars.
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <label className="flex items-center gap-2 text-xs font-normal text-[var(--text-muted)] cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={showMissingAlliance}
+                        onChange={e => setShowMissingAlliance(e.target.checked)}
+                        style={{ accentColor: 'var(--accent)' }}
+                        className="rounded"
+                      />
+                      <span>Alliance</span>
+                    </label>
+                    <label className="flex items-center gap-2 text-xs font-normal text-[var(--text-muted)] cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={showMissingAdventure}
+                        onChange={e => setShowMissingAdventure(e.target.checked)}
+                        style={{ accentColor: 'var(--accent)' }}
+                        className="rounded"
+                      />
+                      <span>Adventure</span>
+                    </label>
                   </div>
                 </div>
-              ) : (
-                <>
-                  <div className={`${view === 'grid' ? 'grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4' : 'flex flex-col space-y-2'}`}>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-h-96 overflow-y-auto custom-scrollbar pr-1">
+                  {mapCollectionStats.missingMaps
+                    .filter(d => {
+                      if (!showMissingAlliance && d.category.includes('Alliance')) return false;
+                      if (!showMissingAdventure && d.category.includes('Adventure')) return false;
+                      return true;
+                    })
+                    .map(dest => (
+                      <div
+                        key={dest.id}
+                        className="bg-black/20 p-3 rounded-2xl border border-white/5 flex items-center justify-between gap-3"
+                      >
+                        <div className="min-w-0 flex-1">
+                          <div className="text-xs font-medium text-[var(--text-main)] truncate">
+                            {dest.destination}
+                          </div>
+                          <div className="text-[10px] text-[var(--text-muted)] flex items-center gap-2">
+                            <span>{dest.aircraft}</span>
+                            <span>•</span>
+                            <span className="truncate">{dest.group}</span>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => updateMapCount(dest.id, (dest.mapsDone || 0) + 1)}
+                          title="Add 1 Map to Inventory"
+                          className="tactile-btn px-2.5 py-1 rounded-xl theme-btn-soft font-mono text-xs font-medium shrink-0"
+                        >
+                          +1 Map
+                        </button>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* VIEW: PILOT ANALYTICS & STATS */}
+          {view === 'stats' && (
+            <div className="space-y-6 animate-in fade-in duration-300">
+              {/* Analytics Header */}
+              <div className="glass-panel rounded-3xl p-6 sm:p-8 relative overflow-hidden border border-[var(--border-card)] shadow-xl">
+                <div className="absolute -right-10 -bottom-10 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
+                  <div className="flex items-center gap-4">
+                    <div className="w-16 h-16 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 shadow-inner shrink-0">
+                      <Trophy className="w-8 h-8" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-medium uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                          Pilot Overview
+                        </span>
+                        <span className="text-xs text-[var(--text-muted)] font-mono">
+                          Rank: {globalPercentage >= 90 ? 'Supreme Sky Commander' : globalPercentage >= 70 ? 'Fleet Captain' : globalPercentage >= 40 ? 'Flight Officer' : 'Cadet Pilot'}
+                        </span>
+                      </div>
+                      <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-[var(--text-main)] font-heading">
+                        Pilot Mastery Analytics
+                      </h1>
+                      <p className="text-xs sm:text-sm text-[var(--text-muted)] mt-0.5">
+                        High-level flight statistics, star rank distribution, and category progress.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="bg-black/20 p-4 rounded-2xl border border-white/5 text-center shrink-0">
+                    <div className="text-[10px] font-medium uppercase text-amber-400 tracking-wider">
+                      Mastery Gauge
+                    </div>
+                    <div className="text-3xl font-heading font-semibold text-amber-300 mt-0.5">
+                      {globalStars.toLocaleString()}
+                      <span className="text-sm font-mono text-[var(--text-muted)]"> / {maxGlobalStars.toLocaleString()}</span>
+                    </div>
+                    <div className="text-xs font-mono font-medium text-amber-400 mt-1">
+                      {globalPercentage}% Global Mastery
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Star Tier Cards Grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                {STAR_RANKS.map(rank => {
+                  const count =
+                    rank.star === 5
+                      ? starCounts.ace
+                      : rank.star === 4
+                      ? starCounts.captain
+                      : rank.star === 3
+                      ? starCounts.expert
+                      : rank.star === 2
+                      ? starCounts.master
+                      : starCounts.specialist;
+
+                  return (
+                    <div
+                      key={rank.star}
+                      className="glass-card rounded-2xl p-4 text-center border border-[var(--border-card)] space-y-1"
+                    >
+                      <div className="flex items-center justify-center gap-0.5 text-amber-400">
+                        {Array.from({ length: rank.star }).map((_, i) => (
+                          <Star key={i} className="w-3.5 h-3.5 fill-amber-400" />
+                        ))}
+                      </div>
+                      <div className="text-2xl font-heading font-semibold text-[var(--text-main)] mt-1">
+                        {count}
+                      </div>
+                      <div className="text-[11px] font-medium text-[var(--text-muted)] uppercase tracking-wider">
+                        {rank.name}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Category Breakdown Table */}
+              <div className="glass-panel rounded-3xl p-6 border border-[var(--border-card)] space-y-4">
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] flex items-center gap-2">
+                  <BarChart3 className="w-4 h-4 theme-accent-text" /> Progress by Flight Division
+                </h3>
+                <div className="divide-y divide-white/5">
+                  {categories.map(cat => {
+                    const stats = categoryStarsMap[cat];
+                    if (!stats || stats.max === 0) return null;
+                    const pct = Math.round((stats.earned / stats.max) * 100);
+                    return (
+                      <div
+                        key={cat}
+                        onClick={() => handleCategoryClick(cat)}
+                        className="py-3.5 flex items-center justify-between gap-4 hover:bg-white/5 px-3 rounded-xl transition-all cursor-pointer group"
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          {CATEGORY_ICONS[cat] ? (
+                            <img src={CATEGORY_ICONS[cat]} alt={cat} className="w-7 h-7 object-contain shrink-0" />
+                          ) : (
+                            <Navigation className="w-6 h-6 theme-accent-text shrink-0" />
+                          )}
+                          <div className="min-w-0">
+                            <div className="text-sm font-medium text-[var(--text-main)] truncate group-hover:text-[var(--accent)] transition-colors">
+                              {cat}
+                            </div>
+                            <div className="text-[10px] font-mono text-[var(--text-muted)]">
+                              {stats.earned} / {stats.max} Stars Earned
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-4 shrink-0">
+                          <div className="w-24 sm:w-36 h-2 bg-black/40 rounded-full overflow-hidden hidden sm:block">
+                            <div
+                              className="h-full theme-progress-fill rounded-full"
+                              style={{ width: `${pct}%` }}
+                            />
+                          </div>
+                          <span className="text-xs font-mono font-medium theme-accent-text w-12 text-right">
+                            {pct}%
+                          </span>
+                          <ChevronRight className="w-4 h-4 text-[var(--text-muted)] group-hover:translate-x-1 transition-transform" />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* VIEW: PRIORITY RADAR ("almost-next-star") */}
+          {view === 'almost-next-star' && (
+            <div className="space-y-6 animate-in fade-in duration-300">
+              {/* Priority Radar Header */}
+              <div className="glass-panel rounded-3xl p-6 sm:p-8 relative overflow-hidden border border-[var(--border-card)] shadow-xl">
+                <div className="absolute -right-10 -bottom-10 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
+                  <div className="flex items-center gap-4">
+                    <div className="w-16 h-16 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 shadow-inner shrink-0">
+                      <Crosshair className="w-8 h-8" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-medium uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                          Star Hunter Dispatch
+                        </span>
+                        <span className="text-xs text-[var(--text-muted)] font-mono">
+                          {priorityDestinations.length} In-Flight Targets
+                        </span>
+                      </div>
+                      <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-[var(--text-main)] font-heading">
+                        Priority Next Stars Radar
+                      </h1>
+                      <p className="text-xs sm:text-sm text-[var(--text-muted)] mt-0.5">
+                        Sorted by least flights remaining. Log flights directly from these cards to unlock stars immediately!
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Priority Cards List */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {priorityDestinations.map(dest => {
+                  const info = getNextStarInfo(dest);
+                  const currentStars = getStars(dest.flightsDone, dest.star1Req, dest.star2Req, dest.star3Req, dest.star4Req, dest.star5Req);
+                  const prevReq =
+                    info.nextStar === 1
+                      ? 0
+                      : info.nextStar === 2
+                      ? dest.star1Req
+                      : info.nextStar === 3
+                      ? dest.star2Req
+                      : info.nextStar === 4
+                      ? dest.star3Req
+                      : dest.star4Req || 0;
+                  const segmentProgress = Math.max(0, dest.flightsDone - prevReq);
+                  const segmentTotal = info.nextReq - prevReq;
+                  const pct = Math.round((segmentProgress / (segmentTotal || 1)) * 100);
+
+                  return (
+                    <div
+                      key={dest.id}
+                      className="glass-card rounded-2xl p-5 border border-[var(--border-card)] hover:border-amber-400/50 transition-all space-y-4 relative overflow-hidden"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-1.5 mb-1">
+                            <span className="px-2 py-0.5 rounded text-[10px] font-medium uppercase tracking-wider bg-amber-500/15 text-amber-300 border border-amber-500/30">
+                              Unlocks Star {info.nextStar} ({info.rank})
+                            </span>
+                            {dest.needsMap && (
+                              <span className="px-1.5 py-0.5 rounded text-[10px] font-medium theme-badge">
+                                🗺️ {dest.mapsDone || 0}
+                              </span>
+                            )}
+                          </div>
+                          <h3 className="text-base font-semibold text-[var(--text-main)] font-heading truncate">
+                            {dest.destination}
+                          </h3>
+                          <div className="text-[11px] text-[var(--text-muted)] flex items-center gap-1.5 mt-0.5">
+                            <span className="font-medium text-[var(--text-main)]">{dest.aircraft}</span>
+                            <span>•</span>
+                            <span className="truncate">{dest.group}</span>
+                          </div>
+                        </div>
+
+                        <button
+                          onClick={e => toggleBookmark(dest.id, e)}
+                          className="p-1.5 text-[var(--text-muted)] hover:text-amber-400 transition-colors shrink-0"
+                        >
+                          <Star className={`w-4 h-4 ${dest.isCustomList ? 'fill-amber-400 text-amber-400' : ''}`} />
+                        </button>
+                      </div>
+
+                      {/* Progress HUD */}
+                      <div className="space-y-1.5">
+                        <div className="flex justify-between items-baseline text-xs font-mono">
+                          <span className="text-[var(--text-muted)]">
+                            Progress: <span className="font-semibold text-[var(--text-main)]">{dest.flightsDone}</span> / {info.nextReq}
+                          </span>
+                          <span className="text-amber-400 font-medium">
+                            {info.needed} flights needed
+                          </span>
+                        </div>
+                        <div className="h-2 w-full bg-black/40 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-gradient-to-r from-amber-500 to-yellow-300 rounded-full transition-all duration-300"
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Quick In-Place Action Buttons */}
+                      <div className="flex items-center justify-between pt-2 border-t border-white/5 gap-2">
+                        <div className="flex items-center gap-1">
+                          <button
+                            onClick={() => updateFlightCount(dest.id, dest.flightsDone - 1)}
+                            disabled={dest.flightsDone <= 0}
+                            className="tactile-btn px-2 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-xs font-mono disabled:opacity-30"
+                          >
+                            -1
+                          </button>
+                          <button
+                            onClick={() => updateFlightCount(dest.id, dest.flightsDone + 1)}
+                            className="tactile-btn px-3 py-1 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-medium text-xs font-mono shadow-sm"
+                          >
+                            +1
+                          </button>
+                          <button
+                            onClick={() => updateFlightCount(dest.id, dest.flightsDone + 5)}
+                            className="tactile-btn px-3 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 font-medium text-xs font-mono border border-amber-500/30"
+                          >
+                            +5
+                          </button>
+                        </div>
+
+                        <button
+                          onClick={() => {
+                            setView('list');
+                            setSearchQuery(dest.destination);
+                          }}
+                          className="text-[11px] font-medium theme-accent-text hover:underline flex items-center gap-1"
+                        >
+                          Details <ChevronRight className="w-3 h-3" />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* VIEW: FLIGHT DECK (LIST OR GRID) */}
+          {(view === 'list' || view === 'grid') && (
+            <div className="space-y-3 animate-in fade-in duration-200">
+              {/* Category Quick Filter Pills Strip */}
+              <div className="glass-panel rounded-2xl p-1.5 border border-[var(--border-card)] flex items-center gap-1.5 overflow-x-auto custom-scrollbar">
+                {categories.map(cat => {
+                  const isActive = activeCategory === cat;
+                  const stats = categoryStarsMap[cat];
+                  return (
+                    <button
+                      key={cat}
+                      onClick={() => handleCategoryClick(cat)}
+                      className={`tactile-btn px-2.5 py-1 rounded-xl text-xs font-medium transition-all shrink-0 flex items-center gap-1.5 ${
+                        isActive
+                          ? 'theme-btn-accent font-semibold shadow-md'
+                          : 'bg-black/20 hover:bg-white/10 text-[var(--text-muted)] hover:text-white border border-white/5'
+                      }`}
+                    >
+                      <span>{cat}</span>
+                      {stats && (
+                        <span className="px-1.5 py-0.2 rounded-full bg-black/30 text-[9px] font-mono opacity-90">
+                          {stats.earned}/{stats.max}★
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+
+                <button
+                  onClick={() => handleCategoryClick('Bookmarks')}
+                  className={`tactile-btn px-2.5 py-1 rounded-xl text-xs font-medium transition-all shrink-0 flex items-center gap-1.5 ${
+                    activeCategory === 'Bookmarks'
+                      ? 'bg-amber-500 text-slate-950 font-semibold shadow-md'
+                      : 'bg-black/20 hover:bg-white/10 text-amber-300 border border-amber-500/20'
+                  }`}
+                >
+                  <Bookmark className="w-3 h-3 fill-amber-400" />
+                  <span>Bookmarks ({destinations.filter(d => d.isCustomList).length})</span>
+                </button>
+              </div>
+
+              {/* Filter & Command Controller Bar */}
+              <div className="glass-panel rounded-2xl p-2.5 sm:p-3 border border-[var(--border-card)] space-y-2">
+                <div className="flex flex-col md:flex-row items-stretch md:items-center gap-2">
+                  {/* Search Bar with Shortcut hint */}
+                  <div className="relative flex-1">
+                    <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
+                    <input
+                      id="command-search-input"
+                      type="text"
+                      value={searchQuery}
+                      onChange={e => setSearchQuery(e.target.value)}
+                      placeholder="Search route destination, aircraft model, or mission set (Press /)..."
+                      className="w-full pl-9 pr-8 py-1.5 rounded-xl bg-black/30 border border-white/10 text-xs text-[var(--text-main)] placeholder:text-[var(--text-faint)] focus:outline-none focus:border-[var(--border-active)] font-normal transition-all"
+                    />
+                    {searchQuery && (
+                      <button
+                        onClick={() => setSearchQuery('')}
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-white p-1"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Aircraft Dropdown */}
+                  <div className="flex items-center gap-1.5 shrink-0 flex-wrap sm:flex-nowrap">
+                    <select
+                      value={filterAircraft}
+                      onChange={e => setFilterAircraft(e.target.value)}
+                      className="bg-black/30 border border-white/10 rounded-xl px-2.5 py-1.5 text-xs font-normal text-[var(--text-main)] focus:outline-none focus:border-[var(--border-active)] transition-all cursor-pointer"
+                    >
+                      <option value="All">All Aircraft ({allAircraft.length - 1})</option>
+                      {allAircraft.filter(ac => ac !== 'All').map(ac => (
+                        <option key={ac} value={ac}>{ac}</option>
+                      ))}
+                    </select>
+
+                    {/* Mission / Group Dropdown */}
+                    <select
+                      value={filterGroup}
+                      onChange={e => setFilterGroup(e.target.value)}
+                      className="bg-black/30 border border-white/10 rounded-xl px-2.5 py-1.5 text-xs font-normal text-[var(--text-main)] focus:outline-none focus:border-[var(--border-active)] transition-all cursor-pointer max-w-[140px] truncate"
+                    >
+                      <option value="All">All Missions</option>
+                      {allGroups.filter(g => g !== 'All').map(g => (
+                        <option key={g} value={g}>{g}</option>
+                      ))}
+                    </select>
+
+                    {/* Sort Controller */}
+                    <div className="flex items-center bg-black/30 rounded-xl border border-white/10 overflow-hidden">
+                      <select
+                        value={sortConfig.field}
+                        onChange={e => handleSort(e.target.value as SortField)}
+                        className="bg-transparent px-2.5 py-1.5 text-xs font-normal text-[var(--text-main)] focus:outline-none cursor-pointer"
+                      >
+                        <option value="destination">Sort: Destination</option>
+                        <option value="aircraft">Sort: Aircraft</option>
+                        <option value="neededToNextStar">Sort: Closest Star</option>
+                        <option value="flightsDone">Sort: Flights Done</option>
+                        <option value="stars">Sort: Star Rank</option>
+                        <option value="mastery">Sort: Mastery %</option>
+                        <option value="maps">Sort: Maps Stocked</option>
+                        <option value="lastUpdated">Sort: Last Updated</option>
+                      </select>
+                      <button
+                        onClick={() => setSortConfig(prev => ({ ...prev, direction: prev.direction === 'asc' ? 'desc' : 'asc' }))}
+                        title={`Sort ${sortConfig.direction === 'asc' ? 'Descending' : 'Ascending'}`}
+                        className="p-1.5 border-l border-white/10 hover:bg-white/10 theme-accent-text transition-all"
+                      >
+                        <ArrowUpDown className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+
+                    {/* Density Switcher (in toolbar) */}
                     {view === 'list' && (
-                      <div className="hidden lg:grid sticky top-0 z-40 bg-[var(--bg)]/95 backdrop-blur-md grid-cols-[minmax(220px,2fr)_minmax(90px,1fr)_minmax(130px,1.2fr)_minmax(90px,0.8fr)_minmax(90px,1fr)_auto] gap-4 items-center px-4 py-4 mb-2 text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] border-b border-[var(--border)] shadow-sm">
-                        <div className="flex items-center gap-4">
-                          <div className="cursor-pointer hover:text-[var(--text-main)] transition-colors flex items-center gap-1 group/col" onClick={() => handleSort('destination')}>
-                            Destination {sortConfig.field === 'destination' ? (sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3 text-[var(--accent)]" /> : <ChevronDown className="w-3 h-3 text-[var(--accent)]" />) : <ArrowUpDown className="w-3 h-3 opacity-20 group-hover/col:opacity-50" />}
-                          </div>
-                          <div className="cursor-pointer hover:text-[var(--text-main)] transition-colors flex items-center gap-1 group/col" onClick={() => handleSort('group')}>
-                            Map Set {sortConfig.field === 'group' ? (sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3 text-[var(--accent)]" /> : <ChevronDown className="w-3 h-3 text-[var(--accent)]" />) : <ArrowUpDown className="w-3 h-3 opacity-20 group-hover/col:opacity-50" />}
-                          </div>
-                        </div>
-                        <div className="text-center cursor-pointer hover:text-[var(--text-main)] transition-colors flex items-center justify-center gap-1 group/col" onClick={() => handleSort('aircraft')}>
-                          Aircraft {sortConfig.field === 'aircraft' ? (sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3 text-[var(--accent)]" /> : <ChevronDown className="w-3 h-3 text-[var(--accent)]" />) : <ArrowUpDown className="w-3 h-3 opacity-20 group-hover/col:opacity-50" />}
-                        </div>
-                        <div />
-                        <div className="text-center cursor-pointer hover:text-[var(--text-main)] transition-colors flex items-center justify-center gap-1 group/col" onClick={() => handleSort('neededToNextStar')}>
-                          To Next Star {sortConfig.field === 'neededToNextStar' ? (sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3 text-[var(--accent)]" /> : <ChevronDown className="w-3 h-3 text-[var(--accent)]" />) : <ArrowUpDown className="w-3 h-3 opacity-20 group-hover/col:opacity-50" />}
-                        </div>
-                        <div className="text-center cursor-pointer hover:text-[var(--text-main)] transition-colors flex items-center justify-center gap-1 group/col" onClick={() => handleSort('maps')}>
-                          Maps {sortConfig.field === 'maps' ? (sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3 text-[var(--accent)]" /> : <ChevronDown className="w-3 h-3 text-[var(--accent)]" />) : <ArrowUpDown className="w-3 h-3 opacity-20 group-hover/col:opacity-50" />}
-                        </div>
-                        <div className="text-right cursor-pointer hover:text-[var(--text-main)] transition-colors flex items-center justify-end gap-1 group/col pr-[44px]" onClick={() => handleSort('flightsDone')}>
-                          Flights {sortConfig.field === 'flightsDone' ? (sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3 text-[var(--accent)]" /> : <ChevronDown className="w-3 h-3 text-[var(--accent)]" />) : <ArrowUpDown className="w-3 h-3 opacity-20 group-hover/col:opacity-50" />}
-                        </div>
+                      <div className="flex items-center bg-black/30 rounded-xl p-0.5 border border-white/10 shrink-0">
+                        <button
+                          onClick={() => toggleDensity('compact')}
+                          className={`px-2 py-1 rounded-lg text-xs font-mono transition-all ${
+                            density === 'compact' ? 'theme-btn-soft font-semibold shadow-sm' : 'text-[var(--text-muted)] hover:text-white'
+                          }`}
+                          title="High-Density Table (25+ routes per screen)"
+                        >
+                          Dense
+                        </button>
+                        <button
+                          onClick={() => toggleDensity('comfortable')}
+                          className={`px-2 py-1 rounded-lg text-xs font-mono transition-all ${
+                            density === 'comfortable' ? 'theme-btn-soft font-semibold shadow-sm' : 'text-[var(--text-muted)] hover:text-white'
+                          }`}
+                          title="Comfortable Cards"
+                        >
+                          Cards
+                        </button>
                       </div>
                     )}
+                  </div>
+                </div>
+
+                {/* Quick Toggle Filter Chips */}
+                <div className="flex flex-wrap items-center justify-between gap-2 pt-1.5 border-t border-white/5 text-xs">
+                  <div className="flex items-center gap-3">
+                    <label className="flex items-center gap-1.5 cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        checked={showOnlyMaps}
+                        onChange={e => setShowOnlyMaps(e.target.checked)}
+                        style={{ accentColor: 'var(--accent)' }}
+                        className="rounded"
+                      />
+                      <span className={`text-xs font-normal transition-colors ${showOnlyMaps ? 'theme-accent-text font-medium' : 'text-[var(--text-muted)]'}`}>
+                        🗺️ Maps Required
+                      </span>
+                    </label>
+
+                    <label className="flex items-center gap-1.5 cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        checked={hide3Star}
+                        onChange={e => setHide3Star(e.target.checked)}
+                        style={{ accentColor: 'var(--accent)' }}
+                        className="rounded"
+                      />
+                      <span className={`text-xs font-normal transition-colors ${hide3Star ? 'text-amber-300 font-medium' : 'text-[var(--text-muted)]'}`}>
+                        ⭐ Hide Maxed Out
+                      </span>
+                    </label>
+                  </div>
+
+                  <div className="flex items-center gap-3 text-xs font-mono text-[var(--text-muted)]">
+                    <span>
+                      Showing <span className="font-semibold text-[var(--text-main)]">{sortedAndFilteredDestinations.length}</span> / {destinations.length} routes
+                    </span>
+                    {(searchQuery || filterAircraft !== 'All' || filterGroup !== 'All' || showOnlyMaps || hide3Star) && (
+                      <button
+                        onClick={() => {
+                          setSearchQuery('');
+                          setFilterAircraft('All');
+                          setFilterGroup('All');
+                          setShowOnlyMaps(false);
+                          setHide3Star(false);
+                        }}
+                        className="text-cyan-400 hover:underline font-medium text-xs"
+                      >
+                        Reset Filters
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Destination Cards / Strips Container */}
+              {sortedAndFilteredDestinations.length === 0 ? (
+                <div className="glass-panel rounded-3xl p-10 text-center border border-[var(--border-card)]">
+                  <Navigation className="w-10 h-10 text-[var(--text-faint)] mx-auto mb-2 opacity-40" />
+                  <h3 className="text-base font-semibold text-[var(--text-main)] font-heading">No Flight Routes Found</h3>
+                  <p className="text-xs text-[var(--text-muted)] mt-1 max-w-sm mx-auto">
+                    Try clearing search query or adjusting your category/aircraft filter selections.
+                  </p>
+                </div>
+              ) : view === 'list' && density === 'compact' ? (
+                /* HIGH-DENSITY FLIGHT OPERATIONS TABLE (25+ DESTINATIONS PER SCREEN) */
+                <div className="glass-panel rounded-2xl border border-[var(--border-card)] overflow-hidden shadow-sm">
+                  {/* Sticky Table Header */}
+                  <div className="hidden lg:grid grid-cols-[32px_28px_minmax(180px,2fr)_minmax(85px,0.8fr)_minmax(140px,1.2fr)_minmax(95px,0.9fr)_minmax(85px,0.8fr)_minmax(210px,1.3fr)_32px] items-center gap-2.5 px-3 py-2 text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)] bg-black/60 border-b border-white/10 sticky top-0 z-30 backdrop-blur-md select-none">
+                    <div className="text-center" title="Bookmark / Pin">★</div>
+                    <div className="text-center">Icon</div>
+                    <div
+                      onClick={() => handleSort('destination')}
+                      className="cursor-pointer hover:text-[var(--text-main)] transition-colors flex items-center gap-1 group/col"
+                    >
+                      <span>Destination & Set</span>
+                      {sortConfig.field === 'destination' ? (
+                        sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3 theme-accent-text" /> : <ChevronDown className="w-3 h-3 theme-accent-text" />
+                      ) : (
+                        <ArrowUpDown className="w-3 h-3 opacity-20 group-hover/col:opacity-75" />
+                      )}
+                    </div>
+                    <div
+                      onClick={() => handleSort('aircraft')}
+                      className="text-center cursor-pointer hover:text-[var(--text-main)] transition-colors flex items-center justify-center gap-1 group/col"
+                    >
+                      <span>Aircraft</span>
+                      {sortConfig.field === 'aircraft' ? (
+                        sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3 theme-accent-text" /> : <ChevronDown className="w-3 h-3 theme-accent-text" />
+                      ) : (
+                        <ArrowUpDown className="w-3 h-3 opacity-20 group-hover/col:opacity-75" />
+                      )}
+                    </div>
+                    <div
+                      onClick={() => handleSort('stars')}
+                      className="cursor-pointer hover:text-[var(--text-main)] transition-colors flex items-center gap-1 group/col"
+                    >
+                      <span>Star Mastery</span>
+                      {sortConfig.field === 'stars' || sortConfig.field === 'mastery' ? (
+                        sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3 theme-accent-text" /> : <ChevronDown className="w-3 h-3 theme-accent-text" />
+                      ) : (
+                        <ArrowUpDown className="w-3 h-3 opacity-20 group-hover/col:opacity-75" />
+                      )}
+                    </div>
+                    <div
+                      onClick={() => handleSort('neededToNextStar')}
+                      className="text-center cursor-pointer hover:text-[var(--text-main)] transition-colors flex items-center justify-center gap-1 group/col"
+                    >
+                      <span>To Next Star</span>
+                      {sortConfig.field === 'neededToNextStar' ? (
+                        sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3 theme-accent-text" /> : <ChevronDown className="w-3 h-3 theme-accent-text" />
+                      ) : (
+                        <ArrowUpDown className="w-3 h-3 opacity-20 group-hover/col:opacity-75" />
+                      )}
+                    </div>
+                    <div
+                      onClick={() => handleSort('maps')}
+                      className="text-center cursor-pointer hover:text-[var(--text-main)] transition-colors flex items-center justify-center gap-1 group/col"
+                    >
+                      <span>Map Stock</span>
+                      {sortConfig.field === 'maps' ? (
+                        sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3 theme-accent-text" /> : <ChevronDown className="w-3 h-3 theme-accent-text" />
+                      ) : (
+                        <ArrowUpDown className="w-3 h-3 opacity-20 group-hover/col:opacity-75" />
+                      )}
+                    </div>
+                    <div
+                      onClick={() => handleSort('flightsDone')}
+                      className="text-center cursor-pointer hover:text-[var(--text-main)] transition-colors flex items-center justify-center gap-1 group/col"
+                    >
+                      <span>Flight Scrubber</span>
+                      {sortConfig.field === 'flightsDone' ? (
+                        sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3 theme-accent-text" /> : <ChevronDown className="w-3 h-3 theme-accent-text" />
+                      ) : (
+                        <ArrowUpDown className="w-3 h-3 opacity-20 group-hover/col:opacity-75" />
+                      )}
+                    </div>
+                    <div className="text-center">Info</div>
+                  </div>
+
+                  {/* Dense Table Rows */}
+                  <div className="divide-y divide-white/5">
                     {sortedAndFilteredDestinations.map(dest => {
                       const stars = getStars(dest.flightsDone, dest.star1Req, dest.star2Req, dest.star3Req, dest.star4Req, dest.star5Req);
                       const maxStars = getMaxStars(dest);
+                      const info = getNextStarInfo(dest);
                       const isExpanded = expandedRowId === dest.id;
-
                       const reqs = [dest.star1Req, dest.star2Req, dest.star3Req];
                       if (dest.star4Req && dest.star4Req > 0) reqs.push(dest.star4Req);
                       if (dest.star5Req && dest.star5Req > 0) reqs.push(dest.star5Req);
                       const maxReq = reqs[reqs.length - 1];
+                      const planeSprite = AIRCRAFT_SPRITES[dest.aircraft];
 
-                      if (view === 'grid') {
-                        return (
-                          <div key={dest.id} className="group relative rounded-2xl p-4 border border-[var(--border)] bg-[var(--card)] transition-all hover:shadow-2xl hover:-translate-y-1.5 flex flex-col overflow-hidden">
-                            {/* Top Status Bar */}
-                            <div className="flex items-center justify-between mb-3">
-                              <div className="flex items-center gap-0.5">
-                                {Array.from({ length: maxStars }, (_, i) => i + 1).map(s => (
-                                  <Star key={s} className={`w-3 h-3 ${stars >= s ? 'fill-amber-400 text-amber-400' : 'text-[var(--border)] opacity-20'}`} />
-                                ))}
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <button onClick={(e) => toggleBookmark(dest.id, e)} className="hover:scale-110 transition-transform" title={dest.isCustomList ? "Remove from Bookmarks" : "Add to Bookmarks"}>
-                                  <Bookmark className={`w-4 h-4 ${dest.isCustomList ? 'fill-[var(--accent)] text-[var(--accent)]' : 'text-[var(--text-muted)] opacity-30 hover:opacity-100'}`} />
-                                </button>
-                                <span className="text-[9px] font-black uppercase tracking-wider text-[var(--accent)] bg-[var(--accent-muted)] px-2 py-0.5 rounded-md border border-[var(--accent)]/10">{dest.aircraft}</span>
-                              </div>
-                            </div>
-
-                            {/* Destination Info */}
-                            <div className="mb-4 flex items-start justify-between gap-2">
-                              <div className="min-w-0 flex-1">
-                                <div className="flex items-center gap-2 mb-1">
-                                  {dest.icon && <img src={dest.icon} alt={dest.destination} className="w-5 h-5 object-contain" referrerPolicy="no-referrer" />}
-                                  <h3 className="text-sm font-black text-[var(--text-main)] leading-tight group-hover:text-[var(--accent)] transition-colors truncate">{dest.destination}</h3>
-                                </div>
-                                <p className="text-[10px] font-bold text-[var(--text-muted)] opacity-60 truncate">{dest.group.split(/[;,]/).map(g => g.trim()).join(', ')}</p>
-                                {(() => {
-                                  const info = getNextStarInfo(dest);
-                                  const showNote = info.needed > 0 && (dest.flightsDone / info.nextReq) > 0.9;
-                                  return showNote ? (
-                                    <div className="mt-2 p-1.5 bg-amber-100 text-amber-800 text-[9px] font-bold rounded-lg border border-amber-200">
-                                      You only need {info.needed} more flights to reach star ⭐{info.nextStar}!
-                                    </div>
-                                  ) : null;
-                                })()}
-                              </div>
-                              {dest.icon && (
-                                <img src={dest.icon} alt={dest.destination} className="w-8 h-8 object-contain shrink-0" referrerPolicy="no-referrer" />
-                              )}
-                            </div>
-
-                            {/* Segmented Progress Bar */}
-                            <div className="mb-4 flex flex-col gap-1.5">
-                              <div className="flex items-center justify-between text-[9px] font-black uppercase tracking-tighter">
-                                <div className="flex items-center gap-1">
-                                  <span className="text-[var(--text-main)]">{dest.flightsDone}</span>
-                                  <span className="text-[var(--text-muted)] opacity-40">/ {maxReq}</span>
-                                </div>
-                                {dest.flightsDone < maxReq && (
-                                  <span className="text-[var(--accent)] bg-[var(--accent-muted)] px-1.5 rounded-md">
-                                    {(() => {
-                                      const info = getNextStarInfo(dest);
-                                      return `+${info.needed} to ⭐${info.nextStar}`;
-                                    })()}
-                                  </span>
-                                )}
-                              </div>
-                              <div className="h-2 w-full bg-[var(--border)] rounded-full overflow-hidden shadow-inner flex gap-0.5 p-0.5">
-                                {reqs.map((req, idx) => {
-                                  const prevReq = idx === 0 ? 0 : reqs[idx - 1];
-                                  const segmentSize = req - prevReq;
-                                  const segmentProgress = Math.max(0, Math.min(segmentSize, dest.flightsDone - prevReq));
-                                  const percentage = (segmentProgress / segmentSize) * 100;
-                                  const colors = ['bg-amber-200', 'bg-amber-300', 'bg-amber-400', 'bg-amber-500', 'bg-amber-600'];
-
-                                  return (
-                                    <div key={idx} className="h-full bg-[var(--bg)] rounded-sm overflow-hidden flex-1 relative">
-                                      <div
-                                        className={`h-full transition-all duration-700 ${colors[idx] || 'bg-amber-500'}`}
-                                        style={{ width: `${percentage}%` }}
-                                      />
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                            </div>
-
-                            {/* Counters Cluster */}
-                            <div className="flex flex-col gap-2 mt-auto">
-                              {/* Flight Counter */}
-                              <div className="p-1.5 rounded-xl flex items-center justify-between border border-[var(--border)] bg-[var(--bg)] shadow-inner group/counter hover:border-[var(--accent)] transition-colors">
-                                <button
-                                  onClick={() => updateFlightCount(dest.id, dest.flightsDone - 1)}
-                                  className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-[var(--card)] text-[var(--text-muted)] active:scale-90 transition-all"
-                                >
-                                  <Minus className="w-3.5 h-3.5" />
-                                </button>
-                                <div className="flex flex-col items-center">
-                                  <input
-                                    type="text"
-                                    inputMode="numeric"
-                                    className="w-10 bg-transparent text-center text-xs font-black outline-none text-[var(--text-main)]"
-                                    value={dest.flightsDone}
-                                    onChange={(e) => updateFlightCount(dest.id, parseInt(e.target.value.replace(/\D/g, '')) || 0)}
-                                  />
-                                  <span className="text-[7px] font-black uppercase opacity-40 -mt-1 tracking-tighter">Flights</span>
-                                </div>
-                                <button
-                                  onClick={() => updateFlightCount(dest.id, dest.flightsDone + 1)}
-                                  className="w-7 h-7 flex items-center justify-center rounded-lg bg-[var(--accent)] text-white shadow-md hover:scale-110 active:scale-90 transition-all"
-                                >
-                                  <Plus className="w-3.5 h-3.5" />
-                                </button>
-                              </div>
-
-                              {/* Map Counter */}
-                              {dest.needsMap ? (
-                                <div className="p-1.5 rounded-xl flex items-center justify-between border border-[var(--border)] bg-[var(--bg)] shadow-inner group/counter hover:border-[var(--accent)] transition-colors">
-                                  <button
-                                    onClick={() => updateMapCount(dest.id, (dest.mapsDone || 0) - 1)}
-                                    className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-[var(--card)] text-[var(--text-muted)] active:scale-90 transition-all"
-                                  >
-                                    <Minus className="w-3.5 h-3.5" />
-                                  </button>
-                                  <div className="flex flex-col items-center">
-                                    <input
-                                      type="text"
-                                      inputMode="numeric"
-                                      className="w-10 bg-transparent text-center text-xs font-black outline-none text-[var(--text-main)]"
-                                      value={dest.mapsDone || 0}
-                                      onChange={(e) => updateMapCount(dest.id, parseInt(e.target.value.replace(/\D/g, '')) || 0)}
-                                    />
-                                    <span className="text-[7px] font-black uppercase opacity-40 -mt-1 tracking-tighter">Maps</span>
-                                  </div>
-                                  <button
-                                    onClick={() => updateMapCount(dest.id, (dest.mapsDone || 0) + 1)}
-                                    className="w-7 h-7 flex items-center justify-center rounded-lg bg-[var(--accent)] text-white shadow-md hover:scale-110 active:scale-90 transition-all"
-                                  >
-                                    <Plus className="w-3.5 h-3.5" />
-                                  </button>
-                                </div>
-                              ) : (
-                                <div className="h-[46px] flex items-center justify-center opacity-5 border border-dashed border-[var(--text-muted)] rounded-xl">
-                                  <MapIcon className="w-4 h-4" />
-                                </div>
-                              )}
-                            </div>
-
-                            {/* Footer Info */}
-                            <div className="mt-4 pt-3 border-t border-[var(--border)] flex items-center justify-between">
-                              <div className="flex items-center gap-1 opacity-40">
-                                <Clock className="w-2.5 h-2.5" />
-                                <span className="text-[8px] font-bold uppercase truncate max-w-[80px]">{formatTimestamp(dest.lastUpdated)}</span>
-                              </div>
-                              <div className="flex space-x-0.5">
-                                {Array.from({ length: maxStars }, (_, i) => i + 1).map(s => (
-                                  <Star key={s} className={`w-3 h-3 ${stars >= s ? 'fill-amber-400 text-amber-400 stroke-black stroke-[1px]' : 'text-[var(--text-muted)] opacity-10'}`} />
-                                ))}
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      }
-
-                      // List View Row (Redesigned for high-density information)
                       return (
                         <div
                           key={dest.id}
-                          id={dest.id}
-                          onClick={() => setExpandedRowId(isExpanded ? null : dest.id)}
-                          className={`group rounded-xl border border-[var(--border)] bg-[var(--card)] transition-all cursor-pointer overflow-hidden ${isExpanded ? 'shadow-lg ring-2 ring-[var(--accent)]' : 'hover:bg-[var(--bg)] shadow-sm'}`}
+                          className={`transition-colors ${
+                            isExpanded ? 'bg-white/[0.04]' : 'hover:bg-white/[0.02]'
+                          }`}
                         >
-                          {/* Main Row Content */}
-                          <div className="px-4 py-3 grid grid-cols-1 lg:grid-cols-[minmax(220px,2fr)_minmax(90px,1fr)_minmax(130px,1.2fr)_minmax(90px,0.8fr)_minmax(90px,1fr)_auto] gap-4 items-center">
-                            {/* Destination & Mission */}
-                            <div className="min-w-0 flex items-center gap-3">
-                              <button onClick={(e) => toggleBookmark(dest.id, e)} className="hover:scale-110 transition-transform shrink-0" title={dest.isCustomList ? "Remove from Bookmarks" : "Add to Bookmarks"}>
-                                <Bookmark className={`w-5 h-5 ${dest.isCustomList ? 'fill-[var(--accent)] text-[var(--accent)]' : 'text-[var(--text-muted)] opacity-30 hover:opacity-100'}`} />
+                          {/* Desktop Dense Row */}
+                          <div className="hidden lg:grid grid-cols-[32px_28px_minmax(180px,2fr)_minmax(85px,0.8fr)_minmax(140px,1.2fr)_minmax(95px,0.9fr)_minmax(85px,0.8fr)_minmax(210px,1.3fr)_32px] items-center gap-2.5 px-3 py-1.5 text-xs dense-table-row">
+                            {/* Pin / Bookmark */}
+                            <div className="flex justify-center">
+                              <button
+                                onClick={e => toggleBookmark(dest.id, e)}
+                                className="p-0.5 text-[var(--text-muted)] hover:text-amber-400 transition-colors"
+                                title={dest.isCustomList ? 'Remove Bookmark' : 'Bookmark Route'}
+                              >
+                                <Star className={`w-3.5 h-3.5 ${dest.isCustomList ? 'fill-amber-400 text-amber-400 glow-star' : ''}`} />
                               </button>
-                              {dest.icon && (
-                                <img src={dest.icon} alt={dest.destination} className="w-6 h-6 object-contain shrink-0" referrerPolicy="no-referrer" />
+                            </div>
+
+                            {/* Icon / Sprite */}
+                            <div className="flex justify-center">
+                              <div className="w-6 h-6 rounded-md bg-black/40 border border-white/10 flex items-center justify-center p-0.5 overflow-hidden">
+                                {dest.icon ? (
+                                  <img src={dest.icon} alt={dest.destination} className="w-5 h-5 object-contain" />
+                                ) : planeSprite ? (
+                                  <img src={planeSprite} alt={dest.aircraft} className="w-5 h-5 object-contain" />
+                                ) : (
+                                  <Plane className="w-3.5 h-3.5 theme-accent-text" />
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Destination Name & Mission Group */}
+                            <div className="min-w-0 flex items-center gap-1.5">
+                              <span
+                                onClick={() => setExpandedRowId(isExpanded ? null : dest.id)}
+                                className="font-semibold text-[var(--text-main)] truncate cursor-pointer hover:text-[var(--accent)] transition-colors"
+                                title={dest.destination}
+                              >
+                                {dest.destination}
+                              </span>
+                              {dest.group && dest.group !== 'None' && (
+                                <span className="text-[10px] text-[var(--text-muted)] bg-white/5 px-1.5 py-0.2 rounded truncate max-w-[120px]" title={dest.group}>
+                                  {dest.group}
+                                </span>
                               )}
-                              <div className="flex flex-col min-w-0">
-                                <div className="flex items-center gap-2">
-                                  <h3 className="text-sm font-black truncate text-[var(--text-main)] leading-tight group-hover:text-[var(--accent)] transition-colors">{dest.destination}</h3>
-                                </div>
-                                <span className="text-[10px] font-bold text-[var(--text-muted)] truncate opacity-60">{dest.group.split(/[;,]/).map(g => g.trim()).join(', ')}</span>
-                                {(() => {
-                                  const info = getNextStarInfo(dest);
-                                  const showNote = info.needed > 0 && (dest.flightsDone / info.nextReq) > 0.9;
-                                  return showNote ? (
-                                    <div className="mt-1 text-[9px] font-bold text-amber-700">
-                                      Need {info.needed} more for star ⭐{info.nextStar}!
-                                    </div>
-                                  ) : null;
-                                })()}
-                              </div>
                             </div>
 
-                            {/* Aircraft */}
-                            <div className="hidden lg:flex flex-col items-center">
-                              <span className="text-[10px] font-black uppercase tracking-wider text-[var(--accent)] bg-[var(--accent-muted)] px-2.5 py-1 rounded-lg border border-[var(--accent)]/10">{dest.aircraft}</span>
+                            {/* Aircraft Class */}
+                            <div className="text-center">
+                              <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-medium theme-badge uppercase inline-block truncate max-w-[80px]" title={dest.aircraft}>
+                                {dest.aircraft}
+                              </span>
                             </div>
 
-                            {/* Progress Visualization (Segmented Bar) */}
-                            <div className="flex flex-col gap-1.5 min-w-[140px]">
-                              <div className="flex items-center justify-between text-[9px] font-black uppercase tracking-tighter text-[var(--text-muted)]">
-                                <div className="flex items-center gap-1">
-                                  <span className="text-[var(--text-main)]">{dest.flightsDone}</span>
-                                  <span className="opacity-40">/ {maxReq}</span>
-                                </div>
-                              </div>
-                              <div className="h-2 w-full bg-[var(--border)] rounded-full overflow-hidden shadow-inner flex gap-0.5 p-0.5">
-                                {reqs.map((req, idx) => {
-                                  const prevReq = idx === 0 ? 0 : reqs[idx - 1];
-                                  const segmentSize = req - prevReq;
-                                  const segmentProgress = Math.max(0, Math.min(segmentSize, dest.flightsDone - prevReq));
-                                  const percentage = (segmentProgress / segmentSize) * 100;
-                                  const colors = ['bg-amber-200', 'bg-amber-300', 'bg-amber-400', 'bg-amber-500', 'bg-amber-600'];
-
-                                  return (
-                                    <div key={idx} className="h-full bg-[var(--bg)] rounded-sm overflow-hidden flex-1 relative">
-                                      <div
-                                        className={`h-full transition-all duration-700 ${colors[idx] || 'bg-amber-500'}`}
-                                        style={{ width: `${percentage}%` }}
-                                      />
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                            </div>
-
-                            {/* Needed To Next Star */}
-                            <div className="hidden lg:flex items-center justify-center">
-                              {(() => {
-                                const info = getNextStarInfo(dest);
-                                const isMax = stars >= maxStars || info.needed <= 0;
-                                return isMax ? null : (
-                                  <span className="text-xs font-black text-amber-500 bg-amber-500/10 px-2.5 py-1 rounded-lg border border-amber-500/20">
-                                    {info.needed}
-                                  </span>
-                                );
-                              })()}
-                            </div>
-
-                            {/* Inline Map Counter (Editable in List Mode) */}
-                            <div className="flex items-center justify-center gap-3">
-                              <div className="hidden sm:flex space-x-0.5 w-[60px] justify-center">
-                                {Array.from({ length: maxStars }, (_, i) => i + 1).map(s => (
-                                  <Star key={s} className={`w-3.5 h-3.5 ${stars >= s ? 'fill-amber-400 text-amber-400 stroke-black stroke-[1px]' : 'text-[var(--text-muted)] opacity-10'}`} />
+                            {/* Star Mastery HUD */}
+                            <div className="flex items-center gap-1.5">
+                              <div className="flex items-center gap-0.5 shrink-0">
+                                {Array.from({ length: maxStars }).map((_, idx) => (
+                                  <Star
+                                    key={idx}
+                                    className={`w-2.5 h-2.5 ${
+                                      stars >= idx + 1 ? 'theme-star-active' : 'theme-star-inactive'
+                                    }`}
+                                  />
                                 ))}
                               </div>
+                              <div className="flex-1 h-1.5 bg-black/40 rounded-full overflow-hidden min-w-[36px]">
+                                <div
+                                  className={`h-full rounded-full transition-all duration-300 ${
+                                    stars >= maxStars ? 'bg-[var(--star-color)]' : 'theme-progress-fill'
+                                  }`}
+                                  style={{ width: `${Math.min(100, Math.round((dest.flightsDone / maxReq) * 100))}%` }}
+                                />
+                              </div>
+                            </div>
+
+                            {/* To Next Star */}
+                            <div className="text-center">
+                              {stars >= maxStars ? (
+                                <span className="text-[9px] font-mono font-semibold text-amber-400 bg-amber-400/15 px-1.5 py-0.2 rounded">
+                                  ACE ★
+                                </span>
+                              ) : (
+                                <span className="text-[11px] font-mono text-[var(--text-muted)]">
+                                  <span className="font-semibold text-[var(--text-main)]">{info.needed}</span> to ★{info.nextStar}
+                                </span>
+                              )}
+                            </div>
+
+                            {/* Map Stock */}
+                            <div className="text-center">
                               {dest.needsMap ? (
-                                <div className="flex items-center gap-1.5 bg-[var(--bg)] border border-[var(--border)] rounded-xl p-1 shadow-sm hover:border-[var(--accent)] transition-colors w-[116px]" onClick={(e) => e.stopPropagation()}>
+                                <div className="inline-flex items-center gap-1 bg-black/30 border border-white/5 px-1.5 py-0.5 rounded-lg text-[10px] font-mono">
+                                  <span className="theme-accent-text">🗺️ {dest.mapsDone || 0}</span>
                                   <button
-                                    onClick={(e) => { e.stopPropagation(); updateMapCount(dest.id, (dest.mapsDone || 0) - 1); }}
-                                    className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-[var(--card)] text-[var(--text-muted)] transition-all active:scale-90"
+                                    onClick={() => updateMapCount(dest.id, (dest.mapsDone || 0) + 1)}
+                                    className="text-[var(--text-muted)] hover:text-white hover:bg-white/10 rounded px-0.5"
+                                    title="Add Map"
                                   >
-                                    <Minus className="w-3.5 h-3.5" />
-                                  </button>
-                                  <div className="flex flex-col items-center min-w-[28px]">
-                                    <input
-                                      type="text"
-                                      inputMode="numeric"
-                                      className="w-10 bg-transparent text-center text-xs font-black outline-none text-[var(--text-main)]"
-                                      value={dest.mapsDone || 0}
-                                      onChange={(e) => updateMapCount(dest.id, parseInt(e.target.value.replace(/\D/g, '')) || 0)}
-                                    />
-                                    <span className="text-[7px] font-black uppercase opacity-40 -mt-1 tracking-tighter">Maps</span>
-                                  </div>
-                                  <button
-                                    onClick={(e) => { e.stopPropagation(); updateMapCount(dest.id, (dest.mapsDone || 0) + 1); }}
-                                    className="w-7 h-7 flex items-center justify-center rounded-lg bg-[var(--accent)] text-white shadow-md hover:scale-110 transition-all active:scale-90"
-                                  >
-                                    <Plus className="w-3.5 h-3.5" />
+                                    +
                                   </button>
                                 </div>
                               ) : (
-                                <div className="flex flex-col items-center opacity-10 w-[116px]">
-                                  <MapIcon className="w-4 h-4 mb-0.5" />
-                                  <span className="text-[7px] font-black uppercase tracking-widest">N/A</span>
-                                </div>
+                                <span className="text-[var(--text-faint)] text-xs">—</span>
                               )}
                             </div>
 
-                            {/* Stars & Inline Flight Counter */}
-                            <div className="flex items-center justify-end gap-6">
-                              <div className="flex items-center gap-3">
-                                <div className="flex items-center gap-1.5 bg-[var(--bg)] border border-[var(--border)] rounded-xl p-1 shadow-sm hover:border-[var(--accent)] transition-colors" onClick={(e) => e.stopPropagation()}>
-                                  <button
-                                    onClick={(e) => { e.stopPropagation(); updateFlightCount(dest.id, dest.flightsDone - 1); }}
-                                    className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-[var(--card)] text-[var(--text-muted)] active:scale-90 transition-transform"
-                                  >
-                                    <Minus className="w-3.5 h-3.5" />
-                                  </button>
-                                  <div className="flex flex-col items-center min-w-[28px]">
-                                    <input
-                                      type="text"
-                                      inputMode="numeric"
-                                      className="w-10 bg-transparent text-center text-xs font-black outline-none"
-                                      value={dest.flightsDone}
-                                      onChange={(e) => updateFlightCount(dest.id, parseInt(e.target.value.replace(/\D/g, '')) || 0)}
-                                    />
-                                    <span className="text-[7px] font-black uppercase opacity-40 -mt-1 tracking-tighter">Flights</span>
-                                  </div>
-                                  <button
-                                    onClick={(e) => { e.stopPropagation(); updateFlightCount(dest.id, dest.flightsDone + 1); }}
-                                    className="w-7 h-7 flex items-center justify-center rounded-lg bg-[var(--accent)] text-white shadow-md hover:scale-110 transition-all active:scale-90"
-                                  >
-                                    <Plus className="w-3.5 h-3.5" />
-                                  </button>
-                                </div>
-                                <div className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[var(--accent-muted)] text-[var(--text-muted)] hover:text-[var(--accent)] transition-colors">
-                                  {isExpanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
-                                </div>
-                              </div>
+                            {/* Flight Scrubber */}
+                            <div className="flex items-center justify-center gap-0.5">
+                              <button
+                                onClick={() => updateFlightCount(dest.id, dest.flightsDone - 1)}
+                                disabled={dest.flightsDone <= 0}
+                                className="tactile-btn px-1.5 py-0.5 rounded bg-white/5 hover:bg-white/10 text-[10px] font-mono disabled:opacity-20 transition-all"
+                                title="-1 Flight"
+                              >
+                                -1
+                              </button>
+
+                              <input
+                                type="number"
+                                value={dest.flightsDone}
+                                onChange={e => updateFlightCount(dest.id, parseInt(e.target.value) || 0)}
+                                className="w-11 h-6 py-0 text-center font-mono font-semibold text-xs bg-black/40 border border-white/10 rounded focus:outline-none focus:border-[var(--border-active)] theme-accent-text"
+                              />
+
+                              <button
+                                onClick={() => updateFlightCount(dest.id, dest.flightsDone + 1)}
+                                className="tactile-btn px-1.5 py-0.5 rounded theme-btn-soft text-[10px] font-mono font-medium transition-all"
+                                title="+1 Flight"
+                              >
+                                +1
+                              </button>
+                              <button
+                                onClick={() => updateFlightCount(dest.id, dest.flightsDone + 5)}
+                                className="tactile-btn px-1.5 py-0.5 rounded theme-btn-soft text-[10px] font-mono font-medium transition-all"
+                                title="+5 Flights"
+                              >
+                                +5
+                              </button>
+                              <button
+                                onClick={() => updateFlightCount(dest.id, dest.flightsDone + 10)}
+                                className="tactile-btn px-1.5 py-0.5 rounded theme-btn-accent text-[10px] font-mono font-medium transition-all"
+                                title="+10 Flights"
+                              >
+                                +10
+                              </button>
+                            </div>
+
+                            {/* Details Chevron */}
+                            <div className="flex justify-center">
+                              <button
+                                onClick={() => setExpandedRowId(isExpanded ? null : dest.id)}
+                                className={`p-1 rounded-lg transition-colors ${
+                                  isExpanded ? 'theme-btn-soft' : 'text-[var(--text-muted)] hover:text-white hover:bg-white/5'
+                                }`}
+                                title={isExpanded ? 'Collapse Details' : 'Expand Details'}
+                              >
+                                {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                              </button>
                             </div>
                           </div>
 
-                          {/* Expanded Content (Detailed View) */}
-                          {isExpanded && (
-                            <div className="px-6 pb-6 pt-2 border-t border-[var(--border)] bg-[var(--bg)]/30 animate-in slide-in-from-top-2 duration-200">
-                              <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-8 items-start">
-                                {/* Left Side: Detailed Progress */}
-                                <div className="flex flex-col gap-6">
-                                  <div className="flex items-center justify-between">
-                                    <div className="flex flex-col">
-                                      <span className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)]">Full Flight Log</span>
-                                      <div className="flex items-center gap-4 mt-1">
-                                        {dest.icon && (
-                                          <img src={dest.icon} alt={dest.destination} className="w-16 h-16 object-contain shrink-0" referrerPolicy="no-referrer" />
-                                        )}
-                                        <div className="flex items-baseline gap-2">
-                                          <span className="text-3xl font-black text-[var(--text-main)]">{dest.flightsDone}</span>
-                                          <span className="text-sm font-bold text-[var(--text-muted)]">/ {maxReq} flights</span>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
+                          {/* Mobile/Tablet Fallback (< lg) */}
+                          <div className="lg:hidden p-2.5 flex items-center justify-between gap-2 text-xs">
+                            <div className="flex items-center gap-2 min-w-0 flex-1">
+                              <button
+                                onClick={e => toggleBookmark(dest.id, e)}
+                                className="p-1 text-[var(--text-muted)] hover:text-amber-400 shrink-0"
+                              >
+                                <Star className={`w-3.5 h-3.5 ${dest.isCustomList ? 'fill-amber-400 text-amber-400' : ''}`} />
+                              </button>
+                              <div className="min-w-0">
+                                <div className="flex items-center gap-1.5 mb-0.5">
+                                  <span className="px-1.5 py-0.2 rounded text-[9px] font-mono theme-badge">{dest.aircraft}</span>
+                                  {dest.needsMap && <span className="text-[9px] text-[var(--text-muted)]">🗺️{dest.mapsDone || 0}</span>}
+                                </div>
+                                <div
+                                  onClick={() => setExpandedRowId(isExpanded ? null : dest.id)}
+                                  className="font-semibold text-[var(--text-main)] truncate cursor-pointer"
+                                >
+                                  {dest.destination}
+                                </div>
+                              </div>
+                            </div>
 
-                                  {/* Large Progress Bar with Markers */}
-                                  <div className="relative pt-6 pb-2">
-                                    <div className="h-4 w-full bg-[var(--border)] rounded-full overflow-hidden shadow-inner">
-                                      <div
-                                        className="h-full bg-gradient-to-r from-amber-300 to-amber-600 transition-all duration-500"
-                                        style={{ width: `${Math.min(100, (dest.flightsDone / maxReq) * 100)}%` }}
-                                      />
-                                    </div>
-                                    {/* Star Markers */}
+                            <div className="flex items-center gap-1 shrink-0">
+                              <button
+                                onClick={() => updateFlightCount(dest.id, dest.flightsDone - 1)}
+                                disabled={dest.flightsDone <= 0}
+                                className="px-1.5 py-0.5 rounded bg-white/5 text-[10px] font-mono disabled:opacity-20"
+                              >
+                                -1
+                              </button>
+                              <input
+                                type="number"
+                                value={dest.flightsDone}
+                                onChange={e => updateFlightCount(dest.id, parseInt(e.target.value) || 0)}
+                                className="w-10 h-6 text-center font-mono font-semibold text-xs bg-black/40 border border-white/10 rounded theme-accent-text"
+                              />
+                              <button
+                                onClick={() => updateFlightCount(dest.id, dest.flightsDone + 1)}
+                                className="px-1.5 py-0.5 rounded theme-btn-soft text-[10px] font-mono"
+                              >
+                                +1
+                              </button>
+                              <button
+                                onClick={() => updateFlightCount(dest.id, dest.flightsDone + 5)}
+                                className="px-1.5 py-0.5 rounded theme-btn-accent text-[10px] font-mono"
+                              >
+                                +5
+                              </button>
+                              <button
+                                onClick={() => setExpandedRowId(isExpanded ? null : dest.id)}
+                                className="p-1 text-[var(--text-muted)]"
+                              >
+                                {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Expanded Drawer Details */}
+                          {isExpanded && (
+                            <div className="bg-black/30 border-t border-white/5 p-4 animate-in slide-in-from-top-2 duration-200">
+                              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                {/* Milestone Star Requirements Table */}
+                                <div className="space-y-1.5">
+                                  <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+                                    Milestone Requirements
+                                  </span>
+                                  <div className="space-y-1 font-mono text-xs">
                                     {reqs.map((req, idx) => {
-                                      const pos = (req / maxReq) * 100;
+                                      const starNum = idx + 1;
                                       const isReached = dest.flightsDone >= req;
+                                      const rankName = STAR_RANKS[idx]?.name || `Star ${starNum}`;
                                       return (
-                                        <div key={idx} className="absolute top-0 -translate-x-1/2 flex flex-col items-center" style={{ left: `${pos}%` }}>
-                                          <Star className={`w-4 h-4 mb-1 ${isReached ? 'fill-amber-400 text-amber-400' : 'text-[var(--text-muted)] opacity-30'}`} />
-                                          <div className={`w-0.5 h-6 ${isReached ? 'bg-amber-400' : 'bg-[var(--border)]'}`} />
-                                          <span className="text-[9px] font-black mt-1 text-[var(--text-muted)]">{req}</span>
+                                        <div
+                                          key={idx}
+                                          className={`flex items-center justify-between p-1.5 rounded-lg border ${
+                                            isReached
+                                              ? 'bg-amber-500/10 border-amber-500/25 text-amber-300'
+                                              : 'bg-white/5 border-white/5 text-[var(--text-muted)]'
+                                          }`}
+                                        >
+                                          <div className="flex items-center gap-1.5">
+                                            <Star className={`w-3 h-3 ${isReached ? 'fill-amber-400 text-amber-400' : 'text-gray-600'}`} />
+                                            <span>{rankName}</span>
+                                          </div>
+                                          <span>{req} flights</span>
                                         </div>
                                       );
                                     })}
                                   </div>
+                                </div>
 
-                                  {/* Detailed Metadata */}
-                                  <div className="flex items-center gap-6 mt-2">
-                                    <div className="flex items-center gap-2 text-[var(--text-muted)]">
-                                      <Clock className="w-4 h-4" />
-                                      <span className="text-[10px] font-bold uppercase">Last Flight: {formatTimestamp(dest.lastUpdated)}</span>
+                                {/* Map Inventory Tracker */}
+                                {dest.needsMap ? (
+                                  <div className="space-y-1.5">
+                                    <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+                                      Map Inventory Stock
+                                    </span>
+                                    <div className="bg-black/40 p-3 rounded-xl border border-white/5 flex items-center justify-between gap-3">
+                                      <div className="flex items-center gap-2">
+                                        <MapIcon className="w-4 h-4 theme-accent-text" />
+                                        <div>
+                                          <div className="text-xs font-medium text-[var(--text-main)]">Maps in Stock</div>
+                                          <div className="text-[10px] text-[var(--text-muted)]">Consumed per flight</div>
+                                        </div>
+                                      </div>
+                                      <div className="flex items-center gap-1">
+                                        <button
+                                          onClick={() => updateMapCount(dest.id, (dest.mapsDone || 0) - 1)}
+                                          disabled={(dest.mapsDone || 0) <= 0}
+                                          className="tactile-btn p-1 rounded bg-white/10 text-xs font-mono disabled:opacity-30"
+                                        >
+                                          <Minus className="w-3 h-3" />
+                                        </button>
+                                        <input
+                                          type="number"
+                                          value={dest.mapsDone || 0}
+                                          onChange={e => updateMapCount(dest.id, parseInt(e.target.value) || 0)}
+                                          className="w-12 text-center font-mono font-medium text-xs bg-black/40 border border-white/10 rounded py-0.5 theme-accent-text"
+                                        />
+                                        <button
+                                          onClick={() => updateMapCount(dest.id, (dest.mapsDone || 0) + 1)}
+                                          className="tactile-btn p-1 rounded theme-btn-soft text-xs font-mono"
+                                        >
+                                          <Plus className="w-3 h-3" />
+                                        </button>
+                                      </div>
                                     </div>
-                                    <div className="flex items-center gap-2 text-[var(--text-muted)]">
-                                      <Layers className="w-4 h-4" />
-                                      <span className="text-[10px] font-bold uppercase">{dest.category} • {dest.group.split(/[;,]/).map(g => g.trim()).join(', ')}</span>
+                                  </div>
+                                ) : (
+                                  <div className="space-y-1.5">
+                                    <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+                                      Route Type
+                                    </span>
+                                    <div className="p-3 rounded-xl bg-white/5 border border-white/5 text-xs text-[var(--text-muted)]">
+                                      Regular scheduled flight route. No consumable flight maps required.
+                                    </div>
+                                  </div>
+                                )}
+
+                                {/* Route Details */}
+                                <div className="space-y-1.5">
+                                  <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+                                    Route Details
+                                  </span>
+                                  <div className="bg-black/40 p-3 rounded-xl border border-white/5 space-y-1.5 text-xs">
+                                    <div className="flex justify-between">
+                                      <span className="text-[var(--text-muted)]">Category:</span>
+                                      <span className="text-[var(--text-main)]">{dest.category}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                      <span className="text-[var(--text-muted)]">Mastery:</span>
+                                      <span className="font-mono font-medium text-amber-400">
+                                        {Math.round((dest.flightsDone / maxReq) * 100)}%
+                                      </span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                      <span className="text-[var(--text-muted)]">Last Logged:</span>
+                                      <span className="font-mono text-[var(--text-main)]">{formatTimestamp(dest.lastUpdated)}</span>
                                     </div>
                                   </div>
                                 </div>
-
-                                {/* Right Side: Map Summary */}
-                                {dest.needsMap && (
-                                  <div className="p-6 rounded-3xl border border-[var(--border)] bg-[var(--card)] shadow-md flex flex-col items-center gap-4 min-w-[160px]">
-                                    <div className="flex items-center gap-2 text-[var(--accent)]">
-                                      <MapIcon className="w-5 h-5" />
-                                      <span className="text-xs font-black uppercase tracking-widest">Map Inventory</span>
-                                    </div>
-                                    <div className="text-4xl font-black text-[var(--text-main)]">{dest.mapsDone || 0}</div>
-                                    <div className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-tight">Current Stock</div>
-                                  </div>
-                                )}
                               </div>
                             </div>
                           )}
@@ -1863,33 +2771,525 @@ const AeroQuest = () => {
                       );
                     })}
                   </div>
-                </>
+                </div>
+              ) : view === 'list' ? (
+                /* COMFORTABLE FLIGHT STRIP LIST VIEW */
+                <div className="space-y-2">
+                  {sortedAndFilteredDestinations.map(dest => {
+                    const stars = getStars(dest.flightsDone, dest.star1Req, dest.star2Req, dest.star3Req, dest.star4Req, dest.star5Req);
+                    const maxStars = getMaxStars(dest);
+                    const info = getNextStarInfo(dest);
+                    const isExpanded = expandedRowId === dest.id;
+                    const reqs = [dest.star1Req, dest.star2Req, dest.star3Req];
+                    if (dest.star4Req && dest.star4Req > 0) reqs.push(dest.star4Req);
+                    if (dest.star5Req && dest.star5Req > 0) reqs.push(dest.star5Req);
+                    const maxReq = reqs[reqs.length - 1];
+                    const planeSprite = AIRCRAFT_SPRITES[dest.aircraft];
+
+                    return (
+                      <div
+                        key={dest.id}
+                        className={`glass-card rounded-2xl border transition-all overflow-hidden ${
+                          isExpanded ? 'border-[var(--border-active)] shadow-md' : 'border-[var(--border-card)]'
+                        }`}
+                      >
+                        <div className="p-3 sm:p-3.5 flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+                          <div className="flex items-center gap-3 min-w-0 flex-1">
+                            <button
+                              onClick={e => toggleBookmark(dest.id, e)}
+                              className="p-1 text-[var(--text-muted)] hover:text-amber-400 transition-colors shrink-0"
+                              title={dest.isCustomList ? 'Remove from Bookmarks' : 'Pin to Bookmarks'}
+                            >
+                              <Star
+                                className={`w-4 h-4 transition-all ${
+                                  dest.isCustomList ? 'fill-amber-400 text-amber-400 glow-star scale-110' : ''
+                                }`}
+                              />
+                            </button>
+
+                            <div className="w-9 h-9 rounded-xl bg-black/40 border border-white/10 flex items-center justify-center p-1 shrink-0 relative overflow-hidden">
+                              {dest.icon ? (
+                                <img src={dest.icon} alt={dest.destination} className="w-7 h-7 object-contain drop-shadow" />
+                              ) : planeSprite ? (
+                                <img src={planeSprite} alt={dest.aircraft} className="w-7 h-7 object-contain drop-shadow" />
+                              ) : (
+                                <Plane className="w-5 h-5 theme-accent-text" />
+                              )}
+                            </div>
+
+                            <div className="min-w-0 flex-1">
+                              <div className="flex flex-wrap items-center gap-1.5 mb-0.5">
+                                <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-medium uppercase tracking-wider theme-badge">
+                                  {dest.aircraft}
+                                </span>
+                                <span className="px-1.5 py-0.2 rounded text-[9px] font-normal text-[var(--text-muted)] bg-white/5 truncate max-w-[150px]">
+                                  {dest.group}
+                                </span>
+                                {dest.needsMap && (
+                                  <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-medium theme-badge flex items-center gap-1">
+                                    <MapIcon className="w-2.5 h-2.5" /> {dest.mapsDone || 0} Maps
+                                  </span>
+                                )}
+                              </div>
+                              <h3 className="text-sm sm:text-base font-semibold text-[var(--text-main)] tracking-tight font-heading truncate">
+                                {dest.destination}
+                              </h3>
+                            </div>
+                          </div>
+
+                          <div className="flex flex-col gap-1 min-w-[170px] lg:w-56 shrink-0">
+                            <div className="flex items-center justify-between text-xs">
+                              <div className="flex items-center gap-0.5">
+                                {Array.from({ length: maxStars }).map((_, idx) => (
+                                  <Star
+                                    key={idx}
+                                    className={`w-3 h-3 ${stars >= idx + 1 ? 'theme-star-active' : 'theme-star-inactive'}`}
+                                  />
+                                ))}
+                              </div>
+                              <span className="text-[10px] font-mono font-medium text-[var(--text-muted)]">
+                                {stars >= maxStars ? (
+                                  <span className="text-amber-400 font-semibold">★ ACE</span>
+                                ) : (
+                                  `${info.needed} to ★${info.nextStar}`
+                                )}
+                              </span>
+                            </div>
+                            <div className="h-1.5 w-full bg-black/40 rounded-full overflow-hidden flex">
+                              <div
+                                className="h-full theme-progress-fill rounded-full transition-all duration-300"
+                                style={{ width: `${Math.min(100, (dest.flightsDone / maxReq) * 100)}%` }}
+                              />
+                            </div>
+                          </div>
+
+                          <div className="flex items-center justify-between lg:justify-end gap-1.5 shrink-0">
+                            <div className="flex items-center gap-1 bg-black/30 p-0.5 rounded-xl border border-white/5">
+                              <button
+                                onClick={() => updateFlightCount(dest.id, dest.flightsDone - 1)}
+                                disabled={dest.flightsDone <= 0}
+                                className="tactile-btn px-2 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-xs font-mono font-medium disabled:opacity-20"
+                                title="Subtract 1 Flight"
+                              >
+                                -1
+                              </button>
+                              <input
+                                type="number"
+                                value={dest.flightsDone}
+                                onChange={e => updateFlightCount(dest.id, parseInt(e.target.value) || 0)}
+                                className="w-14 px-1 py-0.5 text-center font-mono font-semibold text-xs bg-transparent border-0 focus:outline-none rounded theme-accent-text"
+                              />
+                              <button
+                                onClick={() => updateFlightCount(dest.id, dest.flightsDone + 1)}
+                                className="tactile-btn px-2 py-1 rounded-lg theme-btn-soft text-xs font-mono font-medium"
+                                title="Add 1 Flight"
+                              >
+                                +1
+                              </button>
+                              <button
+                                onClick={() => updateFlightCount(dest.id, dest.flightsDone + 5)}
+                                className="tactile-btn px-2 py-1 rounded-lg theme-btn-soft text-xs font-mono font-medium"
+                                title="Add 5 Flights"
+                              >
+                                +5
+                              </button>
+                              <button
+                                onClick={() => updateFlightCount(dest.id, dest.flightsDone + 10)}
+                                className="tactile-btn px-2 py-1 rounded-lg theme-btn-accent text-xs font-mono font-medium shadow-sm"
+                                title="Add 10 Flights"
+                              >
+                                +10
+                              </button>
+                            </div>
+
+                            <button
+                              onClick={() => setExpandedRowId(isExpanded ? null : dest.id)}
+                              className={`p-1.5 rounded-xl border transition-all ${
+                                isExpanded ? 'theme-btn-soft' : 'bg-white/5 border-white/10 text-[var(--text-muted)] hover:text-white'
+                              }`}
+                              title={isExpanded ? 'Collapse Details' : 'Expand Details'}
+                            >
+                              {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                            </button>
+                          </div>
+                        </div>
+
+                        {isExpanded && (
+                          <div className="bg-black/30 border-t border-white/5 p-4 animate-in slide-in-from-top-2 duration-200">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                              <div className="space-y-1.5">
+                                <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+                                  Milestone Star Requirements
+                                </span>
+                                <div className="space-y-1 font-mono text-xs">
+                                  {reqs.map((req, idx) => {
+                                    const isReached = dest.flightsDone >= req;
+                                    return (
+                                      <div
+                                        key={idx}
+                                        className={`flex items-center justify-between p-1.5 rounded-lg border ${
+                                          isReached ? 'bg-amber-500/10 border-amber-500/25 text-amber-300' : 'bg-white/5 border-white/5 text-[var(--text-muted)]'
+                                        }`}
+                                      >
+                                        <div className="flex items-center gap-1.5">
+                                          <Star className={`w-3 h-3 ${isReached ? 'fill-amber-400 text-amber-400' : 'text-gray-600'}`} />
+                                          <span>{STAR_RANKS[idx]?.name || `Star ${idx + 1}`}</span>
+                                        </div>
+                                        <span>{req} flights</span>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+
+                              {dest.needsMap ? (
+                                <div className="space-y-1.5">
+                                  <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+                                    Map Inventory Tracker
+                                  </span>
+                                  <div className="bg-black/40 p-3 rounded-xl border border-white/5 flex items-center justify-between gap-3">
+                                    <div className="flex items-center gap-2">
+                                      <MapIcon className="w-4 h-4 theme-accent-text" />
+                                      <div>
+                                        <div className="text-xs font-medium text-[var(--text-main)]">Maps in Stock</div>
+                                        <div className="text-[10px] text-[var(--text-muted)]">Consumed per flight</div>
+                                      </div>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                      <button
+                                        onClick={() => updateMapCount(dest.id, (dest.mapsDone || 0) - 1)}
+                                        disabled={(dest.mapsDone || 0) <= 0}
+                                        className="tactile-btn p-1 rounded bg-white/10 text-xs font-mono disabled:opacity-30"
+                                      >
+                                        <Minus className="w-3 h-3" />
+                                      </button>
+                                      <input
+                                        type="number"
+                                        value={dest.mapsDone || 0}
+                                        onChange={e => updateMapCount(dest.id, parseInt(e.target.value) || 0)}
+                                        className="w-12 text-center font-mono font-medium text-xs bg-black/40 border border-white/10 rounded py-0.5 theme-accent-text"
+                                      />
+                                      <button
+                                        onClick={() => updateMapCount(dest.id, (dest.mapsDone || 0) + 1)}
+                                        className="tactile-btn p-1 rounded theme-btn-soft text-xs font-mono"
+                                      >
+                                        <Plus className="w-3 h-3" />
+                                      </button>
+                                    </div>
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className="space-y-1.5">
+                                  <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+                                    Route Access
+                                  </span>
+                                  <div className="p-3 rounded-xl bg-white/5 border border-white/5 text-xs text-[var(--text-muted)]">
+                                    Regular scheduled flight route. No consumable flight maps required.
+                                  </div>
+                                </div>
+                              )}
+
+                              <div className="space-y-1.5">
+                                <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+                                  Flight Log Details
+                                </span>
+                                <div className="bg-black/40 p-3 rounded-xl border border-white/5 space-y-1.5 text-xs">
+                                  <div className="flex justify-between">
+                                    <span className="text-[var(--text-muted)]">Division:</span>
+                                    <span className="text-[var(--text-main)]">{dest.category}</span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span className="text-[var(--text-muted)]">Mastery:</span>
+                                    <span className="font-mono font-medium text-amber-400">
+                                      {Math.round((dest.flightsDone / maxReq) * 100)}%
+                                    </span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span className="text-[var(--text-muted)]">Last Logged:</span>
+                                    <span className="font-mono text-[var(--text-main)]">{formatTimestamp(dest.lastUpdated)}</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                /* HIGH-DENSITY RADAR GRID VIEW (6-8 COLUMNS ACROSS) */
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 3xl:grid-cols-8 gap-2">
+                  {sortedAndFilteredDestinations.map(dest => {
+                    const stars = getStars(dest.flightsDone, dest.star1Req, dest.star2Req, dest.star3Req, dest.star4Req, dest.star5Req);
+                    const maxStars = getMaxStars(dest);
+                    const info = getNextStarInfo(dest);
+                    const planeSprite = AIRCRAFT_SPRITES[dest.aircraft];
+
+                    return (
+                      <div
+                        key={dest.id}
+                        className="glass-card rounded-xl p-2.5 border border-[var(--border-card)] hover:border-[var(--border-active)] transition-all space-y-2 flex flex-col justify-between group"
+                      >
+                        <div className="space-y-1.5">
+                          <div className="flex items-start justify-between gap-1">
+                            <div className="w-7 h-7 rounded-lg bg-black/40 border border-white/10 flex items-center justify-center p-0.5 shrink-0">
+                              {dest.icon ? (
+                                <img src={dest.icon} alt={dest.destination} className="w-6 h-6 object-contain" />
+                              ) : planeSprite ? (
+                                <img src={planeSprite} alt={dest.aircraft} className="w-6 h-6 object-contain" />
+                              ) : (
+                                <Plane className="w-4 h-4 theme-accent-text" />
+                              )}
+                            </div>
+                            <button
+                              onClick={e => toggleBookmark(dest.id, e)}
+                              className="p-0.5 text-[var(--text-muted)] hover:text-amber-400 transition-colors"
+                            >
+                              <Star
+                                className={`w-3.5 h-3.5 ${dest.isCustomList ? 'fill-amber-400 text-amber-400 glow-star' : ''}`}
+                              />
+                            </button>
+                          </div>
+
+                          <div>
+                            <div className="flex items-center gap-1 mb-0.5">
+                              <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-medium uppercase theme-badge truncate max-w-[70px]">
+                                {dest.aircraft}
+                              </span>
+                              {dest.needsMap && (
+                                <span className="px-1 py-0.2 rounded text-[9px] font-mono theme-badge">
+                                  🗺️{dest.mapsDone || 0}
+                                </span>
+                              )}
+                            </div>
+                            <h3 className="text-xs font-semibold text-[var(--text-main)] font-heading truncate leading-snug" title={dest.destination}>
+                              {dest.destination}
+                            </h3>
+                            <div className="text-[9px] text-[var(--text-muted)] truncate opacity-70">
+                              {dest.group}
+                            </div>
+                          </div>
+
+                          {/* Star Mastery */}
+                          <div className="space-y-1">
+                            <div className="flex items-center justify-between text-[10px]">
+                              <div className="flex items-center gap-0.5">
+                                {Array.from({ length: maxStars }).map((_, i) => (
+                                  <Star
+                                    key={i}
+                                    className={`w-2.5 h-2.5 ${stars >= i + 1 ? 'theme-star-active' : 'theme-star-inactive'}`}
+                                  />
+                                ))}
+                              </div>
+                              <span className="text-[9px] font-mono text-amber-300">
+                                {stars >= maxStars ? 'ACE' : `${info.needed} left`}
+                              </span>
+                            </div>
+
+                            <div className="h-1 w-full bg-black/40 rounded-full overflow-hidden">
+                              <div
+                                className="h-full theme-progress-fill rounded-full"
+                                style={{ width: `${Math.min(100, (dest.flightsDone / info.nextReq) * 100)}%` }}
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Quick Action Counters */}
+                        <div className="pt-1.5 border-t border-white/5 flex items-center justify-between gap-1">
+                          <button
+                            onClick={() => updateFlightCount(dest.id, dest.flightsDone - 1)}
+                            disabled={dest.flightsDone <= 0}
+                            className="tactile-btn px-1.5 py-0.5 rounded bg-white/5 hover:bg-white/10 text-[10px] font-mono disabled:opacity-20"
+                          >
+                            -1
+                          </button>
+                          <input
+                            type="number"
+                            value={dest.flightsDone}
+                            onChange={e => updateFlightCount(dest.id, parseInt(e.target.value) || 0)}
+                            className="w-10 text-center font-mono font-semibold text-[11px] bg-black/30 border border-white/10 rounded py-0.5 theme-accent-text"
+                          />
+                          <button
+                            onClick={() => updateFlightCount(dest.id, dest.flightsDone + 1)}
+                            className="tactile-btn px-1.5 py-0.5 rounded theme-btn-soft font-mono font-medium text-[10px]"
+                          >
+                            +1
+                          </button>
+                          <button
+                            onClick={() => updateFlightCount(dest.id, dest.flightsDone + 5)}
+                            className="tactile-btn px-1.5 py-0.5 rounded theme-btn-accent font-mono font-medium text-[10px] shadow-sm"
+                          >
+                            +5
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               )}
             </div>
-          </div>
-        )}
-      </main>
+          )}
+        </main>
+      </div>
 
-      {/* Switched to Quicksand for an even softer, more rounded font experience */}
-      <style dangerouslySetInnerHTML={{
-        __html: `
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=Anton&display=swap');
-        * { font-family: 'Inter', sans-serif !important; }
-        :root { --bg: #7A98A8; --sidebar: #5C7C8C; --card: #B0C4CE; --text-main: #1A2B34; --text-muted: #4A606C; --accent: #00A0D6; --accent-muted: #FFB833; --border: #5C7C8C; }
-        .theme-classic { --bg: #7A98A8; --sidebar: #5C7C8C; --card: #B0C4CE; --text-main: #1A2B34; --text-muted: #4A606C; --accent: #00A0D6; --accent-muted: #FFB833; --border: #5C7C8C; }
-        .theme-dark { --bg: #0a0e17; --sidebar: #111827; --card: #1f2937; --text-main: #f1f5f9; --text-muted: #94a3b8; --accent: #818cf8; --accent-muted: #1e1b4b; --border: #334155; }
-        .theme-ocean { --bg: #0c1c2e; --sidebar: #13273e; --card: #1a365d; --text-main: #ffffff; --text-muted: #94a3b8; --accent: #38bdf8; --accent-muted: #082f49; --border: #1e40af; }
-        .theme-nord { --bg: #2e3440; --sidebar: #3b4252; --card: #434c5e; --text-main: #eceff4; --text-muted: #d8dee9; --accent: #88c0d0; --accent-muted: #4c566a; --border: #4c566a; }
-        .theme-dracula { --bg: #282a36; --sidebar: #44475a; --card: #282a36; --text-main: #f8f8f2; --text-muted: #a695e7; --accent: #bd93f9; --accent-muted: #44475a; --border: #6272a4; }
-        .theme-gruvbox { --bg: #282828; --sidebar: #3c3836; --card: #282828; --text-main: #ebdbb2; --text-muted: #a89984; --accent: #fabd2f; --accent-muted: #3c3836; --border: #504945; }
-        .theme-forest { --bg: #061a06; --sidebar: #0b2e0b; --card: #061a06; --text-main: #e8f5e9; --text-muted: #bbf7d0; --accent: #4caf50; --accent-muted: #0b2e0b; --border: #1b5e20; }
-        .theme-sunset { --bg: #2d1b2e; --sidebar: #1a0f1c; --card: #3d263f; --text-main: #fceabb; --text-muted: #f8b500; --accent: #ff6b6b; --accent-muted: #592e3c; --border: #592e3c; }
-        .theme-abyss { --bg: #000814; --sidebar: #000000; --card: #001233; --text-main: #e0fbfc; --text-muted: #98c1d9; --accent: #ee6c4d; --accent-muted: #002855; --border: #002855; }
-        .theme-solarized_dark { --bg: #002b36; --sidebar: #073642; --card: #002b36; --text-main: #839496; --text-muted: #586e75; --accent: #b58900; --accent-muted: #073642; --border: #586e75; }
-        .custom-scrollbar::-webkit-scrollbar { width: 5px; height: 5px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-      `}} />
+      {/* Theme Picker Modal */}
+      {showThemeModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+          <div className="glass-panel bg-[var(--bg-card)] p-6 sm:p-7 rounded-3xl w-full max-w-2xl border border-[var(--border-card)] shadow-2xl space-y-6">
+            <div className="flex justify-between items-center pb-4 border-b border-white/10">
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 rounded-2xl theme-badge flex items-center justify-center">
+                  <Palette className="w-5 h-5 theme-accent-text" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-lg text-[var(--text-main)] font-heading">
+                    Color Themes
+                  </h3>
+                  <p className="text-xs text-[var(--text-muted)]">
+                    Change the color theme of AC-Tracker.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowThemeModal(false)}
+                className="p-2 text-[var(--text-muted)] hover:text-[var(--text-main)] rounded-xl hover:bg-white/5 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 max-h-[65vh] overflow-y-auto custom-scrollbar pr-1">
+              {(Object.entries(THEME_CONFIGS) as [ThemeId, ThemeConfig][]).map(([id, cfg]) => {
+                const isSelected = theme === id;
+                return (
+                  <button
+                    key={id}
+                    onClick={() => {
+                      setTheme(id);
+                      setShowThemeModal(false);
+                    }}
+                    style={{
+                      borderColor: isSelected ? cfg.accentPreview : undefined,
+                      boxShadow: isSelected ? `0 0 22px -3px ${cfg.accentPreview}40` : undefined,
+                    }}
+                    className={`tactile-btn p-4 rounded-2xl border text-left transition-all relative overflow-hidden flex flex-col justify-between gap-3 group ${
+                      isSelected
+                        ? 'bg-[var(--bg-surface)] border-2'
+                        : 'bg-black/25 border-white/10 hover:border-white/20 hover:bg-white/5'
+                    }`}
+                  >
+                    {/* Atmospheric color swatch strip */}
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        {/* 3-Tone Cockpit Palette Stripe */}
+                        <div className="flex items-center rounded-lg overflow-hidden border border-white/15 shadow-inner">
+                          <div className="w-4 h-5" style={{ backgroundColor: cfg.bgPreview }} title="Void Base" />
+                          <div className="w-4 h-5" style={{ backgroundColor: cfg.surfacePreview }} title="Surface Card" />
+                          <div className="w-5 h-5 flex items-center justify-center" style={{ backgroundColor: cfg.accentPreview }} title="HUD Accent">
+                            {isSelected && <Check className="w-3.5 h-3.5 text-slate-950 font-bold" />}
+                          </div>
+                        </div>
+
+                        <span
+                          className="text-[9px] font-mono font-medium px-2 py-0.5 rounded-full border uppercase tracking-wider"
+                          style={{
+                            color: cfg.accentPreview,
+                            borderColor: `${cfg.accentPreview}40`,
+                            backgroundColor: `${cfg.accentPreview}15`,
+                          }}
+                        >
+                          {cfg.tag}
+                        </span>
+                      </div>
+
+                      {isSelected && (
+                        <span
+                          className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full"
+                          style={{
+                            backgroundColor: cfg.accentPreview,
+                            color: cfg.isDark ? '#020617' : '#ffffff',
+                          }}
+                        >
+                          ACTIVE
+                        </span>
+                      )}
+                    </div>
+
+                    <div>
+                      <div className="text-sm font-semibold font-heading text-[var(--text-main)] group-hover:text-white transition-colors">
+                        {cfg.name}
+                      </div>
+                      <div className="text-[11px] text-[var(--text-muted)] line-clamp-2 mt-0.5 leading-snug">
+                        {cfg.desc}
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Backup & JSON Tools Modal */}
+      {showBackupModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+          <div className="glass-panel bg-[var(--bg-card)] p-6 rounded-3xl w-full max-w-md border border-[var(--border-card)] shadow-2xl space-y-5">
+            <div className="flex justify-between items-center pb-3 border-b border-white/10">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl theme-badge flex items-center justify-center">
+                  <Download className="w-5 h-5 theme-accent-text" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-base text-[var(--text-main)] font-heading">Data Management</h3>
+                  <p className="text-xs text-[var(--text-muted)]">Backup, restore, or reset your flight progress.</p>
+                </div>
+              </div>
+              <button onClick={() => setShowBackupModal(false)} className="p-1.5 text-gray-400 hover:text-white rounded-lg">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              <button
+                onClick={exportToJSON}
+                className="tactile-btn w-full p-4 rounded-2xl bg-black/30 border border-white/10 hover:border-[var(--border-active)] flex items-center justify-between text-left group transition-all"
+              >
+                <div>
+                  <div className="text-xs font-medium text-[var(--text-main)] group-hover:text-[var(--accent)]">Export Progress to JSON</div>
+                  <div className="text-[10px] text-[var(--text-muted)]">Download a timestamped snapshot of all flights & fleet</div>
+                </div>
+                <Download className="w-4 h-4 theme-accent-text" />
+              </button>
+
+              <label className="tactile-btn w-full p-4 rounded-2xl bg-black/30 border border-white/10 hover:border-[var(--border-active)] flex items-center justify-between text-left group transition-all cursor-pointer">
+                <div>
+                  <div className="text-xs font-medium text-[var(--text-main)] group-hover:text-[var(--accent)]">Import Backup JSON</div>
+                  <div className="text-[10px] text-[var(--text-muted)]">Restore your previously saved flight logs</div>
+                </div>
+                <Upload className="w-4 h-4 theme-accent-text" />
+                <input ref={fileInputRef} type="file" accept=".json" className="hidden" onChange={handleImportJSON} />
+              </label>
+
+              <div className="pt-2">
+                <button
+                  onClick={resetAllData}
+                  className={`w-full p-3.5 rounded-2xl border text-xs font-medium transition-all flex items-center justify-center gap-2 ${
+                    showResetConfirm
+                      ? 'bg-rose-600 border-rose-700 text-white animate-pulse font-semibold'
+                      : 'bg-rose-500/10 border-rose-500/20 text-rose-400 hover:bg-rose-500/20'
+                  }`}
+                >
+                  <Trash2 className="w-4 h-4" />
+                  {showResetConfirm ? 'Click Again to Confirm Reset!' : 'Reset All Progress'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
