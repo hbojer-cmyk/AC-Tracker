@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Plus, Trash2, X, Plane, Sliders, Zap, Coins, Gift, ShieldAlert, Sparkles, Filter } from 'lucide-react';
+import { Plus, Trash2, X, Plane, Sliders, Zap, Coins, Gift, ShieldAlert, Sparkles, Filter, Gauge, CircleDollarSign, Package } from 'lucide-react';
 import { OWNABLE_AIRCRAFT, AircraftInstance, getAircraftTypeFromName, adjustAircraftList } from './src/aircraftData';
 
 export const AIRCRAFT_SPRITES: Record<string, string> = {
@@ -10,10 +10,13 @@ export const AIRCRAFT_SPRITES: Record<string, string> = {
   Raven: 'icons/aircraft/raven.png',
   Eagle: 'icons/aircraft/eagle.png',
   Jumbo: 'icons/aircraft/jumbo.png',
-  Giant: 'icons/aircraft/gianr.png',
+  Giant: 'icons/aircraft/giant.png',
   Falcon: 'icons/aircraft/falcon.png',
   Thunderbird: 'icons/aircraft/thunderbird.png',
   Condor: 'icons/aircraft/condor.png',
+  Sparrow: 'icons/aircraft/sparrow.png',
+  Crossbill: 'icons/aircraft/crossbill.png',
+  Goldfinch: 'icons/aircraft/goldfinch.png',
 };
 
 export const AirplanesPage = () => {
@@ -92,16 +95,8 @@ export const AirplanesPage = () => {
     return list.filter(a => getAircraftType(a) === filterType);
   }, [ownedAirplanes, filterType]);
 
-  const fleetStats = useMemo(() => {
-    const total = ownedAirplanes.length;
-    const avgSpeed = total ? Math.round(ownedAirplanes.reduce((acc, a) => acc + (a.speed || 0), 0) / total) : 0;
-    const avgProfit = total ? Math.round(ownedAirplanes.reduce((acc, a) => acc + (a.profit || 0), 0) / total) : 0;
-    const avgDrop = total ? Math.round(ownedAirplanes.reduce((acc, a) => acc + (a.itemDrop || 0), 0) / total) : 0;
-    return { total, avgSpeed, avgProfit, avgDrop };
-  }, [ownedAirplanes]);
-
   return (
-    <div className="max-w-6xl mx-auto space-y-6 pb-12 animate-in fade-in duration-300">
+    <div className="space-y-6 pb-12 animate-in fade-in duration-300">
       {/* Header HUD Banner */}
       <div className="glass-panel rounded-3xl p-6 sm:p-8 relative overflow-hidden border border-[var(--border-card)] shadow-xl">
         <div
@@ -110,52 +105,26 @@ export const AirplanesPage = () => {
         />
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-2xl theme-badge flex items-center justify-center shadow-inner shrink-0">
-              <Plane className="w-8 h-8 rotate-45 theme-accent-text" />
+            <div className="w-16 h-16 rounded-2xl theme-badge flex items-center justify-center shadow-inner shrink-0 p-2 overflow-hidden">
+              <img src="Map-icons/standard_icon.png" alt="Aircraft Collection" className="w-11 h-11 object-contain drop-shadow" />
             </div>
             <div>
-              <div className="flex items-center gap-2 mb-1">
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-medium uppercase tracking-wider theme-badge">
-                  Hangar Bay Operations
-                </span>
-                <span className="text-xs text-[var(--text-muted)] font-mono">
-                  {fleetStats.total} Commissioned
-                </span>
-              </div>
               <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-[var(--text-main)] font-heading">
-                Aircraft Fleet Command
+                Aircraft Collection
               </h1>
               <p className="text-xs sm:text-sm text-[var(--text-muted)] mt-0.5 font-normal">
-                Manage your active aircraft roster, configure performance upgrades, and inspect fleet bonuses.
+                Keep track of your Aircraft and their properties
               </p>
             </div>
           </div>
 
-          {/* Quick Fleet Averages */}
-          <div className="grid grid-cols-3 gap-2 sm:gap-3 bg-black/20 p-3 rounded-2xl border border-white/5 shrink-0">
-            <div className="text-center px-3 py-1">
-              <div className="flex items-center justify-center gap-1 text-[10px] font-medium uppercase text-emerald-400 tracking-wider">
-                <Zap className="w-3 h-3" /> Speed
-              </div>
-              <div className="text-lg font-mono font-semibold text-emerald-300 mt-0.5">
-                +{fleetStats.avgSpeed}%
-              </div>
+          {/* Right-side HUD Counter Box */}
+          <div className="bg-black/20 px-6 py-2.5 rounded-2xl border border-white/5 shrink-0 text-center min-w-[120px]">
+            <div className="text-[10px] font-medium uppercase theme-accent-text tracking-wider">
+              Fleet Size
             </div>
-            <div className="text-center px-3 py-1 border-x border-white/10">
-              <div className="flex items-center justify-center gap-1 text-[10px] font-medium uppercase text-amber-400 tracking-wider">
-                <Coins className="w-3 h-3" /> Profit
-              </div>
-              <div className="text-lg font-mono font-semibold text-amber-300 mt-0.5">
-                +{fleetStats.avgProfit}%
-              </div>
-            </div>
-            <div className="text-center px-3 py-1">
-              <div className="flex items-center justify-center gap-1 text-[10px] font-medium uppercase theme-accent-text tracking-wider">
-                <Gift className="w-3 h-3" /> Drop
-              </div>
-              <div className="text-lg font-mono font-semibold theme-accent-text mt-0.5">
-                +{fleetStats.avgDrop}%
-              </div>
+            <div className="text-2xl font-heading font-semibold theme-accent-text mt-0.5">
+              {ownedAirplanes.length}
             </div>
           </div>
         </div>
@@ -186,50 +155,52 @@ export const AirplanesPage = () => {
             disabled={!newNickname.trim()}
             className="tactile-btn px-6 py-3 rounded-xl theme-btn-accent font-medium text-sm shadow-lg disabled:opacity-40 disabled:pointer-events-none flex items-center justify-center gap-2 shrink-0 transition-all"
           >
-            <Plus className="w-4 h-4" /> Commission Aircraft
+            <Plus className="w-4 h-4" /> Add New Aircraft
           </button>
         </form>
       </div>
 
-      {/* Fleet Filter Strip */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-2 custom-scrollbar">
-        <button
-          onClick={() => setFilterType('All')}
-          className={`px-3.5 py-1.5 rounded-xl text-xs font-medium transition-all shrink-0 flex items-center gap-1.5 ${
-            filterType === 'All'
-              ? 'theme-btn-accent shadow-md font-semibold'
-              : 'bg-black/20 hover:bg-white/10 text-[var(--text-muted)] hover:text-white border border-white/5'
-          }`}
-        >
-          <span>All Classes</span>
-          <span className="px-1.5 py-0.2 rounded-full bg-black/30 text-[10px] font-mono">
-            {ownedAirplanes.length}
-          </span>
-        </button>
+      {/* Fleet Filter Bar (Responsive Wrapped Layout - No Scrolling Required) */}
+      <div className="glass-panel rounded-2xl p-3 sm:p-3.5 border border-[var(--border-card)]">
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            onClick={() => setFilterType('All')}
+            className={`px-3.5 py-1.5 rounded-xl text-xs transition-all flex items-center gap-2 border ${
+              filterType === 'All'
+                ? 'theme-btn-accent shadow-md font-semibold border-transparent'
+                : 'bg-black/30 hover:bg-white/10 text-[var(--text-muted)] hover:text-white border-white/5 font-medium'
+            }`}
+          >
+            <span>All Classes</span>
+            <span className="min-w-[18px] h-[18px] px-1.5 rounded-full bg-black/40 text-[10px] font-mono flex items-center justify-center font-bold">
+              {ownedAirplanes.length}
+            </span>
+          </button>
 
-        {OWNABLE_AIRCRAFT.filter(type => ownedAirplanes.some(a => getAircraftType(a) === type)).map(type => {
-          const count = ownedAirplanes.filter(a => getAircraftType(a) === type).length;
-          const isSelected = filterType === type;
-          return (
-            <button
-              key={type}
-              onClick={() => setFilterType(isSelected ? 'All' : type)}
-              className={`px-3 py-1.5 rounded-xl text-xs transition-all shrink-0 flex items-center gap-2 border ${
-                isSelected
-                  ? 'theme-btn-soft shadow-sm font-semibold'
-                  : 'bg-black/20 hover:bg-white/10 text-[var(--text-muted)] hover:text-white border-white/5 font-medium'
-              }`}
-            >
-              {AIRCRAFT_SPRITES[type] && (
-                <img src={AIRCRAFT_SPRITES[type]} alt={type} className="w-4 h-4 object-contain" />
-              )}
-              <span>{type}</span>
-              <span className="w-4 h-4 rounded-full theme-badge text-[10px] font-mono flex items-center justify-center font-normal">
-                {count}
-              </span>
-            </button>
-          );
-        })}
+          {OWNABLE_AIRCRAFT.filter(type => ownedAirplanes.some(a => getAircraftType(a) === type)).map(type => {
+            const count = ownedAirplanes.filter(a => getAircraftType(a) === type).length;
+            const isSelected = filterType === type;
+            return (
+              <button
+                key={type}
+                onClick={() => setFilterType(isSelected ? 'All' : type)}
+                className={`px-3 py-1.5 rounded-xl text-xs transition-all flex items-center gap-2 border ${
+                  isSelected
+                    ? 'theme-btn-soft shadow-sm font-semibold border-transparent'
+                    : 'bg-black/30 hover:bg-white/10 text-[var(--text-muted)] hover:text-white border-white/5 font-medium'
+                }`}
+              >
+                {AIRCRAFT_SPRITES[type] && (
+                  <img src={AIRCRAFT_SPRITES[type]} alt={type} className="w-4 h-4 object-contain shrink-0" />
+                )}
+                <span>{type}</span>
+                <span className="min-w-[18px] h-[18px] px-1 rounded-full theme-badge text-[10px] font-mono flex items-center justify-center font-bold">
+                  {count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Aircraft Grid Roster */}
@@ -244,7 +215,7 @@ export const AirplanesPage = () => {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {filteredAirplanes.map((airplane, index) => {
             const type = getAircraftType(airplane);
             const sprite = AIRCRAFT_SPRITES[type];
@@ -313,51 +284,55 @@ export const AirplanesPage = () => {
                   </div>
                 </div>
 
-                {/* Stat Meters */}
-                <div className="space-y-2 pt-3 border-t border-white/5">
+                {/* Aircraft Properties (In-Game Wording & Styling) */}
+                <div className="space-y-2 pt-3 border-t border-white/5 bg-black/20 p-2.5 rounded-xl border border-white/5">
                   <div className="flex items-center justify-between text-xs font-normal">
-                    <span className="text-[11px] text-[var(--text-muted)] flex items-center gap-1.5">
-                      <Zap className="w-3.5 h-3.5 text-emerald-400" /> Speed Bonus
+                    <span className="text-xs text-[var(--text-main)] flex items-center gap-2">
+                      <Gauge className="w-4 h-4 text-white/90 shrink-0" /> Speed
                     </span>
-                    <span className={`font-mono ${airplane.speed > 0 ? 'text-emerald-400 font-semibold' : 'text-[var(--text-faint)]'}`}>
-                      +{airplane.speed}%
+                    <span
+                      className={`px-2.5 py-0.5 rounded-full text-xs font-mono font-bold ${
+                        airplane.speed > 0
+                          ? 'bg-[#45c900] text-white shadow-sm'
+                          : 'bg-white/10 text-[var(--text-faint)]'
+                      }`}
+                    >
+                      {airplane.speed > 0 ? `+ ${airplane.speed}%` : '+ 0%'}
                     </span>
-                  </div>
-                  <div className="h-1.5 w-full bg-black/40 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-emerald-500 rounded-full transition-all"
-                      style={{ width: `${Math.min(100, airplane.speed * 2)}%` }}
-                    />
                   </div>
 
-                  <div className="flex items-center justify-between text-xs pt-1 font-normal">
-                    <span className="text-[11px] text-[var(--text-muted)] flex items-center gap-1.5">
-                      <Coins className="w-3.5 h-3.5 text-amber-400" /> Profit Bonus
+                  <div className="flex items-center justify-between text-xs font-normal">
+                    <span className="text-xs text-[var(--text-main)] flex items-center gap-2">
+                      <CircleDollarSign className="w-4 h-4 text-white/90 shrink-0" /> Profit
                     </span>
-                    <span className={`font-mono ${airplane.profit > 0 ? 'text-amber-400 font-semibold' : 'text-[var(--text-faint)]'}`}>
-                      +{airplane.profit}%
+                    <span
+                      className={`px-2.5 py-0.5 rounded-full text-xs font-mono font-bold ${
+                        airplane.profit > 0
+                          ? 'bg-[#45c900] text-white shadow-sm'
+                          : 'bg-white/10 text-[var(--text-faint)]'
+                      }`}
+                    >
+                      {airplane.profit > 0 ? `+ ${airplane.profit}%` : '+ 0%'}
                     </span>
-                  </div>
-                  <div className="h-1.5 w-full bg-black/40 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-amber-500 rounded-full transition-all"
-                      style={{ width: `${Math.min(100, airplane.profit * 2)}%` }}
-                    />
                   </div>
 
-                  <div className="flex items-center justify-between text-xs pt-1 font-normal">
-                    <span className="text-[11px] text-[var(--text-muted)] flex items-center gap-1.5">
-                      <Gift className="w-3.5 h-3.5 theme-accent-text" /> Item Drop
+                  <div className="flex items-center justify-between text-xs font-normal">
+                    <span className="text-xs text-[var(--text-main)] flex items-center gap-2">
+                      <svg className="w-4 h-4 text-white/90 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M17.8 19.2L16 11l3.5-3.5C21 6 21.5 4 21 3.5c-.5-.5-2.5 0-4 1.5L13.5 8.5l-8.2-1.8c-.5-.1-.9.1-1.2.4l-.9.9c-.3.3-.2.8.2 1l6 3.7-3.4 3.4-2.8-.4c-.4-.1-.7.1-.9.3l-.5.5c-.3.3-.2.7.2.9l3.3 2 2 3.3c.2.4.6.5.9.2l.5-.5c.2-.2.4-.5.3-.9l-.4-2.8 3.4-3.4 3.7 6c.2.4.7.5 1 .2l.9-.9c.3-.3.5-.7.4-1.2z" />
+                        <rect x="2" y="15" width="5" height="5" rx="1" fill="currentColor" fillOpacity="0.4" />
+                      </svg>
+                      Drop chance:
                     </span>
-                    <span className={`font-mono ${airplane.itemDrop > 0 ? 'theme-accent-text font-semibold' : 'text-[var(--text-faint)]'}`}>
-                      +{airplane.itemDrop}%
+                    <span
+                      className={`px-2.5 py-0.5 rounded-full text-xs font-mono font-bold ${
+                        airplane.itemDrop > 0
+                          ? 'bg-[#45c900] text-white shadow-sm'
+                          : 'bg-white/10 text-[var(--text-faint)]'
+                      }`}
+                    >
+                      {airplane.itemDrop > 0 ? `+ ${airplane.itemDrop}%` : '+ 0%'}
                     </span>
-                  </div>
-                  <div className="h-1.5 w-full bg-black/40 rounded-full overflow-hidden">
-                    <div
-                      className="h-full theme-progress-fill rounded-full transition-all"
-                      style={{ width: `${Math.min(100, airplane.itemDrop * 2)}%` }}
-                    />
                   </div>
                 </div>
               </div>
@@ -392,56 +367,111 @@ export const AirplanesPage = () => {
               </button>
             </div>
 
-            <div className="space-y-4 font-normal">
-              <div>
-                <div className="flex justify-between text-xs text-[var(--text-muted)] mb-1.5">
-                  <span className="flex items-center gap-1 text-emerald-400 font-medium">
-                    <Zap className="w-3.5 h-3.5" /> Speed Bonus (+%)
+            <div className="space-y-5 font-normal">
+              {/* Speed Slider */}
+              <div className="space-y-2 bg-black/20 p-3 rounded-2xl border border-white/5">
+                <div className="flex justify-between items-center text-xs">
+                  <span className="flex items-center gap-1.5 text-white/90 font-medium">
+                    <Gauge className="w-4 h-4 text-emerald-400" /> Speed
                   </span>
-                  <span className="font-mono text-emerald-300 font-semibold">{editStats.speed}%</span>
+                  <span
+                    className={`px-2.5 py-0.5 rounded-full text-xs font-mono font-bold ${
+                      editStats.speed > 0
+                        ? 'bg-[#45c900] text-white shadow-sm'
+                        : 'bg-white/10 text-[var(--text-faint)]'
+                    }`}
+                  >
+                    + {editStats.speed}%
+                  </span>
                 </div>
                 <input
-                  type="number"
+                  type="range"
                   min="0"
                   max="100"
+                  step="5"
                   value={editStats.speed}
-                  onChange={(e) => setEditStats({ ...editStats, speed: Math.max(0, parseInt(e.target.value) || 0) })}
-                  className="w-full p-2.5 border border-white/10 rounded-xl bg-black/40 text-[var(--text-main)] font-mono text-sm focus:outline-none focus:border-emerald-500 font-normal"
+                  onChange={(e) => setEditStats({ ...editStats, speed: parseInt(e.target.value) || 0 })}
+                  className="stat-slider cursor-pointer"
                 />
+                <div className="flex justify-between text-[10px] text-[var(--text-faint)] font-mono px-0.5">
+                  <span>0%</span>
+                  <span>25%</span>
+                  <span>50%</span>
+                  <span>75%</span>
+                  <span>100%</span>
+                </div>
               </div>
 
-              <div>
-                <div className="flex justify-between text-xs text-[var(--text-muted)] mb-1.5">
-                  <span className="flex items-center gap-1 text-amber-400 font-medium">
-                    <Coins className="w-3.5 h-3.5" /> Profit Bonus (+%)
+              {/* Profit Slider */}
+              <div className="space-y-2 bg-black/20 p-3 rounded-2xl border border-white/5">
+                <div className="flex justify-between items-center text-xs">
+                  <span className="flex items-center gap-1.5 text-white/90 font-medium">
+                    <CircleDollarSign className="w-4 h-4 text-amber-400" /> Profit
                   </span>
-                  <span className="font-mono text-amber-300 font-semibold">{editStats.profit}%</span>
+                  <span
+                    className={`px-2.5 py-0.5 rounded-full text-xs font-mono font-bold ${
+                      editStats.profit > 0
+                        ? 'bg-[#45c900] text-white shadow-sm'
+                        : 'bg-white/10 text-[var(--text-faint)]'
+                    }`}
+                  >
+                    + {editStats.profit}%
+                  </span>
                 </div>
                 <input
-                  type="number"
+                  type="range"
                   min="0"
                   max="100"
+                  step="5"
                   value={editStats.profit}
-                  onChange={(e) => setEditStats({ ...editStats, profit: Math.max(0, parseInt(e.target.value) || 0) })}
-                  className="w-full p-2.5 border border-white/10 rounded-xl bg-black/40 text-[var(--text-main)] font-mono text-sm focus:outline-none focus:border-amber-500 font-normal"
+                  onChange={(e) => setEditStats({ ...editStats, profit: parseInt(e.target.value) || 0 })}
+                  className="stat-slider cursor-pointer"
                 />
+                <div className="flex justify-between text-[10px] text-[var(--text-faint)] font-mono px-0.5">
+                  <span>0%</span>
+                  <span>25%</span>
+                  <span>50%</span>
+                  <span>75%</span>
+                  <span>100%</span>
+                </div>
               </div>
 
-              <div>
-                <div className="flex justify-between text-xs text-[var(--text-muted)] mb-1.5">
-                  <span className="flex items-center gap-1 theme-accent-text font-medium">
-                    <Gift className="w-3.5 h-3.5" /> Item Drop Bonus (+%)
+              {/* Drop Chance Slider */}
+              <div className="space-y-2 bg-black/20 p-3 rounded-2xl border border-white/5">
+                <div className="flex justify-between items-center text-xs">
+                  <span className="flex items-center gap-1.5 text-white/90 font-medium">
+                    <svg className="w-4 h-4 text-cyan-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M17.8 19.2L16 11l3.5-3.5C21 6 21.5 4 21 3.5c-.5-.5-2.5 0-4 1.5L13.5 8.5l-8.2-1.8c-.5-.1-.9.1-1.2.4l-.9.9c-.3.3-.2.8.2 1l6 3.7-3.4 3.4-2.8-.4c-.4-.1-.7.1-.9.3l-.5.5c-.3.3-.2.7.2.9l3.3 2 2 3.3c.2.4.6.5.9.2l.5-.5c.2-.2.4-.5.3-.9l-.4-2.8 3.4-3.4 3.7 6c.2.4.7.5 1 .2l.9-.9c.3-.3.5-.7.4-1.2z" />
+                      <rect x="2" y="15" width="5" height="5" rx="1" fill="currentColor" fillOpacity="0.4" />
+                    </svg>
+                    Drop chance:
                   </span>
-                  <span className="font-mono theme-accent-text font-semibold">{editStats.itemDrop}%</span>
+                  <span
+                    className={`px-2.5 py-0.5 rounded-full text-xs font-mono font-bold ${
+                      editStats.itemDrop > 0
+                        ? 'bg-[#45c900] text-white shadow-sm'
+                        : 'bg-white/10 text-[var(--text-faint)]'
+                    }`}
+                  >
+                    + {editStats.itemDrop}%
+                  </span>
                 </div>
                 <input
-                  type="number"
+                  type="range"
                   min="0"
                   max="100"
+                  step="5"
                   value={editStats.itemDrop}
-                  onChange={(e) => setEditStats({ ...editStats, itemDrop: Math.max(0, parseInt(e.target.value) || 0) })}
-                  className="w-full p-2.5 border border-white/10 rounded-xl bg-black/40 text-[var(--text-main)] font-mono text-sm focus:outline-none focus:border-[var(--border-active)] font-normal"
+                  onChange={(e) => setEditStats({ ...editStats, itemDrop: parseInt(e.target.value) || 0 })}
+                  className="stat-slider cursor-pointer"
                 />
+                <div className="flex justify-between text-[10px] text-[var(--text-faint)] font-mono px-0.5">
+                  <span>0%</span>
+                  <span>25%</span>
+                  <span>50%</span>
+                  <span>75%</span>
+                  <span>100%</span>
+                </div>
               </div>
             </div>
 

@@ -3,6 +3,10 @@
 @tailwind utilities;
 
 @layer base {
+  html {
+    scrollbar-gutter: stable;
+  }
+
   :root {
     --font-heading: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
     --font-ui: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -30,6 +34,9 @@
     --badge-bg: rgba(0, 229, 255, 0.12);
     --badge-border: rgba(0, 229, 255, 0.28);
     --badge-text: #00e5ff;
+    --table-header-bg: rgba(0, 0, 0, 0.55);
+    --table-header-border: rgba(255, 255, 255, 0.08);
+    --table-header-text: var(--text-muted);
 
     /* Legacy variable mappings for backward compatibility */
     --bg: var(--bg-base);
@@ -199,6 +206,9 @@
     --badge-bg: rgba(194, 148, 56, 0.1);
     --badge-border: rgba(194, 148, 56, 0.25);
     --badge-text: #87641c;
+    --table-header-bg: rgba(244, 246, 250, 0.96);
+    --table-header-border: rgba(15, 23, 42, 0.08);
+    --table-header-text: #334155;
   }
 
   /* 7. Theme: Red Flag Combat (Night Vision FLIR / NVG) */
@@ -376,6 +386,9 @@
     --badge-bg: rgba(2, 132, 199, 0.1);
     --badge-border: rgba(2, 132, 199, 0.25);
     --badge-text: #0369a1;
+    --table-header-bg: rgba(241, 245, 249, 0.96);
+    --table-header-border: rgba(2, 132, 199, 0.18);
+    --table-header-text: #334155;
   }
 
   body {
@@ -563,12 +576,23 @@
 }
 
 /* Compact Flight Operations Table Styling */
+.dense-table-header {
+  background-color: var(--table-header-bg, rgba(0, 0, 0, 0.55));
+  border-bottom: 1px solid var(--table-header-border, rgba(255, 255, 255, 0.08));
+  color: var(--table-header-text, var(--text-muted));
+}
+
 .dense-table-row {
   min-height: 40px;
 }
 
 .dense-table-row:hover {
   background-color: rgba(255, 255, 255, 0.025);
+}
+
+.theme-alpine-flight .dense-table-row:hover,
+.theme-first-class .dense-table-row:hover {
+  background-color: rgba(2, 132, 199, 0.04);
 }
 
 .custom-scrollbar::-webkit-scrollbar {
@@ -588,3 +612,87 @@
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: var(--accent);
 }
+
+/* Enhanced Number Input Styling & Readability */
+input[type="number"].hide-arrows::-webkit-outer-spin-button,
+input[type="number"].hide-arrows::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"].hide-arrows {
+  -moz-appearance: textfield;
+}
+
+.number-input-prominent {
+  font-family: var(--font-mono);
+  font-feature-settings: 'tnum' on, 'lnum' on;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  font-weight: 700;
+  transition: all 0.15s ease-in-out;
+}
+
+.number-input-prominent:focus {
+  outline: none;
+  border-color: var(--border-active);
+  box-shadow: 0 0 0 2px var(--accent-glow);
+}
+
+/* Range Slider Styling for Stat Modifiers (5% steps) */
+.stat-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 8px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 9999px;
+  outline: none;
+  transition: all 0.15s ease-in-out;
+}
+
+.stat-slider:focus {
+  border-color: #45c900;
+  box-shadow: 0 0 0 2px rgba(69, 201, 0, 0.25);
+}
+
+.stat-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #45c900;
+  border: 2.5px solid #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4), 0 0 8px rgba(69, 201, 0, 0.5);
+  cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.stat-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.5), 0 0 12px rgba(69, 201, 0, 0.8);
+}
+
+.stat-slider::-webkit-slider-thumb:active {
+  transform: scale(1.05);
+}
+
+.stat-slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #45c900;
+  border: 2.5px solid #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4), 0 0 8px rgba(69, 201, 0, 0.5);
+  cursor: pointer;
+}
+
+.stat-slider::-moz-range-track {
+  height: 8px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 9999px;
+}
+

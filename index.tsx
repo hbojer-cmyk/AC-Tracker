@@ -32,7 +32,6 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   PanelLeft,
-  Crosshair,
   Compass,
   Sparkles,
   Sliders,
@@ -45,7 +44,8 @@ import {
   Zap,
   RefreshCw,
   Eye,
-  EyeOff
+  EyeOff,
+  Info
 } from 'lucide-react';
 import {
   BarChart,
@@ -60,7 +60,13 @@ import {
 import { RAW_MASTER_LIST } from './destinations';
 import { MAP_LOCATIONS } from './MAPLOCATIONS';
 import { AirplanesPage, AIRCRAFT_SPRITES } from './AirplanesPage';
+import { AboutPage } from './AboutPage';
 import { adjustAircraftList } from './src/aircraftData';
+
+// --- App Version & Maintenance Tracker ---
+// NOTE: Always update APP_UPDATED_DATE whenever making changes in the app
+export const APP_VERSION = 'Version 2.0';
+export const APP_UPDATED_DATE = 'Sep 24, 2026';
 
 // --- Types & Interfaces ---
 interface FlightDestination {
@@ -103,7 +109,7 @@ type SortField =
 
 type SortDirection = 'asc' | 'desc';
 
-type ViewMode = 'list' | 'grid' | 'almost-next-star' | 'maps' | 'airplanes' | 'stats';
+type ViewMode = 'list' | 'grid' | 'maps' | 'airplanes' | 'stats' | 'about';
 
 export type ThemeId =
   | 'mach-blue'
@@ -426,6 +432,101 @@ const formatTimestamp = (ts: number) => {
   }).format(date);
 };
 
+interface EditableNumberInputProps {
+  value: number;
+  onChange: (val: number) => void;
+  className?: string;
+  min?: number;
+  max?: number;
+  ariaLabel?: string;
+  title?: string;
+}
+
+const EditableNumberInput: React.FC<EditableNumberInputProps> = ({
+  value,
+  onChange,
+  className = '',
+  min = 0,
+  max,
+  ariaLabel,
+  title,
+}) => {
+  const [localVal, setLocalVal] = useState<string>(String(value));
+  const [isFocused, setIsFocused] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (!isFocused) {
+      setLocalVal(String(value));
+    }
+  }, [value, isFocused]);
+
+  const commitValue = (valStr: string) => {
+    let parsed = parseInt(valStr, 10);
+    if (isNaN(parsed) || parsed < min) {
+      parsed = min;
+    }
+    if (max !== undefined && parsed > max) {
+      parsed = max;
+    }
+    setLocalVal(String(parsed));
+    if (parsed !== value) {
+      onChange(parsed);
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value;
+    setLocalVal(raw);
+    const parsed = parseInt(raw, 10);
+    if (!isNaN(parsed) && parsed >= min && (max === undefined || parsed <= max)) {
+      onChange(parsed);
+    }
+  };
+
+  const handleBlur = () => {
+    setIsFocused(false);
+    commitValue(localVal);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      commitValue(localVal);
+      (e.target as HTMLInputElement).blur();
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      const current = parseInt(localVal, 10) || 0;
+      const next = max !== undefined ? Math.min(max, current + 1) : current + 1;
+      setLocalVal(String(next));
+      onChange(next);
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      const current = parseInt(localVal, 10) || 0;
+      const next = Math.max(min, current - 1);
+      setLocalVal(String(next));
+      onChange(next);
+    }
+  };
+
+  return (
+    <input
+      type="number"
+      value={isFocused ? localVal : value}
+      onChange={handleInputChange}
+      onFocus={e => {
+        setIsFocused(true);
+        e.target.select();
+      }}
+      onBlur={handleBlur}
+      onKeyDown={handleKeyDown}
+      min={min}
+      max={max}
+      aria-label={ariaLabel}
+      title={title || 'Click to type a number'}
+      className={`hide-arrows number-input-prominent ${className}`}
+    />
+  );
+};
+
 export const AeroQuest = () => {
   const [destinations, setDestinations] = useState<FlightDestination[]>([]);
   const [activeCategory, setActiveCategory] = useState<string>('All Destinations');
@@ -444,22 +545,10 @@ export const AeroQuest = () => {
     const saved = localStorage.getItem('aeroquest_density');
     return saved === 'comfortable' ? 'comfortable' : 'compact';
   });
-  const [isOverviewCollapsed, setIsOverviewCollapsed] = useState<boolean>(() => {
-    const saved = localStorage.getItem('aeroquest_overview_collapsed');
-    return saved !== null ? saved === 'true' : false;
-  });
 
   const toggleDensity = (newDensity: 'compact' | 'comfortable') => {
     setDensity(newDensity);
     localStorage.setItem('aeroquest_density', newDensity);
-  };
-
-  const toggleOverviewCollapse = () => {
-    setIsOverviewCollapsed(prev => {
-      const next = !prev;
-      localStorage.setItem('aeroquest_overview_collapsed', String(next));
-      return next;
-    });
   };
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
@@ -923,26 +1012,9 @@ export const AeroQuest = () => {
     selectedQuickFilters,
   ]);
 
-  // Priority Radar destinations (close to next star)
-  const priorityDestinations = useMemo(() => {
-    return destinations
-      .filter(d => {
-        const stars = getStars(d.flightsDone, d.star1Req, d.star2Req, d.star3Req, d.star4Req, d.star5Req);
-        const maxStars = getMaxStars(d);
-        if (stars >= maxStars) return false;
-        const info = getNextStarInfo(d);
-        return info.needed > 0;
-      })
-      .sort((a, b) => {
-        const infoA = getNextStarInfo(a);
-        const infoB = getNextStarInfo(b);
-        return infoA.needed - infoB.needed;
-      });
-  }, [destinations]);
-
   // Handlers
   const handleCategoryClick = (cat: string) => {
-    if (view === 'stats' || view === 'almost-next-star' || view === 'airplanes' || view === 'maps') {
+    if (view === 'stats' || view === 'airplanes' || view === 'maps' || view === 'about') {
       setView('list');
     }
     setActiveCategory(cat);
@@ -952,7 +1024,7 @@ export const AeroQuest = () => {
   };
 
   const handleSubItemClick = (cat: string, item: string) => {
-    if (view === 'stats' || view === 'almost-next-star' || view === 'airplanes' || view === 'maps') {
+    if (view === 'stats' || view === 'airplanes' || view === 'maps' || view === 'about') {
       setView('list');
     }
     setActiveCategory(cat);
@@ -1076,157 +1148,116 @@ export const AeroQuest = () => {
       {/* Top Operations Command Header */}
       <header className="sticky top-0 z-40 glass-panel border-b border-[var(--border-subtle)] shadow-lg backdrop-blur-xl">
         <div className="max-w-[1700px] mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-14 sm:h-16 gap-4">
+          <div className="grid grid-cols-[1fr_auto_1fr] items-center h-14 sm:h-16 gap-4">
             {/* Brand Logo */}
-            <div
-              onClick={() => {
-                setView('list');
-                setActiveCategory('All Destinations');
-                setFilterAircraft('All');
-                setFilterGroup('All');
-                setSearchQuery('');
-              }}
-              className="flex items-center gap-3 cursor-pointer group shrink-0"
-            >
-              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl theme-btn-accent p-0.5 shadow-lg group-hover:scale-105 transition-all">
-                <div className="w-full h-full bg-slate-950/75 rounded-[14px] flex items-center justify-center">
-                  <Plane className="w-4 h-4 sm:w-5 sm:h-5 theme-accent-text -rotate-45 group-hover:scale-110 transition-transform" />
+            <div className="flex items-center justify-start min-w-0">
+              <div
+                onClick={() => {
+                  setView('list');
+                  setActiveCategory('All Destinations');
+                  setFilterAircraft('All');
+                  setFilterGroup('All');
+                  setSearchQuery('');
+                }}
+                className="flex items-center gap-3 cursor-pointer group shrink-0"
+              >
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl theme-btn-accent p-0.5 shadow-lg group-hover:scale-105 transition-all">
+                  <div className="w-full h-full bg-slate-950/75 rounded-[14px] flex items-center justify-center">
+                    <Plane className="w-4 h-4 sm:w-5 sm:h-5 theme-accent-text -rotate-45 group-hover:scale-110 transition-transform" />
+                  </div>
                 </div>
-              </div>
-              <div className="flex flex-col justify-center">
-                <span className="font-heading font-bold text-base sm:text-lg tracking-tight text-[var(--text-main)] leading-none">
-                  AC-TRACKER
-                </span>
-                <div className="flex items-center gap-1.5 mt-1">
-                  <span className="text-[11px] font-medium text-[var(--text-muted)] leading-none">
-                    by Soupha
+                <div className="flex flex-col justify-center">
+                  <span className="font-heading font-bold text-base sm:text-lg tracking-tight text-[var(--text-main)] leading-none">
+                    AC-TRACKER
                   </span>
-                  <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-medium theme-badge leading-none">
-                    v10.4
+                  <div className="flex items-center gap-1.5 mt-1">
+                    <span className="text-[11px] font-medium text-[var(--text-muted)] leading-none">
+                      by Soupha
+                    </span>
+                    <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-medium theme-badge leading-none">
+                      {APP_VERSION}
+                    </span>
+                  </div>
+                  <span className="text-[9px] font-mono text-[var(--text-muted)] opacity-75 mt-0.5 leading-none">
+                    Updated: {APP_UPDATED_DATE}
                   </span>
                 </div>
-                <span className="text-[9px] font-mono text-[var(--text-muted)] opacity-75 mt-0.5 leading-none">
-                  Updated: Sep 22, 2026
-                </span>
               </div>
             </div>
 
-            {/* View Switcher Tabs */}
-            <nav className="hidden md:flex items-center gap-1.5 bg-black/25 p-1 rounded-2xl border border-white/5">
-              <button
-                onClick={() => setView('list')}
-                className={`tactile-btn px-3.5 py-1.5 rounded-xl text-xs font-medium flex items-center gap-2 transition-all ${
-                  view === 'list' || view === 'grid'
-                    ? 'theme-btn-accent font-semibold shadow-md'
-                    : 'text-[var(--text-muted)] hover:text-white hover:bg-white/5'
-                }`}
+            {/* Left of Header Links: Star Count with Yellow Star Icon (Informational Only, Doubled Size) */}
+            <div className="hidden md:flex items-center justify-center gap-3 shrink-0">
+              <div
+                className="px-4 py-2 rounded-2xl bg-black/35 border border-amber-500/35 shadow-inner flex items-center gap-2.5 select-none"
+                title="Total Stars Earned"
               >
-                <Compass className="w-4 h-4" /> Flight Deck
-              </button>
-
-              <button
-                onClick={() => setView('almost-next-star')}
-                className={`tactile-btn px-3.5 py-1.5 rounded-xl text-xs font-medium flex items-center gap-2 transition-all relative ${
-                  view === 'almost-next-star'
-                    ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-md shadow-amber-500/25 font-semibold'
-                    : 'text-[var(--text-muted)] hover:text-white hover:bg-white/5'
-                }`}
-              >
-                <Crosshair className="w-4 h-4" /> Priority Radar
-                {priorityDestinations.length > 0 && (
-                  <span className="px-1.5 py-0.2 rounded-full bg-amber-400 text-slate-950 text-[10px] font-mono font-semibold">
-                    {priorityDestinations.length}
-                  </span>
-                )}
-              </button>
-
-              <button
-                onClick={() => setView('maps')}
-                className={`tactile-btn px-3.5 py-1.5 rounded-xl text-xs font-medium flex items-center gap-2 transition-all ${
-                  view === 'maps'
-                    ? 'theme-btn-accent font-semibold shadow-md'
-                    : 'text-[var(--text-muted)] hover:text-white hover:bg-white/5'
-                }`}
-              >
-                <MapIcon className="w-4 h-4" /> Map Depot
-                <span className="px-1.5 py-0.2 rounded-full theme-badge text-[10px] font-mono font-medium">
-                  {mapCollectionStats.uniqueMaps}
+                <Star className="w-6 h-6 text-amber-400 fill-amber-400 drop-shadow-md" />
+                <span className="font-heading font-bold text-xl text-amber-300 tracking-tight leading-none">
+                  {globalStars.toLocaleString()}
                 </span>
-              </button>
+              </div>
 
-              <button
-                onClick={() => setView('airplanes')}
-                className={`tactile-btn px-3.5 py-1.5 rounded-xl text-xs font-medium flex items-center gap-2 transition-all ${
-                  view === 'airplanes'
-                    ? 'theme-btn-accent font-semibold shadow-md'
-                    : 'text-[var(--text-muted)] hover:text-white hover:bg-white/5'
-                }`}
-              >
-                <Layers className="w-4 h-4" /> Fleet Hangar
-              </button>
+              {/* View Switcher Tabs (Header Link Row - Static & Centered) */}
+              <nav className="flex items-center gap-1.5 bg-black/25 p-1 rounded-2xl border border-white/5">
+                <button
+                  onClick={() => setView('list')}
+                  className={`tactile-btn px-3.5 py-1.5 rounded-xl text-xs font-medium flex items-center gap-2 transition-all ${
+                    view === 'list' || view === 'grid'
+                      ? 'theme-btn-accent font-semibold shadow-md'
+                      : 'text-[var(--text-muted)] hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  <Compass className="w-4 h-4" /> Flights
+                </button>
 
-              <button
-                onClick={() => setView('stats')}
-                className={`tactile-btn px-3.5 py-1.5 rounded-xl text-xs font-medium flex items-center gap-2 transition-all ${
-                  view === 'stats'
-                    ? 'theme-btn-accent font-semibold shadow-md'
-                    : 'text-[var(--text-muted)] hover:text-white hover:bg-white/5'
-                }`}
-              >
-                <BarChart3 className="w-4 h-4" /> Stats
-              </button>
-            </nav>
+                <button
+                  onClick={() => setView('maps')}
+                  className={`tactile-btn px-3.5 py-1.5 rounded-xl text-xs font-medium flex items-center gap-2 transition-all ${
+                    view === 'maps'
+                      ? 'theme-btn-accent font-semibold shadow-md'
+                      : 'text-[var(--text-muted)] hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  <MapIcon className="w-4 h-4" /> Maps
+                </button>
 
-            {/* Utility Actions */}
-            <div className="flex items-center gap-2">
-              {/* Density Toggle (Dense Table vs Cards in List Mode) */}
-              {view === 'list' && (
-                <div className="hidden sm:flex items-center bg-black/25 rounded-xl p-0.5 border border-white/5" title="Display Density">
-                  <button
-                    onClick={() => toggleDensity('compact')}
-                    className={`px-2 py-1 rounded-lg text-xs font-mono transition-all ${
-                      density === 'compact' ? 'theme-btn-soft shadow-sm font-semibold' : 'text-[var(--text-muted)] hover:text-white'
-                    }`}
-                    title="Compact High-Density Table (25+ destinations visible)"
-                  >
-                    Dense
-                  </button>
-                  <button
-                    onClick={() => toggleDensity('comfortable')}
-                    className={`px-2 py-1 rounded-lg text-xs font-mono transition-all ${
-                      density === 'comfortable' ? 'theme-btn-soft shadow-sm font-semibold' : 'text-[var(--text-muted)] hover:text-white'
-                    }`}
-                    title="Comfortable Cards"
-                  >
-                    Cards
-                  </button>
-                </div>
-              )}
+                <button
+                  onClick={() => setView('airplanes')}
+                  className={`tactile-btn px-3.5 py-1.5 rounded-xl text-xs font-medium flex items-center gap-2 transition-all ${
+                    view === 'airplanes'
+                      ? 'theme-btn-accent font-semibold shadow-md'
+                      : 'text-[var(--text-muted)] hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  <Layers className="w-4 h-4" /> Aircraft
+                </button>
 
-              {/* Tactical List vs Grid Switcher */}
-              {(view === 'list' || view === 'grid') && (
-                <div className="flex items-center bg-black/25 rounded-xl p-0.5 border border-white/5">
-                  <button
-                    onClick={() => setView('list')}
-                    title="Tactical List View"
-                    className={`p-1.5 sm:p-2 rounded-lg transition-all ${
-                      view === 'list' ? 'theme-btn-soft shadow-sm' : 'text-[var(--text-muted)] hover:text-white'
-                    }`}
-                  >
-                    <List className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => setView('grid')}
-                    title="Radar Grid View"
-                    className={`p-1.5 sm:p-2 rounded-lg transition-all ${
-                      view === 'grid' ? 'theme-btn-soft shadow-sm' : 'text-[var(--text-muted)] hover:text-white'
-                    }`}
-                  >
-                    <Grid className="w-4 h-4" />
-                  </button>
-                </div>
-              )}
+                <button
+                  onClick={() => setView('stats')}
+                  className={`tactile-btn px-3.5 py-1.5 rounded-xl text-xs font-medium flex items-center gap-2 transition-all ${
+                    view === 'stats'
+                      ? 'theme-btn-accent font-semibold shadow-md'
+                      : 'text-[var(--text-muted)] hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  <BarChart3 className="w-4 h-4" /> Stats
+                </button>
 
+                <button
+                  onClick={() => setView('about')}
+                  className={`tactile-btn px-3.5 py-1.5 rounded-xl text-xs font-medium flex items-center gap-2 transition-all ${
+                    view === 'about'
+                      ? 'theme-btn-accent font-semibold shadow-md'
+                      : 'text-[var(--text-muted)] hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  <Info className="w-4 h-4" /> About ACT
+                </button>
+              </nav>
+            </div>
+
+            {/* Global Utility Actions (Always Static on Every Page) */}
+            <div className="flex items-center justify-end gap-2 min-w-0">
               {/* Theme Picker Button */}
               <button
                 onClick={() => setShowThemeModal(true)}
@@ -1248,19 +1279,6 @@ export const AeroQuest = () => {
                 <Download className="w-4 h-4 theme-accent-text" />
                 <span className="text-xs font-medium hidden lg:inline">Data</span>
               </button>
-
-              {/* Sidebar toggle button (for category navigation) */}
-              <button
-                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                title={isSidebarOpen ? 'Hide Category Drawer' : 'Show Category Drawer'}
-                className={`tactile-btn p-2 sm:p-2.5 rounded-xl border transition-all ${
-                  isSidebarOpen
-                    ? 'theme-btn-soft'
-                    : 'glass-panel border-[var(--border-subtle)] text-[var(--text-muted)] hover:text-white'
-                }`}
-              >
-                <PanelLeft className="w-4 h-4" />
-              </button>
             </div>
           </div>
         </div>
@@ -1275,25 +1293,22 @@ export const AeroQuest = () => {
                 : 'text-[var(--text-muted)] hover:bg-white/5'
             }`}
           >
-            <Compass className="w-3.5 h-3.5" /> Routes
+            <Compass className="w-3.5 h-3.5" /> Flights
           </button>
-          <button
-            onClick={() => setView('almost-next-star')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap flex items-center gap-1.5 ${
-              view === 'almost-next-star'
-                ? 'bg-amber-500 text-white font-semibold'
-                : 'text-[var(--text-muted)] hover:bg-white/5'
-            }`}
+          <div
+            className="px-2.5 py-1 rounded-xl text-xs font-mono font-bold whitespace-nowrap flex items-center gap-1 bg-amber-500/20 text-amber-300 border border-amber-500/30 select-none"
+            title="Total Stars"
           >
-            <Crosshair className="w-3.5 h-3.5" /> Next Stars ({priorityDestinations.length})
-          </button>
+            <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+            {globalStars.toLocaleString()}
+          </div>
           <button
             onClick={() => setView('maps')}
             className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap flex items-center gap-1.5 ${
               view === 'maps' ? 'theme-btn-accent font-semibold shadow-sm' : 'text-[var(--text-muted)] hover:bg-white/5'
             }`}
           >
-            <MapIcon className="w-3.5 h-3.5" /> Maps ({mapCollectionStats.uniqueMaps})
+            <MapIcon className="w-3.5 h-3.5" /> Maps
           </button>
           <button
             onClick={() => setView('airplanes')}
@@ -1301,7 +1316,7 @@ export const AeroQuest = () => {
               view === 'airplanes' ? 'theme-btn-accent font-semibold shadow-sm' : 'text-[var(--text-muted)] hover:bg-white/5'
             }`}
           >
-            <Layers className="w-3.5 h-3.5" /> Fleet
+            <Layers className="w-3.5 h-3.5" /> Aircraft
           </button>
           <button
             onClick={() => setView('stats')}
@@ -1311,222 +1326,23 @@ export const AeroQuest = () => {
           >
             <BarChart3 className="w-3.5 h-3.5" /> Stats
           </button>
+          <button
+            onClick={() => setView('about')}
+            className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap flex items-center gap-1.5 ${
+              view === 'about' ? 'theme-btn-accent font-semibold shadow-sm' : 'text-[var(--text-muted)] hover:bg-white/5'
+            }`}
+          >
+            <Info className="w-3.5 h-3.5" /> About ACT
+          </button>
         </div>
       </header>
 
-      {/* Global Mission Overview Strip */}
-      {isOverviewCollapsed ? (
-        <section className="bg-black/30 border-b border-white/5 py-1.5 px-4 sm:px-6 lg:px-8">
-          <div className="max-w-[1700px] mx-auto flex items-center justify-between text-xs gap-3">
-            <div className="flex items-center gap-3 sm:gap-5 overflow-x-auto no-scrollbar font-mono text-[11px] py-0.5">
-              <div
-                onClick={() => setView('stats')}
-                className="flex items-center gap-1.5 cursor-pointer hover:text-amber-300 transition-colors shrink-0 group"
-                title="Star Mastery: Click for full stats"
-              >
-                <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400 glow-star" />
-                <span className="text-[var(--text-muted)]">Stars:</span>
-                <span className="font-semibold text-amber-300">{globalStars.toLocaleString()}/{maxGlobalStars.toLocaleString()}</span>
-                <span className="text-[10px] text-amber-400/80">({globalPercentage}%)</span>
-              </div>
-              <span className="text-white/10 hidden sm:inline">|</span>
-              <div
-                onClick={() => setView('maps')}
-                className="flex items-center gap-1.5 cursor-pointer hover:text-[var(--accent)] transition-colors shrink-0 group"
-                title="Map Stock: Click for Map Depot"
-              >
-                <MapIcon className="w-3.5 h-3.5 theme-accent-text" />
-                <span className="text-[var(--text-muted)]">Maps:</span>
-                <span className="font-semibold text-[var(--text-main)]">{mapCollectionStats.uniqueMaps}/148</span>
-                <span className="text-[10px] theme-accent-text">({mapCollectionStats.completionRate}%)</span>
-              </div>
-              <span className="text-white/10 hidden sm:inline">|</span>
-              <div
-                onClick={() => setView('almost-next-star')}
-                className="flex items-center gap-1.5 cursor-pointer hover:text-amber-300 transition-colors shrink-0 group"
-                title="Priority Star Targets: Click for Radar"
-              >
-                <Crosshair className="w-3.5 h-3.5 text-amber-400" />
-                <span className="text-[var(--text-muted)]">Radar:</span>
-                <span className="font-semibold text-amber-300">{priorityDestinations.length} routes</span>
-              </div>
-              <span className="text-white/10 hidden md:inline">|</span>
-              <div
-                onClick={() => setView('airplanes')}
-                className="flex items-center gap-1.5 cursor-pointer hover:text-[var(--accent)] transition-colors shrink-0 group"
-                title="Active Fleet: Click for Fleet Hangar"
-              >
-                <Plane className="w-3.5 h-3.5 theme-accent-text" />
-                <span className="text-[var(--text-muted)]">Fleet:</span>
-                <span className="font-semibold text-[var(--text-main)]">{allAircraft.length - 1} models</span>
-              </div>
-              <span className="text-white/10 hidden lg:inline">|</span>
-              <div
-                onClick={() => handleCategoryClick('Bookmarks')}
-                className="flex items-center gap-1.5 cursor-pointer hover:text-amber-300 transition-colors shrink-0 group"
-                title="Bookmarked Routes"
-              >
-                <Bookmark className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
-                <span className="text-[var(--text-muted)]">Pinned:</span>
-                <span className="font-semibold text-amber-300">{destinations.filter(d => d.isCustomList).length}</span>
-              </div>
-            </div>
 
-            <button
-              onClick={toggleOverviewCollapse}
-              className="tactile-btn py-1 px-2.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-[11px] font-mono theme-accent-text flex items-center gap-1 shrink-0 transition-all"
-              title="Expand overview cards"
-            >
-              <span>Expand Stats</span>
-              <ChevronDown className="w-3 h-3" />
-            </button>
-          </div>
-        </section>
-      ) : (
-        <section className="bg-black/20 border-b border-white/5 py-2.5">
-          <div className="max-w-[1700px] mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] font-mono tracking-widest uppercase text-[var(--text-muted)]">
-                Global Mission Overview
-              </span>
-              <button
-                onClick={toggleOverviewCollapse}
-                className="text-[11px] font-mono text-[var(--text-muted)] hover:text-white flex items-center gap-1 transition-colors"
-                title="Collapse to compact ticker"
-              >
-                <span>Compact Ticker</span>
-                <ChevronUp className="w-3 h-3" />
-              </button>
-            </div>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
-              {/* Global Star Progress */}
-              <div
-                onClick={() => setView('stats')}
-                className="glass-card rounded-2xl p-2.5 sm:p-3 cursor-pointer hover:border-amber-400/40 transition-all group"
-              >
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)] flex items-center gap-1.5">
-                    <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400 glow-star" /> Star Mastery
-                  </span>
-                  <span className="text-xs font-mono font-medium text-amber-300">
-                    {globalPercentage}%
-                  </span>
-                </div>
-                <div className="flex items-baseline gap-1.5 mb-1.5">
-                  <span className="text-base sm:text-lg font-heading font-semibold text-[var(--text-main)]">
-                    {globalStars.toLocaleString()}
-                  </span>
-                  <span className="text-xs text-[var(--text-muted)] font-mono">
-                    / {maxGlobalStars.toLocaleString()} ★
-                  </span>
-                </div>
-                <div className="h-1.5 w-full bg-black/40 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-gradient-to-r from-amber-500 to-amber-300 rounded-full transition-all duration-700"
-                    style={{ width: `${globalPercentage}%` }}
-                  />
-                </div>
-              </div>
-
-              {/* Map Vault Stock */}
-              <div
-                onClick={() => setView('maps')}
-                className="glass-card rounded-2xl p-2.5 sm:p-3 cursor-pointer hover:border-[var(--border-active)] transition-all group"
-              >
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)] flex items-center gap-1.5">
-                    <MapIcon className="w-3.5 h-3.5 theme-accent-text" /> Map Depot
-                  </span>
-                  <span className="text-xs font-mono font-medium theme-accent-text">
-                    {mapCollectionStats.completionRate}%
-                  </span>
-                </div>
-                <div className="flex items-baseline gap-1.5 mb-1.5">
-                  <span className="text-base sm:text-lg font-heading font-semibold text-[var(--text-main)]">
-                    {mapCollectionStats.uniqueMaps}
-                  </span>
-                  <span className="text-xs text-[var(--text-muted)] font-mono">
-                    / 148 ({mapCollectionStats.totalMaps.toLocaleString()} Total)
-                  </span>
-                </div>
-                <div className="h-1.5 w-full bg-black/40 rounded-full overflow-hidden">
-                  <div
-                    className="h-full theme-progress-fill rounded-full transition-all duration-700"
-                    style={{ width: `${mapCollectionStats.completionRate}%` }}
-                  />
-                </div>
-              </div>
-
-              {/* Priority Targets Radar */}
-              <div
-                onClick={() => setView('almost-next-star')}
-                className="glass-card rounded-2xl p-2.5 sm:p-3 cursor-pointer hover:border-amber-400/40 transition-all group"
-              >
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)] flex items-center gap-1.5">
-                    <Crosshair className="w-3.5 h-3.5 text-amber-400" /> Star Radar
-                  </span>
-                  <span className="text-[10px] font-mono text-amber-400 font-medium px-1.5 py-0.2 rounded bg-amber-400/15">
-                    Active
-                  </span>
-                </div>
-                <div className="flex items-baseline gap-1.5 mb-1.5">
-                  <span className="text-base sm:text-lg font-heading font-semibold text-amber-300">
-                    {priorityDestinations.length}
-                  </span>
-                  <span className="text-xs text-[var(--text-muted)]">
-                    Routes approaching star
-                  </span>
-                </div>
-                <div className="text-[10px] text-[var(--text-muted)] truncate">
-                  {priorityDestinations[0]
-                    ? `Closest: ${priorityDestinations[0].destination} (${getNextStarInfo(priorityDestinations[0]).needed} left)`
-                    : 'All current routes up to date'}
-                </div>
-              </div>
-
-              {/* Fleet & Bookmarks Summary */}
-              <div
-                onClick={() => setView('airplanes')}
-                className="glass-card rounded-2xl p-2.5 sm:p-3 cursor-pointer hover:border-[var(--border-active)] transition-all group"
-              >
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)] flex items-center gap-1.5">
-                    <Plane className="w-3.5 h-3.5 theme-accent-text" /> Active Hangar
-                  </span>
-                  <span
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleCategoryClick('Bookmarks');
-                    }}
-                    className="text-xs font-mono font-medium text-amber-300 hover:underline flex items-center gap-1"
-                  >
-                    <Bookmark className="w-3 h-3 text-amber-400 fill-amber-400" />
-                    {destinations.filter(d => d.isCustomList).length}
-                  </span>
-                </div>
-                <div className="flex items-baseline gap-1.5 mb-1.5">
-                  <span className="text-base sm:text-lg font-heading font-semibold text-[var(--text-main)]">
-                    Fleet Roster
-                  </span>
-                  <span className="text-xs text-[var(--text-muted)]">
-                    & Bookmarks
-                  </span>
-                </div>
-                <div className="text-[10px] text-[var(--text-muted)] truncate flex items-center justify-between">
-                  <span>Manage upgrades</span>
-                  <ChevronRight className="w-3.5 h-3.5 theme-accent-text group-hover:translate-x-1 transition-transform" />
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
 
       {/* Main Body with Optional Category Drawer */}
       <div className="flex-1 max-w-[1700px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4 flex gap-5">
         {/* Collapsible Category Drawer */}
-        {isSidebarOpen && (
+        {isSidebarOpen && (view === 'list' || view === 'grid') && (
           <aside className="w-72 shrink-0 space-y-4 animate-in slide-in-from-left duration-200">
             <div className="glass-panel rounded-3xl p-4 border border-[var(--border-card)]">
               <div className="flex items-center justify-between pb-3 mb-3 border-b border-white/10">
@@ -1639,6 +1455,9 @@ export const AeroQuest = () => {
           {/* VIEW: FLEET HANGAR */}
           {view === 'airplanes' && <AirplanesPage />}
 
+          {/* VIEW: ABOUT ACT */}
+          {view === 'about' && <AboutPage onNavigate={(v) => setView(v)} />}
+
           {/* VIEW: MAP DEPOT */}
           {view === 'maps' && (
             <div className="space-y-6 animate-in fade-in duration-300">
@@ -1650,20 +1469,12 @@ export const AeroQuest = () => {
                 />
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
                   <div className="flex items-center gap-4">
-                    <div className="w-16 h-16 rounded-2xl theme-badge flex items-center justify-center shadow-inner shrink-0">
-                      <MapIcon className="w-8 h-8 theme-accent-text" />
+                    <div className="w-16 h-16 rounded-2xl theme-badge flex items-center justify-center shadow-inner shrink-0 p-2 overflow-hidden">
+                      <img src="Map-icons/map-icon.png" alt="Map Collection" className="w-11 h-11 object-contain drop-shadow" />
                     </div>
                     <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-medium uppercase tracking-wider theme-badge">
-                          Logistics & Inventory
-                        </span>
-                        <span className="text-xs text-[var(--text-muted)] font-mono">
-                          {mapCollectionStats.uniqueMaps} / 148 Unique Maps
-                        </span>
-                      </div>
                       <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-[var(--text-main)] font-heading">
-                        Flight Map Depot
+                        Map Collection
                       </h1>
                       <p className="text-xs sm:text-sm text-[var(--text-muted)] mt-0.5">
                         Inventory tracking for adventure, alliance, space, and event flight maps.
@@ -1858,13 +1669,30 @@ export const AeroQuest = () => {
                             <span className="truncate">{dest.group}</span>
                           </div>
                         </div>
-                        <button
-                          onClick={() => updateMapCount(dest.id, (dest.mapsDone || 0) + 1)}
-                          title="Add 1 Map to Inventory"
-                          className="tactile-btn px-2.5 py-1 rounded-xl theme-btn-soft font-mono text-xs font-medium shrink-0"
-                        >
-                          +1 Map
-                        </button>
+                        <div className="flex items-center gap-1 bg-black/40 p-1 rounded-xl border border-white/10 shrink-0">
+                          <button
+                            onClick={() => updateMapCount(dest.id, (dest.mapsDone || 0) - 1)}
+                            disabled={(dest.mapsDone || 0) <= 0}
+                            title="Subtract 1 Map"
+                            className="tactile-btn w-7 h-7 rounded-lg bg-white/5 hover:bg-white/15 text-[var(--text-muted)] hover:text-white flex items-center justify-center disabled:opacity-20 text-xs font-mono font-bold"
+                          >
+                            -
+                          </button>
+                          <EditableNumberInput
+                            value={dest.mapsDone || 0}
+                            onChange={val => updateMapCount(dest.id, val)}
+                            ariaLabel={`Maps for ${dest.destination}`}
+                            title="Click to type map count"
+                            className="w-12 h-7 text-center font-mono font-bold text-sm bg-black/50 border border-white/10 rounded-lg theme-accent-text shadow-inner"
+                          />
+                          <button
+                            onClick={() => updateMapCount(dest.id, (dest.mapsDone || 0) + 1)}
+                            title="Add 1 Map"
+                            className="tactile-btn w-7 h-7 rounded-lg theme-btn-soft text-xs font-mono font-bold flex items-center justify-center"
+                          >
+                            +
+                          </button>
+                        </div>
                       </div>
                     ))}
                 </div>
@@ -1884,28 +1712,14 @@ export const AeroQuest = () => {
                       <Trophy className="w-8 h-8" />
                     </div>
                     <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-medium uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                          Pilot Overview
-                        </span>
-                        <span className="text-xs text-[var(--text-muted)] font-mono">
-                          Rank: {globalPercentage >= 90 ? 'Supreme Sky Commander' : globalPercentage >= 70 ? 'Fleet Captain' : globalPercentage >= 40 ? 'Flight Officer' : 'Cadet Pilot'}
-                        </span>
-                      </div>
                       <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-[var(--text-main)] font-heading">
-                        Pilot Mastery Analytics
+                        Statistics
                       </h1>
-                      <p className="text-xs sm:text-sm text-[var(--text-muted)] mt-0.5">
-                        High-level flight statistics, star rank distribution, and category progress.
-                      </p>
                     </div>
                   </div>
 
-                  <div className="bg-black/20 p-4 rounded-2xl border border-white/5 text-center shrink-0">
-                    <div className="text-[10px] font-medium uppercase text-amber-400 tracking-wider">
-                      Mastery Gauge
-                    </div>
-                    <div className="text-3xl font-heading font-semibold text-amber-300 mt-0.5">
+                  <div className="bg-black/20 p-4 rounded-2xl border border-white/5 text-center shrink-0 flex flex-col justify-center">
+                    <div className="text-3xl font-heading font-semibold text-amber-300">
                       {globalStars.toLocaleString()}
                       <span className="text-sm font-mono text-[var(--text-muted)]"> / {maxGlobalStars.toLocaleString()}</span>
                     </div>
@@ -1954,7 +1768,7 @@ export const AeroQuest = () => {
               {/* Category Breakdown Table */}
               <div className="glass-panel rounded-3xl p-6 border border-[var(--border-card)] space-y-4">
                 <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] flex items-center gap-2">
-                  <BarChart3 className="w-4 h-4 theme-accent-text" /> Progress by Flight Division
+                  <BarChart3 className="w-4 h-4 theme-accent-text" /> Progress by Category
                 </h3>
                 <div className="divide-y divide-white/5">
                   {categories.map(cat => {
@@ -1967,30 +1781,33 @@ export const AeroQuest = () => {
                         onClick={() => handleCategoryClick(cat)}
                         className="py-3.5 flex items-center justify-between gap-4 hover:bg-white/5 px-3 rounded-xl transition-all cursor-pointer group"
                       >
-                        <div className="flex items-center gap-3 min-w-0">
+                        <div className="flex items-center gap-3.5 min-w-0">
                           {CATEGORY_ICONS[cat] ? (
-                            <img src={CATEGORY_ICONS[cat]} alt={cat} className="w-7 h-7 object-contain shrink-0" />
+                            <img src={CATEGORY_ICONS[cat]} alt={cat} className="w-8 h-8 object-contain shrink-0" />
                           ) : (
-                            <Navigation className="w-6 h-6 theme-accent-text shrink-0" />
+                            <Navigation className="w-7 h-7 theme-accent-text shrink-0" />
                           )}
                           <div className="min-w-0">
-                            <div className="text-sm font-medium text-[var(--text-main)] truncate group-hover:text-[var(--accent)] transition-colors">
+                            <div className="text-sm sm:text-base font-semibold text-[var(--text-main)] truncate group-hover:text-[var(--accent)] transition-colors">
                               {cat}
                             </div>
-                            <div className="text-[10px] font-mono text-[var(--text-muted)]">
-                              {stats.earned} / {stats.max} Stars Earned
+                            <div className="text-xs sm:text-sm font-mono text-[var(--text-muted)] mt-0.5 flex items-center gap-1.5">
+                              <span className="font-bold text-amber-300 text-sm sm:text-base">{stats.earned.toLocaleString()}</span>
+                              <span className="opacity-40 font-normal">/</span>
+                              <span className="font-semibold text-[var(--text-main)] text-sm sm:text-base">{stats.max.toLocaleString()}</span>
+                              <span className="text-xs text-[var(--text-muted)] font-sans ml-0.5">Stars Earned</span>
                             </div>
                           </div>
                         </div>
 
                         <div className="flex items-center gap-4 shrink-0">
-                          <div className="w-24 sm:w-36 h-2 bg-black/40 rounded-full overflow-hidden hidden sm:block">
+                          <div className="w-28 sm:w-44 h-2.5 bg-black/40 rounded-full overflow-hidden hidden sm:block">
                             <div
                               className="h-full theme-progress-fill rounded-full"
                               style={{ width: `${pct}%` }}
                             />
                           </div>
-                          <span className="text-xs font-mono font-medium theme-accent-text w-12 text-right">
+                          <span className="text-sm font-mono font-bold theme-accent-text w-14 text-right">
                             {pct}%
                           </span>
                           <ChevronRight className="w-4 h-4 text-[var(--text-muted)] group-hover:translate-x-1 transition-transform" />
@@ -2003,155 +1820,11 @@ export const AeroQuest = () => {
             </div>
           )}
 
-          {/* VIEW: PRIORITY RADAR ("almost-next-star") */}
-          {view === 'almost-next-star' && (
-            <div className="space-y-6 animate-in fade-in duration-300">
-              {/* Priority Radar Header */}
-              <div className="glass-panel rounded-3xl p-6 sm:p-8 relative overflow-hidden border border-[var(--border-card)] shadow-xl">
-                <div className="absolute -right-10 -bottom-10 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
-                  <div className="flex items-center gap-4">
-                    <div className="w-16 h-16 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 shadow-inner shrink-0">
-                      <Crosshair className="w-8 h-8" />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-medium uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                          Star Hunter Dispatch
-                        </span>
-                        <span className="text-xs text-[var(--text-muted)] font-mono">
-                          {priorityDestinations.length} In-Flight Targets
-                        </span>
-                      </div>
-                      <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-[var(--text-main)] font-heading">
-                        Priority Next Stars Radar
-                      </h1>
-                      <p className="text-xs sm:text-sm text-[var(--text-muted)] mt-0.5">
-                        Sorted by least flights remaining. Log flights directly from these cards to unlock stars immediately!
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Priority Cards List */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {priorityDestinations.map(dest => {
-                  const info = getNextStarInfo(dest);
-                  const currentStars = getStars(dest.flightsDone, dest.star1Req, dest.star2Req, dest.star3Req, dest.star4Req, dest.star5Req);
-                  const prevReq =
-                    info.nextStar === 1
-                      ? 0
-                      : info.nextStar === 2
-                      ? dest.star1Req
-                      : info.nextStar === 3
-                      ? dest.star2Req
-                      : info.nextStar === 4
-                      ? dest.star3Req
-                      : dest.star4Req || 0;
-                  const segmentProgress = Math.max(0, dest.flightsDone - prevReq);
-                  const segmentTotal = info.nextReq - prevReq;
-                  const pct = Math.round((segmentProgress / (segmentTotal || 1)) * 100);
-
-                  return (
-                    <div
-                      key={dest.id}
-                      className="glass-card rounded-2xl p-5 border border-[var(--border-card)] hover:border-amber-400/50 transition-all space-y-4 relative overflow-hidden"
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-1.5 mb-1">
-                            <span className="px-2 py-0.5 rounded text-[10px] font-medium uppercase tracking-wider bg-amber-500/15 text-amber-300 border border-amber-500/30">
-                              Unlocks Star {info.nextStar} ({info.rank})
-                            </span>
-                            {dest.needsMap && (
-                              <span className="px-1.5 py-0.5 rounded text-[10px] font-medium theme-badge">
-                                🗺️ {dest.mapsDone || 0}
-                              </span>
-                            )}
-                          </div>
-                          <h3 className="text-base font-semibold text-[var(--text-main)] font-heading truncate">
-                            {dest.destination}
-                          </h3>
-                          <div className="text-[11px] text-[var(--text-muted)] flex items-center gap-1.5 mt-0.5">
-                            <span className="font-medium text-[var(--text-main)]">{dest.aircraft}</span>
-                            <span>•</span>
-                            <span className="truncate">{dest.group}</span>
-                          </div>
-                        </div>
-
-                        <button
-                          onClick={e => toggleBookmark(dest.id, e)}
-                          className="p-1.5 text-[var(--text-muted)] hover:text-amber-400 transition-colors shrink-0"
-                        >
-                          <Star className={`w-4 h-4 ${dest.isCustomList ? 'fill-amber-400 text-amber-400' : ''}`} />
-                        </button>
-                      </div>
-
-                      {/* Progress HUD */}
-                      <div className="space-y-1.5">
-                        <div className="flex justify-between items-baseline text-xs font-mono">
-                          <span className="text-[var(--text-muted)]">
-                            Progress: <span className="font-semibold text-[var(--text-main)]">{dest.flightsDone}</span> / {info.nextReq}
-                          </span>
-                          <span className="text-amber-400 font-medium">
-                            {info.needed} flights needed
-                          </span>
-                        </div>
-                        <div className="h-2 w-full bg-black/40 rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-gradient-to-r from-amber-500 to-yellow-300 rounded-full transition-all duration-300"
-                            style={{ width: `${pct}%` }}
-                          />
-                        </div>
-                      </div>
-
-                      {/* Quick In-Place Action Buttons */}
-                      <div className="flex items-center justify-between pt-2 border-t border-white/5 gap-2">
-                        <div className="flex items-center gap-1">
-                          <button
-                            onClick={() => updateFlightCount(dest.id, dest.flightsDone - 1)}
-                            disabled={dest.flightsDone <= 0}
-                            className="tactile-btn px-2 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-xs font-mono disabled:opacity-30"
-                          >
-                            -1
-                          </button>
-                          <button
-                            onClick={() => updateFlightCount(dest.id, dest.flightsDone + 1)}
-                            className="tactile-btn px-3 py-1 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-medium text-xs font-mono shadow-sm"
-                          >
-                            +1
-                          </button>
-                          <button
-                            onClick={() => updateFlightCount(dest.id, dest.flightsDone + 5)}
-                            className="tactile-btn px-3 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 font-medium text-xs font-mono border border-amber-500/30"
-                          >
-                            +5
-                          </button>
-                        </div>
-
-                        <button
-                          onClick={() => {
-                            setView('list');
-                            setSearchQuery(dest.destination);
-                          }}
-                          className="text-[11px] font-medium theme-accent-text hover:underline flex items-center gap-1"
-                        >
-                          Details <ChevronRight className="w-3 h-3" />
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
           {/* VIEW: FLIGHT DECK (LIST OR GRID) */}
           {(view === 'list' || view === 'grid') && (
             <div className="space-y-3 animate-in fade-in duration-200">
-              {/* Category Quick Filter Pills Strip */}
-              <div className="glass-panel rounded-2xl p-1.5 border border-[var(--border-card)] flex items-center gap-1.5 overflow-x-auto custom-scrollbar">
+              {/* Category Quick Filter Pills Strip (Responsive Wrapped Layout - No Scrolling Required) */}
+              <div className="glass-panel rounded-2xl p-2 sm:p-2.5 border border-[var(--border-card)] flex flex-wrap items-center gap-1.5">
                 {categories.map(cat => {
                   const isActive = activeCategory === cat;
                   const stats = categoryStarsMap[cat];
@@ -2159,7 +1832,7 @@ export const AeroQuest = () => {
                     <button
                       key={cat}
                       onClick={() => handleCategoryClick(cat)}
-                      className={`tactile-btn px-2.5 py-1 rounded-xl text-xs font-medium transition-all shrink-0 flex items-center gap-1.5 ${
+                      className={`tactile-btn px-2.5 py-1 rounded-xl text-xs font-medium transition-all flex items-center gap-1.5 ${
                         isActive
                           ? 'theme-btn-accent font-semibold shadow-md'
                           : 'bg-black/20 hover:bg-white/10 text-[var(--text-muted)] hover:text-white border border-white/5'
@@ -2177,7 +1850,7 @@ export const AeroQuest = () => {
 
                 <button
                   onClick={() => handleCategoryClick('Bookmarks')}
-                  className={`tactile-btn px-2.5 py-1 rounded-xl text-xs font-medium transition-all shrink-0 flex items-center gap-1.5 ${
+                  className={`tactile-btn px-2.5 py-1 rounded-xl text-xs font-medium transition-all flex items-center gap-1.5 ${
                     activeCategory === 'Bookmarks'
                       ? 'bg-amber-500 text-slate-950 font-semibold shadow-md'
                       : 'bg-black/20 hover:bg-white/10 text-amber-300 border border-amber-500/20'
@@ -2285,6 +1958,41 @@ export const AeroQuest = () => {
                         </button>
                       </div>
                     )}
+
+                    {/* Tactical List vs Grid Switcher */}
+                    <div className="flex items-center bg-black/30 rounded-xl p-0.5 border border-white/10 shrink-0">
+                      <button
+                        onClick={() => setView('list')}
+                        title="Tactical List View"
+                        className={`p-1.5 rounded-lg transition-all ${
+                          view === 'list' ? 'theme-btn-soft shadow-sm' : 'text-[var(--text-muted)] hover:text-white'
+                        }`}
+                      >
+                        <List className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        onClick={() => setView('grid')}
+                        title="Radar Grid View"
+                        className={`p-1.5 rounded-lg transition-all ${
+                          view === 'grid' ? 'theme-btn-soft shadow-sm' : 'text-[var(--text-muted)] hover:text-white'
+                        }`}
+                      >
+                        <Grid className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+
+                    {/* Sidebar Drawer Toggle */}
+                    <button
+                      onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                      title={isSidebarOpen ? 'Hide Category Drawer' : 'Show Category Drawer'}
+                      className={`tactile-btn p-1.5 rounded-xl border border-white/10 transition-all ${
+                        isSidebarOpen
+                          ? 'theme-btn-soft'
+                          : 'bg-black/30 text-[var(--text-muted)] hover:text-white'
+                      }`}
+                    >
+                      <PanelLeft className="w-3.5 h-3.5" />
+                    </button>
                   </div>
                 </div>
 
@@ -2300,7 +2008,7 @@ export const AeroQuest = () => {
                         className="rounded"
                       />
                       <span className={`text-xs font-normal transition-colors ${showOnlyMaps ? 'theme-accent-text font-medium' : 'text-[var(--text-muted)]'}`}>
-                        🗺️ Maps Required
+                        🗺️ Show only Map Destinations
                       </span>
                     </label>
 
@@ -2313,7 +2021,7 @@ export const AeroQuest = () => {
                         className="rounded"
                       />
                       <span className={`text-xs font-normal transition-colors ${hide3Star ? 'text-amber-300 font-medium' : 'text-[var(--text-muted)]'}`}>
-                        ⭐ Hide Maxed Out
+                        ⭐ Hide completed destinations
                       </span>
                     </label>
                   </div>
@@ -2353,7 +2061,7 @@ export const AeroQuest = () => {
                 /* HIGH-DENSITY FLIGHT OPERATIONS TABLE (25+ DESTINATIONS PER SCREEN) */
                 <div className="glass-panel rounded-2xl border border-[var(--border-card)] overflow-hidden shadow-sm">
                   {/* Sticky Table Header */}
-                  <div className="hidden lg:grid grid-cols-[32px_28px_minmax(180px,2fr)_minmax(85px,0.8fr)_minmax(140px,1.2fr)_minmax(95px,0.9fr)_minmax(85px,0.8fr)_minmax(210px,1.3fr)_32px] items-center gap-2.5 px-3 py-2 text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)] bg-black/60 border-b border-white/10 sticky top-0 z-30 backdrop-blur-md select-none">
+                  <div className="hidden lg:grid grid-cols-[32px_28px_minmax(170px,1.8fr)_minmax(80px,0.7fr)_minmax(130px,1.1fr)_minmax(90px,0.8fr)_minmax(130px,1.1fr)_minmax(230px,1.5fr)_32px] items-center gap-2.5 px-3 py-2 text-[10px] font-mono font-semibold uppercase tracking-wider dense-table-header sticky top-0 z-30 backdrop-blur-md select-none">
                     <div className="text-center" title="Bookmark / Pin">★</div>
                     <div className="text-center">Icon</div>
                     <div
@@ -2364,7 +2072,7 @@ export const AeroQuest = () => {
                       {sortConfig.field === 'destination' ? (
                         sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3 theme-accent-text" /> : <ChevronDown className="w-3 h-3 theme-accent-text" />
                       ) : (
-                        <ArrowUpDown className="w-3 h-3 opacity-20 group-hover/col:opacity-75" />
+                        <ArrowUpDown className="w-3 h-3 opacity-30 group-hover/col:opacity-80" />
                       )}
                     </div>
                     <div
@@ -2375,7 +2083,7 @@ export const AeroQuest = () => {
                       {sortConfig.field === 'aircraft' ? (
                         sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3 theme-accent-text" /> : <ChevronDown className="w-3 h-3 theme-accent-text" />
                       ) : (
-                        <ArrowUpDown className="w-3 h-3 opacity-20 group-hover/col:opacity-75" />
+                        <ArrowUpDown className="w-3 h-3 opacity-30 group-hover/col:opacity-80" />
                       )}
                     </div>
                     <div
@@ -2386,7 +2094,7 @@ export const AeroQuest = () => {
                       {sortConfig.field === 'stars' || sortConfig.field === 'mastery' ? (
                         sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3 theme-accent-text" /> : <ChevronDown className="w-3 h-3 theme-accent-text" />
                       ) : (
-                        <ArrowUpDown className="w-3 h-3 opacity-20 group-hover/col:opacity-75" />
+                        <ArrowUpDown className="w-3 h-3 opacity-30 group-hover/col:opacity-80" />
                       )}
                     </div>
                     <div
@@ -2397,7 +2105,7 @@ export const AeroQuest = () => {
                       {sortConfig.field === 'neededToNextStar' ? (
                         sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3 theme-accent-text" /> : <ChevronDown className="w-3 h-3 theme-accent-text" />
                       ) : (
-                        <ArrowUpDown className="w-3 h-3 opacity-20 group-hover/col:opacity-75" />
+                        <ArrowUpDown className="w-3 h-3 opacity-30 group-hover/col:opacity-80" />
                       )}
                     </div>
                     <div
@@ -2408,7 +2116,7 @@ export const AeroQuest = () => {
                       {sortConfig.field === 'maps' ? (
                         sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3 theme-accent-text" /> : <ChevronDown className="w-3 h-3 theme-accent-text" />
                       ) : (
-                        <ArrowUpDown className="w-3 h-3 opacity-20 group-hover/col:opacity-75" />
+                        <ArrowUpDown className="w-3 h-3 opacity-30 group-hover/col:opacity-80" />
                       )}
                     </div>
                     <div
@@ -2419,14 +2127,14 @@ export const AeroQuest = () => {
                       {sortConfig.field === 'flightsDone' ? (
                         sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3 theme-accent-text" /> : <ChevronDown className="w-3 h-3 theme-accent-text" />
                       ) : (
-                        <ArrowUpDown className="w-3 h-3 opacity-20 group-hover/col:opacity-75" />
+                        <ArrowUpDown className="w-3 h-3 opacity-30 group-hover/col:opacity-80" />
                       )}
                     </div>
                     <div className="text-center">Info</div>
                   </div>
 
                   {/* Dense Table Rows */}
-                  <div className="divide-y divide-white/5">
+                  <div className="divide-y divide-[var(--border-subtle)]">
                     {sortedAndFilteredDestinations.map(dest => {
                       const stars = getStars(dest.flightsDone, dest.star1Req, dest.star2Req, dest.star3Req, dest.star4Req, dest.star5Req);
                       const maxStars = getMaxStars(dest);
@@ -2446,7 +2154,7 @@ export const AeroQuest = () => {
                           }`}
                         >
                           {/* Desktop Dense Row */}
-                          <div className="hidden lg:grid grid-cols-[32px_28px_minmax(180px,2fr)_minmax(85px,0.8fr)_minmax(140px,1.2fr)_minmax(95px,0.9fr)_minmax(85px,0.8fr)_minmax(210px,1.3fr)_32px] items-center gap-2.5 px-3 py-1.5 text-xs dense-table-row">
+                          <div className="hidden lg:grid grid-cols-[32px_28px_minmax(170px,1.8fr)_minmax(80px,0.7fr)_minmax(130px,1.1fr)_minmax(90px,0.8fr)_minmax(130px,1.1fr)_minmax(230px,1.5fr)_32px] items-center gap-2.5 px-3 py-1.5 text-xs dense-table-row">
                             {/* Pin / Bookmark */}
                             <div className="flex justify-center">
                               <button
@@ -2530,58 +2238,73 @@ export const AeroQuest = () => {
                             </div>
 
                             {/* Map Stock */}
-                            <div className="text-center">
+                            <div className="flex items-center justify-center">
                               {dest.needsMap ? (
-                                <div className="inline-flex items-center gap-1 bg-black/30 border border-white/5 px-1.5 py-0.5 rounded-lg text-[10px] font-mono">
-                                  <span className="theme-accent-text">🗺️ {dest.mapsDone || 0}</span>
+                                <div className="inline-flex items-center gap-1 bg-black/40 border border-white/10 px-1 py-0.5 rounded-lg shadow-inner">
+                                  <button
+                                    onClick={() => updateMapCount(dest.id, (dest.mapsDone || 0) - 1)}
+                                    disabled={(dest.mapsDone || 0) <= 0}
+                                    className="tactile-btn w-6 h-7 rounded bg-white/5 hover:bg-white/15 text-[var(--text-muted)] hover:text-white flex items-center justify-center disabled:opacity-20 text-xs font-mono font-bold transition-all"
+                                    title="Subtract 1 Map"
+                                  >
+                                    -
+                                  </button>
+                                  <EditableNumberInput
+                                    value={dest.mapsDone || 0}
+                                    onChange={val => updateMapCount(dest.id, val)}
+                                    ariaLabel={`Map count for ${dest.destination}`}
+                                    title="Map count (click to edit)"
+                                    className="w-12 h-7 text-center font-mono font-bold text-sm bg-black/50 border border-white/10 rounded-md focus:border-[var(--border-active)] theme-accent-text shadow-inner"
+                                  />
                                   <button
                                     onClick={() => updateMapCount(dest.id, (dest.mapsDone || 0) + 1)}
-                                    className="text-[var(--text-muted)] hover:text-white hover:bg-white/10 rounded px-0.5"
-                                    title="Add Map"
+                                    className="tactile-btn w-6 h-7 rounded theme-btn-soft flex items-center justify-center text-xs font-mono font-bold transition-all"
+                                    title="Add 1 Map"
                                   >
                                     +
                                   </button>
                                 </div>
                               ) : (
-                                <span className="text-[var(--text-faint)] text-xs">—</span>
+                                <span className="text-[var(--text-faint)] text-xs select-none">—</span>
                               )}
                             </div>
 
                             {/* Flight Scrubber */}
-                            <div className="flex items-center justify-center gap-0.5">
+                            <div className="flex items-center justify-center gap-1">
                               <button
                                 onClick={() => updateFlightCount(dest.id, dest.flightsDone - 1)}
                                 disabled={dest.flightsDone <= 0}
-                                className="tactile-btn px-1.5 py-0.5 rounded bg-white/5 hover:bg-white/10 text-[10px] font-mono disabled:opacity-20 transition-all"
+                                className="tactile-btn px-2 h-7 rounded bg-white/5 hover:bg-white/10 text-xs font-mono font-bold disabled:opacity-20 transition-all flex items-center justify-center"
                                 title="-1 Flight"
                               >
                                 -1
                               </button>
 
-                              <input
-                                type="number"
+                              <EditableNumberInput
                                 value={dest.flightsDone}
-                                onChange={e => updateFlightCount(dest.id, parseInt(e.target.value) || 0)}
-                                className="w-11 h-6 py-0 text-center font-mono font-semibold text-xs bg-black/40 border border-white/10 rounded focus:outline-none focus:border-[var(--border-active)] theme-accent-text"
+                                onChange={val => updateFlightCount(dest.id, val)}
+                                ariaLabel={`Flights done for ${dest.destination}`}
+                                title="Number of flights completed (click to edit)"
+                                className="w-14 h-7 text-center font-mono font-bold text-sm bg-black/50 border border-white/10 rounded-lg focus:border-[var(--border-active)] theme-accent-text shadow-inner"
                               />
 
                               <button
                                 onClick={() => updateFlightCount(dest.id, dest.flightsDone + 1)}
-                                className="tactile-btn px-1.5 py-0.5 rounded theme-btn-soft text-[10px] font-mono font-medium transition-all"
+                                className="tactile-btn px-2 h-7 rounded theme-btn-soft text-xs font-mono font-bold transition-all flex items-center justify-center"
                                 title="+1 Flight"
                               >
                                 +1
                               </button>
                               <button
                                 onClick={() => updateFlightCount(dest.id, dest.flightsDone + 5)}
-                                className="tactile-btn px-1.5 py-0.5 rounded theme-btn-soft text-[10px] font-mono font-medium transition-all"
+                                className="tactile-btn px-2 h-7 rounded theme-btn-soft text-xs font-mono font-bold transition-all flex items-center justify-center"
                                 title="+5 Flights"
                               >
                                 +5
                               </button>
                               <button
                                 onClick={() => updateFlightCount(dest.id, dest.flightsDone + 10)}
-                                className="tactile-btn px-1.5 py-0.5 rounded theme-btn-accent text-[10px] font-mono font-medium transition-all"
+                                className="tactile-btn px-2 h-7 rounded theme-btn-accent text-xs font-mono font-bold transition-all flex items-center justify-center shadow-sm"
                                 title="+10 Flights"
                               >
                                 +10
@@ -2614,7 +2337,32 @@ export const AeroQuest = () => {
                               <div className="min-w-0">
                                 <div className="flex items-center gap-1.5 mb-0.5">
                                   <span className="px-1.5 py-0.2 rounded text-[9px] font-mono theme-badge">{dest.aircraft}</span>
-                                  {dest.needsMap && <span className="text-[9px] text-[var(--text-muted)]">🗺️{dest.mapsDone || 0}</span>}
+                                  {dest.needsMap && (
+                                    <div className="inline-flex items-center gap-0.5 bg-black/40 border border-white/10 px-1 py-0.5 rounded-lg shadow-inner">
+                                      <span className="text-[10px]">🗺️</span>
+                                      <button
+                                        onClick={() => updateMapCount(dest.id, (dest.mapsDone || 0) - 1)}
+                                        disabled={(dest.mapsDone || 0) <= 0}
+                                        className="w-4 h-5 rounded bg-white/5 text-[var(--text-muted)] hover:text-white flex items-center justify-center disabled:opacity-20 text-[10px] font-bold"
+                                        title="Subtract 1 Map"
+                                      >
+                                        -
+                                      </button>
+                                      <EditableNumberInput
+                                        value={dest.mapsDone || 0}
+                                        onChange={val => updateMapCount(dest.id, val)}
+                                        ariaLabel={`Maps for ${dest.destination}`}
+                                        className="w-9 h-5 text-center font-mono font-bold text-xs bg-black/50 border border-white/10 rounded theme-accent-text"
+                                      />
+                                      <button
+                                        onClick={() => updateMapCount(dest.id, (dest.mapsDone || 0) + 1)}
+                                        className="w-4 h-5 rounded theme-btn-soft flex items-center justify-center text-[10px] font-bold"
+                                        title="Add 1 Map"
+                                      >
+                                        +
+                                      </button>
+                                    </div>
+                                  )}
                                 </div>
                                 <div
                                   onClick={() => setExpandedRowId(isExpanded ? null : dest.id)}
@@ -2629,31 +2377,34 @@ export const AeroQuest = () => {
                               <button
                                 onClick={() => updateFlightCount(dest.id, dest.flightsDone - 1)}
                                 disabled={dest.flightsDone <= 0}
-                                className="px-1.5 py-0.5 rounded bg-white/5 text-[10px] font-mono disabled:opacity-20"
+                                className="tactile-btn px-2 h-7 rounded bg-white/5 text-xs font-mono font-bold disabled:opacity-20 flex items-center justify-center"
+                                title="-1 Flight"
                               >
                                 -1
                               </button>
-                              <input
-                                type="number"
+                              <EditableNumberInput
                                 value={dest.flightsDone}
-                                onChange={e => updateFlightCount(dest.id, parseInt(e.target.value) || 0)}
-                                className="w-10 h-6 text-center font-mono font-semibold text-xs bg-black/40 border border-white/10 rounded theme-accent-text"
+                                onChange={val => updateFlightCount(dest.id, val)}
+                                ariaLabel={`Flights for ${dest.destination}`}
+                                className="w-13 h-7 text-center font-mono font-bold text-sm bg-black/50 border border-white/10 rounded-lg theme-accent-text shadow-inner"
                               />
                               <button
                                 onClick={() => updateFlightCount(dest.id, dest.flightsDone + 1)}
-                                className="px-1.5 py-0.5 rounded theme-btn-soft text-[10px] font-mono"
+                                className="tactile-btn px-2 h-7 rounded theme-btn-soft text-xs font-mono font-bold flex items-center justify-center"
+                                title="+1 Flight"
                               >
                                 +1
                               </button>
                               <button
                                 onClick={() => updateFlightCount(dest.id, dest.flightsDone + 5)}
-                                className="px-1.5 py-0.5 rounded theme-btn-accent text-[10px] font-mono"
+                                className="tactile-btn px-2 h-7 rounded theme-btn-accent text-xs font-mono font-bold flex items-center justify-center"
+                                title="+5 Flights"
                               >
                                 +5
                               </button>
                               <button
                                 onClick={() => setExpandedRowId(isExpanded ? null : dest.id)}
-                                className="p-1 text-[var(--text-muted)]"
+                                className="p-1.5 text-[var(--text-muted)] hover:text-white"
                               >
                                 {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
                               </button>
@@ -2708,25 +2459,28 @@ export const AeroQuest = () => {
                                           <div className="text-[10px] text-[var(--text-muted)]">Consumed per flight</div>
                                         </div>
                                       </div>
-                                      <div className="flex items-center gap-1">
+                                      <div className="flex items-center gap-1.5 bg-black/50 p-1 rounded-xl border border-white/10">
                                         <button
                                           onClick={() => updateMapCount(dest.id, (dest.mapsDone || 0) - 1)}
                                           disabled={(dest.mapsDone || 0) <= 0}
-                                          className="tactile-btn p-1 rounded bg-white/10 text-xs font-mono disabled:opacity-30"
+                                          className="tactile-btn w-8 h-8 rounded-lg bg-white/5 hover:bg-white/15 text-[var(--text-muted)] hover:text-white flex items-center justify-center disabled:opacity-20 font-bold transition-all"
+                                          title="Subtract 1 Map"
                                         >
-                                          <Minus className="w-3 h-3" />
+                                          <Minus className="w-3.5 h-3.5" />
                                         </button>
-                                        <input
-                                          type="number"
+                                        <EditableNumberInput
                                           value={dest.mapsDone || 0}
-                                          onChange={e => updateMapCount(dest.id, parseInt(e.target.value) || 0)}
-                                          className="w-12 text-center font-mono font-medium text-xs bg-black/40 border border-white/10 rounded py-0.5 theme-accent-text"
+                                          onChange={val => updateMapCount(dest.id, val)}
+                                          ariaLabel={`Map stock for ${dest.destination}`}
+                                          title="Click to type map count"
+                                          className="w-16 h-8 text-center font-mono font-bold text-base bg-black/60 border border-white/15 rounded-lg theme-accent-text shadow-inner"
                                         />
                                         <button
                                           onClick={() => updateMapCount(dest.id, (dest.mapsDone || 0) + 1)}
-                                          className="tactile-btn p-1 rounded theme-btn-soft text-xs font-mono"
+                                          className="tactile-btn w-8 h-8 rounded-lg theme-btn-soft flex items-center justify-center font-bold transition-all"
+                                          title="Add 1 Map"
                                         >
-                                          <Plus className="w-3 h-3" />
+                                          <Plus className="w-3.5 h-3.5" />
                                         </button>
                                       </div>
                                     </div>
@@ -2826,9 +2580,32 @@ export const AeroQuest = () => {
                                   {dest.group}
                                 </span>
                                 {dest.needsMap && (
-                                  <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-medium theme-badge flex items-center gap-1">
-                                    <MapIcon className="w-2.5 h-2.5" /> {dest.mapsDone || 0} Maps
-                                  </span>
+                                  <div className="inline-flex items-center gap-1 bg-black/40 border border-white/10 px-1.5 py-0.5 rounded-lg shadow-inner">
+                                    <span className="text-[11px]" title="Flight Maps Required">🗺️</span>
+                                    <span className="text-[10px] font-mono text-[var(--text-muted)] font-medium">Maps:</span>
+                                    <button
+                                      onClick={() => updateMapCount(dest.id, (dest.mapsDone || 0) - 1)}
+                                      disabled={(dest.mapsDone || 0) <= 0}
+                                      className="tactile-btn w-5 h-5 rounded bg-white/5 hover:bg-white/15 text-[var(--text-muted)] hover:text-white flex items-center justify-center disabled:opacity-20 text-[10px] font-mono font-bold transition-all"
+                                      title="Subtract 1 Map"
+                                    >
+                                      -
+                                    </button>
+                                    <EditableNumberInput
+                                      value={dest.mapsDone || 0}
+                                      onChange={val => updateMapCount(dest.id, val)}
+                                      ariaLabel={`Map count for ${dest.destination}`}
+                                      title="Map count (click to edit)"
+                                      className="w-11 h-6 text-center font-mono font-bold text-xs bg-black/50 border border-white/10 rounded focus:border-[var(--border-active)] theme-accent-text shadow-inner"
+                                    />
+                                    <button
+                                      onClick={() => updateMapCount(dest.id, (dest.mapsDone || 0) + 1)}
+                                      className="tactile-btn w-5 h-5 rounded theme-btn-soft flex items-center justify-center text-[10px] font-mono font-bold transition-all"
+                                      title="Add 1 Map"
+                                    >
+                                      +
+                                    </button>
+                                  </div>
                                 )}
                               </div>
                               <h3 className="text-sm sm:text-base font-semibold text-[var(--text-main)] tracking-tight font-heading truncate">
@@ -2864,38 +2641,39 @@ export const AeroQuest = () => {
                           </div>
 
                           <div className="flex items-center justify-between lg:justify-end gap-1.5 shrink-0">
-                            <div className="flex items-center gap-1 bg-black/30 p-0.5 rounded-xl border border-white/5">
+                            <div className="flex items-center gap-1 bg-black/40 p-1 rounded-2xl border border-white/10 shadow-inner">
                               <button
                                 onClick={() => updateFlightCount(dest.id, dest.flightsDone - 1)}
                                 disabled={dest.flightsDone <= 0}
-                                className="tactile-btn px-2 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-xs font-mono font-medium disabled:opacity-20"
+                                className="tactile-btn px-2.5 h-8 rounded-xl bg-white/5 hover:bg-white/15 text-xs font-mono font-bold text-[var(--text-muted)] hover:text-white disabled:opacity-20 flex items-center justify-center"
                                 title="Subtract 1 Flight"
                               >
                                 -1
                               </button>
-                              <input
-                                type="number"
+                              <EditableNumberInput
                                 value={dest.flightsDone}
-                                onChange={e => updateFlightCount(dest.id, parseInt(e.target.value) || 0)}
-                                className="w-14 px-1 py-0.5 text-center font-mono font-semibold text-xs bg-transparent border-0 focus:outline-none rounded theme-accent-text"
+                                onChange={val => updateFlightCount(dest.id, val)}
+                                ariaLabel={`Flights completed for ${dest.destination}`}
+                                title="Number of flights completed (click to edit)"
+                                className="w-16 h-8 text-center font-mono font-bold text-base sm:text-lg bg-black/50 border border-white/10 rounded-xl focus:border-[var(--border-active)] theme-accent-text shadow-inner"
                               />
                               <button
                                 onClick={() => updateFlightCount(dest.id, dest.flightsDone + 1)}
-                                className="tactile-btn px-2 py-1 rounded-lg theme-btn-soft text-xs font-mono font-medium"
+                                className="tactile-btn px-2.5 h-8 rounded-xl theme-btn-soft text-xs font-mono font-bold flex items-center justify-center"
                                 title="Add 1 Flight"
                               >
                                 +1
                               </button>
                               <button
                                 onClick={() => updateFlightCount(dest.id, dest.flightsDone + 5)}
-                                className="tactile-btn px-2 py-1 rounded-lg theme-btn-soft text-xs font-mono font-medium"
+                                className="tactile-btn px-2.5 h-8 rounded-xl theme-btn-soft text-xs font-mono font-bold flex items-center justify-center"
                                 title="Add 5 Flights"
                               >
                                 +5
                               </button>
                               <button
                                 onClick={() => updateFlightCount(dest.id, dest.flightsDone + 10)}
-                                className="tactile-btn px-2 py-1 rounded-lg theme-btn-accent text-xs font-mono font-medium shadow-sm"
+                                className="tactile-btn px-2.5 h-8 rounded-xl theme-btn-accent text-xs font-mono font-bold flex items-center justify-center shadow-sm"
                                 title="Add 10 Flights"
                               >
                                 +10
@@ -2955,25 +2733,28 @@ export const AeroQuest = () => {
                                         <div className="text-[10px] text-[var(--text-muted)]">Consumed per flight</div>
                                       </div>
                                     </div>
-                                    <div className="flex items-center gap-1">
+                                    <div className="flex items-center gap-1.5 bg-black/50 p-1 rounded-xl border border-white/10">
                                       <button
                                         onClick={() => updateMapCount(dest.id, (dest.mapsDone || 0) - 1)}
                                         disabled={(dest.mapsDone || 0) <= 0}
-                                        className="tactile-btn p-1 rounded bg-white/10 text-xs font-mono disabled:opacity-30"
+                                        className="tactile-btn w-8 h-8 rounded-lg bg-white/5 hover:bg-white/15 text-[var(--text-muted)] hover:text-white flex items-center justify-center disabled:opacity-20 font-bold transition-all"
+                                        title="Subtract 1 Map"
                                       >
-                                        <Minus className="w-3 h-3" />
+                                        <Minus className="w-3.5 h-3.5" />
                                       </button>
-                                      <input
-                                        type="number"
+                                      <EditableNumberInput
                                         value={dest.mapsDone || 0}
-                                        onChange={e => updateMapCount(dest.id, parseInt(e.target.value) || 0)}
-                                        className="w-12 text-center font-mono font-medium text-xs bg-black/40 border border-white/10 rounded py-0.5 theme-accent-text"
+                                        onChange={val => updateMapCount(dest.id, val)}
+                                        ariaLabel={`Map stock for ${dest.destination}`}
+                                        title="Click to type map count"
+                                        className="w-16 h-8 text-center font-mono font-bold text-base bg-black/60 border border-white/15 rounded-lg theme-accent-text shadow-inner"
                                       />
                                       <button
                                         onClick={() => updateMapCount(dest.id, (dest.mapsDone || 0) + 1)}
-                                        className="tactile-btn p-1 rounded theme-btn-soft text-xs font-mono"
+                                        className="tactile-btn w-8 h-8 rounded-lg theme-btn-soft flex items-center justify-center font-bold transition-all"
+                                        title="Add 1 Map"
                                       >
-                                        <Plus className="w-3 h-3" />
+                                        <Plus className="w-3.5 h-3.5" />
                                       </button>
                                     </div>
                                   </div>
@@ -3058,9 +2839,30 @@ export const AeroQuest = () => {
                                 {dest.aircraft}
                               </span>
                               {dest.needsMap && (
-                                <span className="px-1 py-0.2 rounded text-[9px] font-mono theme-badge">
-                                  🗺️{dest.mapsDone || 0}
-                                </span>
+                                <div className="flex items-center gap-0.5 bg-black/40 px-1 py-0.5 rounded border border-white/5" title="Map Inventory">
+                                  <span className="text-[10px]">🗺️</span>
+                                  <button
+                                    onClick={() => updateMapCount(dest.id, (dest.mapsDone || 0) - 1)}
+                                    disabled={(dest.mapsDone || 0) <= 0}
+                                    className="w-4 h-5 rounded bg-white/5 text-[var(--text-muted)] hover:text-white flex items-center justify-center disabled:opacity-20 text-[10px] font-bold"
+                                    title="Subtract 1 Map"
+                                  >
+                                    -
+                                  </button>
+                                  <EditableNumberInput
+                                    value={dest.mapsDone || 0}
+                                    onChange={val => updateMapCount(dest.id, val)}
+                                    ariaLabel={`Maps for ${dest.destination}`}
+                                    className="w-8 h-5 text-center font-mono font-bold text-xs bg-black/50 border border-white/10 rounded theme-accent-text"
+                                  />
+                                  <button
+                                    onClick={() => updateMapCount(dest.id, (dest.mapsDone || 0) + 1)}
+                                    className="w-4 h-5 rounded theme-btn-soft flex items-center justify-center text-[10px] font-bold"
+                                    title="Add 1 Map"
+                                  >
+                                    +
+                                  </button>
+                                </div>
                               )}
                             </div>
                             <h3 className="text-xs font-semibold text-[var(--text-main)] font-heading truncate leading-snug" title={dest.destination}>
@@ -3101,25 +2903,28 @@ export const AeroQuest = () => {
                           <button
                             onClick={() => updateFlightCount(dest.id, dest.flightsDone - 1)}
                             disabled={dest.flightsDone <= 0}
-                            className="tactile-btn px-1.5 py-0.5 rounded bg-white/5 hover:bg-white/10 text-[10px] font-mono disabled:opacity-20"
+                            className="tactile-btn px-1.5 py-0.5 rounded bg-white/5 hover:bg-white/10 text-[10px] font-mono font-bold disabled:opacity-20 flex items-center justify-center"
+                            title="-1 Flight"
                           >
                             -1
                           </button>
-                          <input
-                            type="number"
+                          <EditableNumberInput
                             value={dest.flightsDone}
-                            onChange={e => updateFlightCount(dest.id, parseInt(e.target.value) || 0)}
-                            className="w-10 text-center font-mono font-semibold text-[11px] bg-black/30 border border-white/10 rounded py-0.5 theme-accent-text"
+                            onChange={val => updateFlightCount(dest.id, val)}
+                            ariaLabel={`Flights for ${dest.destination}`}
+                            className="w-12 h-6 text-center font-mono font-bold text-xs sm:text-sm bg-black/50 border border-white/10 rounded-lg theme-accent-text"
                           />
                           <button
                             onClick={() => updateFlightCount(dest.id, dest.flightsDone + 1)}
-                            className="tactile-btn px-1.5 py-0.5 rounded theme-btn-soft font-mono font-medium text-[10px]"
+                            className="tactile-btn px-1.5 py-0.5 rounded theme-btn-soft font-mono font-bold text-[10px] flex items-center justify-center"
+                            title="+1 Flight"
                           >
                             +1
                           </button>
                           <button
                             onClick={() => updateFlightCount(dest.id, dest.flightsDone + 5)}
-                            className="tactile-btn px-1.5 py-0.5 rounded theme-btn-accent font-mono font-medium text-[10px] shadow-sm"
+                            className="tactile-btn px-1.5 py-0.5 rounded theme-btn-accent font-mono font-bold text-[10px] flex items-center justify-center shadow-sm"
+                            title="+5 Flights"
                           >
                             +5
                           </button>
