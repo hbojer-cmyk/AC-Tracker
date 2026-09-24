@@ -391,6 +391,281 @@
     --table-header-text: #334155;
   }
 
+  /* 14. Theme: Arctic Frost (Theme Factory Template - Nordic Glacial Day) */
+  .theme-arctic-frost,
+  .theme-arctic,
+  .theme-frost {
+    --bg-base: #eaf2fa;
+    --bg-surface: #ffffff;
+    --bg-card: #ffffff;
+    --bg-card-hover: #f1f6fb;
+    --bg-glass: rgba(255, 255, 255, 0.94);
+    --border-subtle: rgba(74, 111, 165, 0.12);
+    --border-card: rgba(74, 111, 165, 0.22);
+    --border-active: #4a6fa5;
+    --text-main: #1e293b;
+    --text-muted: #506680;
+    --text-faint: #889bb3;
+    --accent: #4a6fa5;
+    --accent-hover: #385888;
+    --accent-muted: rgba(74, 111, 165, 0.12);
+    --accent-gradient: linear-gradient(135deg, #385888 0%, #4a6fa5 60%, #688dbf 100%);
+    --accent-glow: rgba(74, 111, 165, 0.25);
+    --star-color: #d97706;
+    --star-glow: rgba(217, 119, 6, 0.35);
+    --badge-bg: rgba(74, 111, 165, 0.1);
+    --badge-border: rgba(74, 111, 165, 0.25);
+    --badge-text: #325280;
+    --table-header-bg: rgba(234, 242, 250, 0.96);
+    --table-header-border: rgba(74, 111, 165, 0.18);
+    --table-header-text: #334155;
+  }
+
+  /* 15. Theme: Botanical Garden (Theme Factory Template - Equatorial Canopy) */
+  .theme-botanical-garden,
+  .theme-botanical,
+  .theme-garden {
+    --bg-base: #f5f3ed;
+    --bg-surface: #ffffff;
+    --bg-card: #ffffff;
+    --bg-card-hover: #eeece4;
+    --bg-glass: rgba(245, 243, 237, 0.94);
+    --border-subtle: rgba(74, 124, 89, 0.14);
+    --border-card: rgba(74, 124, 89, 0.24);
+    --border-active: #4a7c59;
+    --text-main: #1e261f;
+    --text-muted: #526656;
+    --text-faint: #889d8d;
+    --accent: #4a7c59;
+    --accent-hover: #3b6547;
+    --accent-muted: rgba(74, 124, 89, 0.12);
+    --accent-gradient: linear-gradient(135deg, #3b6547 0%, #4a7c59 60%, #f9a620 100%);
+    --accent-glow: rgba(74, 124, 89, 0.28);
+    --star-color: #f9a620;
+    --star-glow: rgba(249, 166, 32, 0.4);
+    --badge-bg: rgba(74, 124, 89, 0.12);
+    --badge-border: rgba(74, 124, 89, 0.28);
+    --badge-text: #2e573a;
+    --table-header-bg: rgba(245, 243, 237, 0.96);
+    --table-header-border: rgba(74, 124, 89, 0.18);
+    --table-header-text: #2b3d2f;
+  }
+
+  /* 16. Theme: Desert Rose (Theme Factory Template - Mirage Twilight) */
+  .theme-desert-rose,
+  .theme-rose {
+    --bg-base: #1f1019;
+    --bg-surface: #2b1623;
+    --bg-card: #381d2e;
+    --bg-card-hover: #48253b;
+    --bg-glass: rgba(43, 22, 35, 0.86);
+    --border-subtle: rgba(212, 165, 165, 0.14);
+    --border-card: rgba(212, 165, 165, 0.24);
+    --border-active: #d4a5a5;
+    --text-main: #fbf2f2;
+    --text-muted: #dfc0c0;
+    --text-faint: #967078;
+    --accent: #d4a5a5;
+    --accent-hover: #e2bbbb;
+    --accent-muted: rgba(212, 165, 165, 0.16);
+    --accent-gradient: linear-gradient(135deg, #b87d6d 0%, #d4a5a5 100%);
+    --accent-glow: rgba(212, 165, 165, 0.35);
+    --star-color: #e8d5c4;
+    --star-glow: rgba(232, 213, 196, 0.45);
+    --badge-bg: rgba(212, 165, 165, 0.14);
+    --badge-border: rgba(212, 165, 165, 0.3);
+    --badge-text: #f0c2c2;
+  }
+
+  /* 17. Theme: Forest Canopy (Theme Factory Template - Dense Woodland) */
+  .theme-forest-canopy,
+  .theme-canopy {
+    --bg-base: #0e180e;
+    --bg-surface: #172616;
+    --bg-card: #20331e;
+    --bg-card-hover: #2b4429;
+    --bg-glass: rgba(23, 38, 22, 0.86);
+    --border-subtle: rgba(164, 172, 134, 0.14);
+    --border-card: rgba(164, 172, 134, 0.24);
+    --border-active: #a4ac86;
+    --text-main: #faf9f6;
+    --text-muted: #b9c2ad;
+    --text-faint: #6d7764;
+    --accent: #a4ac86;
+    --accent-hover: #bdc59f;
+    --accent-muted: rgba(164, 172, 134, 0.15);
+    --accent-gradient: linear-gradient(135deg, #4d664a 0%, #a4ac86 100%);
+    --accent-glow: rgba(164, 172, 134, 0.35);
+    --star-color: #f0d36b;
+    --star-glow: rgba(240, 211, 107, 0.45);
+    --badge-bg: rgba(164, 172, 134, 0.14);
+    --badge-border: rgba(164, 172, 134, 0.28);
+    --badge-text: #c2cca3;
+  }
+
+  /* 18. Theme: Golden Hour Autumn (Theme Factory Template - Indian Summer Harvest) */
+  .theme-golden-autumn,
+  .theme-autumn {
+    --bg-base: #f4ede4;
+    --bg-surface: #ffffff;
+    --bg-card: #ffffff;
+    --bg-card-hover: #f7efe6;
+    --bg-glass: rgba(255, 255, 255, 0.94);
+    --border-subtle: rgba(74, 64, 58, 0.1);
+    --border-card: rgba(193, 102, 107, 0.22);
+    --border-active: #f4a900;
+    --text-main: #4a403a;
+    --text-muted: #7a6b63;
+    --text-faint: #aa978c;
+    --accent: #d98200;
+    --accent-hover: #f4a900;
+    --accent-muted: rgba(244, 169, 0, 0.14);
+    --accent-gradient: linear-gradient(135deg, #c1666b 0%, #f4a900 100%);
+    --accent-glow: rgba(244, 169, 0, 0.28);
+    --star-color: #f4a900;
+    --star-glow: rgba(244, 169, 0, 0.38);
+    --badge-bg: rgba(244, 169, 0, 0.12);
+    --badge-border: rgba(244, 169, 0, 0.28);
+    --badge-text: #b36b00;
+    --table-header-bg: rgba(244, 237, 228, 0.96);
+    --table-header-border: rgba(74, 64, 58, 0.12);
+    --table-header-text: #4a403a;
+  }
+
+  /* 19. Theme: Midnight Galaxy (Theme Factory Template - Deep Cosmic Nebula) */
+  .theme-midnight-galaxy,
+  .theme-galaxy {
+    --bg-base: #140c1f;
+    --bg-surface: #1e122e;
+    --bg-card: #28183d;
+    --bg-card-hover: #352052;
+    --bg-glass: rgba(30, 18, 46, 0.86);
+    --border-subtle: rgba(164, 144, 194, 0.14);
+    --border-card: rgba(164, 144, 194, 0.24);
+    --border-active: #a490c2;
+    --text-main: #fbf9ff;
+    --text-muted: #c2b3d6;
+    --text-faint: #786591;
+    --accent: #a490c2;
+    --accent-hover: #b8a5d4;
+    --accent-muted: rgba(164, 144, 194, 0.16);
+    --accent-gradient: linear-gradient(135deg, #4a4e8f 0%, #a490c2 100%);
+    --accent-glow: rgba(164, 144, 194, 0.38);
+    --star-color: #ffd670;
+    --star-glow: rgba(255, 214, 112, 0.45);
+    --badge-bg: rgba(164, 144, 194, 0.14);
+    --badge-border: rgba(164, 144, 194, 0.28);
+    --badge-text: #cdbde0;
+  }
+
+  /* 20. Theme: Modern Minimalist (Theme Factory Template - Architectural Slate) */
+  .theme-modern-minimalist,
+  .theme-minimalist {
+    --bg-base: #f3f4f6;
+    --bg-surface: #ffffff;
+    --bg-card: #ffffff;
+    --bg-card-hover: #f9fafb;
+    --bg-glass: rgba(255, 255, 255, 0.94);
+    --border-subtle: rgba(54, 69, 79, 0.12);
+    --border-card: rgba(54, 69, 79, 0.2);
+    --border-active: #36454f;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --text-faint: #94a3b8;
+    --accent: #36454f;
+    --accent-hover: #1f2937;
+    --accent-muted: rgba(54, 69, 79, 0.1);
+    --accent-gradient: linear-gradient(135deg, #1f2937 0%, #36454f 50%, #708090 100%);
+    --accent-glow: rgba(54, 69, 79, 0.22);
+    --star-color: #f59e0b;
+    --star-glow: rgba(245, 158, 11, 0.35);
+    --badge-bg: rgba(54, 69, 79, 0.08);
+    --badge-border: rgba(54, 69, 79, 0.22);
+    --badge-text: #1e293b;
+    --table-header-bg: rgba(243, 244, 246, 0.96);
+    --table-header-border: rgba(54, 69, 79, 0.15);
+    --table-header-text: #334155;
+  }
+
+  /* 21. Theme: Ocean Depths (Theme Factory Template - Maritime Recon) */
+  .theme-ocean-depths,
+  .theme-depths {
+    --bg-base: #0d131d;
+    --bg-surface: #141c2b;
+    --bg-card: #1a2332;
+    --bg-card-hover: #222d40;
+    --bg-glass: rgba(20, 28, 43, 0.86);
+    --border-subtle: rgba(45, 139, 139, 0.15);
+    --border-card: rgba(45, 139, 139, 0.25);
+    --border-active: #2d8b8b;
+    --text-main: #f1faee;
+    --text-muted: #9abec4;
+    --text-faint: #53747d;
+    --accent: #2d8b8b;
+    --accent-hover: #38a6a6;
+    --accent-muted: rgba(45, 139, 139, 0.16);
+    --accent-gradient: linear-gradient(135deg, #1d6060 0%, #2d8b8b 60%, #a8dadc 100%);
+    --accent-glow: rgba(45, 139, 139, 0.36);
+    --star-color: #e9c46a;
+    --star-glow: rgba(233, 196, 106, 0.45);
+    --badge-bg: rgba(45, 139, 139, 0.14);
+    --badge-border: rgba(45, 139, 139, 0.3);
+    --badge-text: #a8dadc;
+  }
+
+  /* 22. Theme: Sunset Boulevard (Theme Factory Template - Runway Dusk) */
+  .theme-sunset-boulevard,
+  .theme-boulevard {
+    --bg-base: #14242b;
+    --bg-surface: #1c323c;
+    --bg-card: #264653;
+    --bg-card-hover: #305869;
+    --bg-glass: rgba(28, 50, 60, 0.86);
+    --border-subtle: rgba(231, 111, 81, 0.15);
+    --border-card: rgba(231, 111, 81, 0.25);
+    --border-active: #e76f51;
+    --text-main: #fefbf6;
+    --text-muted: #c7d8dc;
+    --text-faint: #789299;
+    --accent: #e76f51;
+    --accent-hover: #f4a261;
+    --accent-muted: rgba(231, 111, 81, 0.16);
+    --accent-gradient: linear-gradient(135deg, #e76f51 0%, #f4a261 50%, #e9c46a 100%);
+    --accent-glow: rgba(231, 111, 81, 0.38);
+    --star-color: #e9c46a;
+    --star-glow: rgba(233, 196, 106, 0.45);
+    --badge-bg: rgba(231, 111, 81, 0.14);
+    --badge-border: rgba(231, 111, 81, 0.3);
+    --badge-text: #f4a261;
+  }
+
+  /* 23. Theme: Tech Innovation (Theme Factory Template - Avionics Tech Lab) */
+  .theme-tech-innovation,
+  .theme-tech,
+  .theme-innovation {
+    --bg-base: #101012;
+    --bg-surface: #191920;
+    --bg-card: #22222b;
+    --bg-card-hover: #2d2d3a;
+    --bg-glass: rgba(25, 25, 32, 0.88);
+    --border-subtle: rgba(0, 255, 255, 0.12);
+    --border-card: rgba(0, 102, 255, 0.28);
+    --border-active: #00ffff;
+    --text-main: #ffffff;
+    --text-muted: #9ea5b8;
+    --text-faint: #5c6273;
+    --accent: #0066ff;
+    --accent-hover: #2e7fff;
+    --accent-muted: rgba(0, 102, 255, 0.16);
+    --accent-gradient: linear-gradient(135deg, #0066ff 0%, #00d4ff 50%, #00ffff 100%);
+    --accent-glow: rgba(0, 255, 255, 0.38);
+    --star-color: #00ffff;
+    --star-glow: rgba(0, 255, 255, 0.45);
+    --badge-bg: rgba(0, 255, 255, 0.12);
+    --badge-border: rgba(0, 255, 255, 0.3);
+    --badge-text: #00ffff;
+  }
+
   body {
     font-family: var(--font-ui);
     font-weight: 400;
@@ -591,8 +866,12 @@
 }
 
 .theme-alpine-flight .dense-table-row:hover,
-.theme-first-class .dense-table-row:hover {
-  background-color: rgba(2, 132, 199, 0.04);
+.theme-first-class .dense-table-row:hover,
+.theme-arctic-frost .dense-table-row:hover,
+.theme-botanical-garden .dense-table-row:hover,
+.theme-golden-autumn .dense-table-row:hover,
+.theme-modern-minimalist .dense-table-row:hover {
+  background-color: rgba(0, 0, 0, 0.035);
 }
 
 .custom-scrollbar::-webkit-scrollbar {

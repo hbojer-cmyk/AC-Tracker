@@ -36,14 +36,10 @@ Add "Event Walkthrough" pages for past events, similar to the Map Depot format, 
 - [ ] 
 
 ### 🛠️ UI, Themes & Quality of Life (QoL)
-- [ ] 
-More light themes 
-
-Auto-expand rows on the stats page to show plane details when clicking the row
-
-Expandable aircraft info on the hangar page (the aircraft tiles)
-
-Add a button on the stats page to toggle between dark/light mode
+- [x] More light themes (added Arctic Frost, Botanical Garden, Golden Autumn, Modern Minimalist from Theme Factory)
+- [ ] Auto-expand rows on the stats page to show plane details when clicking the row
+- [ ] Expandable aircraft info on the hangar page (the aircraft tiles)
+- [ ] Add a button on the stats page to toggle between dark/light mode
 
 ---
 
@@ -55,6 +51,7 @@ Add a button on the stats page to toggle between dark/light mode
 ---
 
 ## ✅ Implemented / Done
+- [x] Integrated 10 themes from Theme Factory templates (Arctic Frost, Botanical Garden, Desert Rose, Forest Canopy, Golden Autumn, Midnight Galaxy, Modern Minimalist, Ocean Depths, Sunset Boulevard, Tech Innovation) expanding theme roster to 23 with modal filter tabs (All, Theme Factory, Daylight/Light, Dark Deck)
 - [x] Modern Flight Deck UI overhaul with 13 themes & dense table view
 - [x] "To Next Star" sorting & Priority Radar
 - [x] Map Depot collection tracking

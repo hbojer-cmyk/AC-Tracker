@@ -124,7 +124,18 @@ export type ThemeId =
   | 'pacific-clipper'
   | 'mojave-dusk'
   | 'stealth-ghost'
-  | 'alpine-flight';
+  | 'alpine-flight'
+  // Theme Factory Templates
+  | 'arctic-frost'
+  | 'botanical-garden'
+  | 'desert-rose'
+  | 'forest-canopy'
+  | 'golden-autumn'
+  | 'midnight-galaxy'
+  | 'modern-minimalist'
+  | 'ocean-depths'
+  | 'sunset-boulevard'
+  | 'tech-innovation';
 
 export interface ThemeConfig {
   name: string;
@@ -135,6 +146,7 @@ export interface ThemeConfig {
   surfacePreview: string;
   accentPreview: string;
   badgePreview: string;
+  category?: 'core' | 'theme-factory';
 }
 
 export const THEME_CONFIGS: Record<ThemeId, ThemeConfig> = {
@@ -147,6 +159,7 @@ export const THEME_CONFIGS: Record<ThemeId, ThemeConfig> = {
     surfacePreview: '#0a1931',
     accentPreview: '#00e5ff',
     badgePreview: '#38bdf8',
+    category: 'core',
   },
   'blackbird': {
     name: 'SR-71 Blackbird',
@@ -157,6 +170,7 @@ export const THEME_CONFIGS: Record<ThemeId, ThemeConfig> = {
     surfacePreview: '#1a1e27',
     accentPreview: '#f59e0b',
     badgePreview: '#fbbf24',
+    category: 'core',
   },
   'golden-hour': {
     name: 'Cruising FL380',
@@ -167,6 +181,7 @@ export const THEME_CONFIGS: Record<ThemeId, ThemeConfig> = {
     surfacePreview: '#26163b',
     accentPreview: '#ff6b4a',
     badgePreview: '#ff8a65',
+    category: 'core',
   },
   'aurora': {
     name: 'Aurora Borealis',
@@ -177,6 +192,7 @@ export const THEME_CONFIGS: Record<ThemeId, ThemeConfig> = {
     surfacePreview: '#0d2822',
     accentPreview: '#00ffb3',
     badgePreview: '#34d399',
+    category: 'core',
   },
   'cyber-runway': {
     name: 'Tokyo Haneda Night',
@@ -187,6 +203,7 @@ export const THEME_CONFIGS: Record<ThemeId, ThemeConfig> = {
     surfacePreview: '#161226',
     accentPreview: '#f72585',
     badgePreview: '#4cc9f0',
+    category: 'core',
   },
   'first-class': {
     name: 'First Class Suite',
@@ -197,6 +214,7 @@ export const THEME_CONFIGS: Record<ThemeId, ThemeConfig> = {
     surfacePreview: '#ffffff',
     accentPreview: '#c29438',
     badgePreview: '#87641c',
+    category: 'core',
   },
   'red-flag': {
     name: 'Red Flag Combat',
@@ -207,6 +225,7 @@ export const THEME_CONFIGS: Record<ThemeId, ThemeConfig> = {
     surfacePreview: '#0a200e',
     accentPreview: '#39ff14',
     badgePreview: '#39ff14',
+    category: 'core',
   },
   'orbital': {
     name: 'Cosmic Orbital',
@@ -217,6 +236,7 @@ export const THEME_CONFIGS: Record<ThemeId, ThemeConfig> = {
     surfacePreview: '#1a0f35',
     accentPreview: '#e040fb',
     badgePreview: '#ea80fc',
+    category: 'core',
   },
   'storm-chaser': {
     name: 'Storm Chaser',
@@ -227,6 +247,7 @@ export const THEME_CONFIGS: Record<ThemeId, ThemeConfig> = {
     surfacePreview: '#142036',
     accentPreview: '#facc15',
     badgePreview: '#fde047',
+    category: 'core',
   },
   'pacific-clipper': {
     name: 'Pan Am Clipper',
@@ -237,6 +258,7 @@ export const THEME_CONFIGS: Record<ThemeId, ThemeConfig> = {
     surfacePreview: '#0e2736',
     accentPreview: '#14b8a6',
     badgePreview: '#2dd4bf',
+    category: 'core',
   },
   'mojave-dusk': {
     name: 'Mojave Airfield',
@@ -247,6 +269,7 @@ export const THEME_CONFIGS: Record<ThemeId, ThemeConfig> = {
     surfacePreview: '#291c14',
     accentPreview: '#f97316',
     badgePreview: '#fb923c',
+    category: 'core',
   },
   'stealth-ghost': {
     name: 'Ghost Radar OLED',
@@ -257,6 +280,7 @@ export const THEME_CONFIGS: Record<ThemeId, ThemeConfig> = {
     surfacePreview: '#141414',
     accentPreview: '#e2e8f0',
     badgePreview: '#94a3b8',
+    category: 'core',
   },
   'alpine-flight': {
     name: 'Alpine Snow Flight',
@@ -267,10 +291,123 @@ export const THEME_CONFIGS: Record<ThemeId, ThemeConfig> = {
     surfacePreview: '#ffffff',
     accentPreview: '#0284c7',
     badgePreview: '#0369a1',
+    category: 'core',
+  },
+
+  // --- Theme Factory Template Themes ---
+  'arctic-frost': {
+    name: 'Arctic Frost',
+    isDark: false,
+    tag: 'ICE PATROL',
+    desc: 'Crisp glacial ice blue with steel blue avionics and silver metallic trim',
+    bgPreview: '#eaf2fa',
+    surfacePreview: '#ffffff',
+    accentPreview: '#4a6fa5',
+    badgePreview: '#325280',
+    category: 'theme-factory',
+  },
+  'botanical-garden': {
+    name: 'Botanical Garden',
+    isDark: false,
+    tag: 'EQUATORIAL',
+    desc: 'Organic cream base with fern green canopy, marigold markers and terracotta accents',
+    bgPreview: '#f5f3ed',
+    surfacePreview: '#ffffff',
+    accentPreview: '#4a7c59',
+    badgePreview: '#f9a620',
+    category: 'theme-factory',
+  },
+  'desert-rose': {
+    name: 'Desert Rose',
+    isDark: true,
+    tag: 'MIRAGE TWILIGHT',
+    desc: 'Deep burgundy night flight with dusty rose instruments and warm clay glow',
+    bgPreview: '#1f1019',
+    surfacePreview: '#2b1623',
+    accentPreview: '#d4a5a5',
+    badgePreview: '#b87d6d',
+    category: 'theme-factory',
+  },
+  'forest-canopy': {
+    name: 'Forest Canopy',
+    isDark: true,
+    tag: 'DEEP CANOPY',
+    desc: 'Primeval pine woodland darkness with olive vectors and sage foliage telemetry',
+    bgPreview: '#0e180e',
+    surfacePreview: '#172616',
+    accentPreview: '#a4ac86',
+    badgePreview: '#7d8471',
+    category: 'theme-factory',
+  },
+  'golden-autumn': {
+    name: 'Golden Hour Autumn',
+    isDark: false,
+    tag: 'INDIAN SUMMER',
+    desc: 'Warm beige daylight expanse with mustard amber radar, terracotta tones and chocolate anchors',
+    bgPreview: '#f4ede4',
+    surfacePreview: '#ffffff',
+    accentPreview: '#d98200',
+    badgePreview: '#c1666b',
+    category: 'theme-factory',
+  },
+  'midnight-galaxy': {
+    name: 'Midnight Galaxy',
+    isDark: true,
+    tag: 'COSMIC DEEP',
+    desc: 'Deep cosmic nebula purple with celestial blue avionics and radiant lavender glow',
+    bgPreview: '#140c1f',
+    surfacePreview: '#1e122e',
+    accentPreview: '#a490c2',
+    badgePreview: '#4a4e8f',
+    category: 'theme-factory',
+  },
+  'modern-minimalist': {
+    name: 'Modern Minimalist',
+    isDark: false,
+    tag: 'MONOLITH SLATE',
+    desc: 'Architectural light grayscale with slate charcoal typography and precision platinum borders',
+    bgPreview: '#f3f4f6',
+    surfacePreview: '#ffffff',
+    accentPreview: '#36454f',
+    badgePreview: '#708090',
+    category: 'theme-factory',
+  },
+  'ocean-depths': {
+    name: 'Ocean Depths',
+    isDark: true,
+    tag: 'MARITIME RECON',
+    desc: 'Suboceanic deep navy void with vibrant deep-sea teal instrumentation and seafoam crests',
+    bgPreview: '#0d131d',
+    surfacePreview: '#141c2b',
+    accentPreview: '#2d8b8b',
+    badgePreview: '#a8dadc',
+    category: 'theme-factory',
+  },
+  'sunset-boulevard': {
+    name: 'Sunset Boulevard',
+    isDark: true,
+    tag: 'RUNWAY DUSK',
+    desc: 'Deep teal-charcoal horizon with fiery burnt orange afterglow and radiant coral flare',
+    bgPreview: '#14242b',
+    surfacePreview: '#1c323c',
+    accentPreview: '#e76f51',
+    badgePreview: '#f4a261',
+    category: 'theme-factory',
+  },
+  'tech-innovation': {
+    name: 'Tech Innovation',
+    isDark: true,
+    tag: 'AVIONICS LAB',
+    desc: 'Sleek carbon dark gray with high-voltage electric blue vectors and piercing neon cyan telemetry',
+    bgPreview: '#101012',
+    surfacePreview: '#191920',
+    accentPreview: '#0066ff',
+    badgePreview: '#00ffff',
+    category: 'theme-factory',
   },
 };
 
-// Legacy Theme Fallbacks
+// Legacy & Alias Theme Fallbacks
 const THEME_FALLBACK_MAP: Record<string, ThemeId> = {
   classic: 'first-class',
   daylight: 'first-class',
@@ -302,6 +439,20 @@ const THEME_FALLBACK_MAP: Record<string, ThemeId> = {
   alpine: 'alpine-flight',
   snow: 'alpine-flight',
   ice: 'alpine-flight',
+  arctic: 'arctic-frost',
+  frost: 'arctic-frost',
+  botanical: 'botanical-garden',
+  garden: 'botanical-garden',
+  rose: 'desert-rose',
+  canopy: 'forest-canopy',
+  autumn: 'golden-autumn',
+  galaxy: 'midnight-galaxy',
+  minimalist: 'modern-minimalist',
+  depths: 'ocean-depths',
+  sunset_boulevard: 'sunset-boulevard',
+  boulevard: 'sunset-boulevard',
+  tech: 'tech-innovation',
+  innovation: 'tech-innovation',
 };
 
 const AIRCRAFT_ORDER: Record<string, number> = {
@@ -560,6 +711,7 @@ export const AeroQuest = () => {
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [showBackupModal, setShowBackupModal] = useState(false);
   const [showThemeModal, setShowThemeModal] = useState(false);
+  const [themeTab, setThemeTab] = useState<'all' | 'factory' | 'light' | 'dark'>('all');
   const [expandedRowId, setExpandedRowId] = useState<string | null>(null);
   const [showOnlyMaps, setShowOnlyMaps] = useState(false);
   const [hide3Star, setHide3Star] = useState(false);
@@ -2965,74 +3117,136 @@ export const AeroQuest = () => {
               </button>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 max-h-[65vh] overflow-y-auto custom-scrollbar pr-1">
-              {(Object.entries(THEME_CONFIGS) as [ThemeId, ThemeConfig][]).map(([id, cfg]) => {
-                const isSelected = theme === id;
-                return (
-                  <button
-                    key={id}
-                    onClick={() => {
-                      setTheme(id);
-                      setShowThemeModal(false);
-                    }}
-                    style={{
-                      borderColor: isSelected ? cfg.accentPreview : undefined,
-                      boxShadow: isSelected ? `0 0 22px -3px ${cfg.accentPreview}40` : undefined,
-                    }}
-                    className={`tactile-btn p-4 rounded-2xl border text-left transition-all relative overflow-hidden flex flex-col justify-between gap-3 group ${
-                      isSelected
-                        ? 'bg-[var(--bg-surface)] border-2'
-                        : 'bg-black/25 border-white/10 hover:border-white/20 hover:bg-white/5'
-                    }`}
-                  >
-                    {/* Atmospheric color swatch strip */}
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-2">
-                        {/* 3-Tone Cockpit Palette Stripe */}
-                        <div className="flex items-center rounded-lg overflow-hidden border border-white/15 shadow-inner">
-                          <div className="w-4 h-5" style={{ backgroundColor: cfg.bgPreview }} title="Void Base" />
-                          <div className="w-4 h-5" style={{ backgroundColor: cfg.surfacePreview }} title="Surface Card" />
-                          <div className="w-5 h-5 flex items-center justify-center" style={{ backgroundColor: cfg.accentPreview }} title="HUD Accent">
-                            {isSelected && <Check className="w-3.5 h-3.5 text-slate-950 font-bold" />}
+            <div className="flex flex-col gap-3">
+              {/* Category Filter Tabs */}
+              <div className="flex items-center gap-1.5 p-1 bg-black/40 border border-white/10 rounded-2xl overflow-x-auto custom-scrollbar">
+                {[
+                  { id: 'all', label: 'All Themes', count: Object.keys(THEME_CONFIGS).length },
+                  {
+                    id: 'factory',
+                    label: 'Theme Factory',
+                    count: Object.values(THEME_CONFIGS).filter(c => c.category === 'theme-factory').length,
+                  },
+                  {
+                    id: 'light',
+                    label: 'Daylight / Light',
+                    count: Object.values(THEME_CONFIGS).filter(c => !c.isDark).length,
+                  },
+                  {
+                    id: 'dark',
+                    label: 'Dark Deck',
+                    count: Object.values(THEME_CONFIGS).filter(c => c.isDark).length,
+                  },
+                ].map(tab => {
+                  const isActive = themeTab === tab.id;
+                  return (
+                    <button
+                      key={tab.id}
+                      onClick={() => setThemeTab(tab.id as any)}
+                      className={`tactile-btn px-3 py-1.5 rounded-xl text-xs font-mono font-medium transition-all whitespace-nowrap flex items-center gap-1.5 ${
+                        isActive
+                          ? 'theme-btn-accent shadow-sm'
+                          : 'text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-white/5'
+                      }`}
+                    >
+                      <span>{tab.label}</span>
+                      <span
+                        className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                          isActive ? 'bg-black/30 text-white' : 'bg-white/10 text-[var(--text-muted)]'
+                        }`}
+                      >
+                        {tab.count}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 max-h-[60vh] overflow-y-auto custom-scrollbar pr-1 pt-1">
+                {(Object.entries(THEME_CONFIGS) as [ThemeId, ThemeConfig][])
+                  .filter(([_, cfg]) => {
+                    if (themeTab === 'factory') return cfg.category === 'theme-factory';
+                    if (themeTab === 'light') return !cfg.isDark;
+                    if (themeTab === 'dark') return cfg.isDark;
+                    return true;
+                  })
+                  .map(([id, cfg]) => {
+                    const isSelected = theme === id;
+                    return (
+                      <button
+                        key={id}
+                        onClick={() => {
+                          setTheme(id);
+                          setShowThemeModal(false);
+                        }}
+                        style={{
+                          borderColor: isSelected ? cfg.accentPreview : undefined,
+                          boxShadow: isSelected ? `0 0 22px -3px ${cfg.accentPreview}40` : undefined,
+                        }}
+                        className={`tactile-btn p-4 rounded-2xl border text-left transition-all relative overflow-hidden flex flex-col justify-between gap-3 group ${
+                          isSelected
+                            ? 'bg-[var(--bg-surface)] border-2'
+                            : 'bg-black/25 border-white/10 hover:border-white/20 hover:bg-white/5'
+                        }`}
+                      >
+                        {/* Atmospheric color swatch strip */}
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            {/* 3-Tone Cockpit Palette Stripe */}
+                            <div className="flex items-center rounded-lg overflow-hidden border border-white/15 shadow-inner shrink-0">
+                              <div className="w-4 h-5" style={{ backgroundColor: cfg.bgPreview }} title="Void Base" />
+                              <div className="w-4 h-5" style={{ backgroundColor: cfg.surfacePreview }} title="Surface Card" />
+                              <div className="w-5 h-5 flex items-center justify-center" style={{ backgroundColor: cfg.accentPreview }} title="HUD Accent">
+                                {isSelected && <Check className="w-3.5 h-3.5 text-slate-950 font-bold" />}
+                              </div>
+                            </div>
+
+                            <span
+                              className="text-[9px] font-mono font-medium px-2 py-0.5 rounded-full border uppercase tracking-wider"
+                              style={{
+                                color: cfg.accentPreview,
+                                borderColor: `${cfg.accentPreview}40`,
+                                backgroundColor: `${cfg.accentPreview}15`,
+                              }}
+                            >
+                              {cfg.tag}
+                            </span>
+
+                            {cfg.category === 'theme-factory' && (
+                              <span
+                                className="text-[8px] font-mono font-bold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 uppercase tracking-widest"
+                                title="Created from Theme Factory Template"
+                              >
+                                Factory
+                              </span>
+                            )}
                           </div>
+
+                          {isSelected && (
+                            <span
+                              className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full shrink-0"
+                              style={{
+                                backgroundColor: cfg.accentPreview,
+                                color: cfg.isDark ? '#020617' : '#ffffff',
+                              }}
+                            >
+                              ACTIVE
+                            </span>
+                          )}
                         </div>
 
-                        <span
-                          className="text-[9px] font-mono font-medium px-2 py-0.5 rounded-full border uppercase tracking-wider"
-                          style={{
-                            color: cfg.accentPreview,
-                            borderColor: `${cfg.accentPreview}40`,
-                            backgroundColor: `${cfg.accentPreview}15`,
-                          }}
-                        >
-                          {cfg.tag}
-                        </span>
-                      </div>
-
-                      {isSelected && (
-                        <span
-                          className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full"
-                          style={{
-                            backgroundColor: cfg.accentPreview,
-                            color: cfg.isDark ? '#020617' : '#ffffff',
-                          }}
-                        >
-                          ACTIVE
-                        </span>
-                      )}
-                    </div>
-
-                    <div>
-                      <div className="text-sm font-semibold font-heading text-[var(--text-main)] group-hover:text-white transition-colors">
-                        {cfg.name}
-                      </div>
-                      <div className="text-[11px] text-[var(--text-muted)] line-clamp-2 mt-0.5 leading-snug">
-                        {cfg.desc}
-                      </div>
-                    </div>
-                  </button>
-                );
-              })}
+                        <div>
+                          <div className="text-sm font-semibold font-heading text-[var(--text-main)] group-hover:text-[var(--accent)] transition-colors">
+                            {cfg.name}
+                          </div>
+                          <div className="text-[11px] text-[var(--text-muted)] line-clamp-2 mt-0.5 leading-snug">
+                            {cfg.desc}
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })}
+              </div>
             </div>
           </div>
         </div>
