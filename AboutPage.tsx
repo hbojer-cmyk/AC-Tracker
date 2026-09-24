@@ -11,13 +11,75 @@ import {
   Database, 
   Keyboard, 
   Palette,
-  ExternalLink
+  ExternalLink,
+  Globe,
+  BookOpen,
+  Gift,
+  MessageSquare
 } from 'lucide-react';
 import { APP_VERSION, APP_UPDATED_DATE } from './index';
 
 interface AboutPageProps {
   onNavigate: (view: 'list' | 'maps' | 'airplanes' | 'stats') => void;
 }
+
+export interface PilotResource {
+  title: string;
+  url: string;
+  category: string;
+  description: string;
+  badge?: string;
+  domain?: string;
+  icon?: 'wiki' | 'gift' | 'forum' | 'support' | 'map' | 'default';
+}
+
+export const COMMUNITY_RESOURCES: PilotResource[] = [
+  {
+    title: 'Airport City Wiki',
+    url: 'https://www.airportcitygame.com/wiki/',
+    category: 'Wiki & Database',
+    description: 'Comprehensive community encyclopedia, flight requirements, building specs, and quest guides.',
+    badge: 'Official Wiki',
+    domain: 'airportcitygame.com',
+    icon: 'wiki',
+  },
+  {
+    title: 'Airport City Game Forums',
+    url: 'https://www.airportcitygame.com/',
+    category: 'Community & Forums',
+    description: 'The premier player community forum covering trading, neighbor codes, flight tips, space launches, alliances, and game strategies.',
+    badge: 'Player Forums',
+    domain: 'airportcitygame.com',
+    icon: 'forum',
+  },
+  {
+    title: 'Airport City Official Facebook',
+    url: 'https://www.facebook.com/AirportCity',
+    category: 'Bonuses & Giveaways',
+    description: 'Official page featuring weekly bonus codes, gift giveaways, game updates, and community events.',
+    badge: 'Weekly Codes',
+    domain: 'facebook.com',
+    icon: 'gift',
+  },
+  {
+    title: 'Game Insight Help & FAQ',
+    url: 'https://gameinsight.helpshift.com/hc/en/16-airport-city/',
+    category: 'Official Support',
+    description: "The developer's official help desk, troubleshooting guides, account recovery, bug reports, and game FAQs.",
+    badge: 'Developer Support',
+    domain: 'gameinsight.helpshift.com',
+    icon: 'support',
+  },
+  {
+    title: 'World Destinations Interactive Map',
+    url: 'https://www.google.com/maps/d/u/0/viewer?hl=en&mid=1MY3JDc6Lr2XaTiP9RC7GzVcJDuOhyvQv&ll=-10.398846696943707%2C-71.04663895648017&z=5',
+    category: 'Interactive Maps',
+    description: 'Interactive Google Map plotting all Airport City flight destinations worldwide across all continents.',
+    badge: 'Google Maps',
+    domain: 'google.com/maps',
+    icon: 'map',
+  },
+];
 
 export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate }) => {
   return (
@@ -135,6 +197,77 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate }) => {
           <p className="text-xs text-[var(--text-muted)] font-normal leading-relaxed">
             Comprehensive analytics suite with mastery star distribution, flight completion gauges, airline pilot rank progression, and JSON/CSV backup dispatch.
           </p>
+        </div>
+      </div>
+
+      {/* Flight Resources & Community Links */}
+      <div className="glass-panel rounded-3xl p-6 border border-[var(--border-card)] space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[var(--border-subtle)] pb-3">
+          <div>
+            <h2 className="text-base font-semibold text-[var(--text-main)] font-heading flex items-center gap-2">
+              <Globe className="w-4 h-4 theme-accent-text" /> Flight Resources & Community Links
+            </h2>
+            <p className="text-xs text-[var(--text-muted)] mt-0.5 font-normal">
+              Essential knowledge bases, wikis, and reference hubs for Airport City pilots.
+            </p>
+          </div>
+          <span className="px-2.5 py-1 rounded-xl text-[11px] font-mono theme-badge self-start sm:self-auto">
+            {COMMUNITY_RESOURCES.length} {COMMUNITY_RESOURCES.length === 1 ? 'Resource' : 'Resources'}
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {COMMUNITY_RESOURCES.map((link) => (
+            <a
+              key={link.url}
+              href={link.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="glass-card rounded-2xl p-5 border border-[var(--border-card)] hover:border-[var(--border-active)] hover:bg-white/[0.03] transition-all group flex flex-col justify-between space-y-3 relative overflow-hidden"
+            >
+              <div className="space-y-2">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold theme-btn-accent shadow-sm">
+                      {link.category}
+                    </span>
+                    {link.badge && (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-mono text-[var(--text-muted)] bg-white/5 border border-white/10">
+                        {link.badge}
+                      </span>
+                    )}
+                  </div>
+                  <ExternalLink className="w-3.5 h-3.5 text-[var(--text-muted)] group-hover:text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform shrink-0" />
+                </div>
+                <h3 className="font-semibold text-sm text-[var(--text-main)] font-heading group-hover:text-white transition-colors flex items-center gap-2">
+                  {link.icon === 'gift' ? (
+                    <Gift className="w-4 h-4 text-emerald-400 shrink-0" />
+                  ) : link.icon === 'wiki' ? (
+                    <BookOpen className="w-4 h-4 theme-accent-text shrink-0" />
+                  ) : link.icon === 'forum' ? (
+                    <MessageSquare className="w-4 h-4 text-sky-400 shrink-0" />
+                  ) : link.icon === 'support' ? (
+                    <HelpCircle className="w-4 h-4 text-amber-400 shrink-0" />
+                  ) : link.icon === 'map' ? (
+                    <MapIcon className="w-4 h-4 text-teal-400 shrink-0" />
+                  ) : (
+                    <Globe className="w-4 h-4 theme-accent-text shrink-0" />
+                  )}
+                  {link.title}
+                </h3>
+                <p className="text-xs text-[var(--text-muted)] font-normal leading-relaxed">
+                  {link.description}
+                </p>
+              </div>
+
+              <div className="pt-3 border-t border-[var(--border-subtle)] flex items-center justify-between text-[11px] font-mono text-[var(--text-muted)]">
+                <span className="truncate">{link.domain || link.url}</span>
+                <span className="theme-accent-text font-medium group-hover:underline flex items-center gap-1">
+                  Open Link &rarr;
+                </span>
+              </div>
+            </a>
+          ))}
         </div>
       </div>
 

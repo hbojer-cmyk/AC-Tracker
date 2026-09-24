@@ -58,3 +58,4 @@ Add a button on the stats page to toggle between dark/light mode
 - [x] Modern Flight Deck UI overhaul with 13 themes & dense table view
 - [x] "To Next Star" sorting & Priority Radar
 - [x] Map Depot collection tracking
+- [x] Flight Resources & Community Links section in About ACT (Wiki, Game Forums, Facebook Bonus Codes, Developer Support & FAQ, World Destinations Map)
