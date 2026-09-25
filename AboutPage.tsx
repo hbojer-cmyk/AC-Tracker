@@ -17,10 +17,13 @@ import {
   Gift,
   MessageSquare
 } from 'lucide-react';
-import { APP_VERSION, APP_UPDATED_DATE } from './index';
+import { APP_VERSION, APP_UPDATED_DATE, LOGO_OPTIONS } from './index';
 
 interface AboutPageProps {
   onNavigate: (view: 'list' | 'maps' | 'airplanes' | 'stats') => void;
+  onOpenLogoModal?: () => void;
+  activeLogoId?: string;
+  onSelectLogo?: (id: string) => void;
 }
 
 export interface PilotResource {
@@ -81,7 +84,12 @@ export const COMMUNITY_RESOURCES: PilotResource[] = [
   },
 ];
 
-export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate }) => {
+export const AboutPage: React.FC<AboutPageProps> = ({
+  onNavigate,
+  onOpenLogoModal,
+  activeLogoId,
+  onSelectLogo,
+}) => {
   return (
     <div className="space-y-6 pb-12 animate-in fade-in duration-300">
       {/* Hero Header */}
@@ -91,9 +99,9 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate }) => {
           style={{ backgroundColor: 'var(--accent)' }}
         />
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 relative z-10">
-          <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-2xl theme-badge flex items-center justify-center shadow-inner shrink-0 p-2 overflow-hidden">
-              <img src="Map-icons/standard_icon.png" alt="ACT" className="w-11 h-11 object-contain drop-shadow" />
+          <div className="flex items-center gap-5 sm:gap-6">
+            <div className="w-28 h-28 sm:w-36 sm:h-36 rounded-3xl theme-badge flex items-center justify-center shadow-2xl shrink-0 p-1 sm:p-1.5 border border-white/10 group">
+              <img src="icons/deck-resources-3d.png" alt="About ACT" className="w-full h-full object-contain drop-shadow-2xl group-hover:scale-110 transition-transform duration-300" />
             </div>
             <div>
               <div className="flex items-center gap-2 mb-1">
@@ -107,7 +115,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate }) => {
               <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-[var(--text-main)] font-heading">
                 About ACT
               </h1>
-              <p className="text-xs sm:text-sm text-[var(--text-muted)] mt-0.5 font-normal">
+              <p className="text-xs sm:text-sm text-[var(--text-muted)] mt-1 font-normal">
                 Airport City Tracker — Operations Hub & Flight Mastery Companion by Soupha
               </p>
             </div>
@@ -123,6 +131,77 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate }) => {
         <p className="text-xs sm:text-sm text-[var(--text-muted)] leading-relaxed font-normal">
           <strong className="text-[var(--text-main)]">AC-Tracker (ACT)</strong> is a companion application created specifically for Airport City pilots. It replaces bulky spreadsheets and notes with an interactive cockpit to track flight quotas, star progressions, map stocks, and fleet properties with maximum speed and clarity.
         </p>
+      </div>
+
+      {/* Brand Identity & Logo Crests Showcase */}
+      <div className="glass-panel rounded-3xl p-6 border border-[var(--border-card)] space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[var(--border-subtle)] pb-3">
+          <div>
+            <h2 className="text-base font-semibold text-[var(--text-main)] font-heading flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-amber-400" /> Cockpit Brand Emblems
+            </h2>
+            <p className="text-xs text-[var(--text-muted)] mt-0.5 font-normal">
+              Original 3D flight-deck logos reimagined from the official Airport City winged crest.
+            </p>
+          </div>
+          {onOpenLogoModal && (
+            <button
+              onClick={onOpenLogoModal}
+              className="tactile-btn px-4 py-2 rounded-xl text-xs font-semibold theme-btn-accent shadow-md flex items-center gap-1.5 self-start sm:self-auto"
+            >
+              <span>Customize Logo</span>
+              <Sparkles className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {LOGO_OPTIONS.map((logo) => {
+            const isSelected = activeLogoId === logo.id;
+            return (
+              <div
+                key={logo.id}
+                onClick={() => onSelectLogo && onSelectLogo(logo.id)}
+                className={`glass-card rounded-2xl p-4 border transition-all cursor-pointer group flex flex-col justify-between space-y-3 relative overflow-hidden ${
+                  isSelected
+                    ? 'border-[var(--accent)] bg-[var(--accent-muted)] shadow-xl ring-1 ring-[var(--accent)]'
+                    : 'border-[var(--border-card)] hover:border-white/20 hover:bg-white/5'
+                }`}
+              >
+                <div className="flex flex-col items-center text-center space-y-2">
+                  <div className="w-20 h-20 rounded-2xl bg-black/40 border border-white/10 flex items-center justify-center p-1.5 shadow-inner group-hover:scale-105 transition-transform duration-300">
+                    <img src={logo.file} alt={logo.name} className="w-full h-full object-contain drop-shadow-xl" />
+                  </div>
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-center gap-1.5 flex-wrap">
+                      <span className={`px-2 py-0.5 rounded-full text-[9px] font-mono font-bold ${
+                        isSelected ? 'theme-btn-accent shadow-sm' : 'bg-white/10 text-white/90'
+                      }`}>
+                        {logo.badge}
+                      </span>
+                    </div>
+                    <h3 className="font-semibold text-xs text-[var(--text-main)] font-heading group-hover:text-[var(--accent)] transition-colors line-clamp-1">
+                      {logo.name}
+                    </h3>
+                  </div>
+                </div>
+
+                <div className="pt-2 border-t border-white/10 flex items-center justify-between text-[10px]">
+                  <span className="font-mono text-[var(--text-muted)]">Theme Safe</span>
+                  {isSelected ? (
+                    <span className="font-semibold text-emerald-400 flex items-center gap-1 font-mono">
+                      ✓ ACTIVE
+                    </span>
+                  ) : (
+                    <span className="theme-accent-text font-medium group-hover:underline">
+                      Select &rarr;
+                    </span>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {/* Modules Grid */}

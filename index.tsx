@@ -678,6 +678,60 @@ const EditableNumberInput: React.FC<EditableNumberInputProps> = ({
   );
 };
 
+export interface LogoOptionConfig {
+  id: string;
+  name: string;
+  subtitle: string;
+  badge: string;
+  file: string;
+  description: string;
+  inspiration: string;
+  highlights: string[];
+}
+
+export const LOGO_OPTIONS: LogoOptionConfig[] = [
+  {
+    id: 'opt1',
+    name: 'Winged Control Tower Medallion',
+    subtitle: 'Recommended • Direct Airport City 3D Evolution',
+    badge: 'Recommended',
+    file: 'icons/act-logo-opt1.png',
+    description: 'A circular brushed-titanium and gold aviation medallion with 3-tier sculpted gold wings. Features the iconic golden Airport City control tower, city skyline, a soaring jet with cyan contrail arc, and an embossed "ACT" badge.',
+    inspiration: 'Directly adapts the official Airport City winged logo into a tactile 3D flight-deck medallion with glowing cyan holographic radar rings.',
+    highlights: ['3-tier sculpted golden wings', 'Recessed sapphire & cyan radar dome', 'Embossed ACT titanium bezel', 'Optimal balance at navbar sizes']
+  },
+  {
+    id: 'opt2',
+    name: 'Isometric ATC Tower & Radar Crest',
+    subtitle: 'High-Tech Flight Deck Pedestal',
+    badge: 'Tactile 3D',
+    file: 'icons/act-logo-opt2.png',
+    description: 'A heavy brushed-titanium flight-deck pedestal with glowing cyan radar sweep rings and front pilot wings badge, crowned by the golden control tower and mini skyscrapers inside a holographic dome.',
+    inspiration: 'Shares design language with the 3D Map Depot console, placing the Airport City control tower on a tactical command pedestal.',
+    highlights: ['Matches deck-mapdepot pedestal style', 'Miniature 3D golden skyscrapers', 'Ascending airliner with cyan orbit', 'High-contrast base for all themes']
+  },
+  {
+    id: 'opt3',
+    name: 'Winged Aviation Radar Shield',
+    subtitle: 'Aviation Command & Star Pilot Crest',
+    badge: 'Bold Crest',
+    file: 'icons/act-logo-opt3.png',
+    description: 'A heavy 3D dark brushed-titanium shield framed in polished gold with prominent Airport City golden wings, central radar screen displaying the golden tower silhouette, and a banking 3D silver jet.',
+    inspiration: 'Fuses military flight-deck star pilot heraldry with the Airport City golden wings and gold-engraved AC-TRACKER banner.',
+    highlights: ['Engraved AC-TRACKER gold banner', 'Dynamic banking 3D airliner', 'Circular glowing radar sweep', 'Command shield silhouette']
+  },
+  {
+    id: 'opt4',
+    name: 'Winged Hologram Globe & Control Tower',
+    subtitle: 'Global Operations & Destination Mastery',
+    badge: 'World Radar',
+    file: 'icons/act-logo-opt4.png',
+    description: 'A circular titanium instrument bezel with golden pilot wings cradling a glowing cyan 3D world globe with flight pins, topped by the golden Airport City control tower and an orbiting airliner.',
+    inspiration: 'Embodies global flight tracking, integrating the Airport City control tower and skyline as a crown over the worldwide navigation sphere.',
+    highlights: ['Cyan holographic world globe', 'Global destination flight pins', 'Orbiting jet with dual contrail', 'Classic winged instrument bezel']
+  }
+];
+
 export const AeroQuest = () => {
   const [destinations, setDestinations] = useState<FlightDestination[]>([]);
   const [activeCategory, setActiveCategory] = useState<string>('All Destinations');
@@ -706,11 +760,31 @@ export const AeroQuest = () => {
     const saved = localStorage.getItem('aeroquest_sidebar_open');
     return saved !== null ? saved === 'true' : false;
   });
+  const [isFlightDeckHeaderOpen, setIsFlightDeckHeaderOpen] = useState(() => {
+    const saved = localStorage.getItem('aeroquest_flight_deck_header_open');
+    return saved !== null ? saved === 'true' : true;
+  });
+  const toggleFlightDeckHeader = () => {
+    setIsFlightDeckHeaderOpen(prev => {
+      const next = !prev;
+      localStorage.setItem('aeroquest_flight_deck_header_open', String(next));
+      return next;
+    });
+  };
   const [theme, setTheme] = useState<ThemeId>('stealth');
   const [isLoaded, setIsLoaded] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [showBackupModal, setShowBackupModal] = useState(false);
   const [showThemeModal, setShowThemeModal] = useState(false);
+  const [showLogoModal, setShowLogoModal] = useState(false);
+  const [logoId, setLogoId] = useState<string>(() => {
+    return localStorage.getItem('act_logo_choice') || 'opt1';
+  });
+  const handleSelectLogo = (id: string) => {
+    setLogoId(id);
+    localStorage.setItem('act_logo_choice', id);
+  };
+  const activeLogo = LOGO_OPTIONS.find(l => l.id === logoId) || LOGO_OPTIONS[0];
   const [themeTab, setThemeTab] = useState<'all' | 'factory' | 'light' | 'dark'>('all');
   const [expandedRowId, setExpandedRowId] = useState<string | null>(null);
   const [showOnlyMaps, setShowOnlyMaps] = useState(false);
@@ -1301,8 +1375,24 @@ export const AeroQuest = () => {
       <header className="sticky top-0 z-40 glass-panel border-b border-[var(--border-subtle)] shadow-lg backdrop-blur-xl">
         <div className="max-w-[1700px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-[1fr_auto_1fr] items-center h-14 sm:h-16 gap-4">
-            {/* Brand Logo */}
-            <div className="flex items-center justify-start min-w-0">
+            {/* Brand Logo & Brand Crest */}
+            <div className="flex items-center justify-start min-w-0 gap-3 shrink-0">
+              <button
+                type="button"
+                onClick={() => setShowLogoModal(true)}
+                title="Click to customize AC-Tracker logo (4 options available)"
+                className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center shadow-lg hover:scale-105 transition-all shrink-0 relative group p-0.5 focus:outline-none cursor-pointer"
+              >
+                <img
+                  src={activeLogo.file}
+                  alt={activeLogo.name}
+                  className="w-full h-full object-contain drop-shadow-xl group-hover:scale-110 transition-transform duration-300"
+                />
+                <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-amber-400 text-slate-950 flex items-center justify-center text-[9px] font-bold shadow-md opacity-0 group-hover:opacity-100 transition-opacity">
+                  ✦
+                </span>
+              </button>
+
               <div
                 onClick={() => {
                   setView('list');
@@ -1311,29 +1401,23 @@ export const AeroQuest = () => {
                   setFilterGroup('All');
                   setSearchQuery('');
                 }}
-                className="flex items-center gap-3 cursor-pointer group shrink-0"
+                className="flex flex-col justify-center cursor-pointer group select-none"
+                title="Reset filters and view all flights"
               >
-                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl theme-btn-accent p-0.5 shadow-lg group-hover:scale-105 transition-all">
-                  <div className="w-full h-full bg-slate-950/75 rounded-[14px] flex items-center justify-center">
-                    <Plane className="w-4 h-4 sm:w-5 sm:h-5 theme-accent-text -rotate-45 group-hover:scale-110 transition-transform" />
-                  </div>
-                </div>
-                <div className="flex flex-col justify-center">
-                  <span className="font-heading font-bold text-base sm:text-lg tracking-tight text-[var(--text-main)] leading-none">
-                    AC-TRACKER
+                <span className="font-heading font-bold text-base sm:text-lg tracking-tight text-[var(--text-main)] group-hover:text-[var(--accent)] transition-colors leading-none">
+                  AC-TRACKER
+                </span>
+                <div className="flex items-center gap-1.5 mt-1">
+                  <span className="text-[11px] font-medium text-[var(--text-muted)] leading-none">
+                    by Soupha
                   </span>
-                  <div className="flex items-center gap-1.5 mt-1">
-                    <span className="text-[11px] font-medium text-[var(--text-muted)] leading-none">
-                      by Soupha
-                    </span>
-                    <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-medium theme-badge leading-none">
-                      {APP_VERSION}
-                    </span>
-                  </div>
-                  <span className="text-[9px] font-mono text-[var(--text-muted)] opacity-75 mt-0.5 leading-none">
-                    Updated: {APP_UPDATED_DATE}
+                  <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-medium theme-badge leading-none">
+                    {APP_VERSION}
                   </span>
                 </div>
+                <span className="text-[9px] font-mono text-[var(--text-muted)] opacity-75 mt-0.5 leading-none">
+                  Updated: {APP_UPDATED_DATE}
+                </span>
               </div>
             </div>
 
@@ -1608,7 +1692,14 @@ export const AeroQuest = () => {
           {view === 'airplanes' && <AirplanesPage />}
 
           {/* VIEW: ABOUT ACT */}
-          {view === 'about' && <AboutPage onNavigate={(v) => setView(v)} />}
+          {view === 'about' && (
+            <AboutPage
+              onNavigate={(v) => setView(v)}
+              onOpenLogoModal={() => setShowLogoModal(true)}
+              activeLogoId={logoId}
+              onSelectLogo={handleSelectLogo}
+            />
+          )}
 
           {/* VIEW: MAP DEPOT */}
           {view === 'maps' && (
@@ -1620,37 +1711,27 @@ export const AeroQuest = () => {
                   style={{ backgroundColor: 'var(--accent)' }}
                 />
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
-                  <div className="flex items-center gap-4">
-                    <div className="w-16 h-16 rounded-2xl theme-badge flex items-center justify-center shadow-inner shrink-0 p-2 overflow-hidden">
-                      <img src="Map-icons/map-icon.png" alt="Map Collection" className="w-11 h-11 object-contain drop-shadow" />
+                  <div className="flex items-center gap-5 sm:gap-6">
+                    <div className="w-28 h-28 sm:w-36 sm:h-36 rounded-3xl theme-badge flex items-center justify-center shadow-2xl shrink-0 p-1 sm:p-1.5 border border-white/10 group">
+                      <img src="icons/deck-mapdepot-3d.png" alt="Map Inventory" className="w-full h-full object-contain drop-shadow-2xl group-hover:scale-110 transition-transform duration-300" />
                     </div>
                     <div>
                       <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-[var(--text-main)] font-heading">
-                        Map Collection
+                        Map Inventory
                       </h1>
-                      <p className="text-xs sm:text-sm text-[var(--text-muted)] mt-0.5">
-                        Inventory tracking for adventure, alliance, space, and event flight maps.
+                      <p className="text-xs sm:text-sm text-[var(--text-muted)] mt-1 font-normal max-w-2xl leading-relaxed">
+                        Keep track of all the maps in your game. The game has very nice rewards for players who use their maps strategically to complete collections. This page lets you see at a glance which ones you're missing to achieve your goals.
                       </p>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3 bg-black/20 p-3 rounded-2xl border border-white/5 shrink-0">
-                    <div className="text-center px-4 py-1">
-                      <div className="text-[10px] font-medium uppercase theme-accent-text tracking-wider">
-                        Unique Maps
-                      </div>
-                      <div className="text-2xl font-heading font-semibold theme-accent-text mt-0.5">
-                        {mapCollectionStats.uniqueMaps}
-                        <span className="text-xs text-[var(--text-muted)] font-mono"> / 148</span>
-                      </div>
+                  <div className="bg-black/20 p-3 px-5 rounded-2xl border border-white/5 text-center shrink-0">
+                    <div className="text-[10px] font-medium uppercase theme-accent-text tracking-wider">
+                      Collected Maps
                     </div>
-                    <div className="text-center px-4 py-1 border-l border-white/10">
-                      <div className="text-[10px] font-medium uppercase text-amber-400 tracking-wider">
-                        Physical Stock
-                      </div>
-                      <div className="text-2xl font-heading font-semibold text-amber-300 mt-0.5">
-                        {mapCollectionStats.totalMaps.toLocaleString()}
-                      </div>
+                    <div className="text-2xl font-heading font-semibold theme-accent-text mt-0.5">
+                      {mapCollectionStats.uniqueMaps}
+                      <span className="text-xs text-[var(--text-muted)] font-mono"> / 148</span>
                     </div>
                   </div>
                 </div>
@@ -1857,16 +1938,22 @@ export const AeroQuest = () => {
             <div className="space-y-6 animate-in fade-in duration-300">
               {/* Analytics Header */}
               <div className="glass-panel rounded-3xl p-6 sm:p-8 relative overflow-hidden border border-[var(--border-card)] shadow-xl">
-                <div className="absolute -right-10 -bottom-10 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+                <div
+                  className="absolute -right-10 -bottom-10 w-64 h-64 rounded-full blur-3xl pointer-events-none opacity-20"
+                  style={{ backgroundColor: 'var(--accent)' }}
+                />
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
-                  <div className="flex items-center gap-4">
-                    <div className="w-16 h-16 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 shadow-inner shrink-0">
-                      <Trophy className="w-8 h-8" />
+                  <div className="flex items-center gap-5 sm:gap-6">
+                    <div className="w-28 h-28 sm:w-36 sm:h-36 rounded-3xl theme-badge flex items-center justify-center shadow-2xl shrink-0 p-1 sm:p-1.5 border border-white/10 group">
+                      <img src="icons/deck-stars-3d.png" alt="Statistics" className="w-full h-full object-contain drop-shadow-2xl group-hover:scale-110 transition-transform duration-300" />
                     </div>
                     <div>
                       <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-[var(--text-main)] font-heading">
                         Statistics
                       </h1>
+                      <p className="text-xs sm:text-sm text-[var(--text-muted)] mt-1 font-normal">
+                        Track total flight progression, star milestones, and mastery across all categories
+                      </p>
                     </div>
                   </div>
 
@@ -1935,9 +2022,9 @@ export const AeroQuest = () => {
                       >
                         <div className="flex items-center gap-3.5 min-w-0">
                           {CATEGORY_ICONS[cat] ? (
-                            <img src={CATEGORY_ICONS[cat]} alt={cat} className="w-8 h-8 object-contain shrink-0" />
+                            <img src={CATEGORY_ICONS[cat]} alt={cat} className="w-10 h-10 sm:w-11 sm:h-11 object-contain shrink-0 drop-shadow" />
                           ) : (
-                            <Navigation className="w-7 h-7 theme-accent-text shrink-0" />
+                            <Navigation className="w-8 h-8 theme-accent-text shrink-0" />
                           )}
                           <div className="min-w-0">
                             <div className="text-sm sm:text-base font-semibold text-[var(--text-main)] truncate group-hover:text-[var(--accent)] transition-colors">
@@ -1974,7 +2061,79 @@ export const AeroQuest = () => {
 
           {/* VIEW: FLIGHT DECK (LIST OR GRID) */}
           {(view === 'list' || view === 'grid') && (
-            <div className="space-y-3 animate-in fade-in duration-200">
+            <div className="space-y-4 animate-in fade-in duration-200">
+              {/* Flight Deck HUD Header Banner */}
+              {isFlightDeckHeaderOpen ? (
+                <div className="glass-panel rounded-3xl p-6 sm:p-8 relative overflow-hidden border border-[var(--border-card)] shadow-xl">
+                  <div
+                    className="absolute -right-10 -bottom-10 w-64 h-64 rounded-full blur-3xl pointer-events-none opacity-20"
+                    style={{ backgroundColor: 'var(--accent)' }}
+                  />
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
+                    <div className="flex items-center gap-5 sm:gap-6">
+                      <div className="w-28 h-28 sm:w-36 sm:h-36 rounded-3xl theme-badge flex items-center justify-center shadow-2xl shrink-0 p-1 sm:p-1.5 border border-white/10 group">
+                        <img src="icons/deck-radar-3d.png" alt="Flight Deck" className="w-full h-full object-contain drop-shadow-2xl group-hover:scale-110 transition-transform duration-300" />
+                      </div>
+                      <div>
+                        <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-[var(--text-main)] font-heading">
+                          Flight Deck
+                        </h1>
+                        <p className="text-xs sm:text-sm text-[var(--text-muted)] mt-1 font-normal">
+                          Real-time flight radar, route catalog, and star progression tracking.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3 self-end md:self-auto">
+                      <div className="grid grid-cols-2 gap-3 bg-black/20 p-3 rounded-2xl border border-white/5 shrink-0">
+                        <div className="text-center px-4 py-1">
+                          <div className="text-[10px] font-medium uppercase theme-accent-text tracking-wider">
+                            Active Routes
+                          </div>
+                          <div className="text-2xl font-heading font-semibold theme-accent-text mt-0.5">
+                            {sortedAndFilteredDestinations.length}
+                            <span className="text-xs text-[var(--text-muted)] font-mono"> / {destinations.length}</span>
+                          </div>
+                        </div>
+                        <div className="text-center px-4 py-1 border-l border-white/10">
+                          <div className="text-[10px] font-medium uppercase text-amber-400 tracking-wider">
+                            Total Flights
+                          </div>
+                          <div className="text-2xl font-heading font-semibold text-amber-300 mt-0.5">
+                            {destinations.reduce((acc, d) => acc + (d.flightsDone || 0), 0).toLocaleString()}
+                          </div>
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={toggleFlightDeckHeader}
+                        title="Collapse Flight Deck Header"
+                        className="p-2 rounded-xl text-[var(--text-muted)] hover:text-white hover:bg-white/10 transition-all border border-white/5"
+                      >
+                        <ChevronUp className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center justify-between px-4 py-2 glass-panel rounded-2xl border border-[var(--border-card)]">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-xl theme-badge flex items-center justify-center p-0.5 shrink-0 shadow-inner border border-white/10">
+                      <img src="icons/deck-radar-3d.png" alt="Flight Deck" className="w-full h-full object-contain drop-shadow-md" />
+                    </div>
+                    <span className="font-heading font-semibold text-sm text-[var(--text-main)]">Flight Deck</span>
+                    <span className="text-xs text-[var(--text-muted)] font-mono">({sortedAndFilteredDestinations.length} routes)</span>
+                  </div>
+                  <button
+                    onClick={toggleFlightDeckHeader}
+                    className="tactile-btn text-xs text-[var(--text-muted)] hover:text-white flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-black/20 hover:bg-white/10 border border-white/5 transition-all"
+                  >
+                    <span>Expand Header</span>
+                    <ChevronDown className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              )}
+
               {/* Category Quick Filter Pills Strip (Responsive Wrapped Layout - No Scrolling Required) */}
               <div className="glass-panel rounded-2xl p-2 sm:p-2.5 border border-[var(--border-card)] flex flex-wrap items-center gap-1.5">
                 {categories.map(cat => {
@@ -3247,6 +3406,116 @@ export const AeroQuest = () => {
                     );
                   })}
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Brand Logo Crest Selector Modal */}
+      {showLogoModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+          <div className="glass-panel bg-[var(--bg-card)] p-6 sm:p-7 rounded-3xl w-full max-w-3xl border border-[var(--border-card)] shadow-2xl space-y-6">
+            <div className="flex justify-between items-center pb-4 border-b border-white/10">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-2xl theme-badge flex items-center justify-center p-1 shadow-md shrink-0">
+                  <img src={activeLogo.file} alt="Active Logo" className="w-full h-full object-contain drop-shadow" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-lg text-[var(--text-main)] font-heading">
+                    AC-Tracker Brand Logos
+                  </h3>
+                  <p className="text-xs text-[var(--text-muted)]">
+                    Original 3D flight-deck emblems reimagined from the official Airport City logo.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowLogoModal(false)}
+                className="p-2 text-[var(--text-muted)] hover:text-[var(--text-main)] rounded-xl hover:bg-white/5 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[65vh] overflow-y-auto custom-scrollbar pr-1 pt-1">
+              {LOGO_OPTIONS.map((opt) => {
+                const isSelected = logoId === opt.id;
+                return (
+                  <div
+                    key={opt.id}
+                    onClick={() => {
+                      handleSelectLogo(opt.id);
+                    }}
+                    className={`tactile-btn p-5 rounded-2xl border text-left transition-all relative overflow-hidden flex flex-col justify-between gap-4 cursor-pointer group ${
+                      isSelected
+                        ? 'border-[var(--accent)] bg-[var(--accent-muted)] shadow-xl ring-1 ring-[var(--accent)]'
+                        : 'border-[var(--border-card)] bg-black/30 hover:border-white/20 hover:bg-white/5'
+                    }`}
+                  >
+                    <div className="flex items-start gap-4">
+                      {/* 3D Emblem Showcase Box */}
+                      <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-black/50 border border-white/10 flex items-center justify-center p-1.5 shrink-0 shadow-inner group-hover:scale-105 transition-transform duration-300">
+                        <img
+                          src={opt.file}
+                          alt={opt.name}
+                          className="w-full h-full object-contain drop-shadow-2xl"
+                        />
+                      </div>
+
+                      <div className="space-y-1.5 min-w-0 flex-1">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${
+                            isSelected ? 'theme-btn-accent shadow-sm' : 'bg-white/10 text-white/90'
+                          }`}>
+                            {opt.badge}
+                          </span>
+                          {isSelected && (
+                            <span className="text-[10px] font-mono text-emerald-400 flex items-center gap-1 font-bold">
+                              <Check className="w-3 h-3" /> ACTIVE
+                            </span>
+                          )}
+                        </div>
+                        <h4 className="font-heading font-semibold text-base text-[var(--text-main)] group-hover:text-[var(--accent)] transition-colors leading-snug">
+                          {opt.name}
+                        </h4>
+                        <p className="text-xs text-[var(--text-muted)] font-normal line-clamp-2">
+                          {opt.description}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Dual Theme Preview Comparison: Dark vs Light */}
+                    <div className="pt-3 border-t border-white/10 flex items-center justify-between gap-2 text-[11px]">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] uppercase font-mono text-[var(--text-muted)] tracking-wider">Theme Contrast:</span>
+                        {/* Dark Cockpit Swatch */}
+                        <div className="w-6 h-6 rounded-lg bg-slate-950 border border-white/20 flex items-center justify-center p-0.5" title="Dark Cockpit Preview">
+                          <img src={opt.file} alt="Dark" className="w-full h-full object-contain" />
+                        </div>
+                        {/* Daylight Light Swatch */}
+                        <div className="w-6 h-6 rounded-lg bg-slate-100 border border-black/20 flex items-center justify-center p-0.5" title="Daylight Theme Preview">
+                          <img src={opt.file} alt="Light" className="w-full h-full object-contain" />
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleSelectLogo(opt.id);
+                        }}
+                        className={`px-3 py-1 rounded-xl text-xs font-semibold transition-all ${
+                          isSelected
+                            ? 'theme-btn-accent shadow-md'
+                            : 'bg-white/10 hover:bg-white/20 text-[var(--text-main)]'
+                        }`}
+                      >
+                        {isSelected ? 'Selected' : 'Use Logo'}
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>

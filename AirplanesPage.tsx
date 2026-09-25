@@ -104,15 +104,15 @@ export const AirplanesPage = () => {
           style={{ backgroundColor: 'var(--accent)' }}
         />
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
-          <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-2xl theme-badge flex items-center justify-center shadow-inner shrink-0 p-2 overflow-hidden">
-              <img src="Map-icons/standard_icon.png" alt="Aircraft Collection" className="w-11 h-11 object-contain drop-shadow" />
+          <div className="flex items-center gap-5 sm:gap-6">
+            <div className="w-28 h-28 sm:w-36 sm:h-36 rounded-3xl theme-badge flex items-center justify-center shadow-2xl shrink-0 p-1 sm:p-1.5 border border-white/10 group">
+              <img src="icons/deck-hangar-3d.png" alt="Aircraft Collection" className="w-full h-full object-contain drop-shadow-2xl group-hover:scale-110 transition-transform duration-300" />
             </div>
             <div>
               <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-[var(--text-main)] font-heading">
                 Aircraft Collection
               </h1>
-              <p className="text-xs sm:text-sm text-[var(--text-muted)] mt-0.5 font-normal">
+              <p className="text-xs sm:text-sm text-[var(--text-muted)] mt-1 font-normal">
                 Keep track of your Aircraft and their properties
               </p>
             </div>
@@ -165,11 +165,10 @@ export const AirplanesPage = () => {
         <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={() => setFilterType('All')}
-            className={`px-3.5 py-1.5 rounded-xl text-xs transition-all flex items-center gap-2 border ${
-              filterType === 'All'
+            className={`px-3.5 py-1.5 rounded-xl text-xs transition-all flex items-center gap-2 border ${filterType === 'All'
                 ? 'theme-btn-accent shadow-md font-semibold border-transparent'
                 : 'bg-black/30 hover:bg-white/10 text-[var(--text-muted)] hover:text-white border-white/5 font-medium'
-            }`}
+              }`}
           >
             <span>All Classes</span>
             <span className="min-w-[18px] h-[18px] px-1.5 rounded-full bg-black/40 text-[10px] font-mono flex items-center justify-center font-bold">
@@ -184,11 +183,10 @@ export const AirplanesPage = () => {
               <button
                 key={type}
                 onClick={() => setFilterType(isSelected ? 'All' : type)}
-                className={`px-3 py-1.5 rounded-xl text-xs transition-all flex items-center gap-2 border ${
-                  isSelected
+                className={`px-3 py-1.5 rounded-xl text-xs transition-all flex items-center gap-2 border ${isSelected
                     ? 'theme-btn-soft shadow-sm font-semibold border-transparent'
                     : 'bg-black/30 hover:bg-white/10 text-[var(--text-muted)] hover:text-white border-white/5 font-medium'
-                }`}
+                  }`}
               >
                 {AIRCRAFT_SPRITES[type] && (
                   <img src={AIRCRAFT_SPRITES[type]} alt={type} className="w-4 h-4 object-contain shrink-0" />
@@ -226,11 +224,11 @@ export const AirplanesPage = () => {
               >
                 <div className="flex items-start justify-between gap-3 mb-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-black/40 border border-white/10 flex items-center justify-center p-1 relative shrink-0">
+                    <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-black/40 border border-white/10 flex items-center justify-center p-1 relative shrink-0">
                       {sprite ? (
-                        <img src={sprite} alt={type} className="w-10 h-10 object-contain drop-shadow" />
+                        <img src={sprite} alt={type} className="w-full h-full object-contain drop-shadow-md group-hover:scale-110 transition-transform duration-300" />
                       ) : (
-                        <Plane className="w-6 h-6 theme-accent-text" />
+                        <Plane className="w-7 h-7 theme-accent-text" />
                       )}
                     </div>
                     <div>
@@ -291,11 +289,10 @@ export const AirplanesPage = () => {
                       <Gauge className="w-4 h-4 text-white/90 shrink-0" /> Speed
                     </span>
                     <span
-                      className={`px-2.5 py-0.5 rounded-full text-xs font-mono font-bold ${
-                        airplane.speed > 0
+                      className={`px-2.5 py-0.5 rounded-full text-xs font-mono font-bold ${airplane.speed > 0
                           ? 'bg-[#45c900] text-white shadow-sm'
                           : 'bg-white/10 text-[var(--text-faint)]'
-                      }`}
+                        }`}
                     >
                       {airplane.speed > 0 ? `+ ${airplane.speed}%` : '+ 0%'}
                     </span>
@@ -306,11 +303,10 @@ export const AirplanesPage = () => {
                       <CircleDollarSign className="w-4 h-4 text-white/90 shrink-0" /> Profit
                     </span>
                     <span
-                      className={`px-2.5 py-0.5 rounded-full text-xs font-mono font-bold ${
-                        airplane.profit > 0
+                      className={`px-2.5 py-0.5 rounded-full text-xs font-mono font-bold ${airplane.profit > 0
                           ? 'bg-[#45c900] text-white shadow-sm'
                           : 'bg-white/10 text-[var(--text-faint)]'
-                      }`}
+                        }`}
                     >
                       {airplane.profit > 0 ? `+ ${airplane.profit}%` : '+ 0%'}
                     </span>
@@ -325,11 +321,10 @@ export const AirplanesPage = () => {
                       Drop chance:
                     </span>
                     <span
-                      className={`px-2.5 py-0.5 rounded-full text-xs font-mono font-bold ${
-                        airplane.itemDrop > 0
+                      className={`px-2.5 py-0.5 rounded-full text-xs font-mono font-bold ${airplane.itemDrop > 0
                           ? 'bg-[#45c900] text-white shadow-sm'
                           : 'bg-white/10 text-[var(--text-faint)]'
-                      }`}
+                        }`}
                     >
                       {airplane.itemDrop > 0 ? `+ ${airplane.itemDrop}%` : '+ 0%'}
                     </span>
@@ -375,11 +370,10 @@ export const AirplanesPage = () => {
                     <Gauge className="w-4 h-4 text-emerald-400" /> Speed
                   </span>
                   <span
-                    className={`px-2.5 py-0.5 rounded-full text-xs font-mono font-bold ${
-                      editStats.speed > 0
+                    className={`px-2.5 py-0.5 rounded-full text-xs font-mono font-bold ${editStats.speed > 0
                         ? 'bg-[#45c900] text-white shadow-sm'
                         : 'bg-white/10 text-[var(--text-faint)]'
-                    }`}
+                      }`}
                   >
                     + {editStats.speed}%
                   </span>
@@ -409,11 +403,10 @@ export const AirplanesPage = () => {
                     <CircleDollarSign className="w-4 h-4 text-amber-400" /> Profit
                   </span>
                   <span
-                    className={`px-2.5 py-0.5 rounded-full text-xs font-mono font-bold ${
-                      editStats.profit > 0
+                    className={`px-2.5 py-0.5 rounded-full text-xs font-mono font-bold ${editStats.profit > 0
                         ? 'bg-[#45c900] text-white shadow-sm'
                         : 'bg-white/10 text-[var(--text-faint)]'
-                    }`}
+                      }`}
                   >
                     + {editStats.profit}%
                   </span>
@@ -447,11 +440,10 @@ export const AirplanesPage = () => {
                     Drop chance:
                   </span>
                   <span
-                    className={`px-2.5 py-0.5 rounded-full text-xs font-mono font-bold ${
-                      editStats.itemDrop > 0
+                    className={`px-2.5 py-0.5 rounded-full text-xs font-mono font-bold ${editStats.itemDrop > 0
                         ? 'bg-[#45c900] text-white shadow-sm'
                         : 'bg-white/10 text-[var(--text-faint)]'
-                    }`}
+                      }`}
                   >
                     + {editStats.itemDrop}%
                   </span>
