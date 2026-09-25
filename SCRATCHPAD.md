@@ -8,6 +8,7 @@ A dedicated space to jot down brainstorms, backlog items, feature requests, and 
 *Jot down quick thoughts, unformatted ideas, or bugs spotted while playing.*
 
 - make destinations sortable by last flight date
+- sort by collection ?
 
 ---
 
@@ -56,3 +57,4 @@ Add "Event Walkthrough" pages for past events, similar to the Map Depot format, 
 - [x] "To Next Star" sorting & Priority Radar
 - [x] Map Depot collection tracking
 - [x] Flight Resources & Community Links section in About ACT (Wiki, Game Forums, Facebook Bonus Codes, Developer Support & FAQ, World Destinations Map)
+- [x] Custom high-resolution 3D flight-deck icon set (Radar Deck, Fleet Hangar, Map Depot, Progression Stars, Flight Resources) with alpha transparency and shared 512x512 canvas
