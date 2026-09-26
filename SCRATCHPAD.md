@@ -32,7 +32,8 @@ Add "Event Walkthrough" pages for past events, similar to the Map Depot format, 
 - [ ] 
 
 ### 🗺️ Map Depot & Destinations
-- [ ] 
+- [ ] Active Map Countdown Timers: Live in-app countdown widget when a map is activated, showing remaining flight window
+- [ ] Route Flight Yield Estimator: Calculate max theoretical flights per map session based on aircraft flight duration and speedups
 
 ### 📊 Stats, Analytics & Progression
 - [ ] 
@@ -53,6 +54,15 @@ Add "Event Walkthrough" pages for past events, similar to the Map Depot format, 
 ---
 
 ## ✅ Implemented / Done
+- [x] Event Map Timers - Fatima (2h Window): Configured Fatima (Easter Cheer — Owl) with a 2-hour active flight window (`'2h'`) in [mapTimers.ts](file:///c:/Users/Alastair/ac-tracker-10/mapTimers.ts), achieving 100% complete coverage for all map routes in Airport City!
+- [x] Event Map Timers - Rovaniemi (Single-Use Map): Configured Rovaniemi (Santa's Bad Day / Winter) as `'1-time use'` single-flight map in [mapTimers.ts](file:///c:/Users/Alastair/ac-tracker-10/mapTimers.ts), with dedicated UI card handling displaying "Single-use map per flight".
+- [x] Event Map Timers - Area 51 (6h Window): Configured Area 51 (It Came From Outer Space — Owl) with a 6-hour active flight window (`'6h'`) in [mapTimers.ts](file:///c:/Users/Alastair/ac-tracker-10/mapTimers.ts).
+- [x] Alliance Map Timers Configured (3h Window): Set all 50 Alliance Map destinations across 10 collections to a 3-hour active flight window (`'3h'`) in [mapTimers.ts](file:///c:/Users/Alastair/ac-tracker-10/mapTimers.ts) with category-level fallback in `getMapDuration(dest, category)`.
+- [x] Space Map Timers - Edge of Tomorrow (17h Window): Configured all 5 Red Space Map destinations (Vienna, Glasgow, Beverly Hills, Zagreb, Potsdam) with a 17-hour active flight window (`'17h'`) in [mapTimers.ts](file:///c:/Users/Alastair/ac-tracker-10/mapTimers.ts), completing 100% of all Space Map collections.
+- [x] Space Map Timers - The Outer Limits (12h 30m Window): Configured all 5 Blue Space Map destinations (Sacramento, Alexandria, Miami, Nagoya, Puerto Rico) with a 12 hour 30 minute active flight window (`'12h 30m'`) in [mapTimers.ts](file:///c:/Users/Alastair/ac-tracker-10/mapTimers.ts).
+- [x] Space Map Timers - The Theory of Everything (3h Window): Configured all 5 Green Space Map destinations (Novosibirsk, Bangalore, Edmonton, Perth, Berkeley) with a 3-hour active flight window (`'3h'`) in [mapTimers.ts](file:///c:/Users/Alastair/ac-tracker-10/mapTimers.ts).
+- [x] Adventure Map Timers Configured (6h Window): Set all 80 Adventure Map destinations across 16 collections to a 6-hour active flight timer (`'6h'`) in [mapTimers.ts](file:///c:/Users/Alastair/ac-tracker-10/mapTimers.ts), with category-level fallback in `getMapDuration(dest, category)` guaranteeing full coverage across all views.
+- [x] Map Timers & Duration Infrastructure: Clarified authentic Airport City game mechanic (maps unlock a timed window for unlimited flights until expiry rather than consuming 1 map per flight). Created dedicated [mapTimers.ts](file:///c:/Users/Alastair/ac-tracker-10/mapTimers.ts) registry covering all 150 map routes, corrected erroneous "Consumed per flight" UI subtext to dynamic active timer descriptions, and integrated themed duration badges (`⏱️`) into the Dense Table, Mobile rows, Grid Cards, and Map Inventory views.
 - [x] In-Game Authentic Flight Mastery HUD Panel: Redesigned the Statistics page Star Tier Cards into an authentic Airport City Flight Mastery panel matching the in-game HUD screenshot (descending rank order from Ace 5★ down to Specialist 1★, authentic 3D golden game stars, cascading title-case rank names, diagonal runway-striped leader line track, right-aligned tabular counts, and in-game cumulative milestone vs exact tier mode toggle with click-to-filter support).
 - [x] Updated Flights Page Header & Subheader: Renamed header from "Flight Deck" to "Flights" (aligning with top navigation), updated subheader to guide users on updating in-game flight counts, column sorting, and category filters for strategy planning, and updated collapsed header state and accessibility labels.
 - [x] Flight Operations Dense Table Column Split & Renaming: Split "Destination & Set" into two independent sortable columns ("Destination" and "Collection"); updated column names to Destination, Collection, Aircraft, Progress, To Next Star, Maps, Flights, Total Flights, Info; removed column name for icons; added "Sort: Collection" to toolbar sort dropdown; ensured clean horizontal scrolling with minimum responsive desktop grid constraints.

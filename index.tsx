@@ -59,6 +59,7 @@ import {
 } from 'recharts';
 import { RAW_MASTER_LIST } from './destinations';
 import { MAP_LOCATIONS } from './MAPLOCATIONS';
+import { getMapDuration } from './mapTimers';
 import { AirplanesPage, AIRCRAFT_SPRITES } from './AirplanesPage';
 import { AboutPage } from './AboutPage';
 import { adjustAircraftList } from './src/aircraftData';
@@ -85,6 +86,7 @@ interface FlightDestination {
   flightsDone: number;
   mapsDone?: number;
   needsMap: boolean;
+  mapDuration?: string;
   lastUpdated: number;
   isCustomList?: boolean;
 }
@@ -881,6 +883,7 @@ export const AeroQuest = () => {
         const [aircraft, category, group, dest, icon, s1, s2, s3, s4, s5] = parts;
         const id = `f-${idx}`;
         const needsMap = MAP_LOCATIONS.includes(dest);
+        const mapDuration = needsMap ? getMapDuration(dest, category) : undefined;
 
         const star1Req = parseInt(s1) || 0;
         const star2Req = parseInt(s2) || 0;
@@ -920,6 +923,7 @@ export const AeroQuest = () => {
           flightsDone,
           mapsDone,
           needsMap,
+          mapDuration,
           lastUpdated,
           isCustomList,
         };
@@ -1943,8 +1947,14 @@ export const AeroQuest = () => {
                         <div className="text-xs font-medium text-[var(--text-main)] truncate group-hover:text-[var(--accent)] transition-colors">
                           {dest.destination}
                         </div>
-                        <div className="text-[10px] text-[var(--text-muted)] font-mono">
-                          {dest.mapsDone} maps in stock
+                        <div className="text-[10px] text-[var(--text-muted)] font-mono flex items-center gap-1.5">
+                          <span>{dest.mapsDone} maps</span>
+                          {dest.mapDuration && (
+                            <>
+                              <span>•</span>
+                              <span className="theme-accent-text flex items-center gap-0.5"><Clock className="w-2.5 h-2.5" />{dest.mapDuration}</span>
+                            </>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -2007,6 +2017,12 @@ export const AeroQuest = () => {
                             <span>{dest.aircraft}</span>
                             <span>•</span>
                             <span className="truncate">{dest.group}</span>
+                            {dest.mapDuration && (
+                              <>
+                                <span>•</span>
+                                <span className="theme-accent-text font-mono flex items-center gap-0.5"><Clock className="w-2.5 h-2.5" />{dest.mapDuration}</span>
+                              </>
+                            )}
                           </div>
                         </div>
                         <div className="flex items-center gap-1 bg-black/40 p-1 rounded-xl border border-white/10 shrink-0">
@@ -2774,32 +2790,43 @@ export const AeroQuest = () => {
                             </div>
 
                             {/* Map Stock */}
-                            <div className="flex items-center justify-center">
+                            <div className="flex flex-col items-center justify-center">
                               {dest.needsMap ? (
-                                <div className="inline-flex items-center gap-1 bg-black/40 border border-white/10 px-1 py-0.5 rounded-lg shadow-inner">
-                                  <button
-                                    onClick={() => updateMapCount(dest.id, (dest.mapsDone || 0) - 1)}
-                                    disabled={(dest.mapsDone || 0) <= 0}
-                                    className="tactile-btn w-6 h-7 rounded bg-white/5 hover:bg-white/15 text-[var(--text-muted)] hover:text-white flex items-center justify-center disabled:opacity-20 text-xs font-mono font-bold transition-all"
-                                    title="Subtract 1 Map"
-                                  >
-                                    -
-                                  </button>
-                                  <EditableNumberInput
-                                    value={dest.mapsDone || 0}
-                                    onChange={val => updateMapCount(dest.id, val)}
-                                    ariaLabel={`Map count for ${dest.destination}`}
-                                    title="Map count (click to edit)"
-                                    className="w-12 h-7 text-center font-mono font-bold text-sm bg-black/50 border border-white/10 rounded-md focus:border-[var(--border-active)] theme-accent-text shadow-inner"
-                                  />
-                                  <button
-                                    onClick={() => updateMapCount(dest.id, (dest.mapsDone || 0) + 1)}
-                                    className="tactile-btn w-6 h-7 rounded theme-btn-soft flex items-center justify-center text-xs font-mono font-bold transition-all"
-                                    title="Add 1 Map"
-                                  >
-                                    +
-                                  </button>
-                                </div>
+                                <>
+                                  <div className="inline-flex items-center gap-1 bg-black/40 border border-white/10 px-1 py-0.5 rounded-lg shadow-inner">
+                                    <button
+                                      onClick={() => updateMapCount(dest.id, (dest.mapsDone || 0) - 1)}
+                                      disabled={(dest.mapsDone || 0) <= 0}
+                                      className="tactile-btn w-6 h-7 rounded bg-white/5 hover:bg-white/15 text-[var(--text-muted)] hover:text-white flex items-center justify-center disabled:opacity-20 text-xs font-mono font-bold transition-all"
+                                      title="Subtract 1 Map"
+                                    >
+                                      -
+                                    </button>
+                                    <EditableNumberInput
+                                      value={dest.mapsDone || 0}
+                                      onChange={val => updateMapCount(dest.id, val)}
+                                      ariaLabel={`Map count for ${dest.destination}`}
+                                      title="Map count (click to edit)"
+                                      className="w-12 h-7 text-center font-mono font-bold text-sm bg-black/50 border border-white/10 rounded-md focus:border-[var(--border-active)] theme-accent-text shadow-inner"
+                                    />
+                                    <button
+                                      onClick={() => updateMapCount(dest.id, (dest.mapsDone || 0) + 1)}
+                                      className="tactile-btn w-6 h-7 rounded theme-btn-soft flex items-center justify-center text-xs font-mono font-bold transition-all"
+                                      title="Add 1 Map"
+                                    >
+                                      +
+                                    </button>
+                                  </div>
+                                  {dest.mapDuration && (
+                                    <span
+                                      className="text-[10px] font-mono theme-accent-text flex items-center justify-center gap-0.5 mt-0.5 opacity-90 font-medium"
+                                      title={`Active flight window: ${dest.mapDuration} per map`}
+                                    >
+                                      <Clock className="w-2.5 h-2.5 shrink-0" />
+                                      {dest.mapDuration}
+                                    </span>
+                                  )}
+                                </>
                               ) : (
                                 <span className="text-[var(--text-faint)] text-xs select-none">—</span>
                               )}
@@ -2908,6 +2935,12 @@ export const AeroQuest = () => {
                                       >
                                         +
                                       </button>
+                                      {dest.mapDuration && (
+                                        <span className="text-[9px] font-mono theme-accent-text pl-0.5 flex items-center gap-0.5" title={`Active timer: ${dest.mapDuration}`}>
+                                          <Clock className="w-2 h-2" />
+                                          {dest.mapDuration}
+                                        </span>
+                                      )}
                                     </div>
                                   )}
                                 </div>
@@ -3018,7 +3051,11 @@ export const AeroQuest = () => {
                                         <MapIcon className="w-4 h-4 theme-accent-text" />
                                         <div>
                                           <div className="text-xs font-medium text-[var(--text-main)]">Maps in Stock</div>
-                                          <div className="text-[10px] text-[var(--text-muted)]">Consumed per flight</div>
+                                          <div className="text-[10px] text-[var(--text-muted)]">
+                                            {dest.mapDuration
+                                              ? (dest.mapDuration.toLowerCase().includes('use') ? 'Single-use map per flight' : `${dest.mapDuration} active timer per map`)
+                                              : 'Unlocks timed flight window'}
+                                          </div>
                                         </div>
                                       </div>
                                       <div className="flex items-center gap-1.5 bg-black/50 p-1 rounded-xl border border-white/10">
@@ -3312,7 +3349,11 @@ export const AeroQuest = () => {
                                       <MapIcon className="w-4 h-4 theme-accent-text" />
                                       <div>
                                         <div className="text-xs font-medium text-[var(--text-main)]">Maps in Stock</div>
-                                        <div className="text-[10px] text-[var(--text-muted)]">Consumed per flight</div>
+                                        <div className="text-[10px] text-[var(--text-muted)]">
+                                          {dest.mapDuration
+                                            ? (dest.mapDuration.toLowerCase().includes('use') ? 'Single-use map per flight' : `${dest.mapDuration} active timer per map`)
+                                            : 'Unlocks timed flight window'}
+                                        </div>
                                       </div>
                                     </div>
                                     <div className="flex items-center gap-1.5 bg-black/50 p-1 rounded-xl border border-white/10">
@@ -3451,6 +3492,12 @@ export const AeroQuest = () => {
                                   >
                                     +
                                   </button>
+                                  {dest.mapDuration && (
+                                    <span className="text-[9px] font-mono theme-accent-text pl-0.5 flex items-center gap-0.5" title={`Active timer: ${dest.mapDuration}`}>
+                                      <Clock className="w-2 h-2" />
+                                      {dest.mapDuration}
+                                    </span>
+                                  )}
                                 </div>
                               )}
                             </div>
