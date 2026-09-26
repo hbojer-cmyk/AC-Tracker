@@ -1,9 +1,6 @@
 import React from 'react';
 import { 
-  Compass, 
   Map as MapIcon, 
-  Layers, 
-  BarChart3, 
   ShieldCheck, 
   Sparkles, 
   HelpCircle, 
@@ -17,7 +14,7 @@ import {
 import { APP_VERSION, APP_UPDATED_DATE } from './index';
 
 interface AboutPageProps {
-  onNavigate: (view: 'list' | 'maps' | 'airplanes' | 'stats') => void;
+  onNavigate?: (view: 'list' | 'maps' | 'airplanes' | 'stats') => void;
   onOpenLogoModal?: () => void;
   activeLogoId?: string;
   onSelectLogo?: (id: string) => void;
@@ -81,9 +78,7 @@ export const COMMUNITY_RESOURCES: PilotResource[] = [
   },
 ];
 
-export const AboutPage: React.FC<AboutPageProps> = ({
-  onNavigate,
-}) => {
+export const AboutPage: React.FC<AboutPageProps> = () => {
   return (
     <div className="space-y-6 pb-12 animate-in fade-in duration-300">
       {/* Hero Header */}
@@ -164,81 +159,6 @@ export const AboutPage: React.FC<AboutPageProps> = ({
         </div>
       </div>
 
-      {/* Modules Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Flights */}
-        <div 
-          onClick={() => onNavigate('list')}
-          className="glass-card rounded-2xl p-5 border border-[var(--border-card)] hover:border-[var(--border-active)] transition-all cursor-pointer group space-y-2.5"
-        >
-          <div className="flex items-center justify-between">
-            <span className="font-semibold text-sm text-[var(--text-main)] flex items-center gap-2 font-heading">
-              <Compass className="w-4 h-4 theme-accent-text" /> Flights
-            </span>
-            <span className="text-[11px] font-mono text-[var(--text-muted)] group-hover:text-white transition-colors">
-              Open &rarr;
-            </span>
-          </div>
-          <p className="text-xs text-[var(--text-muted)] font-normal leading-relaxed">
-            The core flight operations deck. View destinations in High-Density Table or Card layouts. Features instant click-to-type number inputs, tactile increment scrubbers, and category filtering.
-          </p>
-        </div>
-
-        {/* Maps */}
-        <div 
-          onClick={() => onNavigate('maps')}
-          className="glass-card rounded-2xl p-5 border border-[var(--border-card)] hover:border-[var(--border-active)] transition-all cursor-pointer group space-y-2.5"
-        >
-          <div className="flex items-center justify-between">
-            <span className="font-semibold text-sm text-[var(--text-main)] flex items-center gap-2 font-heading">
-              <MapIcon className="w-4 h-4 theme-accent-text" /> Maps
-            </span>
-            <span className="text-[11px] font-mono text-[var(--text-muted)] group-hover:text-white transition-colors">
-              Open &rarr;
-            </span>
-          </div>
-          <p className="text-xs text-[var(--text-muted)] font-normal leading-relaxed">
-            Dedicated collection depot for all 148 adventure, alliance, and space flight destinations. Tracks map inventory with single-click stock increments and depleted map identification.
-          </p>
-        </div>
-
-        {/* Aircraft */}
-        <div 
-          onClick={() => onNavigate('airplanes')}
-          className="glass-card rounded-2xl p-5 border border-[var(--border-card)] hover:border-[var(--border-active)] transition-all cursor-pointer group space-y-2.5"
-        >
-          <div className="flex items-center justify-between">
-            <span className="font-semibold text-sm text-[var(--text-main)] flex items-center gap-2 font-heading">
-              <Layers className="w-4 h-4 theme-accent-text" /> Aircraft
-            </span>
-            <span className="text-[11px] font-mono text-[var(--text-muted)] group-hover:text-white transition-colors">
-              Open &rarr;
-            </span>
-          </div>
-          <p className="text-xs text-[var(--text-muted)] font-normal leading-relaxed">
-            Fleet hangar collection manager. Commission and name your aircraft across all 14 classes, with interactive 5% step sliders to tune Speed, Profit, and Drop chance modifiers.
-          </p>
-        </div>
-
-        {/* Stats */}
-        <div 
-          onClick={() => onNavigate('stats')}
-          className="glass-card rounded-2xl p-5 border border-[var(--border-card)] hover:border-[var(--border-active)] transition-all cursor-pointer group space-y-2.5"
-        >
-          <div className="flex items-center justify-between">
-            <span className="font-semibold text-sm text-[var(--text-main)] flex items-center gap-2 font-heading">
-              <BarChart3 className="w-4 h-4 theme-accent-text" /> Stats
-            </span>
-            <span className="text-[11px] font-mono text-[var(--text-muted)] group-hover:text-white transition-colors">
-              Open &rarr;
-            </span>
-          </div>
-          <p className="text-xs text-[var(--text-muted)] font-normal leading-relaxed">
-            Comprehensive analytics suite with mastery star distribution, flight completion gauges, airline pilot rank progression, and JSON/CSV backup dispatch.
-          </p>
-        </div>
-      </div>
-
       {/* Flight Resources & Community Links */}
       <div className="glass-panel rounded-3xl p-6 border border-[var(--border-card)] space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[var(--border-subtle)] pb-3">
@@ -255,18 +175,37 @@ export const AboutPage: React.FC<AboutPageProps> = ({
           </span>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="space-y-3">
           {COMMUNITY_RESOURCES.map((link) => (
             <a
               key={link.url}
               href={link.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="glass-card rounded-2xl p-5 border border-[var(--border-card)] hover:border-[var(--border-active)] hover:bg-white/[0.03] transition-all group flex flex-col justify-between space-y-3 relative overflow-hidden"
+              className="glass-card rounded-2xl p-4 sm:p-5 border border-[var(--border-card)] hover:border-[var(--border-active)] hover:bg-white/[0.03] transition-all group flex flex-col md:flex-row md:items-center justify-between gap-4 relative overflow-hidden"
             >
-              <div className="space-y-2">
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-1.5 flex-wrap">
+              <div className="flex items-start sm:items-center gap-4 min-w-0 flex-1">
+                <div className="w-11 h-11 rounded-2xl theme-badge flex items-center justify-center shrink-0 border border-white/10 group-hover:scale-105 transition-transform shadow-md">
+                  {link.icon === 'gift' ? (
+                    <Gift className="w-5 h-5 text-emerald-400 shrink-0" />
+                  ) : link.icon === 'wiki' ? (
+                    <BookOpen className="w-5 h-5 theme-accent-text shrink-0" />
+                  ) : link.icon === 'forum' ? (
+                    <MessageSquare className="w-5 h-5 text-sky-400 shrink-0" />
+                  ) : link.icon === 'support' ? (
+                    <HelpCircle className="w-5 h-5 text-amber-400 shrink-0" />
+                  ) : link.icon === 'map' ? (
+                    <MapIcon className="w-5 h-5 text-teal-400 shrink-0" />
+                  ) : (
+                    <Globe className="w-5 h-5 theme-accent-text shrink-0" />
+                  )}
+                </div>
+
+                <div className="min-w-0 flex-1 space-y-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h3 className="font-semibold text-sm sm:text-base text-[var(--text-main)] font-heading group-hover:text-white transition-colors">
+                      {link.title}
+                    </h3>
                     <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold theme-btn-accent shadow-sm">
                       {link.category}
                     </span>
@@ -276,33 +215,17 @@ export const AboutPage: React.FC<AboutPageProps> = ({
                       </span>
                     )}
                   </div>
-                  <ExternalLink className="w-3.5 h-3.5 text-[var(--text-muted)] group-hover:text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform shrink-0" />
+                  <p className="text-xs text-[var(--text-muted)] font-normal leading-relaxed">
+                    {link.description}
+                  </p>
                 </div>
-                <h3 className="font-semibold text-sm text-[var(--text-main)] font-heading group-hover:text-white transition-colors flex items-center gap-2">
-                  {link.icon === 'gift' ? (
-                    <Gift className="w-4 h-4 text-emerald-400 shrink-0" />
-                  ) : link.icon === 'wiki' ? (
-                    <BookOpen className="w-4 h-4 theme-accent-text shrink-0" />
-                  ) : link.icon === 'forum' ? (
-                    <MessageSquare className="w-4 h-4 text-sky-400 shrink-0" />
-                  ) : link.icon === 'support' ? (
-                    <HelpCircle className="w-4 h-4 text-amber-400 shrink-0" />
-                  ) : link.icon === 'map' ? (
-                    <MapIcon className="w-4 h-4 text-teal-400 shrink-0" />
-                  ) : (
-                    <Globe className="w-4 h-4 theme-accent-text shrink-0" />
-                  )}
-                  {link.title}
-                </h3>
-                <p className="text-xs text-[var(--text-muted)] font-normal leading-relaxed">
-                  {link.description}
-                </p>
               </div>
 
-              <div className="pt-3 border-t border-[var(--border-subtle)] flex items-center justify-between text-[11px] font-mono text-[var(--text-muted)]">
-                <span className="truncate">{link.domain || link.url}</span>
-                <span className="theme-accent-text font-medium group-hover:underline flex items-center gap-1">
-                  Open Link &rarr;
+              <div className="flex items-center justify-between md:justify-end gap-3.5 shrink-0 pt-3 md:pt-0 border-t md:border-t-0 border-[var(--border-subtle)] text-[11px] font-mono text-[var(--text-muted)]">
+                <span className="truncate max-w-[180px] text-[var(--text-muted)]">{link.domain || link.url}</span>
+                <span className="px-3.5 py-1.5 rounded-xl border border-[var(--border-subtle)] group-hover:border-[var(--border-active)] group-hover:bg-white/5 text-xs font-medium theme-accent-text flex items-center gap-1.5 transition-all">
+                  Open Link
+                  <ExternalLink className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                 </span>
               </div>
             </a>

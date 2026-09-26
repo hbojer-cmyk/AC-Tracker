@@ -70,3 +70,6 @@ Add "Event Walkthrough" pages for past events, similar to the Map Depot format, 
 - [x] Updated Help & Resources Page Header & Subheader: Renamed header to "AC - Tracker : Help and Resources" and updated subheader to "How to use the App and where to find other resources to help you master the game."
 - [x] Help & Resources Layout Reorganization: Removed the Cockpit Brand Emblems showcase card from the Help/About view and moved the Cockpit Shortcuts & Offline Storage section up directly below the "What is AC-Tracker?" overview card, positioning the Modules Grid and Flight Resources below it.
 - [x] Renamed Shortcuts Card Header: Changed "Cockpit Shortcuts & Ergonomics" to "Keyboard shortcuts, Usage tips" in the Help & Resources view.
+- [x] Removed Modules Navigation Grid: Removed the 4 navigation shortcut cards (Flights, Maps, Aircraft, Stats) from the Help & Resources page, cleaning up redundant cards and streamlining the flow directly to Flight Resources & Community Links.
+- [x] Flight Resources List-Style Redesign: Converted the Flight Resources & Community Links section on the Help & Resources page from a 3-column card grid into a sleek horizontal list-style format, featuring dedicated themed icon badges, responsive category pills, domain indicators, and interactive "Open Link" action buttons.
+
