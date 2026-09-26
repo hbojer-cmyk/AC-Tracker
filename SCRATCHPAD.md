@@ -72,4 +72,5 @@ Add "Event Walkthrough" pages for past events, similar to the Map Depot format, 
 - [x] Renamed Shortcuts Card Header: Changed "Cockpit Shortcuts & Ergonomics" to "Keyboard shortcuts, Usage tips" in the Help & Resources view.
 - [x] Removed Modules Navigation Grid: Removed the 4 navigation shortcut cards (Flights, Maps, Aircraft, Stats) from the Help & Resources page, cleaning up redundant cards and streamlining the flow directly to Flight Resources & Community Links.
 - [x] Flight Resources List-Style Redesign: Converted the Flight Resources & Community Links section on the Help & Resources page from a 3-column card grid into a sleek horizontal list-style format, featuring dedicated themed icon badges, responsive category pills, domain indicators, and interactive "Open Link" action buttons.
+- [x] Flight Resources Custom Icons: Updated the 5 resource list items on the Help & Resources page with custom icons (`pilots_manual.png` for Wiki, `airplane-icon.png` for Forums, `facebook.png` for Facebook, `GI.svg` for Game Insight Help & FAQ, and `worldmap.png` for World Destinations Interactive Map).
 

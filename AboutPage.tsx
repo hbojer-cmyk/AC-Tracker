@@ -1,15 +1,10 @@
 import React from 'react';
 import { 
-  Map as MapIcon, 
   ShieldCheck, 
   Sparkles, 
-  HelpCircle, 
   Keyboard, 
   ExternalLink,
-  Globe,
-  BookOpen,
-  Gift,
-  MessageSquare
+  Globe
 } from 'lucide-react';
 import { APP_VERSION, APP_UPDATED_DATE } from './index';
 
@@ -27,7 +22,7 @@ export interface PilotResource {
   description: string;
   badge?: string;
   domain?: string;
-  icon?: 'wiki' | 'gift' | 'forum' | 'support' | 'map' | 'default';
+  icon?: string;
 }
 
 export const COMMUNITY_RESOURCES: PilotResource[] = [
@@ -38,7 +33,7 @@ export const COMMUNITY_RESOURCES: PilotResource[] = [
     description: 'Comprehensive community encyclopedia, flight requirements, building specs, and quest guides.',
     badge: 'Official Wiki',
     domain: 'airportcitygame.com',
-    icon: 'wiki',
+    icon: 'icons/pilots_manual.png',
   },
   {
     title: 'Airport City Game Forums',
@@ -47,7 +42,7 @@ export const COMMUNITY_RESOURCES: PilotResource[] = [
     description: 'The premier player community forum covering trading, neighbor codes, flight tips, space launches, alliances, and game strategies.',
     badge: 'Player Forums',
     domain: 'airportcitygame.com',
-    icon: 'forum',
+    icon: 'icons/airplane-icon.png',
   },
   {
     title: 'Airport City Official Facebook',
@@ -56,7 +51,7 @@ export const COMMUNITY_RESOURCES: PilotResource[] = [
     description: 'Official page featuring weekly bonus codes, gift giveaways, game updates, and community events.',
     badge: 'Weekly Codes',
     domain: 'facebook.com',
-    icon: 'gift',
+    icon: 'icons/facebook.png',
   },
   {
     title: 'Game Insight Help & FAQ',
@@ -65,7 +60,7 @@ export const COMMUNITY_RESOURCES: PilotResource[] = [
     description: "The developer's official help desk, troubleshooting guides, account recovery, bug reports, and game FAQs.",
     badge: 'Developer Support',
     domain: 'gameinsight.helpshift.com',
-    icon: 'support',
+    icon: 'icons/GI.svg',
   },
   {
     title: 'World Destinations Interactive Map',
@@ -74,7 +69,7 @@ export const COMMUNITY_RESOURCES: PilotResource[] = [
     description: 'Interactive Google Map plotting all Airport City flight destinations worldwide across all continents.',
     badge: 'Google Maps',
     domain: 'google.com/maps',
-    icon: 'map',
+    icon: 'icons/worldmap.png',
   },
 ];
 
@@ -185,17 +180,9 @@ export const AboutPage: React.FC<AboutPageProps> = () => {
               className="glass-card rounded-2xl p-4 sm:p-5 border border-[var(--border-card)] hover:border-[var(--border-active)] hover:bg-white/[0.03] transition-all group flex flex-col md:flex-row md:items-center justify-between gap-4 relative overflow-hidden"
             >
               <div className="flex items-start sm:items-center gap-4 min-w-0 flex-1">
-                <div className="w-11 h-11 rounded-2xl theme-badge flex items-center justify-center shrink-0 border border-white/10 group-hover:scale-105 transition-transform shadow-md">
-                  {link.icon === 'gift' ? (
-                    <Gift className="w-5 h-5 text-emerald-400 shrink-0" />
-                  ) : link.icon === 'wiki' ? (
-                    <BookOpen className="w-5 h-5 theme-accent-text shrink-0" />
-                  ) : link.icon === 'forum' ? (
-                    <MessageSquare className="w-5 h-5 text-sky-400 shrink-0" />
-                  ) : link.icon === 'support' ? (
-                    <HelpCircle className="w-5 h-5 text-amber-400 shrink-0" />
-                  ) : link.icon === 'map' ? (
-                    <MapIcon className="w-5 h-5 text-teal-400 shrink-0" />
+                <div className="w-11 h-11 rounded-2xl theme-badge flex items-center justify-center shrink-0 border border-white/10 group-hover:scale-105 transition-transform shadow-md p-1.5 overflow-hidden">
+                  {link.icon ? (
+                    <img src={link.icon} alt={link.title} className="w-full h-full object-contain drop-shadow-sm" />
                   ) : (
                     <Globe className="w-5 h-5 theme-accent-text shrink-0" />
                   )}
