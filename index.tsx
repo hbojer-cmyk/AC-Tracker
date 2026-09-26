@@ -66,7 +66,7 @@ import { adjustAircraftList } from './src/aircraftData';
 // --- App Version & Maintenance Tracker ---
 // NOTE: Always update APP_UPDATED_DATE whenever making changes in the app
 export const APP_VERSION = 'Version 2.0';
-export const APP_UPDATED_DATE = 'Sep 24, 2026';
+export const APP_UPDATED_DATE = 'Sep 26, 2026';
 
 // --- Types & Interfaces ---
 interface FlightDestination {
@@ -549,6 +549,14 @@ const STAR_RANKS = [
   { star: 5, name: 'Ace', short: 'Ace' },
 ];
 
+const GAME_STAR_RANKS = [
+  { star: 5, name: 'Ace', key: 'ace' as const },
+  { star: 4, name: 'Captain', key: 'captain' as const },
+  { star: 3, name: 'Expert', key: 'expert' as const },
+  { star: 2, name: 'Master', key: 'master' as const },
+  { star: 1, name: 'Specialist', key: 'specialist' as const },
+];
+
 const getNextStarInfo = (d: FlightDestination) => {
   const reqs: { req: number; star: number; rank: string }[] = [
     { req: d.star1Req, star: 1, rank: 'Specialist' },
@@ -789,6 +797,16 @@ export const AeroQuest = () => {
   const [filterGroup, setFilterGroup] = useState<string>('All');
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [filterStarRank, setFilterStarRank] = useState<number | null>(null);
+  const [starCountMode, setStarCountMode] = useState<'cumulative' | 'exact'>(() => {
+    const saved = localStorage.getItem('aeroquest_star_count_mode');
+    return saved === 'exact' ? 'exact' : 'cumulative';
+  });
+
+  const toggleStarCountMode = (mode: 'cumulative' | 'exact') => {
+    setStarCountMode(mode);
+    localStorage.setItem('aeroquest_star_count_mode', mode);
+  };
   const [view, setView] = useState<ViewMode>('list');
   const [density, setDensity] = useState<'compact' | 'comfortable'>(() => {
     const saved = localStorage.getItem('aeroquest_density');
@@ -1093,15 +1111,38 @@ export const AeroQuest = () => {
       expert = 0,
       master = 0,
       specialist = 0;
+    let exactAce = 0,
+      exactCaptain = 0,
+      exactExpert = 0,
+      exactMaster = 0,
+      exactSpecialist = 0;
+
     destinations.forEach(d => {
       const s = getStars(d.flightsDone, d.star1Req, d.star2Req, d.star3Req, d.star4Req, d.star5Req);
-      if (s === 5) ace++;
-      else if (s === 4) captain++;
-      else if (s === 3) expert++;
-      else if (s === 2) master++;
-      else if (s === 1) specialist++;
+      // Cumulative milestones (In-Game HUD format)
+      if (s >= 5) ace++;
+      if (s >= 4) captain++;
+      if (s >= 3) expert++;
+      if (s >= 2) master++;
+      if (s >= 1) specialist++;
+
+      // Exact current star tier
+      if (s === 5) exactAce++;
+      else if (s === 4) exactCaptain++;
+      else if (s === 3) exactExpert++;
+      else if (s === 2) exactMaster++;
+      else if (s === 1) exactSpecialist++;
     });
-    return { ace, captain, expert, master, specialist };
+    return {
+      cumulative: { ace, captain, expert, master, specialist },
+      exact: {
+        ace: exactAce,
+        captain: exactCaptain,
+        expert: exactExpert,
+        master: exactMaster,
+        specialist: exactSpecialist,
+      },
+    };
   }, [destinations]);
 
   const globalStars = useMemo(() => {
@@ -1193,6 +1234,10 @@ export const AeroQuest = () => {
         (filterGroup === 'All' || d.group.split(/[;,]/).map(g => g.trim()).includes(filterGroup)) &&
         (!showOnlyMaps || d.needsMap) &&
         (!hide3Star || getStars(d.flightsDone, d.star1Req, d.star2Req, d.star3Req, d.star4Req, d.star5Req) < getMaxStars(d)) &&
+        (filterStarRank === null ||
+          (starCountMode === 'cumulative'
+            ? getStars(d.flightsDone, d.star1Req, d.star2Req, d.star3Req, d.star4Req, d.star5Req) >= filterStarRank
+            : getStars(d.flightsDone, d.star1Req, d.star2Req, d.star3Req, d.star4Req, d.star5Req) === filterStarRank)) &&
         (d.destination.toLowerCase().includes(searchQuery.toLowerCase()) ||
           d.aircraft.toLowerCase().includes(searchQuery.toLowerCase()) ||
           d.group.toLowerCase().includes(searchQuery.toLowerCase()))
@@ -1268,7 +1313,9 @@ export const AeroQuest = () => {
       }
 
       if (typeof valA === 'string' && typeof valB === 'string') {
-        return sortConfig.direction === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
+        const comp = sortConfig.direction === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
+        if (comp !== 0) return comp;
+        return a.destination.localeCompare(b.destination);
       }
       if (typeof valA === 'number' && typeof valB === 'number') {
         return sortConfig.direction === 'asc' ? (valA < valB ? -1 : 1) : valA > valB ? -1 : 1;
@@ -1286,10 +1333,19 @@ export const AeroQuest = () => {
     sortConfig,
     showOnlyMaps,
     hide3Star,
+    filterStarRank,
+    starCountMode,
     selectedQuickFilters,
   ]);
 
   // Handlers
+  const handleStarRankClick = (star: number) => {
+    setFilterStarRank(prev => (prev === star ? null : star));
+    if (view === 'stats' || view === 'airplanes' || view === 'maps' || view === 'about') {
+      setView('list');
+    }
+  };
+
   const handleCategoryClick = (cat: string) => {
     if (view === 'stats' || view === 'airplanes' || view === 'maps' || view === 'about') {
       setView('list');
@@ -2020,39 +2076,106 @@ export const AeroQuest = () => {
                 </div>
               </div>
 
-              {/* Star Tier Cards Grid */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-                {STAR_RANKS.map(rank => {
-                  const count =
-                    rank.star === 5
-                      ? starCounts.ace
-                      : rank.star === 4
-                      ? starCounts.captain
-                      : rank.star === 3
-                      ? starCounts.expert
-                      : rank.star === 2
-                      ? starCounts.master
-                      : starCounts.specialist;
-
-                  return (
-                    <div
-                      key={rank.star}
-                      className="glass-card rounded-2xl p-4 text-center border border-[var(--border-card)] space-y-1"
-                    >
-                      <div className="flex items-center justify-center gap-0.5 text-amber-400">
-                        {Array.from({ length: rank.star }).map((_, i) => (
-                          <Star key={i} className="w-3.5 h-3.5 fill-amber-400" />
-                        ))}
-                      </div>
-                      <div className="text-2xl font-heading font-semibold text-[var(--text-main)] mt-1">
-                        {count}
-                      </div>
-                      <div className="text-[11px] font-medium text-[var(--text-muted)] uppercase tracking-wider">
-                        {rank.name}
-                      </div>
+              {/* Flight Mastery / Star Ranks Panel (Game HUD Replica) */}
+              <div className="glass-panel rounded-3xl p-5 sm:p-7 border border-[var(--border-card)] shadow-xl relative overflow-hidden space-y-4">
+                <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-white/5">
+                  <div className="flex items-center gap-2.5">
+                    <img src="icons/star-icon.png" alt="Star Ranks" className="w-5 h-5 object-contain drop-shadow" />
+                    <div>
+                      <h3 className="text-xs sm:text-sm font-semibold uppercase tracking-wider text-[var(--text-main)] font-heading">
+                        Flight Mastery Ranks
+                      </h3>
+                      <p className="text-[11px] text-[var(--text-muted)] mt-0.5">
+                        {starCountMode === 'cumulative'
+                          ? 'Cumulative destinations reaching each milestone tier (In-Game HUD format)'
+                          : 'Destinations currently at each exact star level'}
+                      </p>
                     </div>
-                  );
-                })}
+                  </div>
+
+                  {/* Mode Toggle: In-Game Milestones vs Exact Tier */}
+                  <div className="flex items-center bg-black/40 p-0.5 rounded-xl border border-white/10 text-xs font-mono shrink-0">
+                    <button
+                      onClick={() => toggleStarCountMode('cumulative')}
+                      className={`px-3 py-1 rounded-lg transition-all ${
+                        starCountMode === 'cumulative'
+                          ? 'theme-btn-accent font-semibold shadow-sm text-white'
+                          : 'text-[var(--text-muted)] hover:text-white'
+                      }`}
+                      title="Cumulative milestones (matches the in-game Flight Mastery popup)"
+                    >
+                      In-Game Milestones
+                    </button>
+                    <button
+                      onClick={() => toggleStarCountMode('exact')}
+                      className={`px-3 py-1 rounded-lg transition-all ${
+                        starCountMode === 'exact'
+                          ? 'theme-btn-accent font-semibold shadow-sm text-white'
+                          : 'text-[var(--text-muted)] hover:text-white'
+                      }`}
+                      title="Exact current star tier breakdown"
+                    >
+                      Exact Tier
+                    </button>
+                  </div>
+                </div>
+
+                {/* The 5 Stacked Mastery Rows (Ace 5★ down to Specialist 1★) */}
+                <div className="space-y-1.5 sm:space-y-2">
+                  {GAME_STAR_RANKS.map(rank => {
+                    const count =
+                      starCountMode === 'cumulative'
+                        ? starCounts.cumulative[rank.key]
+                        : starCounts.exact[rank.key];
+                    const isFiltered = filterStarRank === rank.star;
+
+                    return (
+                      <div
+                        key={rank.star}
+                        onClick={() => handleStarRankClick(rank.star)}
+                        className={`py-2.5 sm:py-3 px-3 sm:px-4 rounded-2xl flex items-center justify-between transition-all duration-150 cursor-pointer group select-none border ${
+                          isFiltered
+                            ? 'bg-amber-500/15 border-amber-500/40 shadow-sm'
+                            : 'hover:bg-white/5 border-transparent'
+                        }`}
+                        title={`Click to view ${starCountMode === 'cumulative' ? `≥ ${rank.star}★` : `${rank.star}★`} ${rank.name} routes in Flights table`}
+                      >
+                        {/* Stars (left-aligned, 3D golden game stars) */}
+                        <div className="flex items-center gap-1 shrink-0">
+                          {Array.from({ length: rank.star }).map((_, i) => (
+                            <img
+                              key={i}
+                              src="icons/star-icon.png"
+                              alt="★"
+                              className="w-5 h-5 sm:w-6 sm:h-6 object-contain drop-shadow select-none pointer-events-none group-hover:scale-105 transition-transform"
+                            />
+                          ))}
+                        </div>
+
+                        {/* Rank Name (cascading staircase right after the stars) */}
+                        <span className="font-heading font-medium sm:font-semibold text-base sm:text-lg text-[var(--text-main)] ml-2.5 sm:ml-4 shrink-0 tracking-tight">
+                          {rank.name}
+                        </span>
+
+                        {/* Hatched Runway-Style Leader Line (Game HUD replica) */}
+                        <div
+                          className="flex-1 min-w-[20px] mx-3 sm:mx-4 h-2 rounded-sm opacity-30 group-hover:opacity-65 transition-opacity"
+                          style={{
+                            background:
+                              'repeating-linear-gradient(65deg, currentColor 0px, currentColor 6px, transparent 6px, transparent 10px)',
+                          }}
+                        />
+
+                        {/* Count (right-aligned, tabular numbers) */}
+                        <div className="flex items-center gap-2 shrink-0">
+                          <span className="font-heading font-semibold text-lg sm:text-xl text-[var(--text-main)] tabular-nums group-hover:text-amber-300 transition-colors">
+                            {count.toLocaleString()}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
 
               {/* Category Breakdown Table */}
@@ -2123,14 +2246,14 @@ export const AeroQuest = () => {
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
                     <div className="flex items-center gap-5 sm:gap-6">
                       <div className="w-28 h-28 sm:w-36 sm:h-36 rounded-3xl theme-badge flex items-center justify-center shadow-2xl shrink-0 p-1 sm:p-1.5 border border-white/10 group">
-                        <img src="icons/deck-radar-3d.png" alt="Flight Deck" className="w-full h-full object-contain drop-shadow-2xl group-hover:scale-110 transition-transform duration-300" />
+                        <img src="icons/deck-radar-3d.png" alt="Flights" className="w-full h-full object-contain drop-shadow-2xl group-hover:scale-110 transition-transform duration-300" />
                       </div>
                       <div>
                         <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-[var(--text-main)] font-heading">
-                          Flight Deck
+                          Flights
                         </h1>
                         <p className="text-xs sm:text-sm text-[var(--text-muted)] mt-1 font-normal">
-                          Real-time flight radar, route catalog, and star progression tracking.
+                          Update the flight counts from your game to keep track of your progress. Sort by columns and use the category filters to plan your game strategy
                         </p>
                       </div>
                     </div>
@@ -2158,7 +2281,7 @@ export const AeroQuest = () => {
 
                       <button
                         onClick={toggleFlightDeckHeader}
-                        title="Collapse Flight Deck Header"
+                        title="Collapse Flights Header"
                         className="p-2 rounded-xl text-[var(--text-muted)] hover:text-white hover:bg-white/10 transition-all border border-white/5"
                       >
                         <ChevronUp className="w-4 h-4" />
@@ -2170,9 +2293,9 @@ export const AeroQuest = () => {
                 <div className="flex items-center justify-between px-4 py-2 glass-panel rounded-2xl border border-[var(--border-card)]">
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 rounded-xl theme-badge flex items-center justify-center p-0.5 shrink-0 shadow-inner border border-white/10">
-                      <img src="icons/deck-radar-3d.png" alt="Flight Deck" className="w-full h-full object-contain drop-shadow-md" />
+                      <img src="icons/deck-radar-3d.png" alt="Flights" className="w-full h-full object-contain drop-shadow-md" />
                     </div>
-                    <span className="font-heading font-semibold text-sm text-[var(--text-main)]">Flight Deck</span>
+                    <span className="font-heading font-semibold text-sm text-[var(--text-main)]">Flights</span>
                     <span className="text-xs text-[var(--text-muted)] font-mono">({sortedAndFilteredDestinations.length} routes)</span>
                   </div>
                   <button
@@ -2280,6 +2403,7 @@ export const AeroQuest = () => {
                         className="bg-transparent px-2.5 py-1.5 text-xs font-normal text-[var(--text-main)] focus:outline-none cursor-pointer"
                       >
                         <option value="destination">Sort: Destination</option>
+                        <option value="group">Sort: Collection</option>
                         <option value="aircraft">Sort: Aircraft</option>
                         <option value="neededToNextStar">Sort: Closest Star</option>
                         <option value="currentStarFlights">Sort: Star Flights</option>
@@ -2389,11 +2513,27 @@ export const AeroQuest = () => {
                     </label>
                   </div>
 
-                  <div className="flex items-center gap-3 text-xs font-mono text-[var(--text-muted)]">
+                  <div className="flex items-center gap-3 text-xs font-mono text-[var(--text-muted)] flex-wrap">
                     <span>
                       Showing <span className="font-semibold text-[var(--text-main)]">{sortedAndFilteredDestinations.length}</span> / {destinations.length} routes
                     </span>
-                    {(searchQuery || filterAircraft !== 'All' || filterGroup !== 'All' || showOnlyMaps || hide3Star) && (
+                    {filterStarRank !== null && (
+                      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs">
+                        <img src="icons/star-icon.png" alt="" className="w-3.5 h-3.5 object-contain" />
+                        <span>
+                          {starCountMode === 'cumulative' ? `≥ ${filterStarRank}★` : `${filterStarRank}★`}{' '}
+                          {STAR_RANKS.find(r => r.star === filterStarRank)?.name}
+                        </span>
+                        <button
+                          onClick={() => setFilterStarRank(null)}
+                          className="hover:text-white p-0.5"
+                          title="Clear star filter"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </span>
+                    )}
+                    {(searchQuery || filterAircraft !== 'All' || filterGroup !== 'All' || showOnlyMaps || hide3Star || filterStarRank !== null) && (
                       <button
                         onClick={() => {
                           setSearchQuery('');
@@ -2401,6 +2541,7 @@ export const AeroQuest = () => {
                           setFilterGroup('All');
                           setShowOnlyMaps(false);
                           setHide3Star(false);
+                          setFilterStarRank(null);
                         }}
                         className="text-cyan-400 hover:underline font-medium text-xs"
                       >
@@ -2422,17 +2563,28 @@ export const AeroQuest = () => {
                 </div>
               ) : view === 'list' && density === 'compact' ? (
                 /* HIGH-DENSITY FLIGHT OPERATIONS TABLE (25+ DESTINATIONS PER SCREEN) */
-                <div className="glass-panel rounded-2xl border border-[var(--border-card)] overflow-hidden shadow-sm">
+                <div className="glass-panel rounded-2xl border border-[var(--border-card)] overflow-x-auto shadow-sm">
                   {/* Sticky Table Header */}
-                  <div className="hidden lg:grid grid-cols-[32px_28px_minmax(160px,1.6fr)_minmax(75px,0.6fr)_minmax(120px,1.0fr)_minmax(85px,0.7fr)_minmax(110px,0.9fr)_minmax(135px,1.1fr)_minmax(80px,0.6fr)_32px] items-center gap-2 px-3 py-2 text-[10px] font-mono font-semibold uppercase tracking-wider dense-table-header sticky top-0 z-30 backdrop-blur-md select-none">
+                  <div className="hidden lg:grid grid-cols-[32px_28px_minmax(140px,1.3fr)_minmax(120px,1.1fr)_minmax(70px,0.6fr)_minmax(110px,0.9fr)_minmax(85px,0.7fr)_minmax(105px,0.8fr)_minmax(125px,1.0fr)_minmax(80px,0.6fr)_32px] items-center gap-2 px-3 py-2 text-[10px] font-mono font-semibold uppercase tracking-wider dense-table-header sticky top-0 z-30 backdrop-blur-md select-none min-w-[1020px]">
                     <div className="text-center" title="Bookmark / Pin">★</div>
-                    <div className="text-center">Icon</div>
+                    <div className="text-center" aria-hidden="true"></div>
                     <div
                       onClick={() => handleSort('destination')}
                       className="cursor-pointer hover:text-[var(--text-main)] transition-colors flex items-center gap-1 group/col"
                     >
-                      <span>Destination & Set</span>
+                      <span>Destination</span>
                       {sortConfig.field === 'destination' ? (
+                        sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3 theme-accent-text" /> : <ChevronDown className="w-3 h-3 theme-accent-text" />
+                      ) : (
+                        <ArrowUpDown className="w-3 h-3 opacity-30 group-hover/col:opacity-80" />
+                      )}
+                    </div>
+                    <div
+                      onClick={() => handleSort('group')}
+                      className="cursor-pointer hover:text-[var(--text-main)] transition-colors flex items-center gap-1 group/col"
+                    >
+                      <span>Collection</span>
+                      {sortConfig.field === 'group' ? (
                         sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3 theme-accent-text" /> : <ChevronDown className="w-3 h-3 theme-accent-text" />
                       ) : (
                         <ArrowUpDown className="w-3 h-3 opacity-30 group-hover/col:opacity-80" />
@@ -2453,7 +2605,7 @@ export const AeroQuest = () => {
                       onClick={() => handleSort('stars')}
                       className="cursor-pointer hover:text-[var(--text-main)] transition-colors flex items-center gap-1 group/col"
                     >
-                      <span>Star Mastery</span>
+                      <span>Progress</span>
                       {sortConfig.field === 'stars' || sortConfig.field === 'mastery' ? (
                         sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3 theme-accent-text" /> : <ChevronDown className="w-3 h-3 theme-accent-text" />
                       ) : (
@@ -2475,7 +2627,7 @@ export const AeroQuest = () => {
                       onClick={() => handleSort('maps')}
                       className="text-center cursor-pointer hover:text-[var(--text-main)] transition-colors flex items-center justify-center gap-1 group/col"
                     >
-                      <span>Map Stock</span>
+                      <span>Maps</span>
                       {sortConfig.field === 'maps' ? (
                         sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3 theme-accent-text" /> : <ChevronDown className="w-3 h-3 theme-accent-text" />
                       ) : (
@@ -2486,7 +2638,7 @@ export const AeroQuest = () => {
                       onClick={() => handleSort('currentStarFlights')}
                       className="text-center cursor-pointer hover:text-[var(--text-main)] transition-colors flex items-center justify-center gap-1 group/col"
                     >
-                      <span>Star Flights</span>
+                      <span>Flights</span>
                       {sortConfig.field === 'currentStarFlights' ? (
                         sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3 theme-accent-text" /> : <ChevronDown className="w-3 h-3 theme-accent-text" />
                       ) : (
@@ -2497,7 +2649,7 @@ export const AeroQuest = () => {
                       onClick={() => handleSort('flightsDone')}
                       className="text-center cursor-pointer hover:text-[var(--text-main)] transition-colors flex items-center justify-center gap-1 group/col"
                     >
-                      <span>Total</span>
+                      <span>Total Flights</span>
                       {sortConfig.field === 'flightsDone' ? (
                         sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3 theme-accent-text" /> : <ChevronDown className="w-3 h-3 theme-accent-text" />
                       ) : (
@@ -2508,7 +2660,7 @@ export const AeroQuest = () => {
                   </div>
 
                   {/* Dense Table Rows */}
-                  <div className="divide-y divide-[var(--border-subtle)]">
+                  <div className="divide-y divide-[var(--border-subtle)] lg:min-w-[1020px]">
                     {sortedAndFilteredDestinations.map(dest => {
                       const stars = getStars(dest.flightsDone, dest.star1Req, dest.star2Req, dest.star3Req, dest.star4Req, dest.star5Req);
                       const maxStars = getMaxStars(dest);
@@ -2529,7 +2681,7 @@ export const AeroQuest = () => {
                           }`}
                         >
                           {/* Desktop Dense Row */}
-                          <div className="hidden lg:grid grid-cols-[32px_28px_minmax(160px,1.6fr)_minmax(75px,0.6fr)_minmax(120px,1.0fr)_minmax(85px,0.7fr)_minmax(110px,0.9fr)_minmax(135px,1.1fr)_minmax(80px,0.6fr)_32px] items-center gap-2 px-3 py-1.5 text-xs dense-table-row">
+                          <div className="hidden lg:grid grid-cols-[32px_28px_minmax(140px,1.3fr)_minmax(120px,1.1fr)_minmax(70px,0.6fr)_minmax(110px,0.9fr)_minmax(85px,0.7fr)_minmax(105px,0.8fr)_minmax(125px,1.0fr)_minmax(80px,0.6fr)_32px] items-center gap-2 px-3 py-1.5 text-xs dense-table-row min-w-[1020px]">
                             {/* Pin / Bookmark */}
                             <div className="flex justify-center">
                               <button
@@ -2554,8 +2706,8 @@ export const AeroQuest = () => {
                               </div>
                             </div>
 
-                            {/* Destination Name & Mission Group */}
-                            <div className="min-w-0 flex items-center gap-1.5">
+                            {/* Destination Name */}
+                            <div className="min-w-0 flex items-center">
                               <span
                                 onClick={() => setExpandedRowId(isExpanded ? null : dest.id)}
                                 className="font-semibold text-[var(--text-main)] truncate cursor-pointer hover:text-[var(--accent)] transition-colors"
@@ -2563,10 +2715,19 @@ export const AeroQuest = () => {
                               >
                                 {dest.destination}
                               </span>
-                              {dest.group && dest.group !== 'None' && (
-                                <span className="text-[10px] text-[var(--text-muted)] bg-white/5 px-1.5 py-0.2 rounded truncate max-w-[120px]" title={dest.group}>
+                            </div>
+
+                            {/* Collection / Set */}
+                            <div className="min-w-0 flex items-center">
+                              {dest.group && dest.group !== 'None' ? (
+                                <span
+                                  className="text-[11px] text-[var(--text-muted)] bg-white/5 px-1.5 py-0.5 rounded truncate max-w-full hover:text-[var(--text-main)] transition-colors"
+                                  title={dest.group}
+                                >
                                   {dest.group}
                                 </span>
+                              ) : (
+                                <span className="text-[var(--text-faint)] text-xs select-none pl-1">—</span>
                               )}
                             </div>
 

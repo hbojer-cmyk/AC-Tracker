@@ -12,5 +12,9 @@
 - Verify all TypeScript and asset changes by running `npm run build` before completing a task.
 - Ensure zero unused imports or type errors to keep GitHub Pages CI deployments healthy.
 
+## App Maintenance & Date Stamping
+- **Always update `APP_UPDATED_DATE` in `index.tsx`**: Whenever modifying the app (features, UI, styling, destinations, or bug fixes), update `export const APP_UPDATED_DATE` to the current date (formatted as `'MMM D, YYYY'`, e.g. `'Sep 26, 2026'`) so the "Updated: [Date]" badge in the top navigation bar and About page always reflects the latest revision.
+
 ## Design & UI Aesthetics
 - Preserve the cyber flight-deck aesthetic: dark glassmorphic panels, glowing cyan/amber accents, high-contrast badges, and custom landmark SVGs/icons across all views.
+

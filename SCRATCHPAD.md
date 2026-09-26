@@ -8,7 +8,7 @@ A dedicated space to jot down brainstorms, backlog items, feature requests, and 
 *Jot down quick thoughts, unformatted ideas, or bugs spotted while playing.*
 
 - make destinations sortable by last flight date
-- sort by collection ?
+- [x] sort by collection (implemented via separate Collection column with sorting support)
 
 ---
 
@@ -53,6 +53,9 @@ Add "Event Walkthrough" pages for past events, similar to the Map Depot format, 
 ---
 
 ## ✅ Implemented / Done
+- [x] In-Game Authentic Flight Mastery HUD Panel: Redesigned the Statistics page Star Tier Cards into an authentic Airport City Flight Mastery panel matching the in-game HUD screenshot (descending rank order from Ace 5★ down to Specialist 1★, authentic 3D golden game stars, cascading title-case rank names, diagonal runway-striped leader line track, right-aligned tabular counts, and in-game cumulative milestone vs exact tier mode toggle with click-to-filter support).
+- [x] Updated Flights Page Header & Subheader: Renamed header from "Flight Deck" to "Flights" (aligning with top navigation), updated subheader to guide users on updating in-game flight counts, column sorting, and category filters for strategy planning, and updated collapsed header state and accessibility labels.
+- [x] Flight Operations Dense Table Column Split & Renaming: Split "Destination & Set" into two independent sortable columns ("Destination" and "Collection"); updated column names to Destination, Collection, Aircraft, Progress, To Next Star, Maps, Flights, Total Flights, Info; removed column name for icons; added "Sort: Collection" to toolbar sort dropdown; ensured clean horizontal scrolling with minimum responsive desktop grid constraints.
 - [x] In-game Star Flight Scrubber: Input flights directly on current star ("XX / [Star Target]" e.g. "49/300") with paired Total Flights column (e.g. 349) matching Airport City in-game HUD; removed redundant +5 and +10 buttons for an uncluttered, clean flight deck across Desktop Dense Table, Mobile Rows, Cards View, and Priority Radar
 - [x] Integrated 10 themes from Theme Factory templates (Arctic Frost, Botanical Garden, Desert Rose, Forest Canopy, Golden Autumn, Midnight Galaxy, Modern Minimalist, Ocean Depths, Sunset Boulevard, Tech Innovation) expanding theme roster to 23 with modal filter tabs (All, Theme Factory, Daylight/Light, Dark Deck)
 - [x] Modern Flight Deck UI overhaul with 13 themes & dense table view
@@ -64,3 +67,6 @@ Add "Event Walkthrough" pages for past events, similar to the Map Depot format, 
 - [x] Standardized Statistics page header icon container and ambient glow to use dynamic `.theme-badge` and `var(--accent)`, resolving legacy amber/brown background discrepancy
 - [x] Updated Map Depot view header: renamed main title to "Map Inventory", updated subheader copy to highlight strategic collection rewards & missing map tracking, changed metric badge to "Collected Maps", and streamlined the header by removing the "Physical Stock" block
 - [x] Original 3D AC-Tracker Brand Logo suite: created 4 bespoke 3D flight-deck emblems reimagining the official Airport City game logo (golden control tower, skyline, wings, ascending jet contrail) in 3D brushed titanium & cyan hologram style, integrated live interactive Logo Selector Modal, dual-theme contrast swatches, and About ACT showcase card
+- [x] Updated Help & Resources Page Header & Subheader: Renamed header to "AC - Tracker : Help and Resources" and updated subheader to "How to use the App and where to find other resources to help you master the game."
+- [x] Help & Resources Layout Reorganization: Removed the Cockpit Brand Emblems showcase card from the Help/About view and moved the Cockpit Shortcuts & Offline Storage section up directly below the "What is AC-Tracker?" overview card, positioning the Modules Grid and Flight Resources below it.
+- [x] Renamed Shortcuts Card Header: Changed "Cockpit Shortcuts & Ergonomics" to "Keyboard shortcuts, Usage tips" in the Help & Resources view.

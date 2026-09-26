@@ -24,8 +24,14 @@ description: >-
 1. Check [AirplanesPage.tsx](file:///c:/Users/Alastair/ac-tracker-10/AirplanesPage.tsx) for aircraft models and specs.
 2. Icons reside under `icons/aircraft/` in PNG format.
 
-### 3. Verification & Deployment Readiness
+### 3. Date Stamping & Maintenance
+1. Always update `APP_UPDATED_DATE` in [index.tsx](file:///c:/Users/Alastair/ac-tracker-10/index.tsx) with today's date (formatted as `'MMM D, YYYY'`, e.g., `'Sep 26, 2026'`) whenever making changes to the application.
+2. Both the top brand bar badge and the About & Resources page read from this single source of truth.
+
+### 4. Verification & Deployment Readiness
 1. Always run verification:
    `npm run build`
 2. Ensure there are no TypeScript diagnostics or bundle issues.
 3. Review changes against [SCRATCHPAD.md](file:///c:/Users/Alastair/ac-tracker-10/SCRATCHPAD.md) and check off completed items.
+4. Verify that `APP_UPDATED_DATE` matches the current date.
+
