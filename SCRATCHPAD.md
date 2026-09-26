@@ -27,6 +27,7 @@ Add "Event Walkthrough" pages for past events, similar to the Map Depot format, 
 ### 🧭 Flight Deck & Radar
 - [ ] 
 
+
 ### ✈️ Fleet Hangar & Aircraft
 - [ ] 
 
@@ -52,6 +53,7 @@ Add "Event Walkthrough" pages for past events, similar to the Map Depot format, 
 ---
 
 ## ✅ Implemented / Done
+- [x] In-game Star Flight Scrubber: Input flights directly on current star ("XX / [Star Target]" e.g. "49/300") with paired Total Flights column (e.g. 349) matching Airport City in-game HUD; removed redundant +5 and +10 buttons for an uncluttered, clean flight deck across Desktop Dense Table, Mobile Rows, Cards View, and Priority Radar
 - [x] Integrated 10 themes from Theme Factory templates (Arctic Frost, Botanical Garden, Desert Rose, Forest Canopy, Golden Autumn, Midnight Galaxy, Modern Minimalist, Ocean Depths, Sunset Boulevard, Tech Innovation) expanding theme roster to 23 with modal filter tabs (All, Theme Factory, Daylight/Light, Dark Deck)
 - [x] Modern Flight Deck UI overhaul with 13 themes & dense table view
 - [x] "To Next Star" sorting & Priority Radar

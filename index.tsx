@@ -101,11 +101,13 @@ type SortField =
   | 'aircraft'
   | 'group'
   | 'flightsDone'
+  | 'currentStarFlights'
   | 'stars'
   | 'mastery'
   | 'lastUpdated'
   | 'maps'
   | 'neededToNextStar';
+
 
 type SortDirection = 'asc' | 'desc';
 
@@ -570,6 +572,48 @@ const getNextStarInfo = (d: FlightDestination) => {
   const maxStar = reqs[reqs.length - 1].star;
   const maxRank = reqs[reqs.length - 1].rank;
   return { nextReq: maxReq, nextStar: maxStar, rank: maxRank, needed: 0 };
+};
+
+interface CurrentStarDetails {
+  currentStar: number;
+  tierDone: number;
+  tierTarget: number;
+  prevThreshold: number;
+  nextThreshold: number;
+  isMastered: boolean;
+}
+
+const getCurrentStarDetails = (d: FlightDestination): CurrentStarDetails => {
+  const reqs = [d.star1Req, d.star2Req, d.star3Req];
+  if (d.star4Req && d.star4Req > 0) reqs.push(d.star4Req);
+  if (d.star5Req && d.star5Req > 0) reqs.push(d.star5Req);
+
+  let prevThreshold = 0;
+  for (let i = 0; i < reqs.length; i++) {
+    const nextThreshold = reqs[i];
+    const tierTarget = nextThreshold - prevThreshold;
+    if (d.flightsDone < nextThreshold) {
+      return {
+        currentStar: i + 1,
+        tierDone: Math.max(0, d.flightsDone - prevThreshold),
+        tierTarget,
+        prevThreshold,
+        nextThreshold,
+        isMastered: false,
+      };
+    }
+    prevThreshold = nextThreshold;
+  }
+
+  const lastTarget = reqs.length > 1 ? reqs[reqs.length - 1] - reqs[reqs.length - 2] : reqs[0];
+  return {
+    currentStar: reqs.length,
+    tierDone: lastTarget,
+    tierTarget: lastTarget,
+    prevThreshold: reqs[reqs.length - 1],
+    nextThreshold: reqs[reqs.length - 1],
+    isMastered: true,
+  };
 };
 
 const formatTimestamp = (ts: number) => {
@@ -1171,6 +1215,13 @@ export const AeroQuest = () => {
           valA = a.flightsDone;
           valB = b.flightsDone;
           break;
+        case 'currentStarFlights': {
+          const infoA = getCurrentStarDetails(a);
+          const infoB = getCurrentStarDetails(b);
+          valA = infoA.tierDone;
+          valB = infoB.tierDone;
+          break;
+        }
         case 'aircraft':
           valA = AIRCRAFT_ORDER[a.aircraft] || 999;
           valB = AIRCRAFT_ORDER[b.aircraft] || 999;
@@ -2231,7 +2282,8 @@ export const AeroQuest = () => {
                         <option value="destination">Sort: Destination</option>
                         <option value="aircraft">Sort: Aircraft</option>
                         <option value="neededToNextStar">Sort: Closest Star</option>
-                        <option value="flightsDone">Sort: Flights Done</option>
+                        <option value="currentStarFlights">Sort: Star Flights</option>
+                        <option value="flightsDone">Sort: Total Flights</option>
                         <option value="stars">Sort: Star Rank</option>
                         <option value="mastery">Sort: Mastery %</option>
                         <option value="maps">Sort: Maps Stocked</option>
@@ -2372,7 +2424,7 @@ export const AeroQuest = () => {
                 /* HIGH-DENSITY FLIGHT OPERATIONS TABLE (25+ DESTINATIONS PER SCREEN) */
                 <div className="glass-panel rounded-2xl border border-[var(--border-card)] overflow-hidden shadow-sm">
                   {/* Sticky Table Header */}
-                  <div className="hidden lg:grid grid-cols-[32px_28px_minmax(170px,1.8fr)_minmax(80px,0.7fr)_minmax(130px,1.1fr)_minmax(90px,0.8fr)_minmax(130px,1.1fr)_minmax(230px,1.5fr)_32px] items-center gap-2.5 px-3 py-2 text-[10px] font-mono font-semibold uppercase tracking-wider dense-table-header sticky top-0 z-30 backdrop-blur-md select-none">
+                  <div className="hidden lg:grid grid-cols-[32px_28px_minmax(160px,1.6fr)_minmax(75px,0.6fr)_minmax(120px,1.0fr)_minmax(85px,0.7fr)_minmax(110px,0.9fr)_minmax(135px,1.1fr)_minmax(80px,0.6fr)_32px] items-center gap-2 px-3 py-2 text-[10px] font-mono font-semibold uppercase tracking-wider dense-table-header sticky top-0 z-30 backdrop-blur-md select-none">
                     <div className="text-center" title="Bookmark / Pin">★</div>
                     <div className="text-center">Icon</div>
                     <div
@@ -2431,10 +2483,21 @@ export const AeroQuest = () => {
                       )}
                     </div>
                     <div
+                      onClick={() => handleSort('currentStarFlights')}
+                      className="text-center cursor-pointer hover:text-[var(--text-main)] transition-colors flex items-center justify-center gap-1 group/col"
+                    >
+                      <span>Star Flights</span>
+                      {sortConfig.field === 'currentStarFlights' ? (
+                        sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3 theme-accent-text" /> : <ChevronDown className="w-3 h-3 theme-accent-text" />
+                      ) : (
+                        <ArrowUpDown className="w-3 h-3 opacity-30 group-hover/col:opacity-80" />
+                      )}
+                    </div>
+                    <div
                       onClick={() => handleSort('flightsDone')}
                       className="text-center cursor-pointer hover:text-[var(--text-main)] transition-colors flex items-center justify-center gap-1 group/col"
                     >
-                      <span>Flight Scrubber</span>
+                      <span>Total</span>
                       {sortConfig.field === 'flightsDone' ? (
                         sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3 theme-accent-text" /> : <ChevronDown className="w-3 h-3 theme-accent-text" />
                       ) : (
@@ -2450,6 +2513,7 @@ export const AeroQuest = () => {
                       const stars = getStars(dest.flightsDone, dest.star1Req, dest.star2Req, dest.star3Req, dest.star4Req, dest.star5Req);
                       const maxStars = getMaxStars(dest);
                       const info = getNextStarInfo(dest);
+                      const starDetails = getCurrentStarDetails(dest);
                       const isExpanded = expandedRowId === dest.id;
                       const reqs = [dest.star1Req, dest.star2Req, dest.star3Req];
                       if (dest.star4Req && dest.star4Req > 0) reqs.push(dest.star4Req);
@@ -2465,7 +2529,7 @@ export const AeroQuest = () => {
                           }`}
                         >
                           {/* Desktop Dense Row */}
-                          <div className="hidden lg:grid grid-cols-[32px_28px_minmax(170px,1.8fr)_minmax(80px,0.7fr)_minmax(130px,1.1fr)_minmax(90px,0.8fr)_minmax(130px,1.1fr)_minmax(230px,1.5fr)_32px] items-center gap-2.5 px-3 py-1.5 text-xs dense-table-row">
+                          <div className="hidden lg:grid grid-cols-[32px_28px_minmax(160px,1.6fr)_minmax(75px,0.6fr)_minmax(120px,1.0fr)_minmax(85px,0.7fr)_minmax(110px,0.9fr)_minmax(135px,1.1fr)_minmax(80px,0.6fr)_32px] items-center gap-2 px-3 py-1.5 text-xs dense-table-row">
                             {/* Pin / Bookmark */}
                             <div className="flex justify-center">
                               <button
@@ -2580,46 +2644,57 @@ export const AeroQuest = () => {
                               )}
                             </div>
 
-                            {/* Flight Scrubber */}
+                            {/* Current Star Flight Scrubber */}
                             <div className="flex items-center justify-center gap-1">
                               <button
-                                onClick={() => updateFlightCount(dest.id, dest.flightsDone - 1)}
+                                onClick={() => updateFlightCount(dest.id, Math.max(0, dest.flightsDone - 1))}
                                 disabled={dest.flightsDone <= 0}
-                                className="tactile-btn px-2 h-7 rounded bg-white/5 hover:bg-white/10 text-xs font-mono font-bold disabled:opacity-20 transition-all flex items-center justify-center"
+                                className="tactile-btn w-6 h-7 rounded bg-white/5 hover:bg-white/10 text-xs font-mono font-bold disabled:opacity-20 transition-all flex items-center justify-center text-[var(--text-muted)] hover:text-white"
                                 title="-1 Flight"
                               >
-                                -1
+                                -
                               </button>
 
-                              <EditableNumberInput
-                                value={dest.flightsDone}
-                                onChange={val => updateFlightCount(dest.id, val)}
-                                ariaLabel={`Flights done for ${dest.destination}`}
-                                title="Number of flights completed (click to edit)"
-                                className="w-14 h-7 text-center font-mono font-bold text-sm bg-black/50 border border-white/10 rounded-lg focus:border-[var(--border-active)] theme-accent-text shadow-inner"
-                              />
+                              {starDetails.isMastered ? (
+                                <div className="inline-flex items-center justify-center px-2.5 h-7 rounded-lg bg-amber-400/10 border border-amber-400/25 text-amber-300 font-mono font-semibold text-xs select-none">
+                                  ★ ACE
+                                </div>
+                              ) : (
+                                <div className="inline-flex items-center bg-black/50 border border-white/10 rounded-lg px-2 h-7 focus-within:border-[var(--border-active)] shadow-inner">
+                                  <EditableNumberInput
+                                    value={starDetails.tierDone}
+                                    onChange={val => {
+                                      const newTotal = starDetails.prevThreshold + Math.max(0, val);
+                                      updateFlightCount(dest.id, newTotal);
+                                    }}
+                                    ariaLabel={`Flights on Star ${starDetails.currentStar} for ${dest.destination}`}
+                                    title={`Flights on Star ${starDetails.currentStar} (click to edit)`}
+                                    className="w-10 h-5 text-center font-mono font-bold text-xs bg-transparent border-0 focus:ring-0 theme-accent-text p-0"
+                                  />
+                                  <span className="text-[11px] font-mono text-[var(--text-muted)] select-none">
+                                    /{starDetails.tierTarget}
+                                  </span>
+                                </div>
+                              )}
 
                               <button
                                 onClick={() => updateFlightCount(dest.id, dest.flightsDone + 1)}
-                                className="tactile-btn px-2 h-7 rounded theme-btn-soft text-xs font-mono font-bold transition-all flex items-center justify-center"
+                                className="tactile-btn w-6 h-7 rounded theme-btn-soft text-xs font-mono font-bold transition-all flex items-center justify-center"
                                 title="+1 Flight"
                               >
-                                +1
+                                +
                               </button>
-                              <button
-                                onClick={() => updateFlightCount(dest.id, dest.flightsDone + 5)}
-                                className="tactile-btn px-2 h-7 rounded theme-btn-soft text-xs font-mono font-bold transition-all flex items-center justify-center"
-                                title="+5 Flights"
-                              >
-                                +5
-                              </button>
-                              <button
-                                onClick={() => updateFlightCount(dest.id, dest.flightsDone + 10)}
-                                className="tactile-btn px-2 h-7 rounded theme-btn-accent text-xs font-mono font-bold transition-all flex items-center justify-center shadow-sm"
-                                title="+10 Flights"
-                              >
-                                +10
-                              </button>
+                            </div>
+
+                            {/* Total Flights */}
+                            <div className="flex items-center justify-center">
+                              <EditableNumberInput
+                                value={dest.flightsDone}
+                                onChange={val => updateFlightCount(dest.id, Math.max(0, val))}
+                                ariaLabel={`Total flights for ${dest.destination}`}
+                                title="Total flights completed (click to edit)"
+                                className="w-14 h-7 text-center font-mono font-bold text-xs bg-black/40 border border-white/10 rounded-lg focus:border-[var(--border-active)] text-[var(--text-main)] shadow-inner"
+                              />
                             </div>
 
                             {/* Details Chevron */}
@@ -2684,35 +2759,50 @@ export const AeroQuest = () => {
                               </div>
                             </div>
 
-                            <div className="flex items-center gap-1 shrink-0">
-                              <button
-                                onClick={() => updateFlightCount(dest.id, dest.flightsDone - 1)}
-                                disabled={dest.flightsDone <= 0}
-                                className="tactile-btn px-2 h-7 rounded bg-white/5 text-xs font-mono font-bold disabled:opacity-20 flex items-center justify-center"
-                                title="-1 Flight"
-                              >
-                                -1
-                              </button>
-                              <EditableNumberInput
-                                value={dest.flightsDone}
-                                onChange={val => updateFlightCount(dest.id, val)}
-                                ariaLabel={`Flights for ${dest.destination}`}
-                                className="w-13 h-7 text-center font-mono font-bold text-sm bg-black/50 border border-white/10 rounded-lg theme-accent-text shadow-inner"
-                              />
-                              <button
-                                onClick={() => updateFlightCount(dest.id, dest.flightsDone + 1)}
-                                className="tactile-btn px-2 h-7 rounded theme-btn-soft text-xs font-mono font-bold flex items-center justify-center"
-                                title="+1 Flight"
-                              >
-                                +1
-                              </button>
-                              <button
-                                onClick={() => updateFlightCount(dest.id, dest.flightsDone + 5)}
-                                className="tactile-btn px-2 h-7 rounded theme-btn-accent text-xs font-mono font-bold flex items-center justify-center"
-                                title="+5 Flights"
-                              >
-                                +5
-                              </button>
+                            <div className="flex items-center gap-1.5 shrink-0">
+                              <div className="flex items-center gap-1">
+                                <button
+                                  onClick={() => updateFlightCount(dest.id, Math.max(0, dest.flightsDone - 1))}
+                                  disabled={dest.flightsDone <= 0}
+                                  className="tactile-btn w-6 h-7 rounded bg-white/5 text-xs font-mono font-bold disabled:opacity-20 flex items-center justify-center text-[var(--text-muted)]"
+                                  title="-1 Flight"
+                                >
+                                  -
+                                </button>
+                                {starDetails.isMastered ? (
+                                  <div className="px-2 h-7 rounded-lg bg-amber-400/10 border border-amber-400/25 text-amber-300 font-mono font-semibold text-xs flex items-center">
+                                    ★ ACE
+                                  </div>
+                                ) : (
+                                  <div className="inline-flex items-center bg-black/50 border border-white/10 rounded-lg px-1.5 h-7">
+                                    <EditableNumberInput
+                                      value={starDetails.tierDone}
+                                      onChange={val => {
+                                        const newTotal = starDetails.prevThreshold + Math.max(0, val);
+                                        updateFlightCount(dest.id, newTotal);
+                                      }}
+                                      ariaLabel={`Star flights for ${dest.destination}`}
+                                      className="w-8 h-5 text-center font-mono font-bold text-xs bg-transparent border-0 focus:ring-0 theme-accent-text p-0"
+                                    />
+                                    <span className="text-[10px] font-mono text-[var(--text-muted)] select-none">
+                                      /{starDetails.tierTarget}
+                                    </span>
+                                  </div>
+                                )}
+                                <button
+                                  onClick={() => updateFlightCount(dest.id, dest.flightsDone + 1)}
+                                  className="tactile-btn w-6 h-7 rounded theme-btn-soft text-xs font-mono font-bold flex items-center justify-center"
+                                  title="+1 Flight"
+                                >
+                                  +
+                                </button>
+                              </div>
+
+                              <div className="hidden sm:flex flex-col items-center justify-center px-1 text-[10px] font-mono" title="Total Flights">
+                                <span className="text-[8px] uppercase tracking-wider text-[var(--text-faint)]">Total</span>
+                                <span className="font-bold text-[var(--text-main)]">{dest.flightsDone}</span>
+                              </div>
+
                               <button
                                 onClick={() => setExpandedRowId(isExpanded ? null : dest.id)}
                                 className="p-1.5 text-[var(--text-muted)] hover:text-white"
@@ -2818,6 +2908,12 @@ export const AeroQuest = () => {
                                       <span className="text-[var(--text-main)]">{dest.category}</span>
                                     </div>
                                     <div className="flex justify-between">
+                                      <span className="text-[var(--text-muted)]">Total Flights:</span>
+                                      <span className="font-mono font-medium text-[var(--text-main)]">
+                                        {dest.flightsDone.toLocaleString()}
+                                      </span>
+                                    </div>
+                                    <div className="flex justify-between">
                                       <span className="text-[var(--text-muted)]">Mastery:</span>
                                       <span className="font-mono font-medium text-amber-400">
                                         {Math.round((dest.flightsDone / maxReq) * 100)}%
@@ -2844,6 +2940,7 @@ export const AeroQuest = () => {
                     const stars = getStars(dest.flightsDone, dest.star1Req, dest.star2Req, dest.star3Req, dest.star4Req, dest.star5Req);
                     const maxStars = getMaxStars(dest);
                     const info = getNextStarInfo(dest);
+                    const starDetails = getCurrentStarDetails(dest);
                     const isExpanded = expandedRowId === dest.id;
                     const reqs = [dest.star1Req, dest.star2Req, dest.star3Req];
                     if (dest.star4Req && dest.star4Req > 0) reqs.push(dest.star4Req);
@@ -2951,44 +3048,57 @@ export const AeroQuest = () => {
                             </div>
                           </div>
 
-                          <div className="flex items-center justify-between lg:justify-end gap-1.5 shrink-0">
+                          <div className="flex items-center justify-between lg:justify-end gap-2 shrink-0">
+                            {/* Current Star Scrubber */}
                             <div className="flex items-center gap-1 bg-black/40 p-1 rounded-2xl border border-white/10 shadow-inner">
                               <button
-                                onClick={() => updateFlightCount(dest.id, dest.flightsDone - 1)}
+                                onClick={() => updateFlightCount(dest.id, Math.max(0, dest.flightsDone - 1))}
                                 disabled={dest.flightsDone <= 0}
                                 className="tactile-btn px-2.5 h-8 rounded-xl bg-white/5 hover:bg-white/15 text-xs font-mono font-bold text-[var(--text-muted)] hover:text-white disabled:opacity-20 flex items-center justify-center"
                                 title="Subtract 1 Flight"
                               >
-                                -1
+                                -
                               </button>
-                              <EditableNumberInput
-                                value={dest.flightsDone}
-                                onChange={val => updateFlightCount(dest.id, val)}
-                                ariaLabel={`Flights completed for ${dest.destination}`}
-                                title="Number of flights completed (click to edit)"
-                                className="w-16 h-8 text-center font-mono font-bold text-base sm:text-lg bg-black/50 border border-white/10 rounded-xl focus:border-[var(--border-active)] theme-accent-text shadow-inner"
-                              />
+                              {starDetails.isMastered ? (
+                                <div className="px-3 h-8 rounded-xl bg-amber-400/10 border border-amber-400/25 text-amber-300 font-mono font-bold text-sm flex items-center">
+                                  ★ ACE
+                                </div>
+                              ) : (
+                                <div className="inline-flex items-center bg-black/50 border border-white/10 rounded-xl px-2 h-8 focus-within:border-[var(--border-active)]">
+                                  <EditableNumberInput
+                                    value={starDetails.tierDone}
+                                    onChange={val => {
+                                      const newTotal = starDetails.prevThreshold + Math.max(0, val);
+                                      updateFlightCount(dest.id, newTotal);
+                                    }}
+                                    ariaLabel={`Star ${starDetails.currentStar} flights for ${dest.destination}`}
+                                    title={`Star ${starDetails.currentStar} flights (click to edit)`}
+                                    className="w-12 h-6 text-center font-mono font-bold text-sm bg-transparent border-0 focus:ring-0 theme-accent-text p-0"
+                                  />
+                                  <span className="text-xs font-mono text-[var(--text-muted)] select-none">
+                                    /{starDetails.tierTarget}
+                                  </span>
+                                </div>
+                              )}
                               <button
                                 onClick={() => updateFlightCount(dest.id, dest.flightsDone + 1)}
                                 className="tactile-btn px-2.5 h-8 rounded-xl theme-btn-soft text-xs font-mono font-bold flex items-center justify-center"
                                 title="Add 1 Flight"
                               >
-                                +1
+                                +
                               </button>
-                              <button
-                                onClick={() => updateFlightCount(dest.id, dest.flightsDone + 5)}
-                                className="tactile-btn px-2.5 h-8 rounded-xl theme-btn-soft text-xs font-mono font-bold flex items-center justify-center"
-                                title="Add 5 Flights"
-                              >
-                                +5
-                              </button>
-                              <button
-                                onClick={() => updateFlightCount(dest.id, dest.flightsDone + 10)}
-                                className="tactile-btn px-2.5 h-8 rounded-xl theme-btn-accent text-xs font-mono font-bold flex items-center justify-center shadow-sm"
-                                title="Add 10 Flights"
-                              >
-                                +10
-                              </button>
+                            </div>
+
+                            {/* Total Flights */}
+                            <div className="flex items-center gap-1.5 bg-black/40 px-2.5 h-10 rounded-2xl border border-white/10 shadow-inner" title="Total All-Time Flights">
+                              <span className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)]">Total:</span>
+                              <EditableNumberInput
+                                value={dest.flightsDone}
+                                onChange={val => updateFlightCount(dest.id, Math.max(0, val))}
+                                ariaLabel={`Total flights for ${dest.destination}`}
+                                title="Total flights completed (click to edit)"
+                                className="w-12 h-6 text-center font-mono font-bold text-xs bg-white/5 border border-white/10 rounded-lg theme-accent-text p-0"
+                              />
                             </div>
 
                             <button
@@ -3091,6 +3201,12 @@ export const AeroQuest = () => {
                                     <span className="text-[var(--text-main)]">{dest.category}</span>
                                   </div>
                                   <div className="flex justify-between">
+                                    <span className="text-[var(--text-muted)]">Total Flights:</span>
+                                    <span className="font-mono font-medium text-[var(--text-main)]">
+                                      {dest.flightsDone.toLocaleString()}
+                                    </span>
+                                  </div>
+                                  <div className="flex justify-between">
                                     <span className="text-[var(--text-muted)]">Mastery:</span>
                                     <span className="font-mono font-medium text-amber-400">
                                       {Math.round((dest.flightsDone / maxReq) * 100)}%
@@ -3116,6 +3232,7 @@ export const AeroQuest = () => {
                     const stars = getStars(dest.flightsDone, dest.star1Req, dest.star2Req, dest.star3Req, dest.star4Req, dest.star5Req);
                     const maxStars = getMaxStars(dest);
                     const info = getNextStarInfo(dest);
+                    const starDetails = getCurrentStarDetails(dest);
                     const planeSprite = AIRCRAFT_SPRITES[dest.aircraft];
 
                     return (
@@ -3212,32 +3329,40 @@ export const AeroQuest = () => {
                         {/* Quick Action Counters */}
                         <div className="pt-1.5 border-t border-white/5 flex items-center justify-between gap-1">
                           <button
-                            onClick={() => updateFlightCount(dest.id, dest.flightsDone - 1)}
+                            onClick={() => updateFlightCount(dest.id, Math.max(0, dest.flightsDone - 1))}
                             disabled={dest.flightsDone <= 0}
-                            className="tactile-btn px-1.5 py-0.5 rounded bg-white/5 hover:bg-white/10 text-[10px] font-mono font-bold disabled:opacity-20 flex items-center justify-center"
+                            className="tactile-btn px-2 py-0.5 rounded bg-white/5 hover:bg-white/10 text-xs font-mono font-bold disabled:opacity-20 flex items-center justify-center text-[var(--text-muted)] hover:text-white"
                             title="-1 Flight"
                           >
-                            -1
+                            -
                           </button>
-                          <EditableNumberInput
-                            value={dest.flightsDone}
-                            onChange={val => updateFlightCount(dest.id, val)}
-                            ariaLabel={`Flights for ${dest.destination}`}
-                            className="w-12 h-6 text-center font-mono font-bold text-xs sm:text-sm bg-black/50 border border-white/10 rounded-lg theme-accent-text"
-                          />
+                          {starDetails.isMastered ? (
+                            <div className="px-2 py-0.5 rounded bg-amber-400/10 border border-amber-400/25 text-amber-300 font-mono font-bold text-xs">
+                              ★ ACE
+                            </div>
+                          ) : (
+                            <div className="inline-flex items-center bg-black/50 border border-white/10 rounded-lg px-1.5 py-0.5">
+                              <EditableNumberInput
+                                value={starDetails.tierDone}
+                                onChange={val => {
+                                  const newTotal = starDetails.prevThreshold + Math.max(0, val);
+                                  updateFlightCount(dest.id, newTotal);
+                                }}
+                                ariaLabel={`Star flights for ${dest.destination}`}
+                                title={`Flights on Star ${starDetails.currentStar} (click to edit)`}
+                                className="w-8 h-5 text-center font-mono font-bold text-xs bg-transparent border-0 focus:ring-0 theme-accent-text p-0"
+                              />
+                              <span className="text-[10px] font-mono text-[var(--text-muted)] select-none">
+                                /{starDetails.tierTarget}
+                              </span>
+                            </div>
+                          )}
                           <button
                             onClick={() => updateFlightCount(dest.id, dest.flightsDone + 1)}
-                            className="tactile-btn px-1.5 py-0.5 rounded theme-btn-soft font-mono font-bold text-[10px] flex items-center justify-center"
+                            className="tactile-btn px-2 py-0.5 rounded theme-btn-soft font-mono font-bold text-xs flex items-center justify-center"
                             title="+1 Flight"
                           >
-                            +1
-                          </button>
-                          <button
-                            onClick={() => updateFlightCount(dest.id, dest.flightsDone + 5)}
-                            className="tactile-btn px-1.5 py-0.5 rounded theme-btn-accent font-mono font-bold text-[10px] flex items-center justify-center shadow-sm"
-                            title="+5 Flights"
-                          >
-                            +5
+                            +
                           </button>
                         </div>
                       </div>
