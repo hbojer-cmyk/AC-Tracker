@@ -54,6 +54,7 @@ Add "Event Walkthrough" pages for past events, similar to the Map Depot format, 
 ---
 
 ## ✅ Implemented / Done
+- [x] Streamlined Map Scrubber Layout: Removed the redundant red active timer text (e.g. "🕒 6h") directly underneath and beside map stock scrubbers across the Dense Table, Mobile rows, and Grid Cards to reclaim vertical table row space and eliminate layout crowding, while preserving duration details in hover tooltips and expanded flight detail drawers.
 - [x] Event Map Timers - Fatima (2h Window): Configured Fatima (Easter Cheer — Owl) with a 2-hour active flight window (`'2h'`) in [mapTimers.ts](file:///c:/Users/Alastair/ac-tracker-10/mapTimers.ts), achieving 100% complete coverage for all map routes in Airport City!
 - [x] Event Map Timers - Rovaniemi (Single-Use Map): Configured Rovaniemi (Santa's Bad Day / Winter) as `'1-time use'` single-flight map in [mapTimers.ts](file:///c:/Users/Alastair/ac-tracker-10/mapTimers.ts), with dedicated UI card handling displaying "Single-use map per flight".
 - [x] Event Map Timers - Area 51 (6h Window): Configured Area 51 (It Came From Outer Space — Owl) with a 6-hour active flight window (`'6h'`) in [mapTimers.ts](file:///c:/Users/Alastair/ac-tracker-10/mapTimers.ts).

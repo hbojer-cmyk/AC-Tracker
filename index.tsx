@@ -2790,43 +2790,35 @@ export const AeroQuest = () => {
                             </div>
 
                             {/* Map Stock */}
-                            <div className="flex flex-col items-center justify-center">
+                            <div className="flex items-center justify-center">
                               {dest.needsMap ? (
-                                <>
-                                  <div className="inline-flex items-center gap-1 bg-black/40 border border-white/10 px-1 py-0.5 rounded-lg shadow-inner">
-                                    <button
-                                      onClick={() => updateMapCount(dest.id, (dest.mapsDone || 0) - 1)}
-                                      disabled={(dest.mapsDone || 0) <= 0}
-                                      className="tactile-btn w-6 h-7 rounded bg-white/5 hover:bg-white/15 text-[var(--text-muted)] hover:text-white flex items-center justify-center disabled:opacity-20 text-xs font-mono font-bold transition-all"
-                                      title="Subtract 1 Map"
-                                    >
-                                      -
-                                    </button>
-                                    <EditableNumberInput
-                                      value={dest.mapsDone || 0}
-                                      onChange={val => updateMapCount(dest.id, val)}
-                                      ariaLabel={`Map count for ${dest.destination}`}
-                                      title="Map count (click to edit)"
-                                      className="w-12 h-7 text-center font-mono font-bold text-sm bg-black/50 border border-white/10 rounded-md focus:border-[var(--border-active)] theme-accent-text shadow-inner"
-                                    />
-                                    <button
-                                      onClick={() => updateMapCount(dest.id, (dest.mapsDone || 0) + 1)}
-                                      className="tactile-btn w-6 h-7 rounded theme-btn-soft flex items-center justify-center text-xs font-mono font-bold transition-all"
-                                      title="Add 1 Map"
-                                    >
-                                      +
-                                    </button>
-                                  </div>
-                                  {dest.mapDuration && (
-                                    <span
-                                      className="text-[10px] font-mono theme-accent-text flex items-center justify-center gap-0.5 mt-0.5 opacity-90 font-medium"
-                                      title={`Active flight window: ${dest.mapDuration} per map`}
-                                    >
-                                      <Clock className="w-2.5 h-2.5 shrink-0" />
-                                      {dest.mapDuration}
-                                    </span>
-                                  )}
-                                </>
+                                <div
+                                  className="inline-flex items-center gap-1 bg-black/40 border border-white/10 px-1 py-0.5 rounded-lg shadow-inner"
+                                  title={dest.mapDuration ? `Map count (${dest.mapDuration} active window per map)` : 'Map count (click to edit)'}
+                                >
+                                  <button
+                                    onClick={() => updateMapCount(dest.id, (dest.mapsDone || 0) - 1)}
+                                    disabled={(dest.mapsDone || 0) <= 0}
+                                    className="tactile-btn w-6 h-7 rounded bg-white/5 hover:bg-white/15 text-[var(--text-muted)] hover:text-white flex items-center justify-center disabled:opacity-20 text-xs font-mono font-bold transition-all"
+                                    title="Subtract 1 Map"
+                                  >
+                                    -
+                                  </button>
+                                  <EditableNumberInput
+                                    value={dest.mapsDone || 0}
+                                    onChange={val => updateMapCount(dest.id, val)}
+                                    ariaLabel={`Map count for ${dest.destination}`}
+                                    title={dest.mapDuration ? `Map count (${dest.mapDuration} active window per map)` : 'Map count (click to edit)'}
+                                    className="w-12 h-7 text-center font-mono font-bold text-sm bg-black/50 border border-white/10 rounded-md focus:border-[var(--border-active)] theme-accent-text shadow-inner"
+                                  />
+                                  <button
+                                    onClick={() => updateMapCount(dest.id, (dest.mapsDone || 0) + 1)}
+                                    className="tactile-btn w-6 h-7 rounded theme-btn-soft flex items-center justify-center text-xs font-mono font-bold transition-all"
+                                    title="Add 1 Map"
+                                  >
+                                    +
+                                  </button>
+                                </div>
                               ) : (
                                 <span className="text-[var(--text-faint)] text-xs select-none">—</span>
                               )}
@@ -2912,7 +2904,10 @@ export const AeroQuest = () => {
                                 <div className="flex items-center gap-1.5 mb-0.5">
                                   <span className="px-1.5 py-0.2 rounded text-[9px] font-mono theme-badge">{dest.aircraft}</span>
                                   {dest.needsMap && (
-                                    <div className="inline-flex items-center gap-0.5 bg-black/40 border border-white/10 px-1 py-0.5 rounded-lg shadow-inner">
+                                    <div
+                                      className="inline-flex items-center gap-0.5 bg-black/40 border border-white/10 px-1 py-0.5 rounded-lg shadow-inner"
+                                      title={dest.mapDuration ? `Map count (${dest.mapDuration} active timer per map)` : 'Map count'}
+                                    >
                                       <span className="text-[10px]">🗺️</span>
                                       <button
                                         onClick={() => updateMapCount(dest.id, (dest.mapsDone || 0) - 1)}
@@ -2935,12 +2930,6 @@ export const AeroQuest = () => {
                                       >
                                         +
                                       </button>
-                                      {dest.mapDuration && (
-                                        <span className="text-[9px] font-mono theme-accent-text pl-0.5 flex items-center gap-0.5" title={`Active timer: ${dest.mapDuration}`}>
-                                          <Clock className="w-2 h-2" />
-                                          {dest.mapDuration}
-                                        </span>
-                                      )}
                                     </div>
                                   )}
                                 </div>
@@ -3469,7 +3458,10 @@ export const AeroQuest = () => {
                                 {dest.aircraft}
                               </span>
                               {dest.needsMap && (
-                                <div className="flex items-center gap-0.5 bg-black/40 px-1 py-0.5 rounded border border-white/5" title="Map Inventory">
+                                <div
+                                  className="flex items-center gap-0.5 bg-black/40 px-1 py-0.5 rounded border border-white/5"
+                                  title={dest.mapDuration ? `Map count (${dest.mapDuration} active timer per map)` : 'Map Inventory'}
+                                >
                                   <span className="text-[10px]">🗺️</span>
                                   <button
                                     onClick={() => updateMapCount(dest.id, (dest.mapsDone || 0) - 1)}
@@ -3492,12 +3484,6 @@ export const AeroQuest = () => {
                                   >
                                     +
                                   </button>
-                                  {dest.mapDuration && (
-                                    <span className="text-[9px] font-mono theme-accent-text pl-0.5 flex items-center gap-0.5" title={`Active timer: ${dest.mapDuration}`}>
-                                      <Clock className="w-2 h-2" />
-                                      {dest.mapDuration}
-                                    </span>
-                                  )}
                                 </div>
                               )}
                             </div>
