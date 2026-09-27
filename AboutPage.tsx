@@ -33,7 +33,7 @@ export const COMMUNITY_RESOURCES: PilotResource[] = [
     description: 'Comprehensive community encyclopedia, flight requirements, building specs, and quest guides.',
     badge: 'Official Wiki',
     domain: 'airportcitygame.com',
-    icon: 'icons/pilots_manual.png',
+    icon: 'icons/resource-wiki-3d.png',
   },
   {
     title: 'Airport City Game Forums',
@@ -42,7 +42,7 @@ export const COMMUNITY_RESOURCES: PilotResource[] = [
     description: 'The premier player community forum covering trading, neighbor codes, flight tips, space launches, alliances, and game strategies.',
     badge: 'Player Forums',
     domain: 'airportcitygame.com',
-    icon: 'icons/airplane-icon.png',
+    icon: 'icons/resource-forums-3d.png',
   },
   {
     title: 'Airport City Official Facebook',
@@ -51,7 +51,7 @@ export const COMMUNITY_RESOURCES: PilotResource[] = [
     description: 'Official page featuring weekly bonus codes, gift giveaways, game updates, and community events.',
     badge: 'Weekly Codes',
     domain: 'facebook.com',
-    icon: 'icons/facebook.png',
+    icon: 'icons/resource-facebook-3d.png',
   },
   {
     title: 'Game Insight Help & FAQ',
@@ -60,7 +60,7 @@ export const COMMUNITY_RESOURCES: PilotResource[] = [
     description: "The developer's official help desk, troubleshooting guides, account recovery, bug reports, and game FAQs.",
     badge: 'Developer Support',
     domain: 'gameinsight.helpshift.com',
-    icon: 'icons/GI.svg',
+    icon: 'icons/resource-support-3d.png',
   },
   {
     title: 'World Destinations Interactive Map',
@@ -69,7 +69,7 @@ export const COMMUNITY_RESOURCES: PilotResource[] = [
     description: 'Interactive Google Map plotting all Airport City flight destinations worldwide across all continents.',
     badge: 'Google Maps',
     domain: 'google.com/maps',
-    icon: 'icons/worldmap.png',
+    icon: 'icons/resource-worldmap-3d.png',
   },
 ];
 
@@ -100,7 +100,7 @@ export const AboutPage: React.FC<AboutPageProps> = () => {
                 AC - Tracker : Help and Resources
               </h1>
               <p className="text-xs sm:text-sm text-[var(--text-muted)] mt-1 font-normal">
-                How to use the App and where to find other resources to help you master the game.
+                How to use the App and where to find other resources to help you advance in the game.
               </p>
             </div>
           </div>
@@ -180,9 +180,9 @@ export const AboutPage: React.FC<AboutPageProps> = () => {
               className="glass-card rounded-2xl p-4 sm:p-5 border border-[var(--border-card)] hover:border-[var(--border-active)] hover:bg-white/[0.03] transition-all group flex flex-col md:flex-row md:items-center justify-between gap-4 relative overflow-hidden"
             >
               <div className="flex items-start sm:items-center gap-4 min-w-0 flex-1">
-                <div className="w-11 h-11 rounded-2xl theme-badge flex items-center justify-center shrink-0 border border-white/10 group-hover:scale-105 transition-transform shadow-md p-1.5 overflow-hidden">
+                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl theme-badge flex items-center justify-center shrink-0 border border-white/10 group-hover:scale-110 transition-transform shadow-lg p-1 overflow-hidden">
                   {link.icon ? (
-                    <img src={link.icon} alt={link.title} className="w-full h-full object-contain drop-shadow-sm" />
+                    <img src={link.icon} alt={link.title} className="w-full h-full object-contain drop-shadow-md" />
                   ) : (
                     <Globe className="w-5 h-5 theme-accent-text shrink-0" />
                   )}

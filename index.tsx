@@ -67,7 +67,7 @@ import { adjustAircraftList } from './src/aircraftData';
 // --- App Version & Maintenance Tracker ---
 // NOTE: Always update APP_UPDATED_DATE whenever making changes in the app
 export const APP_VERSION = 'Version 2.0';
-export const APP_UPDATED_DATE = 'Sep 26, 2026';
+export const APP_UPDATED_DATE = 'Sep 27, 2026';
 
 // --- Types & Interfaces ---
 interface FlightDestination {
@@ -777,7 +777,7 @@ export const LOGO_OPTIONS: LogoOptionConfig[] = [
   {
     id: 'opt4',
     name: 'Winged Hologram Globe & Control Tower',
-    subtitle: 'Global Operations & Destination Mastery',
+    subtitle: 'Global Operations & Destination Progress',
     badge: 'World Radar',
     file: 'icons/act-logo-opt4.png',
     description: 'A circular titanium instrument bezel with golden pilot wings cradling a glowing cyan 3D world globe with flight pins, topped by the golden Airport City control tower and an orbiting airliner.',
@@ -1342,6 +1342,14 @@ export const AeroQuest = () => {
     selectedQuickFilters,
   ]);
 
+  const totalFlightsAll = useMemo(() => {
+    return destinations.reduce((acc, d) => acc + (d.flightsDone || 0), 0);
+  }, [destinations]);
+
+  const totalFlightsFiltered = useMemo(() => {
+    return sortedAndFilteredDestinations.reduce((acc, d) => acc + (d.flightsDone || 0), 0);
+  }, [sortedAndFilteredDestinations]);
+
   // Handlers
   const handleStarRankClick = (star: number) => {
     setFilterStarRank(prev => (prev === star ? null : star));
@@ -1879,7 +1887,7 @@ export const AeroQuest = () => {
                         />
                       </div>
                       <div className="text-[11px] font-mono text-[var(--text-muted)] flex justify-between">
-                        <span>Unlocked:</span>
+                        <span>Collected:</span>
                         <span className="text-[var(--text-main)] font-medium">
                           {col.collected} / {col.total}
                         </span>
@@ -2075,7 +2083,7 @@ export const AeroQuest = () => {
                         Statistics
                       </h1>
                       <p className="text-xs sm:text-sm text-[var(--text-muted)] mt-1 font-normal">
-                        Track total flight progression, star milestones, and mastery across all categories
+                        Track total flight progression, star milestones, and progress across all categories
                       </p>
                     </div>
                   </div>
@@ -2086,20 +2094,20 @@ export const AeroQuest = () => {
                       <span className="text-sm font-mono text-[var(--text-muted)]"> / {maxGlobalStars.toLocaleString()}</span>
                     </div>
                     <div className="text-xs font-mono font-medium text-amber-400 mt-1">
-                      {globalPercentage}% Global Mastery
+                      {globalPercentage}% Global Progress
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Flight Mastery / Star Ranks Panel (Game HUD Replica) */}
+              {/* Flight Progress / Star Ranks Panel (Game HUD Replica) */}
               <div className="glass-panel rounded-3xl p-5 sm:p-7 border border-[var(--border-card)] shadow-xl relative overflow-hidden space-y-4">
                 <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-white/5">
                   <div className="flex items-center gap-2.5">
                     <img src="icons/star-icon.png" alt="Star Ranks" className="w-5 h-5 object-contain drop-shadow" />
                     <div>
                       <h3 className="text-xs sm:text-sm font-semibold uppercase tracking-wider text-[var(--text-main)] font-heading">
-                        Flight Mastery Ranks
+                        Flight Progress Ranks
                       </h3>
                       <p className="text-[11px] text-[var(--text-muted)] mt-0.5">
                         {starCountMode === 'cumulative'
@@ -2118,7 +2126,7 @@ export const AeroQuest = () => {
                           ? 'theme-btn-accent font-semibold shadow-sm text-white'
                           : 'text-[var(--text-muted)] hover:text-white'
                       }`}
-                      title="Cumulative milestones (matches the in-game Flight Mastery popup)"
+                      title="Cumulative milestones (matches the in-game Flight Progress popup)"
                     >
                       In-Game Milestones
                     </button>
@@ -2136,7 +2144,7 @@ export const AeroQuest = () => {
                   </div>
                 </div>
 
-                {/* The 5 Stacked Mastery Rows (Ace 5★ down to Specialist 1★) */}
+                {/* The 5 Stacked Star Rank Rows (Ace 5★ down to Specialist 1★) */}
                 <div className="space-y-1.5 sm:space-y-2">
                   {GAME_STAR_RANKS.map(rank => {
                     const count =
@@ -2290,7 +2298,8 @@ export const AeroQuest = () => {
                             Total Flights
                           </div>
                           <div className="text-2xl font-heading font-semibold text-amber-300 mt-0.5">
-                            {destinations.reduce((acc, d) => acc + (d.flightsDone || 0), 0).toLocaleString()}
+                            {totalFlightsFiltered.toLocaleString()}
+                            <span className="text-xs text-[var(--text-muted)] font-mono"> / {totalFlightsAll.toLocaleString()}</span>
                           </div>
                         </div>
                       </div>
@@ -2425,7 +2434,7 @@ export const AeroQuest = () => {
                         <option value="currentStarFlights">Sort: Star Flights</option>
                         <option value="flightsDone">Sort: Total Flights</option>
                         <option value="stars">Sort: Star Rank</option>
-                        <option value="mastery">Sort: Mastery %</option>
+                        <option value="mastery">Sort: Progress %</option>
                         <option value="maps">Sort: Maps Stocked</option>
                         <option value="lastUpdated">Sort: Last Updated</option>
                       </select>
@@ -2754,7 +2763,7 @@ export const AeroQuest = () => {
                               </span>
                             </div>
 
-                            {/* Star Mastery HUD */}
+                            {/* Star Progress HUD */}
                             <div className="flex items-center gap-1.5">
                               <div className="flex items-center gap-0.5 shrink-0">
                                 {Array.from({ length: maxStars }).map((_, idx) => (
@@ -3043,7 +3052,7 @@ export const AeroQuest = () => {
                                           <div className="text-[10px] text-[var(--text-muted)]">
                                             {dest.mapDuration
                                               ? (dest.mapDuration.toLowerCase().includes('use') ? 'Single-use map per flight' : `${dest.mapDuration} active timer per map`)
-                                              : 'Unlocks timed flight window'}
+                                              : 'Activates timed flight window'}
                                           </div>
                                         </div>
                                       </div>
@@ -3101,7 +3110,7 @@ export const AeroQuest = () => {
                                       </span>
                                     </div>
                                     <div className="flex justify-between">
-                                      <span className="text-[var(--text-muted)]">Mastery:</span>
+                                      <span className="text-[var(--text-muted)]">Progress:</span>
                                       <span className="font-mono font-medium text-amber-400">
                                         {Math.round((dest.flightsDone / maxReq) * 100)}%
                                       </span>
@@ -3341,7 +3350,7 @@ export const AeroQuest = () => {
                                         <div className="text-[10px] text-[var(--text-muted)]">
                                           {dest.mapDuration
                                             ? (dest.mapDuration.toLowerCase().includes('use') ? 'Single-use map per flight' : `${dest.mapDuration} active timer per map`)
-                                            : 'Unlocks timed flight window'}
+                                            : 'Activates timed flight window'}
                                         </div>
                                       </div>
                                     </div>
@@ -3398,7 +3407,7 @@ export const AeroQuest = () => {
                                     </span>
                                   </div>
                                   <div className="flex justify-between">
-                                    <span className="text-[var(--text-muted)]">Mastery:</span>
+                                    <span className="text-[var(--text-muted)]">Progress:</span>
                                     <span className="font-mono font-medium text-amber-400">
                                       {Math.round((dest.flightsDone / maxReq) * 100)}%
                                     </span>
@@ -3495,7 +3504,7 @@ export const AeroQuest = () => {
                             </div>
                           </div>
 
-                          {/* Star Mastery */}
+                          {/* Star Progress */}
                           <div className="space-y-1">
                             <div className="flex items-center justify-between text-[10px]">
                               <div className="flex items-center gap-0.5">
