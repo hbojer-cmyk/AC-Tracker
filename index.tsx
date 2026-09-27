@@ -3244,7 +3244,7 @@ export const AeroQuest = () => {
                             </div>
                           </div>
 
-                          <div className="flex items-center justify-between lg:justify-end gap-2 shrink-0">
+                          <div className="flex items-center justify-between lg:justify-end gap-2 shrink-0 lg:w-[325px]">
                             {/* Current Star Scrubber */}
                             <div className="flex items-center gap-1 bg-black/40 p-1 rounded-2xl border border-white/10 shadow-inner">
                               <button
@@ -3256,11 +3256,11 @@ export const AeroQuest = () => {
                                 -
                               </button>
                               {starDetails.isMastered ? (
-                                <div className="px-3 h-8 rounded-xl bg-amber-400/10 border border-amber-400/25 text-amber-300 font-mono font-bold text-sm flex items-center">
+                                <div className="px-3 h-8 rounded-xl bg-amber-400/10 border border-amber-400/25 text-amber-300 font-mono font-bold text-sm flex items-center justify-center min-w-[94px]">
                                   ★ ACE
                                 </div>
                               ) : (
-                                <div className="inline-flex items-center bg-black/50 border border-white/10 rounded-xl px-2 h-8 focus-within:border-[var(--border-active)]">
+                                <div className="inline-flex items-center justify-center bg-black/50 border border-white/10 rounded-xl px-2 h-8 focus-within:border-[var(--border-active)] min-w-[94px]">
                                   <EditableNumberInput
                                     value={starDetails.tierDone}
                                     onChange={val => {
