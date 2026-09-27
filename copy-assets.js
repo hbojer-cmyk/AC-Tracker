@@ -1,14 +1,18 @@
 import fs from 'fs';
 import path from 'path';
 
-const dirs = ['Map-icons', 'icons', 'Headers', 'event-icons'];
-dirs.forEach(dir => {
-  const srcDir = path.resolve(dir);
-  const destDir = path.resolve('dist', dir);
-  if (fs.existsSync(srcDir)) {
-    fs.cpSync(srcDir, destDir, { recursive: true });
-    console.log(`Successfully copied ${dir} to dist/${dir}`);
-  } else {
-    console.warn(`Warning: ${dir} directory does not exist!`);
-  }
-});
+// Primary consolidated graphics folder
+const srcDir = path.resolve('icons');
+if (fs.existsSync(srcDir)) {
+  // Copy to dist/icons
+  const destIconsDir = path.resolve('dist', 'icons');
+  fs.cpSync(srcDir, destIconsDir, { recursive: true });
+  console.log('Successfully copied icons to dist/icons');
+
+  // Also mirror to dist/icon for seamless singular/plural path compatibility
+  const destIconDir = path.resolve('dist', 'icon');
+  fs.cpSync(srcDir, destIconDir, { recursive: true });
+  console.log('Successfully copied icons to dist/icon (compatibility mirror)');
+} else {
+  console.warn('Warning: icons directory does not exist!');
+}

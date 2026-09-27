@@ -516,14 +516,14 @@ const QUICK_FILTERS = [
 ];
 
 const CATEGORY_ICONS: Record<string, string> = {
-  'All Destinations': 'Map-icons/standard_icon.png',
+  'All Destinations': 'icons/standard_icon.png',
   'Regular Flights': 'icons/flights_icon.png',
   'Helicopter Flights': 'icons/helicopter_icon.png',
   'Adventure Map Flights': 'icons/adventure_icon.png',
   'Alliance Map Flights': 'icons/alliance__icon.png',
   'Alliance Task Flights': 'icons/alliance__icon.png',
-  'Space Map Flights': 'Map-icons/space_map_icon.png',
-  'Space Launches': 'Map-icons/space_icon.png',
+  'Space Map Flights': 'icons/space_map_icon.png',
+  'Space Launches': 'icons/space_icon.png',
   'Event Flights': 'icons/event_icon.png',
 };
 
