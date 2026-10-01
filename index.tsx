@@ -67,7 +67,7 @@ import { adjustAircraftList } from './src/aircraftData';
 // --- App Version & Maintenance Tracker ---
 // NOTE: Always update APP_UPDATED_DATE whenever making changes in the app
 export const APP_VERSION = 'Version 2.0';
-export const APP_UPDATED_DATE = 'Sep 27, 2026';
+export const APP_UPDATED_DATE = 'Oct 1, 2026';
 
 // --- Types & Interfaces ---
 interface FlightDestination {
@@ -853,6 +853,8 @@ export const AeroQuest = () => {
   const [expandedRowId, setExpandedRowId] = useState<string | null>(null);
   const [showOnlyMaps, setShowOnlyMaps] = useState(false);
   const [hide3Star, setHide3Star] = useState(false);
+  const [hideZeroMaps, setHideZeroMaps] = useState(false);
+  const [hideEventDestinations, setHideEventDestinations] = useState(false);
   const [missingSearch, setMissingSearch] = useState('');
   const [showMissingAlliance, setShowMissingAlliance] = useState(true);
   const [showMissingAdventure, setShowMissingAdventure] = useState(true);
@@ -1238,6 +1240,8 @@ export const AeroQuest = () => {
         (filterGroup === 'All' || d.group.split(/[;,]/).map(g => g.trim()).includes(filterGroup)) &&
         (!showOnlyMaps || d.needsMap) &&
         (!hide3Star || getStars(d.flightsDone, d.star1Req, d.star2Req, d.star3Req, d.star4Req, d.star5Req) < getMaxStars(d)) &&
+        (!hideZeroMaps || !d.needsMap || (d.mapsDone || 0) > 0) &&
+        (!hideEventDestinations || activeCategory === 'Event Flights' || d.category !== 'Event Flights') &&
         (filterStarRank === null ||
           (starCountMode === 'cumulative'
             ? getStars(d.flightsDone, d.star1Req, d.star2Req, d.star3Req, d.star4Req, d.star5Req) >= filterStarRank
@@ -1337,6 +1341,8 @@ export const AeroQuest = () => {
     sortConfig,
     showOnlyMaps,
     hide3Star,
+    hideZeroMaps,
+    hideEventDestinations,
     filterStarRank,
     starCountMode,
     selectedQuickFilters,
@@ -1363,6 +1369,9 @@ export const AeroQuest = () => {
       setView('list');
     }
     setActiveCategory(cat);
+    if (cat === 'Event Flights') {
+      setHideEventDestinations(false);
+    }
     setFilterAircraft('All');
     setFilterGroup('All');
     setExpandedCategory(prev => (prev === cat ? null : cat));
@@ -1376,6 +1385,7 @@ export const AeroQuest = () => {
     if (cat === 'Event Flights') {
       setFilterGroup(item);
       setFilterAircraft('All');
+      setHideEventDestinations(false);
     } else {
       setFilterAircraft(item);
       setFilterGroup('All');
@@ -2510,7 +2520,7 @@ export const AeroQuest = () => {
 
                 {/* Quick Toggle Filter Chips */}
                 <div className="flex flex-wrap items-center justify-between gap-2 pt-1.5 border-t border-white/5 text-xs">
-                  <div className="flex items-center gap-3">
+                  <div className="flex flex-wrap items-center gap-x-3.5 gap-y-1.5">
                     <label className="flex items-center gap-1.5 cursor-pointer select-none">
                       <input
                         type="checkbox"
@@ -2536,6 +2546,33 @@ export const AeroQuest = () => {
                         ⭐ Hide completed destinations
                       </span>
                     </label>
+
+                    <label className="flex items-center gap-1.5 cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        checked={hideZeroMaps}
+                        onChange={e => setHideZeroMaps(e.target.checked)}
+                        style={{ accentColor: 'var(--accent)' }}
+                        className="rounded"
+                      />
+                      <span className={`text-xs font-normal transition-colors ${hideZeroMaps ? 'theme-accent-text font-medium' : 'text-[var(--text-muted)]'}`}>
+                        🗺️ Hide destinations with 0 maps
+                      </span>
+                    </label>
+
+                    <label className={`flex items-center gap-1.5 cursor-pointer select-none ${activeCategory === 'Event Flights' ? 'opacity-40 cursor-not-allowed' : ''}`}>
+                      <input
+                        type="checkbox"
+                        checked={hideEventDestinations}
+                        disabled={activeCategory === 'Event Flights'}
+                        onChange={e => setHideEventDestinations(e.target.checked)}
+                        style={{ accentColor: 'var(--accent)' }}
+                        className="rounded"
+                      />
+                      <span className={`text-xs font-normal transition-colors ${hideEventDestinations ? 'text-purple-300 font-medium' : 'text-[var(--text-muted)]'}`}>
+                        🎪 Hide Event Destinations
+                      </span>
+                    </label>
                   </div>
 
                   <div className="flex items-center gap-3 text-xs font-mono text-[var(--text-muted)] flex-wrap">
@@ -2558,7 +2595,7 @@ export const AeroQuest = () => {
                         </button>
                       </span>
                     )}
-                    {(searchQuery || filterAircraft !== 'All' || filterGroup !== 'All' || showOnlyMaps || hide3Star || filterStarRank !== null) && (
+                    {(searchQuery || filterAircraft !== 'All' || filterGroup !== 'All' || showOnlyMaps || hide3Star || hideZeroMaps || hideEventDestinations || filterStarRank !== null) && (
                       <button
                         onClick={() => {
                           setSearchQuery('');
@@ -2566,6 +2603,8 @@ export const AeroQuest = () => {
                           setFilterGroup('All');
                           setShowOnlyMaps(false);
                           setHide3Star(false);
+                          setHideZeroMaps(false);
+                          setHideEventDestinations(false);
                           setFilterStarRank(null);
                         }}
                         className="text-cyan-400 hover:underline font-medium text-xs"
