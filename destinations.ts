@@ -42,36 +42,36 @@ Thunderbird|Adventure Map Flights|Rhythm of My Heart|Hyderabad|icons/maps/ex14 a
 Thunderbird|Adventure Map Flights|Rhythm of My Heart|Kanpur|icons/maps/ex14 ancient india.png|150|250|500|1250|3750
 Thunderbird|Adventure Map Flights|Rhythm of My Heart|Kolkata|icons/maps/ex14 ancient india.png|150|250|500|1250|3750
 Thunderbird|Adventure Map Flights|Rhythm of My Heart|Mumbai|icons/maps/ex14 ancient india.png|150|250|500|1250|3750
-Eagle|Adventure Map Flights|Riddles of the Pharaohs|Cairo|icons/maps/ex14 ancient india.png|20|50|100|1250|3750
-Eagle|Adventure Map Flights|Riddles of the Pharaohs|Excavations: Ancient Egypt|icons/maps/ex04 ancient egypt.png|20|50|100|1250|3750
-Eagle|Adventure Map Flights|Riddles of the Pharaohs|Heliopolis|icons/maps/ex04 ancient egypt.png|20|50|100|1250|3750
-Eagle|Adventure Map Flights|Riddles of the Pharaohs|Kom Ombo|icons/maps/ex04 ancient egypt.png|20|50|100|1250|3750
-Eagle|Adventure Map Flights|Riddles of the Pharaohs|Luxor|icons/maps/ex04 ancient egypt.png|20|50|100|1250|3750
-Eagle|Adventure Map Flights|Riddles of the Pharaohs|Memphis|icons/maps/ex04 ancient egypt.png|20|50|100|1250|3750
+Eagle|Adventure Map Flights|Riddles of the Pharaohs|Cairo|icons/maps/ex14 ancient india.png|20|50|100|250|750
+Eagle|Adventure Map Flights|Riddles of the Pharaohs|Excavations: Ancient Egypt|icons/maps/ex04 ancient egypt.png|20|50|100|250|750
+Eagle|Adventure Map Flights|Riddles of the Pharaohs|Heliopolis|icons/maps/ex04 ancient egypt.png|20|50|100|250|750
+Eagle|Adventure Map Flights|Riddles of the Pharaohs|Kom Ombo|icons/maps/ex04 ancient egypt.png|20|50|100|250|750
+Eagle|Adventure Map Flights|Riddles of the Pharaohs|Luxor|icons/maps/ex04 ancient egypt.png|20|50|100|250|750
+Eagle|Adventure Map Flights|Riddles of the Pharaohs|Memphis|icons/maps/ex04 ancient egypt.png|20|50|100|250|750
 Hawk|Adventure Map Flights|Roman Holiday|Carthage|icons/maps/ex02 ancient rome.png|20|50|100|1250|3750
 Hawk|Adventure Map Flights|Roman Holiday|Constantinople|icons/maps/ex02 ancient rome.png|20|50|100|1250|3750
 Hawk|Adventure Map Flights|Roman Holiday|Ephesus|icons/maps/ex02 ancient rome.png|20|50|100|1250|3750
 Hawk|Adventure Map Flights|Roman Holiday|Excavations: Ancient Rome|icons/maps/ex02 ancient rome.png|20|50|100|1250|3750
 Hawk|Adventure Map Flights|Roman Holiday|Merida|icons/maps/ex02 ancient rome.png|20|50|100|1250|3750
 Hawk|Adventure Map Flights|Roman Holiday|Veii|icons/maps/ex02 ancient rome.png|20|50|100|1250|3750
-Giant|Adventure Map Flights|Tale of Bygone Years|Chernihiv|icons/maps/ex08 eastern europe.png|20|50|100|1250|3750
-Giant|Adventure Map Flights|Tale of Bygone Years|Excavations: Eastern Europe|icons/maps/ex08 eastern europe.png|20|50|100|1250|3750
-Giant|Adventure Map Flights|Tale of Bygone Years|Kyiv|icons/maps/ex08 eastern europe.png|20|50|100|1250|3750
-Giant|Adventure Map Flights|Tale of Bygone Years|Murom|icons/maps/ex08 eastern europe.png|20|50|100|1250|3750
-Giant|Adventure Map Flights|Tale of Bygone Years|Novgorod|icons/maps/ex08 eastern europe.png|20|50|100|1250|3750
-Giant|Adventure Map Flights|Tale of Bygone Years|Smolensk|icons/maps/ex08 eastern europe.png|20|50|100|1250|3750
+Giant|Adventure Map Flights|Tale of Bygone Years|Chernihiv|icons/maps/ex08 eastern europe.png|20|50|100|250|750
+Giant|Adventure Map Flights|Tale of Bygone Years|Excavations: Eastern Europe|icons/maps/ex08 eastern europe.png|20|50|100|250|750
+Giant|Adventure Map Flights|Tale of Bygone Years|Kyiv|icons/maps/ex08 eastern europe.png|20|50|100|250|750
+Giant|Adventure Map Flights|Tale of Bygone Years|Murom|icons/maps/ex08 eastern europe.png|20|50|100|250|750
+Giant|Adventure Map Flights|Tale of Bygone Years|Novgorod|icons/maps/ex08 eastern europe.png|20|50|100|250|750
+Giant|Adventure Map Flights|Tale of Bygone Years|Smolensk|icons/maps/ex08 eastern europe.png|20|50|100|250|750
 Jumbo|Adventure Map Flights|The Ancient World|Athens|icons/maps/ex05 ancient world.png|20|50|100|1250|3750
 Jumbo|Adventure Map Flights|The Ancient World|Delphi|icons/maps/ex05 ancient world.png|20|50|100|1250|3750
 Jumbo|Adventure Map Flights|The Ancient World|Excavations: The Ancient World|icons/maps/ex05 ancient world.png|20|50|100|1250|3750
 Jumbo|Adventure Map Flights|The Ancient World|Sparta|icons/maps/ex05 ancient world.png|20|50|100|1250|3750
 Jumbo|Adventure Map Flights|The Ancient World|Thebes|icons/maps/ex05 ancient world.png|20|50|100|1250|3750
 Jumbo|Adventure Map Flights|The Ancient World|Troy|icons/maps/ex05 ancient world.png|20|50|100|1250|3750
-Giant|Adventure Map Flights|The Art of Transmutation|Basel|icons/maps/ex10 western europe.png|20|50|100|1250|3750
-Giant|Adventure Map Flights|The Art of Transmutation|Excavations: Western Europe|icons/maps/ex10 western europe.png|20|50|100|1250|3750
-Giant|Adventure Map Flights|The Art of Transmutation|Montpelier|icons/maps/ex10 western europe.png|20|50|100|1250|3750
-Giant|Adventure Map Flights|The Art of Transmutation|Salzburg|icons/maps/ex10 western europe.png|20|50|100|1250|3750
-Giant|Adventure Map Flights|The Art of Transmutation|Strasbourg|icons/maps/ex10 western europe.png|20|50|100|1250|3750
-Giant|Adventure Map Flights|The Art of Transmutation|Zaragoza|icons/maps/ex10 western europe.png|20|50|100|1250|3750
+Giant|Adventure Map Flights|The Art of Transmutation|Basel|icons/maps/ex10 western europe.png|20|50|100|250|750
+Giant|Adventure Map Flights|The Art of Transmutation|Excavations: Western Europe|icons/maps/ex10 western europe.png|20|50|100|250|750
+Giant|Adventure Map Flights|The Art of Transmutation|Montpelier|icons/maps/ex10 western europe.png|20|50|100|250|750
+Giant|Adventure Map Flights|The Art of Transmutation|Salzburg|icons/maps/ex10 western europe.png|20|50|100|250|750
+Giant|Adventure Map Flights|The Art of Transmutation|Strasbourg|icons/maps/ex10 western europe.png|20|50|100|250|750
+Giant|Adventure Map Flights|The Art of Transmutation|Zaragoza|icons/maps/ex10 western europe.png|20|50|100|250|750
 Thunderbird|Adventure Map Flights|The Dawn of Man|Cirta|icons/maps/ex13 ancient africa.png|150|250|500|1250|3750
 Thunderbird|Adventure Map Flights|The Dawn of Man|Excavations: Ancient Africa|icons/maps/ex13 ancient africa.png|150|250|500|1250|3750
 Thunderbird|Adventure Map Flights|The Dawn of Man|Nairobi|icons/maps/ex13 ancient africa.png|150|250|500|1250|3750

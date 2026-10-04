@@ -67,7 +67,7 @@ import { adjustAircraftList } from './src/aircraftData';
 // --- App Version & Maintenance Tracker ---
 // NOTE: Always update APP_UPDATED_DATE whenever making changes in the app
 export const APP_VERSION = 'Version 2.0';
-export const APP_UPDATED_DATE = 'Oct 1, 2026';
+export const APP_UPDATED_DATE = 'Oct 4, 2026';
 
 // --- Types & Interfaces ---
 interface FlightDestination {
