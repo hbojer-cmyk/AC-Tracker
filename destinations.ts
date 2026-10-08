@@ -274,16 +274,16 @@ Jumbo|Event Flights|Dark Skies|Windsor|icons/events/darkskies.png|30|60|120||
 Owl|Event Flights|Dark Skies|Transylvania|icons/events/darkskies.png|10|20|40||
 Raven|Event Flights|Dark Skies|Salem|icons/events/darkskies.png|20|41|81||
 Thunderbird|Event Flights|Dark Skies|Aokigahara|icons/events/darkskies.png|150|250|500||
-Condor|Event Flights|Down The Rabbit Hole|Bradford|icons/events/downtherabbithole.png|200|300|600||
-Eagle|Event Flights|Down The Rabbit Hole|Bristol|icons/events/downtherabbithole.png|23|46|92||
-Falcon|Event Flights|Down The Rabbit Hole|Salisbury|icons/events/downtherabbithole.png|100|200|400||
-Giant|Event Flights|Down The Rabbit Hole|Leeds|icons/events/downtherabbithole.png|50|100|150||
-Hawk|Event Flights|Down The Rabbit Hole|Chichester|icons/events/downtherabbithole.png|23|46|92||
-Jumbo|Event Flights|Down The Rabbit Hole|Durham|icons/events/downtherabbithole.png|30|60|120||
-Owl|Event Flights|Down The Rabbit Hole|Cheltenham|icons/events/downtherabbithole.png|10|20|40||
-Raven|Event Flights|Down The Rabbit Hole|Lichfield|icons/events/downtherabbithole.png|23|46|92||
-Swift|Event Flights|Down The Rabbit Hole|Wonderland|icons/events/downtherabbithole.png|100|250|500||
-Thunderbird|Event Flights|Down The Rabbit Hole|Southampton|icons/events/downtherabbithole.png|150|250|500||
+Condor|Event Flights|Down The Rabbit Hole|Bradford|icons/events/downtherabbithole.png|200|300|600|1500|3750
+Eagle|Event Flights|Down The Rabbit Hole|Bristol|icons/events/downtherabbithole.png|23|46|92|230|580
+Falcon|Event Flights|Down The Rabbit Hole|Salisbury|icons/events/downtherabbithole.png|100|200|400|1000|2500
+Giant|Event Flights|Down The Rabbit Hole|Leeds|icons/events/downtherabbithole.png|50|100|150|380|950
+Hawk|Event Flights|Down The Rabbit Hole|Chichester|icons/events/downtherabbithole.png|23|46|92|230|580
+Jumbo|Event Flights|Down The Rabbit Hole|Durham|icons/events/downtherabbithole.png|30|60|120|300|750
+Owl|Event Flights|Down The Rabbit Hole|Cheltenham|icons/events/downtherabbithole.png|10|20|40|100|250
+Raven|Event Flights|Down The Rabbit Hole|Lichfield|icons/events/downtherabbithole.png|23|46|92|230|580
+Swift|Event Flights|Down The Rabbit Hole|Wonderland|icons/events/downtherabbithole.png|100|250|500|1250|3130
+Thunderbird|Event Flights|Down The Rabbit Hole|Southampton|icons/events/downtherabbithole.png|150|250|500|1250|3130
 Condor|Event Flights|Dragon Rising|Tianjin|icons/events/dragonrising.png|200|300|600||
 Eagle|Event Flights|Dragon Rising|Hangzhou|icons/events/dragonrising.png|23|46|92||
 Falcon|Event Flights|Dragon Rising|Wuhan|icons/events/dragonrising.png|100|200|400||
