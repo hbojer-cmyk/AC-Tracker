@@ -34,4 +34,5 @@ description: >-
 2. Ensure there are no TypeScript diagnostics or bundle issues.
 3. Review changes against [SCRATCHPAD.md](file:///c:/Users/Alastair/ac-tracker-10/SCRATCHPAD.md) and check off completed items.
 4. Verify that `APP_UPDATED_DATE` matches the current date.
+5. After updating the app, always verify the webpage is updated correctly.  
 
