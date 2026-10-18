@@ -16,7 +16,7 @@
 - **Always update `APP_UPDATED_DATE` in `index.tsx`**: Whenever modifying the app (features, UI, styling, destinations, or bug fixes), update `export const APP_UPDATED_DATE` to the current date (formatted as `'MMM D, YYYY'`, e.g. `'Sep 26, 2026'`) so the "Updated: [Date]" badge in the top navigation bar and About page always reflects the latest revision.
 
 ## Live Deployment & Cache Verification
-- **Always verify live deployments**: After pushing a commit to `origin/main`, wait for and verify that the GitHub Pages deploy workflow runs and updates `origin/gh-pages` (check `git fetch origin gh-pages; git log -1 origin/gh-pages`).
+- **Always verify live deployments**: After pushing commits, always push to both `main` and `ACT+` (`git push origin main; git push origin main:ACT+`) so both GitHub Pages and Cloudflare Pages pipelines trigger. Wait for and verify that `origin/gh-pages` is updated (`git fetch origin gh-pages; git log -1 origin/gh-pages`).
 - **Remind user about browser cache**: Inform the user if hard refreshing (`Ctrl + F5` or `Cmd + Shift + R`) or opening a private/incognito window is needed to bypass edge caching (Cloudflare CDN / Service Worker / browser cache) and fetch the new JavaScript bundle immediately.
 
 ## Design & UI Aesthetics
