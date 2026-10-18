@@ -1775,6 +1775,16 @@ export const ACTracker = () => {
     setShowResetConfirm(false);
   };
 
+  // If waiting on first-load migration modal, render the migration modal immediately
+  if (!isLoaded && showMigrationModal) {
+    return (
+      <MigrationModal
+        isOpen={showMigrationModal}
+        onMigrate={handleMigrateLegacy}
+      />
+    );
+  }
+
   if (!isLoaded) return null;
 
   return (
