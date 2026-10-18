@@ -84,7 +84,7 @@ import { ProfileModal, MigrationModal } from './ProfileModal';
 
 // --- App Version & Maintenance Tracker ---
 // NOTE: Always update APP_UPDATED_DATE whenever making changes in the app
-export const APP_VERSION = 'Version 2.1.1';
+export const APP_VERSION = 'Version 2.1.2';
 export const APP_UPDATED_DATE = 'Oct 19, 2026';
 
 // --- Types & Interfaces ---
@@ -843,6 +843,7 @@ export const ACTracker = () => {
   const [showBackupModal, setShowBackupModal] = useState(false);
   const [showThemeModal, setShowThemeModal] = useState(false);
   const [showLogoModal, setShowLogoModal] = useState(false);
+  const [showWhatsNewModal, setShowWhatsNewModal] = useState(false);
   const [logoId, setLogoId] = useState<string>('opt1');
 
   const handleSelectLogo = (id: string) => {
@@ -1003,6 +1004,25 @@ export const ACTracker = () => {
     applyProfileState(allProfiles[resolvedActiveId]);
     setIsLoaded(true);
   }, []);
+
+  // Check for new release version to show What's New modal
+  useEffect(() => {
+    if (!isLoaded) return;
+    const lastSeenVersion = localStorage.getItem('act_last_seen_version');
+    if (lastSeenVersion !== APP_VERSION) {
+      setShowWhatsNewModal(true);
+    }
+  }, [isLoaded]);
+
+  const closeWhatsNewModal = () => {
+    try {
+      localStorage.setItem('act_last_seen_version', APP_VERSION);
+    } catch (e) {
+      // Ignore storage errors
+    }
+    setShowWhatsNewModal(false);
+  };
+
 
   // Handle first-load Migration submission
   const handleMigrateLegacy = (name: string, emoji: string, accentColor: string, acCode: string) => {
@@ -1181,7 +1201,7 @@ export const ACTracker = () => {
   const toggleBookmark = (id: string, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     setDestinations(prev =>
-      prev.map(d => (d.id === id ? { ...d, isCustomList: !d.isCustomList, lastUpdated: Date.now() } : d))
+      prev.map(d => (d.id === id ? { ...d, isCustomList: !d.isCustomList } : d))
     );
   };
 
@@ -1843,9 +1863,17 @@ export const ACTracker = () => {
                   <span className="text-[11px] font-medium text-[var(--text-muted)] leading-none">
                     by Soupha
                   </span>
-                  <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-medium theme-badge leading-none">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowWhatsNewModal(true);
+                    }}
+                    className="px-1.5 py-0.5 rounded text-[9px] font-mono font-medium theme-badge leading-none hover:scale-105 transition-transform cursor-pointer"
+                    title="View What's New in this release"
+                  >
                     {APP_VERSION}
-                  </span>
+                  </button>
                 </div>
                 <span className="text-[9px] font-mono text-[var(--text-muted)] opacity-75 mt-0.5 leading-none">
                   Updated: {APP_UPDATED_DATE}
@@ -2245,6 +2273,7 @@ export const ACTracker = () => {
             <AboutPage
               onNavigate={(v) => setView(v)}
               onOpenLogoModal={() => setShowLogoModal(true)}
+              onOpenWhatsNew={() => setShowWhatsNewModal(true)}
               activeLogoId={logoId}
               onSelectLogo={handleSelectLogo}
             />
@@ -2845,11 +2874,22 @@ export const ACTracker = () => {
                         <button
                           type="button"
                           onClick={() => {
-                            setSearchQuery(dest.destination);
-                            setExpandedRowId(dest.id);
+                            if (!sortedAndFilteredDestinations.some(d => d.id === dest.id)) {
+                              setActiveCategory('All Destinations');
+                              setFilterAircraft('All');
+                              setFilterGroup('All');
+                              setSearchQuery('');
+                            }
+                            setExpandedRowId(prev => (prev === dest.id ? null : dest.id));
+                            setTimeout(() => {
+                              const el = document.getElementById(dest.id);
+                              if (el) {
+                                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                              }
+                            }, 50);
                           }}
                           className="font-medium text-[var(--text-main)] hover:text-white flex items-center gap-1.5 mr-1.5"
-                          title={`Click to filter & expand ${dest.destination}`}
+                          title={`Click to view & expand ${dest.destination}`}
                         >
                           <span className="truncate max-w-[120px] sm:max-w-[160px]">{dest.destination}</span>
                           <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-md bg-white/5 text-[var(--text-muted)]">
@@ -2870,6 +2910,14 @@ export const ACTracker = () => {
                       </div>
                     );
                   })}
+                  <button
+                    type="button"
+                    onClick={() => setDestinations(prev => prev.map(d => ({ ...d, lastUpdated: 0 })))}
+                    className="ml-auto p-1 rounded-lg text-[var(--text-muted)] hover:text-white hover:bg-white/10 transition-colors shrink-0"
+                    title="Clear recent flights list"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
                 </div>
               )}
 
@@ -3232,6 +3280,7 @@ export const ACTracker = () => {
                       return (
                         <div
                           key={dest.id}
+                          id={dest.id}
                           className={`transition-colors ${
                             isExpanded ? 'bg-white/[0.04]' : 'hover:bg-white/[0.02]'
                           }`}
@@ -3678,6 +3727,7 @@ export const ACTracker = () => {
                     return (
                       <div
                         key={dest.id}
+                        id={dest.id}
                         className={`glass-card rounded-2xl border transition-all overflow-hidden ${
                           isExpanded ? 'border-[var(--border-active)] shadow-md' : 'border-[var(--border-card)]'
                         }`}
@@ -3969,6 +4019,7 @@ export const ACTracker = () => {
                     return (
                       <div
                         key={dest.id}
+                        id={dest.id}
                         className="glass-card rounded-xl p-2.5 border border-[var(--border-card)] hover:border-[var(--border-active)] transition-all space-y-2 flex flex-col justify-between group"
                       >
                         <div className="space-y-1.5">
@@ -4215,7 +4266,7 @@ export const ACTracker = () => {
                               <div className="w-4 h-5" style={{ backgroundColor: cfg.bgPreview }} title="Void Base" />
                               <div className="w-4 h-5" style={{ backgroundColor: cfg.surfacePreview }} title="Surface Card" />
                               <div className="w-5 h-5 flex items-center justify-center" style={{ backgroundColor: cfg.accentPreview }} title="HUD Accent">
-                                {isSelected && <Check className="w-3.5 h-3.5 text-slate-950 font-bold" />}
+                                {isSelected && <Check className={`w-3.5 h-3.5 ${cfg.isDark ? 'text-slate-950' : 'text-white'} font-bold`} />}
                               </div>
                             </div>
 
@@ -4609,6 +4660,108 @@ export const ACTracker = () => {
         isOpen={showMigrationModal}
         onMigrate={handleMigrateLegacy}
       />
+
+      {/* What's New in AC-Tracker Release Modal */}
+      {showWhatsNewModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+          <div className="glass-panel bg-[var(--bg-card)] p-6 sm:p-7 rounded-3xl w-full max-w-2xl border border-[var(--border-card)] shadow-2xl space-y-6 relative max-h-[90vh] overflow-y-auto custom-scrollbar">
+            {/* Modal Header */}
+            <div className="flex justify-between items-center pb-4 border-b border-white/10">
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 rounded-2xl theme-badge flex items-center justify-center">
+                  <Sparkles className="w-5 h-5 theme-accent-text" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-semibold text-lg text-[var(--text-main)] font-heading">
+                      What's New in AC-Tracker
+                    </h3>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold theme-btn-accent shadow-sm">
+                      {APP_VERSION}
+                    </span>
+                  </div>
+                  <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                    Latest upgrades, flight-deck enhancements, and performance fixes.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={closeWhatsNewModal}
+                className="p-2 text-[var(--text-muted)] hover:text-[var(--text-main)] rounded-xl hover:bg-white/5 transition-colors"
+                title="Close"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Feature Cards Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 font-normal">
+              {/* Feature 1 */}
+              <div className="p-4 rounded-2xl bg-black/20 border border-white/5 space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-base">⚡</span>
+                  <h4 className="text-xs font-semibold text-[var(--text-main)] font-heading">
+                    Recent Flights Quick-Command Bar
+                  </h4>
+                </div>
+                <p className="text-xs text-[var(--text-muted)] leading-relaxed">
+                  Instant +1 flight increment and 1-click smooth row jump for your 6 most recently flown routes. Includes route filter auto-reset and a dismiss button.
+                </p>
+              </div>
+
+              {/* Feature 2 */}
+              <div className="p-4 rounded-2xl bg-black/20 border border-white/5 space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-base">☀️</span>
+                  <h4 className="text-xs font-semibold text-[var(--text-main)] font-heading">
+                    True Daylight & Theme Factory Polish
+                  </h4>
+                </div>
+                <p className="text-xs text-[var(--text-muted)] leading-relaxed">
+                  High-contrast recessed avionics wells across all 6 Light/Daylight themes (Botanical Garden, Arctic Frost, First Class Suite, Alpine Snow, Golden Autumn, Modern Minimalist).
+                </p>
+              </div>
+
+              {/* Feature 3 */}
+              <div className="p-4 rounded-2xl bg-black/20 border border-white/5 space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-base">✈️</span>
+                  <h4 className="text-xs font-semibold text-[var(--text-main)] font-heading">
+                    Hangar Callsign & Class Editor
+                  </h4>
+                </div>
+                <p className="text-xs text-[var(--text-muted)] leading-relaxed">
+                  Rename aircraft callsigns and switch aircraft classes directly from the Hangar Edit modal, with smart word-boundary type detection to prevent nickname false positives.
+                </p>
+              </div>
+
+              {/* Feature 4 */}
+              <div className="p-4 rounded-2xl bg-black/20 border border-white/5 space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-base">🗺️</span>
+                  <h4 className="text-xs font-semibold text-[var(--text-main)] font-heading">
+                    Missing Maps Radar Search & Data Fixes
+                  </h4>
+                </div>
+                <p className="text-xs text-[var(--text-muted)] leading-relaxed">
+                  Instant search filter in Missing Maps Radar, plus calibrated star requirements for New Haven, Cairo, and Rovaniemi with backward-compatible legacy migrations.
+                </p>
+              </div>
+            </div>
+
+            {/* Launch Action */}
+            <div className="pt-2">
+              <button
+                type="button"
+                onClick={closeWhatsNewModal}
+                className="w-full py-3 rounded-2xl theme-btn-accent font-semibold text-sm shadow-xl flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.99] transition-all"
+              >
+                <Rocket className="w-4 h-4" /> Got It, Launch Flight Deck
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

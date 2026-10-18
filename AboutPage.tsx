@@ -14,9 +14,11 @@ import { APP_VERSION, APP_UPDATED_DATE } from './index';
 interface AboutPageProps {
   onNavigate?: (view: 'list' | 'maps' | 'airplanes' | 'stats') => void;
   onOpenLogoModal?: () => void;
+  onOpenWhatsNew?: () => void;
   activeLogoId?: string;
   onSelectLogo?: (id: string) => void;
 }
+
 
 export interface PilotResource {
   title: string;
@@ -76,7 +78,9 @@ export const COMMUNITY_RESOURCES: PilotResource[] = [
   },
 ];
 
-export const AboutPage: React.FC<AboutPageProps> = () => {
+export const AboutPage: React.FC<AboutPageProps> = ({
+  onOpenWhatsNew,
+}) => {
   return (
     <div className="space-y-6 pb-12 animate-in fade-in duration-300">
       {/* Hero Header */}
@@ -92,9 +96,14 @@ export const AboutPage: React.FC<AboutPageProps> = () => {
             </div>
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold theme-btn-accent shadow-sm">
+                <button
+                  type="button"
+                  onClick={onOpenWhatsNew}
+                  className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold theme-btn-accent shadow-sm hover:scale-105 transition-transform cursor-pointer"
+                  title="View What's New in this release"
+                >
                   {APP_VERSION}
-                </span>
+                </button>
                 <span className="text-xs text-[var(--text-muted)] font-mono">
                   Updated: {APP_UPDATED_DATE}
                 </span>
@@ -200,7 +209,7 @@ export const AboutPage: React.FC<AboutPageProps> = () => {
             <ShieldCheck className="w-4 h-4 text-emerald-400" /> Offline Storage & Backups
           </h3>
           <p className="text-xs text-[var(--text-muted)] font-normal leading-relaxed">
-            ACT is 100% client-side and privacy-respecting. All flight logs, map stocks, aircraft records, and profile settings are stored locally in your browser's <code className="px-1.5 py-0.5 rounded bg-black/40 font-mono text-[10px] text-white/90">localStorage</code> under the clean <code className="px-1.5 py-0.5 rounded bg-black/40 font-mono text-[10px] text-cyan-300">act_</code> namespace.
+            ACT is 100% client-side and privacy-respecting. All flight logs, map stocks, aircraft records, and profile settings are stored locally in your browser's <code className="px-1.5 py-0.5 rounded bg-black/40 font-mono text-[10px] text-[var(--text-main)]">localStorage</code> under the clean <code className="px-1.5 py-0.5 rounded bg-black/40 font-mono text-[10px] theme-accent-text">act_</code> namespace.
           </p>
           <p className="text-xs text-[var(--text-muted)] font-normal leading-relaxed">
             Use the <strong className="text-[var(--text-main)]">Data</strong> tool in the top header anytime to export a single profile, download an all-profiles master backup, or restore previous JSON logs.

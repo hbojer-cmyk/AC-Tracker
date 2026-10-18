@@ -22,4 +22,9 @@
 ## Design & UI Aesthetics
 - Preserve the cyber flight-deck aesthetic: dark glassmorphic panels, glowing cyan/amber accents, high-contrast badges, and custom landmark SVGs/icons across all views.
 
+## Post-Update Workflow & Deployment Offers
+- **Offer Local Preview First**: After modifying or updating the app and verifying the build, always offer to start or show a local preview server (`npm run dev` or `npm run preview`) so the user can inspect changes locally.
+- **Offer Commit & Live Deployment**: Following the preview offer, offer to commit the changes and push to `origin/main` to trigger live deployments (GitHub Pages and Cloudflare Pages).
+
+
 

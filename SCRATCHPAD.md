@@ -18,8 +18,7 @@ Links page
 
 Event walkthroughs
 
-"what's new" page that's only visible on first load after a new update
-
+- [x] "what's new" page that's only visible on first load after a new update (implemented as release notes modal with top nav and About trigger)
 - [x] Add a "Recent Flights" quick-jump bar to the Flight Deck so users can quickly jump back to flights they've recently worked on
 - [ ] Add "Event Walkthrough" pages for past events, similar to the Map Depot format, with categories for easy navigation
 
@@ -41,6 +40,7 @@ Event walkthroughs
 ### 🛠️ UI, Themes & Quality of Life (QoL)
 - [x] More light themes (added Arctic Frost, Botanical Garden, Golden Autumn, Modern Minimalist from Theme Factory)
 - [x] Clean default theme fallback alignment (`stealth-ghost`)
+- [x] Light theme contrast and surface normalization across all 6 daylight themes
 - [ ] Auto-expand rows on the stats page to show plane details when clicking the row
 - [ ] Expandable aircraft info on the hangar page (the aircraft tiles)
 - [ ] Add a button on the stats page to toggle between dark/light mode
@@ -55,6 +55,7 @@ Event walkthroughs
 ---
 
 ## ✅ Implemented / Done
+- [x] Light Theme Surface Normalization, Smooth Recent Flight Jump, PWA Manifest & What's New Release Modal (Oct 19, 2026 - v2.1.2): Added systemic light-theme surface and contrast normalization CSS overrides across all 6 light themes (First Class Suite, Alpine Snow Flight, Arctic Frost, Botanical Garden, Golden Hour Autumn, Modern Minimalist) replacing muddy dark boxes with crisp recessed alabaster/slate avionics wells. Fixed theme picker checkmark contrast for dark-accented daylight themes. Refined Recently Flown bar to smoothly scroll into view and expand without locking search queries or wiping active route filters, prevented bookmark toggling from falsely bumping recent flight order, and added a quick dismiss/clear action. Built cyber flight-deck styled "What's New in AC-Tracker" release modal automatically shown on first load of a new version (with version tracking in `act_last_seen_version`) and manually openable from top navigation and About page badges. Created installable offline-ready PWA `manifest.json` asset pipeline with `copy-assets.js` and meta tags in `index.html`.
 - [x] Data Integrity, Fleet Renaming & Flight Deck QoL Upgrades (Oct 19, 2026): Fixed destination data discrepancies and typos in `destinations.ts` (corrected New Haven 4★ threshold to 1500, Cairo icon path to `ex04 ancient egypt.png`, and corrected spellings for Rovaniemi, Los Angeles, Cincinnati, Kuala Lumpur, and Fontainebleau) with transparent backward-compatible alias migration in `index.tsx`. Deduplicated `MAPLOCATIONS.tsx` to exactly 148 map routes by removing accent duplicate `"Córdoba"`. Upgraded `aircraftData.ts` with word-boundary matching to prevent nickname false positives (e.g., Bowler/Prowler matching Owl). Upgraded Hangar Fleet Edit modal in `AirplanesPage.tsx` with callsign/nickname renaming and aircraft class selection. Fixed default theme mismatch in `index.tsx` to `'stealth-ghost'`. Activated the `missingSearch` search bar in the Missing Maps Radar view. Added interactive "Recently Flown" quick-jump chip strip with one-click `+1` increment buttons and instant filter/expansion to the Flight Deck. Cleaned unused API key injection definitions from `vite.config.ts`.
 - [x] Multi-Profile Support & v2.1 Release: Implemented complete local multi-profile architecture allowing unlimited pilot profiles with independent flight logs, fleet hangars, and cockpit UI preferences (theme, logo, density, sidebar, star mode). Added top-navigation quick switcher dropdown with active avatar, callsign, and 9-character Airport City code display, alongside a dedicated cyber flight-deck styled Profile Management modal (create, clone, edit, export, and safe two-step deletion). Added tabbed Data & Profiles Hub (Profiles | Backup & Import | Reset) supporting both single-profile and full multi-profile JSON exports/imports with auto-detecting restore. Migrated internal localStorage namespace from legacy `aeroquest_*` to clean `act_*` keys (`act_profiles`, `act_active_profile_id`), complete with an automatic first-load migration wizard that seamlessly transfers existing flight records without data loss. Renamed root component to `ACTracker`, bumped app version to `Version 2.1` across the top nav, `package.json`, and About page, and added a dedicated "Multi-Profile Pilot Command (NEW in v2.1)" showcase section to the Help & Resources page.
 - [x] Cross-Platform Linux CI & Cloudflare Pages Compatibility: Added `@rollup/rollup-linux-x64-gnu` under `optionalDependencies` in [package.json](file:///c:/Users/Alastair/ac-tracker-10/package.json) and cleaned up stale Windows platform entries in [package-lock.json](file:///c:/Users/Alastair/ac-tracker-10/package-lock.json), resolving npm issue #4828 and enabling clean automated builds on Linux runners for both GitHub Pages and Cloudflare Pages (`ac-tracker.pages.dev`).

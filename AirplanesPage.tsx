@@ -320,7 +320,7 @@ export const AirplanesPage: React.FC<AirplanesPageProps> = ({
                 <div className="space-y-2 pt-3 border-t border-white/5 bg-black/20 p-2.5 rounded-xl border border-white/5">
                   <div className="flex items-center justify-between text-xs font-normal">
                     <span className="text-xs text-[var(--text-main)] flex items-center gap-2">
-                      <Gauge className="w-4 h-4 text-white/90 shrink-0" /> Speed
+                      <Gauge className="w-4 h-4 text-[var(--text-muted)] shrink-0" /> Speed
                     </span>
                     <span
                       className={`px-2.5 py-0.5 rounded-full text-xs font-mono font-bold ${airplane.speed > 0
@@ -334,7 +334,7 @@ export const AirplanesPage: React.FC<AirplanesPageProps> = ({
 
                   <div className="flex items-center justify-between text-xs font-normal">
                     <span className="text-xs text-[var(--text-main)] flex items-center gap-2">
-                      <CircleDollarSign className="w-4 h-4 text-white/90 shrink-0" /> Profit
+                      <CircleDollarSign className="w-4 h-4 text-[var(--text-muted)] shrink-0" /> Profit
                     </span>
                     <span
                       className={`px-2.5 py-0.5 rounded-full text-xs font-mono font-bold ${airplane.profit > 0
@@ -348,7 +348,7 @@ export const AirplanesPage: React.FC<AirplanesPageProps> = ({
 
                   <div className="flex items-center justify-between text-xs font-normal">
                     <span className="text-xs text-[var(--text-main)] flex items-center gap-2">
-                      <svg className="w-4 h-4 text-white/90 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <svg className="w-4 h-4 text-[var(--text-muted)] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M17.8 19.2L16 11l3.5-3.5C21 6 21.5 4 21 3.5c-.5-.5-2.5 0-4 1.5L13.5 8.5l-8.2-1.8c-.5-.1-.9.1-1.2.4l-.9.9c-.3.3-.2.8.2 1l6 3.7-3.4 3.4-2.8-.4c-.4-.1-.7.1-.9.3l-.5.5c-.3.3-.2.7.2.9l3.3 2 2 3.3c.2.4.6.5.9.2l.5-.5c.2-.2.4-.5.3-.9l-.4-2.8 3.4-3.4 3.7 6c.2.4.7.5 1 .2l.9-.9c.3-.3.5-.7.4-1.2z" />
                         <rect x="2" y="15" width="5" height="5" rx="1" fill="currentColor" fillOpacity="0.4" />
                       </svg>
@@ -432,7 +432,7 @@ export const AirplanesPage: React.FC<AirplanesPageProps> = ({
               {/* Speed Slider */}
               <div className="space-y-2 bg-black/20 p-3 rounded-2xl border border-white/5">
                 <div className="flex justify-between items-center text-xs">
-                  <span className="flex items-center gap-1.5 text-white/90 font-medium">
+                  <span className="flex items-center gap-1.5 text-[var(--text-main)] font-medium">
                     <Gauge className="w-4 h-4 text-emerald-400" /> Speed
                   </span>
                   <span
@@ -465,7 +465,7 @@ export const AirplanesPage: React.FC<AirplanesPageProps> = ({
               {/* Profit Slider */}
               <div className="space-y-2 bg-black/20 p-3 rounded-2xl border border-white/5">
                 <div className="flex justify-between items-center text-xs">
-                  <span className="flex items-center gap-1.5 text-white/90 font-medium">
+                  <span className="flex items-center gap-1.5 text-[var(--text-main)] font-medium">
                     <CircleDollarSign className="w-4 h-4 text-amber-400" /> Profit
                   </span>
                   <span
@@ -498,7 +498,7 @@ export const AirplanesPage: React.FC<AirplanesPageProps> = ({
               {/* Drop Chance Slider */}
               <div className="space-y-2 bg-black/20 p-3 rounded-2xl border border-white/5">
                 <div className="flex justify-between items-center text-xs">
-                  <span className="flex items-center gap-1.5 text-white/90 font-medium">
+                  <span className="flex items-center gap-1.5 text-[var(--text-main)] font-medium">
                     <svg className="w-4 h-4 text-cyan-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M17.8 19.2L16 11l3.5-3.5C21 6 21.5 4 21 3.5c-.5-.5-2.5 0-4 1.5L13.5 8.5l-8.2-1.8c-.5-.1-.9.1-1.2.4l-.9.9c-.3.3-.2.8.2 1l6 3.7-3.4 3.4-2.8-.4c-.4-.1-.7.1-.9.3l-.5.5c-.3.3-.2.7.2.9l3.3 2 2 3.3c.2.4.6.5.9.2l.5-.5c.2-.2.4-.5.3-.9l-.4-2.8 3.4-3.4 3.7 6c.2.4.7.5 1 .2l.9-.9c.3-.3.5-.7.4-1.2z" />
                       <rect x="2" y="15" width="5" height="5" rx="1" fill="currentColor" fillOpacity="0.4" />

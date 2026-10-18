@@ -16,3 +16,12 @@ if (fs.existsSync(srcDir)) {
 } else {
   console.warn('Warning: icons directory does not exist!');
 }
+
+// Copy manifest.json to dist
+const manifestSrc = path.resolve('manifest.json');
+if (fs.existsSync(manifestSrc)) {
+  const manifestDest = path.resolve('dist', 'manifest.json');
+  fs.copyFileSync(manifestSrc, manifestDest);
+  console.log('Successfully copied manifest.json to dist/manifest.json');
+}
+

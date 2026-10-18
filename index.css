@@ -975,3 +975,53 @@ input[type="number"].hide-arrows {
   border-radius: 9999px;
 }
 
+/* Light Theme Surface & Contrast Normalization */
+.theme-first-class,
+.theme-alpine-flight,
+.theme-arctic-frost,
+.theme-botanical-garden,
+.theme-golden-autumn,
+.theme-modern-minimalist {
+  --well-bg: rgba(15, 23, 42, 0.055);
+  --well-bg-deep: rgba(15, 23, 42, 0.085);
+  --well-border: rgba(15, 23, 42, 0.14);
+}
+
+:is(.theme-first-class, .theme-alpine-flight, .theme-arctic-frost, .theme-botanical-garden, .theme-golden-autumn, .theme-modern-minimalist)
+  :is(.bg-black\/20, .bg-black\/25, .bg-black\/30, .bg-black\/35) {
+  background-color: var(--well-bg) !important;
+}
+
+:is(.theme-first-class, .theme-alpine-flight, .theme-arctic-frost, .theme-botanical-garden, .theme-golden-autumn, .theme-modern-minimalist)
+  :is(.bg-black\/40, .bg-black\/50, .bg-black\/60) {
+  background-color: var(--well-bg-deep) !important;
+}
+
+:is(.theme-first-class, .theme-alpine-flight, .theme-arctic-frost, .theme-botanical-garden, .theme-golden-autumn, .theme-modern-minimalist)
+  :is(.border-white\/5, .border-white\/10, .border-white\/15, .border-white\/20) {
+  border-color: var(--well-border) !important;
+}
+
+:is(.theme-first-class, .theme-alpine-flight, .theme-arctic-frost, .theme-botanical-garden, .theme-golden-autumn, .theme-modern-minimalist)
+  :is(.divide-white\/5 > :not([hidden]) ~ :not([hidden]), .divide-white\/10 > :not([hidden]) ~ :not([hidden])) {
+  border-color: rgba(15, 23, 42, 0.08) !important;
+}
+
+:is(.theme-first-class, .theme-alpine-flight, .theme-arctic-frost, .theme-botanical-garden, .theme-golden-autumn, .theme-modern-minimalist)
+  :is(.text-amber-300, .text-amber-400) {
+  color: #b45309 !important;
+}
+
+:is(.theme-first-class, .theme-alpine-flight, .theme-arctic-frost, .theme-botanical-garden, .theme-golden-autumn, .theme-modern-minimalist)
+  .hover\:text-white:hover {
+  color: var(--text-main) !important;
+}
+
+:is(.theme-first-class, .theme-alpine-flight, .theme-arctic-frost, .theme-botanical-garden, .theme-golden-autumn, .theme-modern-minimalist)
+  .hover\:bg-white\/5:hover,
+:is(.theme-first-class, .theme-alpine-flight, .theme-arctic-frost, .theme-botanical-garden, .theme-golden-autumn, .theme-modern-minimalist)
+  .hover\:bg-white\/10:hover {
+  background-color: rgba(15, 23, 42, 0.07) !important;
+}
+
+
