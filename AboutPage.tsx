@@ -4,7 +4,10 @@ import {
   Sparkles, 
   Keyboard, 
   ExternalLink,
-  Globe
+  Globe,
+  User,
+  Layers,
+  Copy
 } from 'lucide-react';
 import { APP_VERSION, APP_UPDATED_DATE } from './index';
 
@@ -117,6 +120,57 @@ export const AboutPage: React.FC<AboutPageProps> = () => {
         </p>
       </div>
 
+      {/* Multi-Profile Command Feature Showcase */}
+      <div className="glass-panel rounded-3xl p-6 border border-[var(--accent)]/30 space-y-4 relative overflow-hidden bg-gradient-to-r from-[var(--bg-card)] to-[var(--bg-surface)]">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[var(--border-subtle)] pb-3">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-[var(--accent)]/15 border border-[var(--accent)]/30 flex items-center justify-center text-[var(--accent)]">
+              <User className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="text-base font-semibold text-[var(--text-main)] font-heading flex items-center gap-2">
+                Multi-Profile Pilot Command
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-400/20 text-amber-300 border border-amber-400/30">
+                  NEW in v2.1
+                </span>
+              </h2>
+              <p className="text-xs text-[var(--text-muted)]">
+                Manage multiple Airport City game accounts
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 pt-1">
+          <div className="p-4 rounded-2xl bg-black/25 border border-white/5 space-y-1.5">
+            <div className="text-xs font-semibold text-[var(--text-main)] flex items-center gap-1.5">
+              <span>✈️</span> Instant Account Switching
+            </div>
+            <p className="text-xs text-[var(--text-muted)] leading-relaxed font-normal">
+              Click your callsign in the top navigation header anytime to switch profiles in a single click. Flight records, map inventory, hangar fleet, and themes swap immediately without page reloads.
+            </p>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-black/25 border border-white/5 space-y-1.5">
+            <div className="text-xs font-semibold text-[var(--text-main)] flex items-center gap-1.5">
+              <span>🆔</span> Callsigns & In-Game Codes
+            </div>
+            <p className="text-xs text-[var(--text-muted)] leading-relaxed font-normal">
+              Assign bespoke pilot names, avatar emojis, glowing accent tags, and your authentic 9-character Airport City friend code for quick reference.
+            </p>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-black/25 border border-white/5 space-y-1.5">
+            <div className="text-xs font-semibold text-[var(--text-main)] flex items-center gap-1.5">
+              <span>💾</span> Export, Backup & Safe Reset
+            </div>
+            <p className="text-xs text-[var(--text-muted)] leading-relaxed font-normal">
+              Export individual profile JSON snapshots, download a full multi-profile master backup, or safely reset your active profile from the <strong>Data</strong> hub.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Tips & Privacy Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Tips */}
@@ -135,7 +189,7 @@ export const AboutPage: React.FC<AboutPageProps> = () => {
             </li>
             <li className="flex items-start gap-2">
               <span className="text-amber-400 font-bold">•</span>
-              <span><strong>First Class Suite</strong>: Choose from 13 bespoke airport palettes (Dark & Light) from the top-right theme picker.</span>
+              <span><strong>First Class Suite</strong>: Choose from 23 bespoke airport palettes (Dark & Light) from the top-right theme picker, saved independently per profile.</span>
             </li>
           </ul>
         </div>
@@ -146,10 +200,10 @@ export const AboutPage: React.FC<AboutPageProps> = () => {
             <ShieldCheck className="w-4 h-4 text-emerald-400" /> Offline Storage & Backups
           </h3>
           <p className="text-xs text-[var(--text-muted)] font-normal leading-relaxed">
-            ACT is 100% client-side and privacy-respecting. All flight logs, map stocks, and aircraft records are stored locally in your browser's <code className="px-1.5 py-0.5 rounded bg-black/40 font-mono text-[10px] text-white/90">localStorage</code>.
+            ACT is 100% client-side and privacy-respecting. All flight logs, map stocks, aircraft records, and profile settings are stored locally in your browser's <code className="px-1.5 py-0.5 rounded bg-black/40 font-mono text-[10px] text-white/90">localStorage</code> under the clean <code className="px-1.5 py-0.5 rounded bg-black/40 font-mono text-[10px] text-cyan-300">act_</code> namespace.
           </p>
           <p className="text-xs text-[var(--text-muted)] font-normal leading-relaxed">
-            Use the <strong className="text-[var(--text-main)]">Data</strong> tool in the top header anytime to export a full JSON backup or transfer your flight progress to another device.
+            Use the <strong className="text-[var(--text-main)]">Data</strong> tool in the top header anytime to export a single profile, download an all-profiles master backup, or restore previous JSON logs.
           </p>
         </div>
       </div>
@@ -165,9 +219,6 @@ export const AboutPage: React.FC<AboutPageProps> = () => {
               Essential knowledge bases, wikis, and reference hubs for Airport City pilots.
             </p>
           </div>
-          <span className="px-2.5 py-1 rounded-xl text-[11px] font-mono theme-badge self-start sm:self-auto">
-            {COMMUNITY_RESOURCES.length} {COMMUNITY_RESOURCES.length === 1 ? 'Resource' : 'Resources'}
-          </span>
         </div>
 
         <div className="space-y-3">

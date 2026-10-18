@@ -45,7 +45,10 @@ import {
   RefreshCw,
   Eye,
   EyeOff,
-  Info
+  Info,
+  User,
+  Settings,
+  UserCheck
 } from 'lucide-react';
 import {
   BarChart,
@@ -63,11 +66,26 @@ import { getMapDuration } from './mapTimers';
 import { AirplanesPage, AIRCRAFT_SPRITES } from './AirplanesPage';
 import { AboutPage } from './AboutPage';
 import { adjustAircraftList } from './src/aircraftData';
+import {
+  ProfileData,
+  ProfileMeta,
+  UserDataEntry,
+  loadAllProfiles,
+  saveAllProfiles,
+  getActiveProfileId,
+  setActiveProfileId as persistActiveProfileId,
+  hasLegacyData,
+  migrateLegacyData,
+  createBlankProfile,
+  generateProfileId,
+  getDefaultPrefs,
+} from './profiles';
+import { ProfileModal, MigrationModal } from './ProfileModal';
 
 // --- App Version & Maintenance Tracker ---
 // NOTE: Always update APP_UPDATED_DATE whenever making changes in the app
-export const APP_VERSION = 'Version 2.0';
-export const APP_UPDATED_DATE = 'Oct 13, 2026';
+export const APP_VERSION = 'Version 2.1';
+export const APP_UPDATED_DATE = 'Oct 18, 2026';
 
 // --- Types & Interfaces ---
 interface FlightDestination {
@@ -88,13 +106,6 @@ interface FlightDestination {
   needsMap: boolean;
   mapDuration?: string;
   lastUpdated: number;
-  isCustomList?: boolean;
-}
-
-interface UserDataEntry {
-  count: number;
-  lastUpdated: number;
-  maps?: number;
   isCustomList?: boolean;
 }
 
@@ -786,8 +797,17 @@ export const LOGO_OPTIONS: LogoOptionConfig[] = [
   }
 ];
 
-export const AeroQuest = () => {
+export const ACTracker = () => {
+  const [profiles, setProfiles] = useState<Record<string, ProfileData>>({});
+  const [activeProfileId, setActiveProfileId] = useState<string>('');
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [profileModalInitialMode, setProfileModalInitialMode] = useState<'manage' | 'create'>('manage');
+  const [showMigrationModal, setShowMigrationModal] = useState(false);
+  const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+  const [backupActiveTab, setBackupActiveTab] = useState<'profiles' | 'backup' | 'reset'>('backup');
+
   const [destinations, setDestinations] = useState<FlightDestination[]>([]);
+  const [ownedAirplanes, setOwnedAirplanes] = useState<any[]>([]);
   const [activeCategory, setActiveCategory] = useState<string>('All Destinations');
   const [selectedQuickFilters, setSelectedQuickFilters] = useState<string[]>([
     'regular',
@@ -800,40 +820,22 @@ export const AeroQuest = () => {
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStarRank, setFilterStarRank] = useState<number | null>(null);
-  const [starCountMode, setStarCountMode] = useState<'cumulative' | 'exact'>(() => {
-    const saved = localStorage.getItem('aeroquest_star_count_mode');
-    return saved === 'exact' ? 'exact' : 'cumulative';
-  });
+  const [starCountMode, setStarCountMode] = useState<'cumulative' | 'exact'>('cumulative');
 
   const toggleStarCountMode = (mode: 'cumulative' | 'exact') => {
     setStarCountMode(mode);
-    localStorage.setItem('aeroquest_star_count_mode', mode);
   };
   const [view, setView] = useState<ViewMode>('list');
-  const [density, setDensity] = useState<'compact' | 'comfortable'>(() => {
-    const saved = localStorage.getItem('aeroquest_density');
-    return saved === 'comfortable' ? 'comfortable' : 'compact';
-  });
+  const [density, setDensity] = useState<'compact' | 'comfortable'>('compact');
 
   const toggleDensity = (newDensity: 'compact' | 'comfortable') => {
     setDensity(newDensity);
-    localStorage.setItem('aeroquest_density', newDensity);
   };
 
-  const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
-    const saved = localStorage.getItem('aeroquest_sidebar_open');
-    return saved !== null ? saved === 'true' : false;
-  });
-  const [isFlightDeckHeaderOpen, setIsFlightDeckHeaderOpen] = useState(() => {
-    const saved = localStorage.getItem('aeroquest_flight_deck_header_open');
-    return saved !== null ? saved === 'true' : true;
-  });
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isFlightDeckHeaderOpen, setIsFlightDeckHeaderOpen] = useState(true);
   const toggleFlightDeckHeader = () => {
-    setIsFlightDeckHeaderOpen(prev => {
-      const next = !prev;
-      localStorage.setItem('aeroquest_flight_deck_header_open', String(next));
-      return next;
-    });
+    setIsFlightDeckHeaderOpen(prev => !prev);
   };
   const [theme, setTheme] = useState<ThemeId>('stealth');
   const [isLoaded, setIsLoaded] = useState(false);
@@ -841,12 +843,10 @@ export const AeroQuest = () => {
   const [showBackupModal, setShowBackupModal] = useState(false);
   const [showThemeModal, setShowThemeModal] = useState(false);
   const [showLogoModal, setShowLogoModal] = useState(false);
-  const [logoId, setLogoId] = useState<string>(() => {
-    return localStorage.getItem('act_logo_choice') || 'opt1';
-  });
+  const [logoId, setLogoId] = useState<string>('opt1');
+
   const handleSelectLogo = (id: string) => {
     setLogoId(id);
-    localStorage.setItem('act_logo_choice', id);
   };
   const activeLogo = LOGO_OPTIONS.find(l => l.id === logoId) || LOGO_OPTIONS[0];
   const [themeTab, setThemeTab] = useState<'all' | 'factory' | 'light' | 'dark'>('all');
@@ -864,21 +864,9 @@ export const AeroQuest = () => {
   });
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Load Saved Data
-  useEffect(() => {
-    const rawData = localStorage.getItem('aeroquest_user_data');
-    const savedData: Record<string, any> = rawData ? JSON.parse(rawData) : {};
-    const savedTheme = localStorage.getItem('aeroquest_theme_id') || 'stealth';
-    const mappedTheme = THEME_FALLBACK_MAP[savedTheme] || (THEME_CONFIGS[savedTheme] ? (savedTheme as ThemeId) : 'stealth');
-    setTheme(mappedTheme);
-
-    const savedShowMissingAlliance = localStorage.getItem('aeroquest_show_missing_alliance');
-    if (savedShowMissingAlliance !== null) setShowMissingAlliance(savedShowMissingAlliance === 'true');
-
-    const savedShowMissingAdventure = localStorage.getItem('aeroquest_show_missing_adventure');
-    if (savedShowMissingAdventure !== null) setShowMissingAdventure(savedShowMissingAdventure === 'true');
-
-    const parsed: FlightDestination[] = RAW_MASTER_LIST.split('\n')
+  // Helper to parse destinations from given user flight logs
+  const parseDestinationsFromUserData = (savedData: Record<string, any>): FlightDestination[] => {
+    return RAW_MASTER_LIST.split('\n')
       .map((line, idx) => {
         const parts = line.split('|');
         if (parts.length < 8) return null;
@@ -931,30 +919,193 @@ export const AeroQuest = () => {
         };
       })
       .filter(Boolean) as FlightDestination[];
+  };
 
-    setDestinations(parsed);
+  // Helper to apply profile state (preferences, flights, aircraft)
+  const applyProfileState = (profile: ProfileData) => {
+    const prefs = profile.prefs || getDefaultPrefs();
+    const mappedTheme = THEME_FALLBACK_MAP[prefs.themeId] || (THEME_CONFIGS[prefs.themeId as ThemeId] ? (prefs.themeId as ThemeId) : 'stealth');
+    setTheme(mappedTheme);
+    setLogoId(prefs.logoId || 'opt1');
+    setDensity(prefs.density || 'compact');
+    setStarCountMode(prefs.starCountMode || 'cumulative');
+    setIsSidebarOpen(Boolean(prefs.sidebarOpen));
+    setIsFlightDeckHeaderOpen(prefs.flightDeckHeaderOpen !== false);
+    setShowMissingAlliance(prefs.showMissingAlliance !== false);
+    setShowMissingAdventure(prefs.showMissingAdventure !== false);
+
+    setDestinations(parseDestinationsFromUserData(profile.userData || {}));
+    const loadedPlanes = profile.airplanes && Array.isArray(profile.airplanes) ? adjustAircraftList(profile.airplanes) : [];
+    setOwnedAirplanes(loadedPlanes);
+  };
+
+  // Switch Active Profile
+  const switchProfile = (targetId: string, currentProfilesMap?: Record<string, ProfileData>) => {
+    const map = currentProfilesMap || profiles;
+    const target = map[targetId];
+    if (!target) return;
+
+    setActiveProfileId(targetId);
+    persistActiveProfileId(targetId);
+    applyProfileState(target);
+    setShowProfileDropdown(false);
+  };
+
+  // Load Profiles & Saved Data on Mount
+  useEffect(() => {
+    const allProfiles = loadAllProfiles();
+    const hasProfiles = Object.keys(allProfiles).length > 0;
+
+    // Check if legacy aeroquest data exists without any profiles created yet
+    if (!hasProfiles && hasLegacyData()) {
+      setShowMigrationModal(true);
+      return;
+    }
+
+    if (!hasProfiles) {
+      // First-time clean visitor: create default profile
+      const defaultId = generateProfileId();
+      const defaultMeta: ProfileMeta = {
+        id: defaultId,
+        name: 'Commander',
+        emoji: '✈️',
+        acCode: '',
+        accentColor: '#00e5ff',
+        createdAt: Date.now(),
+      };
+      const newDefaultProfile = createBlankProfile(defaultMeta);
+      const initialMap = { [defaultId]: newDefaultProfile };
+      saveAllProfiles(initialMap);
+      persistActiveProfileId(defaultId);
+      setProfiles(initialMap);
+      setActiveProfileId(defaultId);
+      applyProfileState(newDefaultProfile);
+      setIsLoaded(true);
+      return;
+    }
+
+    // Normal profile loading
+    setProfiles(allProfiles);
+    const savedActiveId = getActiveProfileId();
+    const resolvedActiveId = savedActiveId && allProfiles[savedActiveId]
+      ? savedActiveId
+      : Object.keys(allProfiles)[0];
+
+    setActiveProfileId(resolvedActiveId);
+    persistActiveProfileId(resolvedActiveId);
+    applyProfileState(allProfiles[resolvedActiveId]);
     setIsLoaded(true);
   }, []);
 
-  // Theme & Preference Persistence
+  // Handle first-load Migration submission
+  const handleMigrateLegacy = (name: string, emoji: string, accentColor: string, acCode: string) => {
+    const migrated = migrateLegacyData(name, emoji, accentColor, acCode);
+    const newProfiles = { [migrated.meta.id]: migrated };
+    setProfiles(newProfiles);
+    setActiveProfileId(migrated.meta.id);
+    applyProfileState(migrated);
+    setShowMigrationModal(false);
+    setIsLoaded(true);
+  };
+
+  // Save / Update a Profile from Modal
+  const handleSaveProfile = (updatedProfile: ProfileData) => {
+    setProfiles(prev => {
+      const nextMap = {
+        ...prev,
+        [updatedProfile.meta.id]: updatedProfile,
+      };
+      saveAllProfiles(nextMap);
+      return nextMap;
+    });
+
+    if (updatedProfile.meta.id === activeProfileId) {
+      applyProfileState(updatedProfile);
+    }
+  };
+
+  // Delete a Profile from Modal
+  const handleDeleteProfile = (idToDelete: string) => {
+    const remainingKeys = Object.keys(profiles).filter(id => id !== idToDelete);
+    if (remainingKeys.length === 0) return; // Disallow deleting the last profile
+
+    setProfiles(prev => {
+      const nextMap = { ...prev };
+      delete nextMap[idToDelete];
+      saveAllProfiles(nextMap);
+
+      if (idToDelete === activeProfileId) {
+        const nextActiveId = remainingKeys[0];
+        setActiveProfileId(nextActiveId);
+        persistActiveProfileId(nextActiveId);
+        applyProfileState(nextMap[nextActiveId]);
+      }
+      return nextMap;
+    });
+  };
+
+  // Update airplanes in active profile
+  const handleSaveOwnedAirplanes = (updatedAirplanes: any[]) => {
+    const adjusted = adjustAircraftList(updatedAirplanes);
+    setOwnedAirplanes(adjusted);
+
+    if (activeProfileId) {
+      setProfiles(prev => {
+        if (!prev[activeProfileId]) return prev;
+        const nextMap = {
+          ...prev,
+          [activeProfileId]: {
+            ...prev[activeProfileId],
+            airplanes: adjusted,
+          },
+        };
+        saveAllProfiles(nextMap);
+        return nextMap;
+      });
+    }
+  };
+
+  // Theme & Preference Persistence into Active Profile
   useEffect(() => {
     if (isLoaded) {
-      localStorage.setItem('aeroquest_theme_id', theme);
-      localStorage.setItem('aeroquest_sidebar_open', String(isSidebarOpen));
-      localStorage.setItem('aeroquest_show_missing_alliance', String(showMissingAlliance));
-      localStorage.setItem('aeroquest_show_missing_adventure', String(showMissingAdventure));
-
       const html = document.documentElement;
       Object.keys(THEME_CONFIGS).forEach(id => html.classList.remove(`theme-${id}`));
       html.classList.add(`theme-${theme}`);
       if (THEME_CONFIGS[theme]?.isDark) html.classList.add('dark');
       else html.classList.remove('dark');
-    }
-  }, [theme, isSidebarOpen, showMissingAlliance, showMissingAdventure, isLoaded]);
 
-  // Destination Progress Persistence
+      if (activeProfileId) {
+        setProfiles(prev => {
+          if (!prev[activeProfileId]) return prev;
+          const currentProfile = prev[activeProfileId];
+          const updatedPrefs = {
+            ...(currentProfile.prefs || getDefaultPrefs()),
+            themeId: theme,
+            logoId,
+            density,
+            starCountMode,
+            sidebarOpen: isSidebarOpen,
+            flightDeckHeaderOpen: isFlightDeckHeaderOpen,
+            showMissingAlliance,
+            showMissingAdventure,
+          };
+          const nextMap = {
+            ...prev,
+            [activeProfileId]: {
+              ...currentProfile,
+              prefs: updatedPrefs,
+            },
+          };
+          saveAllProfiles(nextMap);
+          return nextMap;
+        });
+      }
+    }
+  }, [theme, logoId, density, starCountMode, isSidebarOpen, isFlightDeckHeaderOpen, showMissingAlliance, showMissingAdventure, isLoaded, activeProfileId]);
+
+  // Destination Progress Persistence into Active Profile
   useEffect(() => {
-    if (isLoaded) {
+    if (isLoaded && activeProfileId) {
       const storageObj: Record<string, UserDataEntry> = {};
       destinations.forEach(d => {
         if (d.flightsDone > 0 || (d.needsMap && (d.mapsDone || 0) > 0) || d.isCustomList) {
@@ -966,9 +1117,24 @@ export const AeroQuest = () => {
           };
         }
       });
-      localStorage.setItem('aeroquest_user_data', JSON.stringify(storageObj));
+
+      setProfiles(prev => {
+        if (!prev[activeProfileId]) return prev;
+        const nextMap = {
+          ...prev,
+          [activeProfileId]: {
+            ...prev[activeProfileId],
+            userData: storageObj,
+          },
+        };
+        saveAllProfiles(nextMap);
+        return nextMap;
+      });
     }
-  }, [destinations, isLoaded]);
+  }, [destinations, isLoaded, activeProfileId]);
+
+  // Active Profile object for UI rendering
+  const activeProfile = profiles[activeProfileId] || null;
 
   // Scroll into view on expand
   useEffect(() => {
@@ -1399,8 +1565,55 @@ export const AeroQuest = () => {
     }));
   };
 
-  // Export JSON
-  const exportToJSON = () => {
+  // Export Active Profile to JSON
+  const exportToJSON = (targetProfileId?: string) => {
+    const profId = targetProfileId || activeProfileId;
+    const profile = profiles[profId];
+    if (!profile) return;
+
+    // Build latest userData from live destinations if active profile
+    let currentUserData = profile.userData;
+    if (profId === activeProfileId) {
+      const storageObj: Record<string, any> = {};
+      destinations.forEach(d => {
+        if (d.flightsDone > 0 || (d.needsMap && (d.mapsDone || 0) > 0) || d.isCustomList) {
+          storageObj[d.destination] = {
+            count: d.flightsDone,
+            lastUpdated: d.lastUpdated,
+            ...(d.needsMap ? { maps: d.mapsDone } : {}),
+            ...(d.isCustomList ? { isCustomList: true } : {}),
+          };
+        }
+      });
+      currentUserData = storageObj;
+    }
+
+    const exportPayload = {
+      version: 2,
+      type: 'act_single_profile',
+      profile: {
+        ...profile,
+        userData: currentUserData,
+        airplanes: profId === activeProfileId ? ownedAirplanes : profile.airplanes,
+      },
+    };
+
+    const sanitizedName = (profile.meta?.name || 'profile').replace(/[^a-z0-9_-]/gi, '_').toLowerCase();
+    const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(exportPayload, null, 2));
+    const downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute('href', dataStr);
+    downloadAnchorNode.setAttribute(
+      'download',
+      `act_profile_${sanitizedName}_${new Date().toISOString().split('T')[0]}.json`
+    );
+    document.body.appendChild(downloadAnchorNode);
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+  };
+
+  // Export All Profiles to JSON
+  const exportAllProfilesToJSON = () => {
+    // Sync current active profile live state first
     const storageObj: Record<string, any> = {};
     destinations.forEach(d => {
       if (d.flightsDone > 0 || (d.needsMap && (d.mapsDone || 0) > 0) || d.isCustomList) {
@@ -1413,28 +1626,40 @@ export const AeroQuest = () => {
       }
     });
 
-    const savedAirplanes = localStorage.getItem('aeroquest_owned_airplanes_v2');
-    if (savedAirplanes) {
-      try {
-        const parsed = JSON.parse(savedAirplanes);
-        const adjusted = adjustAircraftList(parsed);
-        storageObj['airplanes'] = adjusted;
-      } catch (e) {}
-    }
+    const synchronizedProfiles = {
+      ...profiles,
+      ...(activeProfileId
+        ? {
+            [activeProfileId]: {
+              ...profiles[activeProfileId],
+              userData: storageObj,
+              airplanes: ownedAirplanes,
+            },
+          }
+        : {}),
+    };
 
-    const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(storageObj, null, 2));
+    const exportPayload = {
+      version: 2,
+      type: 'act_all_profiles',
+      exportedAt: Date.now(),
+      activeProfileId,
+      profiles: synchronizedProfiles,
+    };
+
+    const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(exportPayload, null, 2));
     const downloadAnchorNode = document.createElement('a');
     downloadAnchorNode.setAttribute('href', dataStr);
     downloadAnchorNode.setAttribute(
       'download',
-      `star_tracker_backup_${new Date().toISOString().split('T')[0]}.json`
+      `act_all_profiles_backup_${new Date().toISOString().split('T')[0]}.json`
     );
     document.body.appendChild(downloadAnchorNode);
     downloadAnchorNode.click();
     downloadAnchorNode.remove();
   };
 
-  // Import JSON
+  // Import JSON (Supports all profiles backup, single profile, or legacy format)
   const handleImportJSON = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -1442,17 +1667,67 @@ export const AeroQuest = () => {
     reader.onload = e => {
       try {
         const json = JSON.parse(e.target?.result as string) as Record<string, any>;
+
+        // Case A: Full Multi-Profile Backup
+        if (json.type === 'act_all_profiles' && json.profiles && typeof json.profiles === 'object') {
+          const importedProfiles = json.profiles as Record<string, ProfileData>;
+          saveAllProfiles(importedProfiles);
+          setProfiles(importedProfiles);
+
+          const newActiveId = json.activeProfileId && importedProfiles[json.activeProfileId]
+            ? json.activeProfileId
+            : Object.keys(importedProfiles)[0];
+
+          setActiveProfileId(newActiveId);
+          persistActiveProfileId(newActiveId);
+          applyProfileState(importedProfiles[newActiveId]);
+          setShowBackupModal(false);
+          alert(`Successfully restored all ${Object.keys(importedProfiles).length} profiles!`);
+          return;
+        }
+
+        // Case B: Single Profile Export format
+        if (json.type === 'act_single_profile' && json.profile && json.profile.meta) {
+          const importedProfile = json.profile as ProfileData;
+          // Ensure fresh unique ID if user already has a profile with the same ID
+          const targetId = profiles[importedProfile.meta.id]
+            ? generateProfileId()
+            : importedProfile.meta.id;
+
+          const finalProfile: ProfileData = {
+            ...importedProfile,
+            meta: {
+              ...importedProfile.meta,
+              id: targetId,
+            },
+          };
+
+          const nextMap = {
+            ...profiles,
+            [targetId]: finalProfile,
+          };
+          saveAllProfiles(nextMap);
+          setProfiles(nextMap);
+          switchProfile(targetId, nextMap);
+          setShowBackupModal(false);
+          alert(`Successfully imported profile "${finalProfile.meta.name}"!`);
+          return;
+        }
+
+        // Case C: Legacy single flight log backup format
         const sanitizedJson: Record<string, UserDataEntry> = {};
+        let importedAirplanes: any[] | null = null;
         Object.entries(json).forEach(([id, val]) => {
           if (id === 'airplanes') {
-            const adjusted = adjustAircraftList(Array.isArray(val) ? val : []);
-            localStorage.setItem('aeroquest_owned_airplanes_v2', JSON.stringify(adjusted));
+            importedAirplanes = adjustAircraftList(Array.isArray(val) ? val : []);
           } else if (typeof val === 'number') {
             sanitizedJson[id] = { count: val, lastUpdated: 0 };
           } else if (typeof val === 'object' && val !== null) {
             sanitizedJson[id] = val as UserDataEntry;
           }
         });
+
+        // Apply into current active profile
         setDestinations(prev =>
           prev.map(d => {
             const entry = sanitizedJson[d.destination] || sanitizedJson[d.id];
@@ -1467,8 +1742,13 @@ export const AeroQuest = () => {
               : d;
           })
         );
+
+        if (importedAirplanes) {
+          handleSaveOwnedAirplanes(importedAirplanes);
+        }
+
         setShowBackupModal(false);
-        alert('Flight data imported successfully!');
+        alert('Flight data imported successfully into active profile!');
       } catch (err) {
         alert('Error parsing JSON backup file.');
       }
@@ -1477,7 +1757,7 @@ export const AeroQuest = () => {
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
-  // Reset Data
+  // Reset Active Profile Data
   const resetAllData = () => {
     if (!showResetConfirm) {
       setShowResetConfirm(true);
@@ -1487,12 +1767,11 @@ export const AeroQuest = () => {
     setDestinations(prev =>
       prev.map(d => ({ ...d, flightsDone: 0, mapsDone: 0, lastUpdated: 0, isCustomList: false }))
     );
+    handleSaveOwnedAirplanes([]);
     setActiveCategory('All Destinations');
     setFilterAircraft('All');
     setFilterGroup('All');
     setSearchQuery('');
-    localStorage.removeItem('aeroquest_user_data');
-    localStorage.removeItem('aeroquest_owned_airplanes_v2');
     setShowResetConfirm(false);
   };
 
@@ -1623,6 +1902,115 @@ export const AeroQuest = () => {
 
             {/* Global Utility Actions (Always Static on Every Page) */}
             <div className="flex items-center justify-end gap-2 min-w-0">
+              {/* Profile Selector Dropdown */}
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setShowProfileDropdown(prev => !prev)}
+                  title="Switch or manage pilot profile"
+                  className="tactile-btn px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl glass-panel border border-[var(--border-subtle)] hover:border-[var(--border-active)] text-[var(--text-main)] transition-all flex items-center gap-2"
+                >
+                  <div
+                    className="w-5 h-5 rounded-lg flex items-center justify-center text-xs shrink-0 relative"
+                    style={{ backgroundColor: `${activeProfile?.meta.accentColor || '#00e5ff'}25` }}
+                  >
+                    <span>{activeProfile?.meta.emoji || '✈️'}</span>
+                    <span
+                      className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full border border-black/50"
+                      style={{ backgroundColor: activeProfile?.meta.accentColor || 'var(--accent)' }}
+                    />
+                  </div>
+                  <div className="flex flex-col text-left">
+                    <span className="text-xs font-semibold max-w-[90px] sm:max-w-[120px] truncate leading-tight">
+                      {activeProfile?.meta.name || 'Commander'}
+                    </span>
+                    {activeProfile?.meta.acCode && (
+                      <span className="text-[9px] font-mono text-[var(--text-muted)] tracking-wider leading-none hidden sm:inline">
+                        {activeProfile.meta.acCode}
+                      </span>
+                    )}
+                  </div>
+                  <ChevronDown className={`w-3.5 h-3.5 text-[var(--text-muted)] transition-transform duration-200 ${showProfileDropdown ? 'rotate-180' : ''}`} />
+                </button>
+
+                {/* Dropdown Menu */}
+                {showProfileDropdown && (
+                  <>
+                    <div
+                      className="fixed inset-0 z-30"
+                      onClick={() => setShowProfileDropdown(false)}
+                    />
+                    <div className="absolute right-0 mt-2 w-64 bg-[var(--bg-card)] border border-[var(--border-card)] rounded-2xl shadow-2xl p-2 z-40 animate-in fade-in zoom-in-95 duration-150">
+                      <div className="px-2.5 py-1.5 text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-wider">
+                        Switch Pilot Profile
+                      </div>
+
+                      <div className="space-y-1 max-h-48 overflow-y-auto custom-scrollbar my-1">
+                        {Object.values(profiles).map(p => {
+                          const isCurrent = p.meta.id === activeProfileId;
+                          return (
+                            <button
+                              key={p.meta.id}
+                              type="button"
+                              onClick={() => switchProfile(p.meta.id)}
+                              className={`w-full p-2 rounded-xl text-left flex items-center justify-between gap-2.5 transition-colors ${
+                                isCurrent
+                                  ? 'bg-[var(--accent)]/15 border border-[var(--accent)]/30 text-[var(--text-main)] font-semibold'
+                                  : 'hover:bg-white/5 text-[var(--text-muted)] hover:text-[var(--text-main)] border border-transparent'
+                              }`}
+                            >
+                              <div className="flex items-center gap-2.5 min-w-0">
+                                <span className="text-base shrink-0">{p.meta.emoji || '✈️'}</span>
+                                <div className="min-w-0 flex-1">
+                                  <div className="text-xs truncate text-[var(--text-main)]">
+                                    {p.meta.name}
+                                  </div>
+                                  {p.meta.acCode && (
+                                    <div className="text-[10px] font-mono text-[var(--text-muted)]">
+                                      {p.meta.acCode}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                              {isCurrent && (
+                                <Check className="w-3.5 h-3.5 text-[var(--accent)] shrink-0" />
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      <div className="pt-2 border-t border-[var(--border-subtle)] space-y-1">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowProfileDropdown(false);
+                            setProfileModalInitialMode('create');
+                            setShowProfileModal(true);
+                          }}
+                          className="w-full px-2.5 py-1.5 rounded-lg text-xs font-medium text-[var(--accent)] hover:bg-[var(--accent)]/10 flex items-center gap-2 transition-colors"
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                          New Profile
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowProfileDropdown(false);
+                            setProfileModalInitialMode('manage');
+                            setShowProfileModal(true);
+                          }}
+                          className="w-full px-2.5 py-1.5 rounded-lg text-xs font-medium text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-white/5 flex items-center gap-2 transition-colors"
+                        >
+                          <Settings className="w-3.5 h-3.5" />
+                          Manage Profiles
+                        </button>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+
               {/* Theme Picker Button */}
               <button
                 onClick={() => setShowThemeModal(true)}
@@ -1637,7 +2025,10 @@ export const AeroQuest = () => {
 
               {/* Backup & Tools Modal Button */}
               <button
-                onClick={() => setShowBackupModal(true)}
+                onClick={() => {
+                  setBackupActiveTab('backup');
+                  setShowBackupModal(true);
+                }}
                 title="Data Backup & JSON Tools"
                 className="tactile-btn p-2 sm:p-2.5 rounded-xl glass-panel border border-[var(--border-subtle)] hover:border-[var(--border-active)] text-[var(--text-main)] transition-all flex items-center gap-1.5"
               >
@@ -1818,7 +2209,12 @@ export const AeroQuest = () => {
         {/* Main Content Area */}
         <main className="flex-1 min-w-0 space-y-6">
           {/* VIEW: FLEET HANGAR */}
-          {view === 'airplanes' && <AirplanesPage />}
+          {view === 'airplanes' && (
+            <AirplanesPage
+              airplanes={ownedAirplanes}
+              onSaveAirplanes={handleSaveOwnedAirplanes}
+            />
+          )}
 
           {/* VIEW: ABOUT ACT */}
           {view === 'about' && (
@@ -3891,15 +4287,15 @@ export const AeroQuest = () => {
       {/* Backup & JSON Tools Modal */}
       {showBackupModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
-          <div className="glass-panel bg-[var(--bg-card)] p-6 rounded-3xl w-full max-w-md border border-[var(--border-card)] shadow-2xl space-y-5">
+          <div className="glass-panel bg-[var(--bg-card)] p-6 rounded-3xl w-full max-w-lg border border-[var(--border-card)] shadow-2xl space-y-5">
             <div className="flex justify-between items-center pb-3 border-b border-white/10">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl theme-badge flex items-center justify-center">
                   <Download className="w-5 h-5 theme-accent-text" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-base text-[var(--text-main)] font-heading">Data Management</h3>
-                  <p className="text-xs text-[var(--text-muted)]">Backup, restore, or reset your flight progress.</p>
+                  <h3 className="font-semibold text-base text-[var(--text-main)] font-heading">Data & Profiles Hub</h3>
+                  <p className="text-xs text-[var(--text-muted)]">Manage pilot profiles, backups, and data imports.</p>
                 </div>
               </div>
               <button onClick={() => setShowBackupModal(false)} className="p-1.5 text-gray-400 hover:text-white rounded-lg">
@@ -3907,44 +4303,216 @@ export const AeroQuest = () => {
               </button>
             </div>
 
-            <div className="space-y-3">
+            {/* Modal Tabs: Profiles | Backup | Reset */}
+            <div className="grid grid-cols-3 gap-1 p-1 bg-black/30 rounded-2xl border border-white/10">
               <button
-                onClick={exportToJSON}
-                className="tactile-btn w-full p-4 rounded-2xl bg-black/30 border border-white/10 hover:border-[var(--border-active)] flex items-center justify-between text-left group transition-all"
+                type="button"
+                onClick={() => setBackupActiveTab('profiles')}
+                className={`py-2 text-xs font-semibold rounded-xl transition-all flex items-center justify-center gap-1.5 ${
+                  backupActiveTab === 'profiles'
+                    ? 'bg-[var(--accent)] text-white shadow-md'
+                    : 'text-[var(--text-muted)] hover:text-white'
+                }`}
               >
-                <div>
-                  <div className="text-xs font-medium text-[var(--text-main)] group-hover:text-[var(--accent)]">Export Progress to JSON</div>
-                  <div className="text-[10px] text-[var(--text-muted)]">Download a timestamped snapshot of all flights & fleet</div>
-                </div>
-                <Download className="w-4 h-4 theme-accent-text" />
+                <User className="w-3.5 h-3.5" /> Profiles
               </button>
+              <button
+                type="button"
+                onClick={() => setBackupActiveTab('backup')}
+                className={`py-2 text-xs font-semibold rounded-xl transition-all flex items-center justify-center gap-1.5 ${
+                  backupActiveTab === 'backup'
+                    ? 'bg-[var(--accent)] text-white shadow-md'
+                    : 'text-[var(--text-muted)] hover:text-white'
+                }`}
+              >
+                <Download className="w-3.5 h-3.5" /> Backup & Import
+              </button>
+              <button
+                type="button"
+                onClick={() => setBackupActiveTab('reset')}
+                className={`py-2 text-xs font-semibold rounded-xl transition-all flex items-center justify-center gap-1.5 ${
+                  backupActiveTab === 'reset'
+                    ? 'bg-rose-600 text-white shadow-md'
+                    : 'text-[var(--text-muted)] hover:text-rose-400'
+                }`}
+              >
+                <Trash2 className="w-3.5 h-3.5" /> Reset
+              </button>
+            </div>
 
-              <label className="tactile-btn w-full p-4 rounded-2xl bg-black/30 border border-white/10 hover:border-[var(--border-active)] flex items-center justify-between text-left group transition-all cursor-pointer">
-                <div>
-                  <div className="text-xs font-medium text-[var(--text-main)] group-hover:text-[var(--accent)]">Import Backup JSON</div>
-                  <div className="text-[10px] text-[var(--text-muted)]">Restore your previously saved flight logs</div>
+            {/* TAB: PROFILES */}
+            {backupActiveTab === 'profiles' && (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between text-xs text-[var(--text-muted)]">
+                  <span>Current Active Profile:</span>
+                  <span className="font-semibold text-[var(--text-main)] flex items-center gap-1.5">
+                    <span>{activeProfile?.meta.emoji || '✈️'}</span>
+                    {activeProfile?.meta.name || 'Commander'}
+                  </span>
                 </div>
-                <Upload className="w-4 h-4 theme-accent-text" />
-                <input ref={fileInputRef} type="file" accept=".json" className="hidden" onChange={handleImportJSON} />
-              </label>
 
-              <div className="pt-2">
+                <div className="space-y-2 max-h-52 overflow-y-auto custom-scrollbar pr-1">
+                  {Object.values(profiles).map(p => {
+                    const isCur = p.meta.id === activeProfileId;
+                    return (
+                      <div
+                        key={p.meta.id}
+                        className={`p-3 rounded-xl border flex items-center justify-between gap-2 ${
+                          isCur
+                            ? 'bg-[var(--accent)]/15 border-[var(--accent)]/40'
+                            : 'bg-black/20 border-white/5'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <span className="text-lg shrink-0">{p.meta.emoji || '✈️'}</span>
+                          <div className="min-w-0">
+                            <div className="text-xs font-semibold text-[var(--text-main)] truncate">
+                              {p.meta.name}
+                            </div>
+                            <div className="text-[10px] text-[var(--text-muted)] font-mono">
+                              {p.meta.acCode ? `🆔 ${p.meta.acCode}` : 'No Code'}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-1.5">
+                          {!isCur ? (
+                            <button
+                              type="button"
+                              onClick={() => switchProfile(p.meta.id)}
+                              className="px-2.5 py-1 rounded-lg text-xs font-medium border border-white/10 hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors"
+                            >
+                              Switch
+                            </button>
+                          ) : (
+                            <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-[var(--accent)]/20 text-[var(--accent)] border border-[var(--accent)]/30">
+                              ACTIVE
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowBackupModal(false);
+                    setProfileModalInitialMode('manage');
+                    setShowProfileModal(true);
+                  }}
+                  className="w-full py-2.5 rounded-xl border border-white/10 hover:border-[var(--accent)] hover:text-[var(--accent)] text-xs font-medium transition-all flex items-center justify-center gap-2"
+                >
+                  <Settings className="w-3.5 h-3.5" />
+                  Full Profiles Manager (Edit, Clone, Delete)
+                </button>
+              </div>
+            )}
+
+            {/* TAB: BACKUP & IMPORT */}
+            {backupActiveTab === 'backup' && (
+              <div className="space-y-3">
+                {/* Export Active Profile */}
+                <button
+                  onClick={() => exportToJSON()}
+                  className="tactile-btn w-full p-3.5 rounded-2xl bg-black/30 border border-white/10 hover:border-[var(--border-active)] flex items-center justify-between text-left group transition-all"
+                >
+                  <div>
+                    <div className="text-xs font-semibold text-[var(--text-main)] group-hover:text-[var(--accent)]">
+                      Export Active Profile ("{activeProfile?.meta.name}")
+                    </div>
+                    <div className="text-[10px] text-[var(--text-muted)]">
+                      Save flight progress & fleet for this pilot profile only
+                    </div>
+                  </div>
+                  <Download className="w-4 h-4 theme-accent-text" />
+                </button>
+
+                {/* Export All Profiles */}
+                <button
+                  onClick={exportAllProfilesToJSON}
+                  className="tactile-btn w-full p-3.5 rounded-2xl bg-black/30 border border-white/10 hover:border-[var(--border-active)] flex items-center justify-between text-left group transition-all"
+                >
+                  <div>
+                    <div className="text-xs font-semibold text-[var(--text-main)] group-hover:text-[var(--accent)]">
+                      Export Complete Backup (All {Object.keys(profiles).length} Profiles)
+                    </div>
+                    <div className="text-[10px] text-[var(--text-muted)]">
+                      Full multi-profile snapshot including all hangars and settings
+                    </div>
+                  </div>
+                  <Download className="w-4 h-4 text-emerald-400" />
+                </button>
+
+                {/* Import JSON */}
+                <label className="tactile-btn w-full p-3.5 rounded-2xl bg-black/30 border border-white/10 hover:border-[var(--border-active)] flex items-center justify-between text-left group transition-all cursor-pointer">
+                  <div>
+                    <div className="text-xs font-semibold text-[var(--text-main)] group-hover:text-[var(--accent)]">
+                      Import Backup JSON
+                    </div>
+                    <div className="text-[10px] text-[var(--text-muted)]">
+                      Auto-detects full multi-profile backups or single profile logs
+                    </div>
+                  </div>
+                  <Upload className="w-4 h-4 theme-accent-text" />
+                  <input ref={fileInputRef} type="file" accept=".json" className="hidden" onChange={handleImportJSON} />
+                </label>
+              </div>
+            )}
+
+            {/* TAB: RESET */}
+            {backupActiveTab === 'reset' && (
+              <div className="space-y-4 pt-1">
+                <div className="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-xs text-rose-300 space-y-1">
+                  <div className="font-semibold flex items-center gap-1.5 text-rose-400">
+                    <AlertTriangle className="w-4 h-4" />
+                    Reset Active Profile Only
+                  </div>
+                  <p className="text-[11px] text-rose-300/80 leading-relaxed">
+                    This will clear all flights, map counts, and fleet aircraft for <strong>"{activeProfile?.meta.name}"</strong> only. Other profiles remain completely untouched.
+                  </p>
+                </div>
+
                 <button
                   onClick={resetAllData}
-                  className={`w-full p-3.5 rounded-2xl border text-xs font-medium transition-all flex items-center justify-center gap-2 ${
+                  className={`w-full p-3.5 rounded-2xl border text-xs font-semibold transition-all flex items-center justify-center gap-2 ${
                     showResetConfirm
-                      ? 'bg-rose-600 border-rose-700 text-white animate-pulse font-semibold'
+                      ? 'bg-rose-600 border-rose-700 text-white animate-pulse font-bold'
                       : 'bg-rose-500/10 border-rose-500/20 text-rose-400 hover:bg-rose-500/20'
                   }`}
                 >
                   <Trash2 className="w-4 h-4" />
-                  {showResetConfirm ? 'Click Again to Confirm Reset!' : 'Reset All Progress'}
+                  {showResetConfirm ? 'Click Again to Confirm Reset!' : `Reset "${activeProfile?.meta.name}" Progress`}
                 </button>
               </div>
-            </div>
+            )}
           </div>
         </div>
       )}
+
+      {/* Profile Management & Creation Modal */}
+      <ProfileModal
+        isOpen={showProfileModal}
+        onClose={() => setShowProfileModal(false)}
+        profiles={profiles}
+        activeProfileId={activeProfileId}
+        onSelectProfile={(id) => {
+          switchProfile(id);
+          setShowProfileModal(false);
+        }}
+        onSaveProfile={handleSaveProfile}
+        onDeleteProfile={handleDeleteProfile}
+        onExportProfile={(id) => exportToJSON(id)}
+        onExportAllProfiles={exportAllProfilesToJSON}
+        initialMode={profileModalInitialMode}
+      />
+
+      {/* First-Load Legacy Migration Modal */}
+      <MigrationModal
+        isOpen={showMigrationModal}
+        onMigrate={handleMigrateLegacy}
+      />
     </div>
   );
 };
@@ -3952,4 +4520,5 @@ export const AeroQuest = () => {
 const container = document.getElementById('root')!;
 const root = (window as any)._reactRoot || createRoot(container);
 (window as any)._reactRoot = root;
-root.render(<AeroQuest />);
+root.render(<ACTracker />);
+

@@ -19,8 +19,18 @@ export const AIRCRAFT_SPRITES: Record<string, string> = {
   Goldfinch: 'icons/aircraft/goldfinch.png',
 };
 
-export const AirplanesPage = () => {
-  const [ownedAirplanes, setOwnedAirplanes] = useState<AircraftInstance[]>([]);
+interface AirplanesPageProps {
+  airplanes?: AircraftInstance[];
+  onSaveAirplanes?: (airplanes: AircraftInstance[]) => void;
+}
+
+export const AirplanesPage: React.FC<AirplanesPageProps> = ({
+  airplanes: propAirplanes,
+  onSaveAirplanes: propOnSaveAirplanes,
+}) => {
+  const [internalAirplanes, setInternalAirplanes] = useState<AircraftInstance[]>([]);
+  const ownedAirplanes = propAirplanes !== undefined ? propAirplanes : internalAirplanes;
+
   const [newNickname, setNewNickname] = useState('');
   const [editingAirplane, setEditingAirplane] = useState<AircraftInstance | null>(null);
   const [editStats, setEditStats] = useState({ speed: 0, profit: 0, itemDrop: 0 });
@@ -28,22 +38,27 @@ export const AirplanesPage = () => {
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   useEffect(() => {
-    const saved = localStorage.getItem('aeroquest_owned_airplanes_v2');
+    if (propAirplanes !== undefined) return;
+    const saved = localStorage.getItem('act_owned_airplanes') || localStorage.getItem('aeroquest_owned_airplanes_v2');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
         const adjusted = adjustAircraftList(parsed);
-        setOwnedAirplanes(adjusted);
+        setInternalAirplanes(adjusted);
       } catch (e) {
-        setOwnedAirplanes([]);
+        setInternalAirplanes([]);
       }
     }
-  }, []);
+  }, [propAirplanes]);
 
   const saveAirplanes = (airplanes: AircraftInstance[]) => {
     const adjusted = adjustAircraftList(airplanes);
-    setOwnedAirplanes(adjusted);
-    localStorage.setItem('aeroquest_owned_airplanes_v2', JSON.stringify(adjusted));
+    if (propOnSaveAirplanes) {
+      propOnSaveAirplanes(adjusted);
+    } else {
+      setInternalAirplanes(adjusted);
+      localStorage.setItem('act_owned_airplanes', JSON.stringify(adjusted));
+    }
   };
 
   const detectedNewType = useMemo(() => {
