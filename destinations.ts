@@ -42,7 +42,7 @@ Thunderbird|Adventure Map Flights|Rhythm of My Heart|Hyderabad|icons/maps/ex14 a
 Thunderbird|Adventure Map Flights|Rhythm of My Heart|Kanpur|icons/maps/ex14 ancient india.png|150|250|500|1250|3750
 Thunderbird|Adventure Map Flights|Rhythm of My Heart|Kolkata|icons/maps/ex14 ancient india.png|150|250|500|1250|3750
 Thunderbird|Adventure Map Flights|Rhythm of My Heart|Mumbai|icons/maps/ex14 ancient india.png|150|250|500|1250|3750
-Eagle|Adventure Map Flights|Riddles of the Pharaohs|Cairo|icons/maps/ex14 ancient india.png|20|50|100|250|750
+Eagle|Adventure Map Flights|Riddles of the Pharaohs|Cairo|icons/maps/ex04 ancient egypt.png|20|50|100|250|750
 Eagle|Adventure Map Flights|Riddles of the Pharaohs|Excavations: Ancient Egypt|icons/maps/ex04 ancient egypt.png|20|50|100|250|750
 Eagle|Adventure Map Flights|Riddles of the Pharaohs|Heliopolis|icons/maps/ex04 ancient egypt.png|20|50|100|250|750
 Eagle|Adventure Map Flights|Riddles of the Pharaohs|Kom Ombo|icons/maps/ex04 ancient egypt.png|20|50|100|250|750
@@ -230,7 +230,7 @@ Sparrow|Event Flights|Airport City|Cary|icons/events/airportcity.png|50|400|1000
 Sparrow|Event Flights|Airport City|Hunt Valley|icons/events/airportcity.png|50|400|1000||
 Sparrow|Event Flights|Airport City|McLean|icons/events/airportcity.png|50|400|1000||
 Sparrow|Event Flights|Airport City|Southam|icons/events/airportcity.png|50|400|1000||
-Condor|Event Flights|Back To School|New Haven|icons/events/backtoschool.png|200|300|600|150|3750
+Condor|Event Flights|Back To School|New Haven|icons/events/backtoschool.png|200|300|600|1500|3750
 Eagle|Event Flights|Back To School|Edinburgh|icons/events/backtoschool.png|23|46|92|230|580
 Falcon|Event Flights|Back To School|Oxford|icons/events/backtoschool.png|100|200|400|1000|2500
 Giant|Event Flights|Back To School|Kyoto|icons/events/backtoschool.png|50|100|150|380|950
@@ -266,7 +266,7 @@ Raven|Event Flights|Dancing With Leprechauns|Cork|icons/events/dancingwiththelep
 Swift|Event Flights|Dancing With Leprechauns|Tullamore|icons/events/dancingwiththeleprechauns.png|10|20|40||
 Thunderbird|Event Flights|Dancing With Leprechauns|Kilkenny|icons/events/dancingwiththeleprechauns.png|150|250|500||
 Condor|Event Flights|Dark Skies|Oaxaca City|icons/events/darkskies.png|200|300|600||
-Eagle|Event Flights|Dark Skies|Fountainbleau|icons/events/darkskies.png|23|46|92||
+Eagle|Event Flights|Dark Skies|Fontainebleau|icons/events/darkskies.png|23|46|92||
 Falcon|Event Flights|Dark Skies|Savannah|icons/events/darkskies.png|100|200|400||
 Giant|Event Flights|Dark Skies|Portland|icons/events/darkskies.png|50|100|150||
 Hawk|Event Flights|Dark Skies|Machu-Pichu|icons/events/darkskies.png|19|38|75||
@@ -305,7 +305,7 @@ Owl|Event Flights|Easter Cheer|Ohrid|icons/events/eastercheer.png|10|20|40||
 Raven|Event Flights|Easter Cheer|Tivat|icons/events/eastercheer.png|20|39|79||
 Swift|Event Flights|Easter Cheer|Lourdes|icons/events/eastercheer.png|10|20|39||
 Thunderbird|Event Flights|Easter Cheer|Santiago de Compostela|icons/events/eastercheer.png|149|249|499||
-Swift|Event Flights|Holiday Rush|Rovaneimi|icons/events/holidayrush.png|10|20|39||
+Swift|Event Flights|Holiday Rush|Rovaniemi|icons/events/holidayrush.png|10|20|39||
 Condor|Event Flights|It Came From Outer Space|Bohol|icons/events/itcamefromouterspace.png|200|300|600||
 Eagle|Event Flights|It Came From Outer Space|Roswell|icons/events/itcamefromouterspace.png|23|46|92||
 Falcon|Event Flights|It Came From Outer Space|Nazca|icons/events/itcamefromouterspace.png|100|200|400||
@@ -359,7 +359,7 @@ Falcon|Event Flights|The Land of Opportunity|Detroit|icons/events/thelandofoppor
 Giant|Event Flights|The Land of Opportunity|Nashville|icons/events/thelandofopportunity.png|50|100|200|500|1250
 Hawk|Event Flights|The Land of Opportunity|Pittsburgh|icons/events/thelandofopportunity.png|20|40|80|200|500
 Jumbo|Event Flights|The Land of Opportunity|San Antonio|icons/events/thelandofopportunity.png|30|60|120|300|750
-Owl|Event Flights|The Land of Opportunity|Cincinatti|icons/events/thelandofopportunity.png|17|35|69|170|430
+Owl|Event Flights|The Land of Opportunity|Cincinnati|icons/events/thelandofopportunity.png|17|35|69|170|430
 Raven|Event Flights|The Land of Opportunity|Cleveland|icons/events/thelandofopportunity.png|20|40|80|200|550
 Thunderbird|Event Flights|The Land of Opportunity|Atlanta|icons/events/thelandofopportunity.png|150|250|500|1250|3130
 Crossbill|Event Flights|Time to Rock|Peak District|icons/events/timetorock.png|23|46|92||
@@ -413,7 +413,7 @@ Condor|Regular Flights|Condor Flights|Guadalajara||200|300|600|1500|4500
 Condor|Regular Flights|Condor Flights|Hainan||200|300|600|1500|4500
 Condor|Regular Flights|Condor Flights|Kansas City||200|300|600|1500|4500
 Condor|Regular Flights|Condor Flights|Karachi||200|300|600|1500|4500
-Condor|Regular Flights|Condor Flights|Kuala Lampur||200|300|600|1500|4500
+Condor|Regular Flights|Condor Flights|Kuala Lumpur||200|300|600|1500|4500
 Condor|Regular Flights|Condor Flights|Lagos||200|300|600|1500|4500
 Condor|Regular Flights|Condor Flights|Macau||200|300|600|1500|4500
 Condor|Regular Flights|Condor Flights|New Orleans||200|300|600|1500|4500
@@ -457,7 +457,7 @@ Hawk|Regular Flights|Hawk Flights|London||17|35|69|175|525
 Hawk|Regular Flights|Hawk Flights|Baikonur||19|38|75|190|575
 Hawk|Regular Flights|Hawk Flights|Aswan||19|38|75|190|575
 Hawk|Regular Flights|Hawk Flights|Corsica||19|38|75|190|575
-Hawk|Regular Flights|Hawk Flights|Los Angees||19|38|75|190|575
+Hawk|Regular Flights|Hawk Flights|Los Angeles||19|38|75|190|575
 Hawk|Regular Flights|Hawk Flights|Rome||19|38|75|190|575
 Hawk|Regular Flights|Hawk Flights|Rio||20|39|79|200|600
 Hawk|Regular Flights|Hawk Flights|Canary Islands||20|41|82|205|625

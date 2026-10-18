@@ -20,16 +20,16 @@ Event walkthroughs
 
 "what's new" page that's only visible on first load after a new update
 
-Add a "Recent Flights" dropdown to the Flight Deck and Radar pages so users can quickly jump back to flights they've recently worked on
-
-Add "Event Walkthrough" pages for past events, similar to the Map Depot format, with categories for easy navigation
+- [x] Add a "Recent Flights" quick-jump bar to the Flight Deck so users can quickly jump back to flights they've recently worked on
+- [ ] Add "Event Walkthrough" pages for past events, similar to the Map Depot format, with categories for easy navigation
 
 ### 🧭 Flight Deck & Radar
-- [ ] 
-
+- [x] Recently Flown quick-jump bar with one-click +1 counters and instant filter expansion
+- [x] Missing Maps Radar search input filter by destination, aircraft model, or mission set
 
 ### ✈️ Fleet Hangar & Aircraft
-- [ ] 
+- [x] Hangar Edit modal: Allow renaming callsigns and changing aircraft classes alongside speed, profit, and drop stats
+- [x] Word-boundary regex matching for aircraft type derivation (fixes false matches like "Bowler" -> "Owl")
 
 ### 🗺️ Map Depot & Destinations
 - [ ] Active Map Countdown Timers: Live in-app countdown widget when a map is activated, showing remaining flight window
@@ -40,6 +40,7 @@ Add "Event Walkthrough" pages for past events, similar to the Map Depot format, 
 
 ### 🛠️ UI, Themes & Quality of Life (QoL)
 - [x] More light themes (added Arctic Frost, Botanical Garden, Golden Autumn, Modern Minimalist from Theme Factory)
+- [x] Clean default theme fallback alignment (`stealth-ghost`)
 - [ ] Auto-expand rows on the stats page to show plane details when clicking the row
 - [ ] Expandable aircraft info on the hangar page (the aircraft tiles)
 - [ ] Add a button on the stats page to toggle between dark/light mode
@@ -54,6 +55,7 @@ Add "Event Walkthrough" pages for past events, similar to the Map Depot format, 
 ---
 
 ## ✅ Implemented / Done
+- [x] Data Integrity, Fleet Renaming & Flight Deck QoL Upgrades (Oct 19, 2026): Fixed destination data discrepancies and typos in `destinations.ts` (corrected New Haven 4★ threshold to 1500, Cairo icon path to `ex04 ancient egypt.png`, and corrected spellings for Rovaniemi, Los Angeles, Cincinnati, Kuala Lumpur, and Fontainebleau) with transparent backward-compatible alias migration in `index.tsx`. Deduplicated `MAPLOCATIONS.tsx` to exactly 148 map routes by removing accent duplicate `"Córdoba"`. Upgraded `aircraftData.ts` with word-boundary matching to prevent nickname false positives (e.g., Bowler/Prowler matching Owl). Upgraded Hangar Fleet Edit modal in `AirplanesPage.tsx` with callsign/nickname renaming and aircraft class selection. Fixed default theme mismatch in `index.tsx` to `'stealth-ghost'`. Activated the `missingSearch` search bar in the Missing Maps Radar view. Added interactive "Recently Flown" quick-jump chip strip with one-click `+1` increment buttons and instant filter/expansion to the Flight Deck. Cleaned unused API key injection definitions from `vite.config.ts`.
 - [x] Multi-Profile Support & v2.1 Release: Implemented complete local multi-profile architecture allowing unlimited pilot profiles with independent flight logs, fleet hangars, and cockpit UI preferences (theme, logo, density, sidebar, star mode). Added top-navigation quick switcher dropdown with active avatar, callsign, and 9-character Airport City code display, alongside a dedicated cyber flight-deck styled Profile Management modal (create, clone, edit, export, and safe two-step deletion). Added tabbed Data & Profiles Hub (Profiles | Backup & Import | Reset) supporting both single-profile and full multi-profile JSON exports/imports with auto-detecting restore. Migrated internal localStorage namespace from legacy `aeroquest_*` to clean `act_*` keys (`act_profiles`, `act_active_profile_id`), complete with an automatic first-load migration wizard that seamlessly transfers existing flight records without data loss. Renamed root component to `ACTracker`, bumped app version to `Version 2.1` across the top nav, `package.json`, and About page, and added a dedicated "Multi-Profile Pilot Command (NEW in v2.1)" showcase section to the Help & Resources page.
 - [x] Cross-Platform Linux CI & Cloudflare Pages Compatibility: Added `@rollup/rollup-linux-x64-gnu` under `optionalDependencies` in [package.json](file:///c:/Users/Alastair/ac-tracker-10/package.json) and cleaned up stale Windows platform entries in [package-lock.json](file:///c:/Users/Alastair/ac-tracker-10/package-lock.json), resolving npm issue #4828 and enabling clean automated builds on Linux runners for both GitHub Pages and Cloudflare Pages (`ac-tracker.pages.dev`).
 - [x] Event Map Star Flight Threshold Calibration: Added complete 4★ and 5★ star threshold flights in [destinations.ts](file:///c:/Users/Alastair/ac-tracker-10/destinations.ts) for Down The Rabbit Hole event destinations (Bradford, Bristol, Salisbury, Leeds, Chichester, Durham, Cheltenham, Lichfield, Wonderland, Southampton).

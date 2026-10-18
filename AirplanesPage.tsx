@@ -33,7 +33,7 @@ export const AirplanesPage: React.FC<AirplanesPageProps> = ({
 
   const [newNickname, setNewNickname] = useState('');
   const [editingAirplane, setEditingAirplane] = useState<AircraftInstance | null>(null);
-  const [editStats, setEditStats] = useState({ speed: 0, profit: 0, itemDrop: 0 });
+  const [editStats, setEditStats] = useState({ nickname: '', type: 'Swift', speed: 0, profit: 0, itemDrop: 0 });
   const [filterType, setFilterType] = useState<string>('All');
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
@@ -88,12 +88,31 @@ export const AirplanesPage: React.FC<AirplanesPageProps> = ({
 
   const startEdit = (airplane: AircraftInstance) => {
     setEditingAirplane(airplane);
-    setEditStats({ speed: airplane.speed, profit: airplane.profit, itemDrop: airplane.itemDrop });
+    setEditStats({
+      nickname: airplane.nickname,
+      type: getAircraftType(airplane),
+      speed: airplane.speed,
+      profit: airplane.profit,
+      itemDrop: airplane.itemDrop,
+    });
   };
 
   const saveEdit = () => {
     if (editingAirplane) {
-      saveAirplanes(ownedAirplanes.map(a => a.id === editingAirplane.id ? { ...a, ...editStats } : a));
+      saveAirplanes(
+        ownedAirplanes.map(a =>
+          a.id === editingAirplane.id
+            ? {
+                ...a,
+                nickname: editStats.nickname.trim() || editingAirplane.nickname,
+                type: editStats.type,
+                speed: editStats.speed,
+                profit: editStats.profit,
+                itemDrop: editStats.itemDrop,
+              }
+            : a
+        )
+      );
       setEditingAirplane(null);
     }
   };
@@ -378,6 +397,38 @@ export const AirplanesPage: React.FC<AirplanesPageProps> = ({
             </div>
 
             <div className="space-y-5 font-normal">
+              {/* Callsign & Aircraft Class Row */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-black/20 p-3 rounded-2xl border border-white/5">
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-medium text-[var(--text-muted)] uppercase tracking-wider block">
+                    Callsign / Nickname
+                  </label>
+                  <input
+                    type="text"
+                    value={editStats.nickname}
+                    onChange={(e) => setEditStats({ ...editStats, nickname: e.target.value })}
+                    placeholder="Aircraft Callsign..."
+                    className="w-full px-3 py-2 rounded-xl bg-black/40 border border-white/10 text-xs text-[var(--text-main)] placeholder:text-[var(--text-faint)] focus:outline-none focus:border-[var(--border-active)] transition-all font-mono"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-medium text-[var(--text-muted)] uppercase tracking-wider block">
+                    Aircraft Class
+                  </label>
+                  <select
+                    value={editStats.type}
+                    onChange={(e) => setEditStats({ ...editStats, type: e.target.value })}
+                    className="w-full px-3 py-2 rounded-xl bg-black/40 border border-white/10 text-xs text-[var(--text-main)] focus:outline-none focus:border-[var(--border-active)] transition-all cursor-pointer"
+                  >
+                    {OWNABLE_AIRCRAFT.map(type => (
+                      <option key={type} value={type} className="bg-slate-900 text-white">
+                        {type}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
               {/* Speed Slider */}
               <div className="space-y-2 bg-black/20 p-3 rounded-2xl border border-white/5">
                 <div className="flex justify-between items-center text-xs">

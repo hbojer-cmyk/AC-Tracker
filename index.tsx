@@ -84,8 +84,8 @@ import { ProfileModal, MigrationModal } from './ProfileModal';
 
 // --- App Version & Maintenance Tracker ---
 // NOTE: Always update APP_UPDATED_DATE whenever making changes in the app
-export const APP_VERSION = 'Version 2.1';
-export const APP_UPDATED_DATE = 'Oct 18, 2026';
+export const APP_VERSION = 'Version 2.1.1';
+export const APP_UPDATED_DATE = 'Oct 19, 2026';
 
 // --- Types & Interfaces ---
 interface FlightDestination {
@@ -837,7 +837,7 @@ export const ACTracker = () => {
   const toggleFlightDeckHeader = () => {
     setIsFlightDeckHeaderOpen(prev => !prev);
   };
-  const [theme, setTheme] = useState<ThemeId>('stealth');
+  const [theme, setTheme] = useState<ThemeId>('stealth-ghost');
   const [isLoaded, setIsLoaded] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [showBackupModal, setShowBackupModal] = useState(false);
@@ -882,7 +882,14 @@ export const ACTracker = () => {
         const star5Req = s5 && parseInt(s5) > 0 ? parseInt(s5) : undefined;
         const maxStars = star5Req ? 5 : star4Req ? 4 : 3;
 
-        const entry = savedData[dest] || savedData[id];
+        const LEGACY_DEST_ALIASES: Record<string, string> = {
+          'Rovaniemi': 'Rovaneimi',
+          'Los Angeles': 'Los Angees',
+          'Cincinnati': 'Cincinatti',
+          'Kuala Lumpur': 'Kuala Lampur',
+          'Fontainebleau': 'Fountainbleau',
+        };
+        const entry = savedData[dest] || (LEGACY_DEST_ALIASES[dest] ? savedData[LEGACY_DEST_ALIASES[dest]] : undefined) || savedData[id];
         let flightsDone = 0;
         let mapsDone = 0;
         let lastUpdated = 0;
@@ -924,7 +931,7 @@ export const ACTracker = () => {
   // Helper to apply profile state (preferences, flights, aircraft)
   const applyProfileState = (profile: ProfileData) => {
     const prefs = profile.prefs || getDefaultPrefs();
-    const mappedTheme = THEME_FALLBACK_MAP[prefs.themeId] || (THEME_CONFIGS[prefs.themeId as ThemeId] ? (prefs.themeId as ThemeId) : 'stealth');
+    const mappedTheme = THEME_FALLBACK_MAP[prefs.themeId] || (THEME_CONFIGS[prefs.themeId as ThemeId] ? (prefs.themeId as ThemeId) : 'stealth-ghost');
     setTheme(mappedTheme);
     setLogoId(prefs.logoId || 'opt1');
     setDensity(prefs.density || 'compact');
@@ -1522,6 +1529,13 @@ export const ACTracker = () => {
     return sortedAndFilteredDestinations.reduce((acc, d) => acc + (d.flightsDone || 0), 0);
   }, [sortedAndFilteredDestinations]);
 
+  const recentDestinations = useMemo(() => {
+    return destinations
+      .filter(d => (d.lastUpdated || 0) > 0)
+      .sort((a, b) => (b.lastUpdated || 0) - (a.lastUpdated || 0))
+      .slice(0, 6);
+  }, [destinations]);
+
   // Handlers
   const handleStarRankClick = (star: number) => {
     setFilterStarRank(prev => (prev === star ? null : star));
@@ -1956,7 +1970,7 @@ export const ACTracker = () => {
                       </div>
 
                       <div className="space-y-1 max-h-48 overflow-y-auto custom-scrollbar my-1">
-                        {Object.values(profiles).map(p => {
+                        {(Object.values(profiles) as ProfileData[]).map(p => {
                           const isCurrent = p.meta.id === activeProfileId;
                           return (
                             <button
@@ -2397,7 +2411,25 @@ export const ACTracker = () => {
                       Routes requiring maps where you currently have 0 inventory and incomplete stars.
                     </p>
                   </div>
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <div className="relative">
+                      <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
+                      <input
+                        type="text"
+                        value={missingSearch}
+                        onChange={e => setMissingSearch(e.target.value)}
+                        placeholder="Search missing..."
+                        className="pl-8 pr-7 py-1 rounded-xl bg-black/30 border border-white/10 text-xs text-[var(--text-main)] placeholder:text-[var(--text-faint)] focus:outline-none focus:border-[var(--border-active)] w-40 sm:w-48 font-normal transition-all"
+                      />
+                      {missingSearch && (
+                        <button
+                          onClick={() => setMissingSearch('')}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-white p-0.5"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      )}
+                    </div>
                     <label className="flex items-center gap-2 text-xs font-normal text-[var(--text-muted)] cursor-pointer">
                       <input
                         type="checkbox"
@@ -2426,6 +2458,14 @@ export const ACTracker = () => {
                     .filter(d => {
                       if (!showMissingAlliance && d.category.includes('Alliance')) return false;
                       if (!showMissingAdventure && d.category.includes('Adventure')) return false;
+                      if (
+                        missingSearch.trim() &&
+                        !d.destination.toLowerCase().includes(missingSearch.toLowerCase()) &&
+                        !d.aircraft.toLowerCase().includes(missingSearch.toLowerCase()) &&
+                        !d.group.toLowerCase().includes(missingSearch.toLowerCase())
+                      ) {
+                        return false;
+                      }
                       return true;
                     })
                     .map(dest => (
@@ -2786,6 +2826,52 @@ export const ACTracker = () => {
                   <span>Bookmarks ({destinations.filter(d => d.isCustomList).length})</span>
                 </button>
               </div>
+
+              {/* Recently Flown Quick-Jump Bar */}
+              {recentDestinations.length > 0 && (
+                <div className="glass-panel rounded-2xl p-2 sm:p-2.5 border border-[var(--border-card)] flex flex-wrap items-center gap-1.5 animate-in fade-in duration-200">
+                  <div className="flex items-center gap-1.5 px-2 py-1 text-xs font-medium text-[var(--text-muted)] shrink-0">
+                    <Clock className="w-3 h-3 theme-accent-text" />
+                    <span>Recent:</span>
+                  </div>
+                  {recentDestinations.map(dest => {
+                    const starDetails = getCurrentStarDetails(dest);
+                    const isAce = starDetails.isMastered;
+                    return (
+                      <div
+                        key={dest.id}
+                        className="flex items-center bg-black/30 hover:bg-white/10 border border-white/5 hover:border-[var(--border-active)] rounded-xl px-2 py-1 text-xs transition-all group"
+                      >
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSearchQuery(dest.destination);
+                            setExpandedRowId(dest.id);
+                          }}
+                          className="font-medium text-[var(--text-main)] hover:text-white flex items-center gap-1.5 mr-1.5"
+                          title={`Click to filter & expand ${dest.destination}`}
+                        >
+                          <span className="truncate max-w-[120px] sm:max-w-[160px]">{dest.destination}</span>
+                          <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-md bg-white/5 text-[var(--text-muted)]">
+                            {isAce ? '★ ACE' : `${starDetails.tierDone}/${starDetails.tierTarget}`}
+                          </span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            updateFlightCount(dest.id, dest.flightsDone + 1);
+                          }}
+                          className="px-1.5 py-0.5 rounded-lg theme-btn-accent text-[10px] font-bold hover:scale-105 active:scale-95 transition-all shadow-sm"
+                          title={`Quick +1 flight to ${dest.destination} (Now: ${dest.flightsDone})`}
+                        >
+                          +1
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
 
               {/* Filter & Command Controller Bar */}
               <div className="glass-panel rounded-2xl p-2.5 sm:p-3 border border-[var(--border-card)] space-y-2">
@@ -4362,7 +4448,7 @@ export const ACTracker = () => {
                 </div>
 
                 <div className="space-y-2 max-h-52 overflow-y-auto custom-scrollbar pr-1">
-                  {Object.values(profiles).map(p => {
+                  {(Object.values(profiles) as ProfileData[]).map(p => {
                     const isCur = p.meta.id === activeProfileId;
                     return (
                       <div

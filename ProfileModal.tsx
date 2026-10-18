@@ -64,7 +64,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
 
   if (!isOpen) return null;
 
-  const profileList = Object.values(profiles);
+  const profileList = Object.values(profiles) as ProfileData[];
 
   const startCreate = () => {
     setFormName('');

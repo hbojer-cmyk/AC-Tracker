@@ -46,7 +46,6 @@ export const MAP_LOCATIONS = [
   "Bilbao",
   "Seville",
   "Granada",
-  "Córdoba",
   "Alicante",
   "Novosibirsk",
   "Bangalore",
