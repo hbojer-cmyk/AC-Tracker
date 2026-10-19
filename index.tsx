@@ -33,6 +33,7 @@ import {
   PanelLeftOpen,
   PanelLeft,
   Compass,
+  Calendar,
   Sparkles,
   Sliders,
   Filter,
@@ -65,6 +66,8 @@ import { MAP_LOCATIONS } from './MAPLOCATIONS';
 import { getMapDuration } from './mapTimers';
 import { AirplanesPage, AIRCRAFT_SPRITES } from './AirplanesPage';
 import { AboutPage } from './AboutPage';
+import { EventsPage } from './EventsPage';
+import { ACTIVE_EVENT_CONFIG } from './src/data/eventsData';
 import { adjustAircraftList } from './src/aircraftData';
 import {
   ProfileData,
@@ -84,7 +87,7 @@ import { ProfileModal, MigrationModal } from './ProfileModal';
 
 // --- App Version & Maintenance Tracker ---
 // NOTE: Always update APP_UPDATED_DATE whenever making changes in the app
-export const APP_VERSION = 'Version 2.1.2';
+export const APP_VERSION = 'Version 2.2.1';
 export const APP_UPDATED_DATE = 'Oct 19, 2026';
 
 // --- Types & Interfaces ---
@@ -124,7 +127,7 @@ type SortField =
 
 type SortDirection = 'asc' | 'desc';
 
-type ViewMode = 'list' | 'grid' | 'maps' | 'airplanes' | 'stats' | 'about';
+type ViewMode = 'list' | 'grid' | 'maps' | 'airplanes' | 'stats' | 'events' | 'about';
 
 export type ThemeId =
   | 'mach-blue'
@@ -1556,16 +1559,39 @@ export const ACTracker = () => {
       .slice(0, 6);
   }, [destinations]);
 
+  // Active Event status calculation
+  const activeEventInfo = useMemo(() => {
+    if (!ACTIVE_EVENT_CONFIG || !ACTIVE_EVENT_CONFIG.eventName) return null;
+    const todayStr = new Date().toISOString().split('T')[0];
+    const isDateActive =
+      (!ACTIVE_EVENT_CONFIG.startDate || todayStr >= ACTIVE_EVENT_CONFIG.startDate) &&
+      (!ACTIVE_EVENT_CONFIG.endDate || todayStr <= ACTIVE_EVENT_CONFIG.endDate);
+
+    if (!isDateActive) return null;
+
+    let daysRemaining: number | null = null;
+    if (ACTIVE_EVENT_CONFIG.endDate) {
+      const endD = new Date(ACTIVE_EVENT_CONFIG.endDate + 'T23:59:59');
+      const diffMs = endD.getTime() - Date.now();
+      daysRemaining = Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
+    }
+
+    return {
+      ...ACTIVE_EVENT_CONFIG,
+      daysRemaining,
+    };
+  }, []);
+
   // Handlers
   const handleStarRankClick = (star: number) => {
     setFilterStarRank(prev => (prev === star ? null : star));
-    if (view === 'stats' || view === 'airplanes' || view === 'maps' || view === 'about') {
+    if (view === 'stats' || view === 'airplanes' || view === 'maps' || view === 'events' || view === 'about') {
       setView('list');
     }
   };
 
   const handleCategoryClick = (cat: string) => {
-    if (view === 'stats' || view === 'airplanes' || view === 'maps' || view === 'about') {
+    if (view === 'stats' || view === 'airplanes' || view === 'maps' || view === 'events' || view === 'about') {
       setView('list');
     }
     setActiveCategory(cat);
@@ -1578,7 +1604,7 @@ export const ACTracker = () => {
   };
 
   const handleSubItemClick = (cat: string, item: string) => {
-    if (view === 'stats' || view === 'airplanes' || view === 'maps' || view === 'about') {
+    if (view === 'stats' || view === 'airplanes' || view === 'maps' || view === 'events' || view === 'about') {
       setView('list');
     }
     setActiveCategory(cat);
@@ -1597,6 +1623,16 @@ export const ACTracker = () => {
       field,
       direction: prev.field === field && prev.direction === 'asc' ? 'desc' : 'asc',
     }));
+  };
+
+  // Navigate to Flights and filter for an event
+  const handleFilterForEvent = (eventKeyword: string) => {
+    setView('list');
+    setActiveCategory('Event Flights');
+    setHideEventDestinations(false);
+    setFilterAircraft('All');
+    setFilterGroup(eventKeyword);
+    setSearchQuery('');
   };
 
   // Export Active Profile to JSON
@@ -1940,6 +1976,17 @@ export const ACTracker = () => {
                 </button>
 
                 <button
+                  onClick={() => setView('events')}
+                  className={`tactile-btn px-3.5 py-1.5 rounded-xl text-xs font-medium flex items-center gap-2 transition-all ${
+                    view === 'events'
+                      ? 'theme-btn-accent font-semibold shadow-md'
+                      : 'text-[var(--text-muted)] hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  <Calendar className="w-4 h-4" /> Events
+                </button>
+
+                <button
                   onClick={() => setView('about')}
                   className={`tactile-btn px-3.5 py-1.5 rounded-xl text-xs font-medium flex items-center gap-2 transition-all ${
                     view === 'about'
@@ -2135,6 +2182,14 @@ export const ACTracker = () => {
             <BarChart3 className="w-3.5 h-3.5" /> Stats
           </button>
           <button
+            onClick={() => setView('events')}
+            className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap flex items-center gap-1.5 ${
+              view === 'events' ? 'theme-btn-accent font-semibold shadow-sm' : 'text-[var(--text-muted)] hover:bg-white/5'
+            }`}
+          >
+            <Calendar className="w-3.5 h-3.5" /> Events
+          </button>
+          <button
             onClick={() => setView('about')}
             className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap flex items-center gap-1.5 ${
               view === 'about' ? 'theme-btn-accent font-semibold shadow-sm' : 'text-[var(--text-muted)] hover:bg-white/5'
@@ -2276,6 +2331,13 @@ export const ACTracker = () => {
               onOpenWhatsNew={() => setShowWhatsNewModal(true)}
               activeLogoId={logoId}
               onSelectLogo={handleSelectLogo}
+            />
+          )}
+
+          {/* VIEW: EVENTS CALENDAR */}
+          {view === 'events' && (
+            <EventsPage
+              onNavigateToFlightsWithEvent={handleFilterForEvent}
             />
           )}
 
@@ -2815,6 +2877,86 @@ export const ACTracker = () => {
                     <span>Expand Header</span>
                     <ChevronDown className="w-3.5 h-3.5" />
                   </button>
+                </div>
+              )}
+
+              {/* Current Event Cyber Flight-Deck Banner */}
+              {activeEventInfo && (
+                <div className="bg-slate-900/80 backdrop-blur-md border border-cyan-500/30 rounded-2xl p-4 sm:p-5 shadow-xl relative overflow-hidden transition-all hover:border-cyan-500/50">
+                  <div
+                    className="absolute -right-8 -top-8 w-40 h-40 rounded-full blur-2xl pointer-events-none opacity-20 bg-cyan-400"
+                  />
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
+                    <div className="flex items-center gap-3.5 min-w-0">
+                      {/* Pulsing radar indicator */}
+                      <div className="relative flex items-center justify-center shrink-0 w-10 h-10 rounded-xl bg-cyan-500/15 border border-cyan-500/30">
+                        <span className="absolute w-3 h-3 rounded-full bg-cyan-400 animate-ping opacity-75" />
+                        <span className="relative w-2.5 h-2.5 rounded-full bg-cyan-300 shadow-[0_0_8px_#00e5ff]" />
+                      </div>
+
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-cyan-400 px-2 py-0.5 rounded-md bg-cyan-950/80 border border-cyan-800/40">
+                            Active Live Event
+                          </span>
+                          {activeEventInfo.daysRemaining !== null && (
+                            <span className="text-xs font-mono font-semibold text-amber-300">
+                              ⏱️ {activeEventInfo.daysRemaining === 0 ? 'Ending Today (Final Hours)' : activeEventInfo.daysRemaining === 1 ? '1 day remaining (Ending Today)' : `${activeEventInfo.daysRemaining} days remaining`}
+                            </span>
+                          )}
+                          {activeEventInfo.endDate && (
+                            <span className="text-[11px] font-mono text-[var(--text-muted)] hidden md:inline">
+                              (ends {activeEventInfo.endDate})
+                            </span>
+                          )}
+                        </div>
+                        <h2 className="text-base sm:text-lg font-bold text-white font-heading mt-0.5 truncate flex items-center gap-2">
+                          Current Event: <span className="text-cyan-300">{activeEventInfo.eventName}</span>
+                        </h2>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2.5 shrink-0 flex-wrap sm:flex-nowrap">
+                      {/* Toggle / Filter Button */}
+                      {activeCategory === 'Event Flights' && filterGroup === activeEventInfo.filterKeyword ? (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setActiveCategory('All Destinations');
+                            setFilterGroup('All');
+                            setFilterAircraft('All');
+                          }}
+                          className="tactile-btn px-3.5 py-1.5 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-400/40 text-cyan-200 text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                          <span>Clear Filter / Show All</span>
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => handleFilterForEvent(activeEventInfo.filterKeyword)}
+                          className="tactile-btn px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-xs font-bold flex items-center gap-1.5 transition-all shadow-md shadow-cyan-500/20"
+                        >
+                          <Compass className="w-3.5 h-3.5" />
+                          <span>Show Event Flights</span>
+                        </button>
+                      )}
+
+                      {/* Wiki Link */}
+                      {activeEventInfo.wikiUrl && (
+                        <a
+                          href={activeEventInfo.wikiUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="tactile-btn px-3 py-1.5 rounded-xl border border-white/10 hover:border-cyan-500/30 bg-black/30 hover:bg-white/10 text-xs font-medium text-[var(--text-muted)] hover:text-white flex items-center gap-1.5 transition-all"
+                          title="Open Event Wiki Guide"
+                        >
+                          <span>Wiki Guide</span>
+                          <ExternalLink className="w-3 h-3 opacity-70" />
+                        </a>
+                      )}
+                    </div>
+                  </div>
                 </div>
               )}
 
@@ -4699,52 +4841,52 @@ export const ACTracker = () => {
               {/* Feature 1 */}
               <div className="p-4 rounded-2xl bg-black/20 border border-white/5 space-y-2">
                 <div className="flex items-center gap-2">
-                  <span className="text-base">⚡</span>
+                  <span className="text-base">📅</span>
                   <h4 className="text-xs font-semibold text-[var(--text-main)] font-heading">
-                    Recent Flights Quick-Command Bar
+                    12-Month Event Calendar
                   </h4>
                 </div>
                 <p className="text-xs text-[var(--text-muted)] leading-relaxed">
-                  Instant +1 flight increment and 1-click smooth row jump for your 6 most recently flown routes. Includes route filter auto-reset and a dismiss button.
+                  Browse the comprehensive 12-month event schedule with thematic banners, walkthrough Wiki guides, and 1-click "View Event Flights" routing.
                 </p>
               </div>
 
               {/* Feature 2 */}
               <div className="p-4 rounded-2xl bg-black/20 border border-white/5 space-y-2">
                 <div className="flex items-center gap-2">
-                  <span className="text-base">☀️</span>
+                  <span className="text-base">📡</span>
                   <h4 className="text-xs font-semibold text-[var(--text-main)] font-heading">
-                    True Daylight & Theme Factory Polish
+                    Active Event Cockpit Banner
                   </h4>
                 </div>
                 <p className="text-xs text-[var(--text-muted)] leading-relaxed">
-                  High-contrast recessed avionics wells across all 6 Light/Daylight themes (Botanical Garden, Arctic Frost, First Class Suite, Alpine Snow, Golden Autumn, Modern Minimalist).
+                  Live flight-deck telemetry banner showing the active in-game event, pulsing radar indicator, remaining days countdown, and instant filter toggling.
                 </p>
               </div>
 
               {/* Feature 3 */}
               <div className="p-4 rounded-2xl bg-black/20 border border-white/5 space-y-2">
                 <div className="flex items-center gap-2">
-                  <span className="text-base">✈️</span>
+                  <span className="text-base">⭐</span>
                   <h4 className="text-xs font-semibold text-[var(--text-main)] font-heading">
-                    Hangar Callsign & Class Editor
+                    Star Count Discrepancy Guidance
                   </h4>
                 </div>
                 <p className="text-xs text-[var(--text-muted)] leading-relaxed">
-                  Rename aircraft callsigns and switch aircraft classes directly from the Hangar Edit modal, with smart word-boundary type detection to prevent nickname false positives.
+                  New About page guidance explaining why pilot star counts diverge from in-game totals after limited-time events end, with tips on logging flight numbers.
                 </p>
               </div>
 
               {/* Feature 4 */}
               <div className="p-4 rounded-2xl bg-black/20 border border-white/5 space-y-2">
                 <div className="flex items-center gap-2">
-                  <span className="text-base">🗺️</span>
+                  <span className="text-base">⚡</span>
                   <h4 className="text-xs font-semibold text-[var(--text-main)] font-heading">
-                    Missing Maps Radar Search & Data Fixes
+                    Flight Deck & Theme Upgrades
                   </h4>
                 </div>
                 <p className="text-xs text-[var(--text-muted)] leading-relaxed">
-                  Instant search filter in Missing Maps Radar, plus calibrated star requirements for New Haven, Cairo, and Rovaniemi with backward-compatible legacy migrations.
+                  Recent flights quick-jump bar with +1 increment, high-contrast daylight theme normalization, and installable offline-ready PWA support.
                 </p>
               </div>
             </div>

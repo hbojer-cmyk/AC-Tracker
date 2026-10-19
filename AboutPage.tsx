@@ -279,6 +279,26 @@ export const AboutPage: React.FC<AboutPageProps> = ({
           ))}
         </div>
       </div>
+
+      {/* Star Count FAQ Block */}
+      <div className="bg-slate-900/50 border border-cyan-500/30 rounded-xl p-6 space-y-3 relative overflow-hidden backdrop-blur-md">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center text-cyan-400 shrink-0">
+            <Sparkles className="w-5 h-5" />
+          </div>
+          <div>
+            <h2 className="text-base font-semibold text-[var(--text-main)] font-heading">
+              Why is my star count wrong?
+            </h2>
+            <p className="text-xs text-[var(--text-muted)]">
+              Important guidance regarding seasonal and limited-time event destinations
+            </p>
+          </div>
+        </div>
+        <p className="text-xs sm:text-sm text-[var(--text-muted)] leading-relaxed font-normal pt-1">
+          Because you don't have access to the flight numbers from the event destinations outside of the event duration, you have no way of knowing those numbers and cannot accurately input them into AC-Tracker. Please note that it's important to note down all the flight numbers from the event before the event timer runs out.
+        </p>
+      </div>
     </div>
   );
 };
