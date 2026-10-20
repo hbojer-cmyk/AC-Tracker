@@ -88,7 +88,7 @@ import { ProfileModal, MigrationModal } from './ProfileModal';
 // --- App Version & Maintenance Tracker ---
 // NOTE: Always update APP_UPDATED_DATE whenever making changes in the app
 export const APP_VERSION = 'Version 2.2.1';
-export const APP_UPDATED_DATE = 'Oct 19, 2026';
+export const APP_UPDATED_DATE = 'Oct 20, 2026';
 
 // --- Types & Interfaces ---
 interface FlightDestination {
