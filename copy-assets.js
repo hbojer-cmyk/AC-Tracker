@@ -1,6 +1,13 @@
 import fs from 'fs';
 import path from 'path';
 
+// Clean up legacy singular 'dist/icon' duplicate if present
+const legacyIconDir = path.resolve('dist', 'icon');
+if (fs.existsSync(legacyIconDir)) {
+  fs.rmSync(legacyIconDir, { recursive: true, force: true });
+  console.log('Removed legacy dist/icon duplicate directory');
+}
+
 // Primary consolidated graphics folder
 const srcDir = path.resolve('icons');
 if (fs.existsSync(srcDir)) {
@@ -8,11 +15,6 @@ if (fs.existsSync(srcDir)) {
   const destIconsDir = path.resolve('dist', 'icons');
   fs.cpSync(srcDir, destIconsDir, { recursive: true });
   console.log('Successfully copied icons to dist/icons');
-
-  // Also mirror to dist/icon for seamless singular/plural path compatibility
-  const destIconDir = path.resolve('dist', 'icon');
-  fs.cpSync(srcDir, destIconDir, { recursive: true });
-  console.log('Successfully copied icons to dist/icon (compatibility mirror)');
 } else {
   console.warn('Warning: icons directory does not exist!');
 }
