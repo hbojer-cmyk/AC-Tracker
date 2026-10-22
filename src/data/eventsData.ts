@@ -1,17 +1,19 @@
 export interface ActiveEventConfig {
   eventName: string;
   startDate: string; // YYYY-MM-DD
-  endDate: string;   // YYYY-MM-DD
+  endDate: string;   // YYYY-MM-DD or ISO timestamp
+  endDateDisplay?: string; // Optional user-friendly display date e.g. "Nov 3, 2026"
   wikiUrl: string;
   filterKeyword: string; // Used to filter flights on the main Flights page
 }
 
 export const ACTIVE_EVENT_CONFIG: ActiveEventConfig = {
-  eventName: "Down the Rabbit Hole",
-  startDate: "2026-10-06",
-  endDate: "2026-10-19",
-  wikiUrl: "https://www.airportcitygame.com/wiki/down-the-rabbit-hole/",
-  filterKeyword: "Down The Rabbit Hole"
+  eventName: "Dark Skies",
+  startDate: "2026-10-22",
+  endDate: "2026-11-02T20:31:00Z",
+  endDateDisplay: "Nov 3, 2026",
+  wikiUrl: "https://www.airportcitygame.com/wiki/dark-skies/",
+  filterKeyword: "Dark Skies"
 };
 
 export interface CalendarEventItem {

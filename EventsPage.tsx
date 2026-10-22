@@ -1,6 +1,6 @@
 import React from 'react';
 import { ExternalLink, ArrowRight, Info } from 'lucide-react';
-import { EVENTS_CALENDAR, MonthCalendarData } from './src/data/eventsData';
+import { EVENTS_CALENDAR, ACTIVE_EVENT_CONFIG, MonthCalendarData } from './src/data/eventsData';
 
 interface EventsPageProps {
   onNavigateToFlightsWithEvent?: (eventKeyword: string) => void;
@@ -78,58 +78,83 @@ export const EventsPage: React.FC<EventsPageProps> = ({
               {/* Events List for Month */}
               <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between space-y-3.5">
                 <div className="space-y-3">
-                  {month.events.map((evt, idx) => (
-                    <div
-                      key={idx}
-                      className="event-sub-card p-3.5 rounded-2xl flex flex-col space-y-2.5 shadow-sm"
-                    >
-                      {/* Title & Wiki Link Icon at top-right */}
-                      <div className="flex items-start justify-between gap-2">
-                        <span className="event-title text-sm tracking-tight font-bold">
-                          {evt.title}
-                        </span>
-                        <a
-                          href={evt.wikiUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="p-1 rounded-lg text-slate-500 hover:text-[var(--border-active)] dark:text-slate-400 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-white/10 transition-all shrink-0"
-                          title="Open Wiki Walkthrough"
-                        >
-                          <ExternalLink className="w-3.5 h-3.5" />
-                        </a>
-                      </div>
+                  {month.events.map((evt, idx) => {
+                    const isLiveActive = Boolean(
+                      ACTIVE_EVENT_CONFIG?.eventName &&
+                      (evt.filterKeyword === ACTIVE_EVENT_CONFIG.filterKeyword ||
+                        evt.title.toLowerCase() === ACTIVE_EVENT_CONFIG.eventName.toLowerCase())
+                    );
 
-                      <p className="event-desc text-xs leading-relaxed font-normal">
-                        {evt.description}
-                      </p>
-
-                      {/* Clean and theme-adaptive metadata pills */}
-                      {evt.badges && evt.badges.length > 0 && (
-                        <div className="flex flex-wrap gap-1.5 pt-0.5">
-                          {evt.badges.map((b, bIdx) => (
-                            <span
-                              key={bIdx}
-                              className="event-pill px-2.5 py-0.5 rounded-md text-[10px] font-mono"
-                            >
-                              {b}
+                    return (
+                      <div
+                        key={idx}
+                        className={`event-sub-card p-3.5 rounded-2xl flex flex-col space-y-2.5 shadow-sm transition-all ${
+                          isLiveActive
+                            ? 'border border-cyan-500/50 shadow-[0_0_15px_rgba(6,182,212,0.15)] bg-cyan-500/5'
+                            : ''
+                        }`}
+                      >
+                        {/* Title & Wiki Link Icon at top-right */}
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="event-title text-sm tracking-tight font-bold">
+                              {evt.title}
                             </span>
-                          ))}
+                            {isLiveActive && (
+                              <span className="inline-flex items-center gap-1.5 text-[10px] font-mono font-bold uppercase tracking-wider text-cyan-600 dark:text-cyan-300 px-2 py-0.5 rounded-full bg-cyan-100/90 dark:bg-cyan-950/90 border border-cyan-400/50 shadow-sm">
+                                <span className="relative flex h-2 w-2">
+                                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+                                  <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
+                                </span>
+                                Active Now
+                              </span>
+                            )}
+                          </div>
+                          <a
+                            href={evt.wikiUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="p-1 rounded-lg text-slate-500 hover:text-[var(--border-active)] dark:text-slate-400 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-white/10 transition-all shrink-0"
+                            title="Open Wiki Walkthrough"
+                          >
+                            <ExternalLink className="w-3.5 h-3.5" />
+                          </a>
                         </div>
-                      )}
 
-                      {/* View Event Flights Action Button */}
-                      <div className="pt-1 flex justify-end">
-                        <button
-                          type="button"
-                          onClick={() => onNavigateToFlightsWithEvent?.(evt.filterKeyword || evt.title)}
-                          className="tactile-btn text-xs font-semibold event-action-btn px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-all shadow-sm group/btn"
-                        >
-                          <span>View Event Flights</span>
-                          <ArrowRight className="w-3 h-3 group-hover/btn:translate-x-0.5 transition-transform" />
-                        </button>
+                        <p className="event-desc text-xs leading-relaxed font-normal">
+                          {evt.description}
+                        </p>
+
+                        {/* Clean and theme-adaptive metadata pills */}
+                        {evt.badges && evt.badges.length > 0 && (
+                          <div className="flex flex-wrap gap-1.5 pt-0.5">
+                            {evt.badges.map((b, bIdx) => (
+                              <span
+                                key={bIdx}
+                                className="event-pill px-2.5 py-0.5 rounded-md text-[10px] font-mono"
+                              >
+                                {b}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* View Event Flights Action Button */}
+                        <div className="pt-1 flex justify-end">
+                          <button
+                            type="button"
+                            onClick={() => onNavigateToFlightsWithEvent?.(evt.filterKeyword || evt.title)}
+                            className={`tactile-btn text-xs font-semibold event-action-btn px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-all shadow-sm group/btn ${
+                              isLiveActive ? 'ring-1 ring-cyan-500/40' : ''
+                            }`}
+                          >
+                            <span>{isLiveActive ? 'View Active Event Flights' : 'View Event Flights'}</span>
+                            <ArrowRight className="w-3 h-3 group-hover/btn:translate-x-0.5 transition-transform" />
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             </div>

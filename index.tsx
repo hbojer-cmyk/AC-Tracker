@@ -1566,28 +1566,54 @@ export const ACTracker = () => {
       .slice(0, 6);
   }, [destinations]);
 
+  // Real-time minute tick for live event countdown
+  const [nowTick, setNowTick] = useState<number>(() => Date.now());
+  useEffect(() => {
+    const timer = setInterval(() => setNowTick(Date.now()), 60000);
+    return () => clearInterval(timer);
+  }, []);
+
   // Active Event status calculation
   const activeEventInfo = useMemo(() => {
     if (!ACTIVE_EVENT_CONFIG || !ACTIVE_EVENT_CONFIG.eventName) return null;
-    const todayStr = new Date().toISOString().split('T')[0];
-    const isDateActive =
-      (!ACTIVE_EVENT_CONFIG.startDate || todayStr >= ACTIVE_EVENT_CONFIG.startDate) &&
-      (!ACTIVE_EVENT_CONFIG.endDate || todayStr <= ACTIVE_EVENT_CONFIG.endDate);
+    const now = nowTick;
+    const endD = ACTIVE_EVENT_CONFIG.endDate.includes('T')
+      ? new Date(ACTIVE_EVENT_CONFIG.endDate)
+      : new Date(ACTIVE_EVENT_CONFIG.endDate + 'T23:59:59');
+    const startD = new Date(
+      ACTIVE_EVENT_CONFIG.startDate.includes('T')
+        ? ACTIVE_EVENT_CONFIG.startDate
+        : ACTIVE_EVENT_CONFIG.startDate + 'T00:00:00'
+    );
 
-    if (!isDateActive) return null;
+    if (now < startD.getTime() || now > endD.getTime()) return null;
 
-    let daysRemaining: number | null = null;
-    if (ACTIVE_EVENT_CONFIG.endDate) {
-      const endD = new Date(ACTIVE_EVENT_CONFIG.endDate + 'T23:59:59');
-      const diffMs = endD.getTime() - Date.now();
-      daysRemaining = Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
+    const diffMs = Math.max(0, endD.getTime() - now);
+    const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const daysRemaining = Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
+
+    let timeRemainingStr = '';
+    if (days > 0) {
+      timeRemainingStr = `${days}d ${hours}h remaining`;
+    } else if (hours > 0) {
+      const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+      timeRemainingStr = `${hours}h ${minutes}m remaining`;
+    } else {
+      timeRemainingStr = 'Ending Today (Final Hours)';
     }
+
+    const displayEndDate =
+      ACTIVE_EVENT_CONFIG.endDateDisplay ||
+      endD.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
 
     return {
       ...ACTIVE_EVENT_CONFIG,
       daysRemaining,
+      timeRemainingStr,
+      displayEndDate,
     };
-  }, []);
+  }, [nowTick]);
 
   // Automatic Daily Star History Snapshot
   useEffect(() => {
@@ -1596,7 +1622,18 @@ export const ACTracker = () => {
     const todayStr = getLocalDateString();
     let eventTag: string | undefined = undefined;
     if (ACTIVE_EVENT_CONFIG && ACTIVE_EVENT_CONFIG.startDate && ACTIVE_EVENT_CONFIG.endDate) {
-      if (todayStr >= ACTIVE_EVENT_CONFIG.startDate && todayStr <= ACTIVE_EVENT_CONFIG.endDate) {
+      const now = Date.now();
+      const startD = new Date(
+        ACTIVE_EVENT_CONFIG.startDate.includes('T')
+          ? ACTIVE_EVENT_CONFIG.startDate
+          : ACTIVE_EVENT_CONFIG.startDate + 'T00:00:00'
+      );
+      const endD = new Date(
+        ACTIVE_EVENT_CONFIG.endDate.includes('T')
+          ? ACTIVE_EVENT_CONFIG.endDate
+          : ACTIVE_EVENT_CONFIG.endDate + 'T23:59:59'
+      );
+      if (now >= startD.getTime() && now <= endD.getTime()) {
         eventTag = ACTIVE_EVENT_CONFIG.eventName;
       }
     }
@@ -2842,14 +2879,18 @@ export const ACTracker = () => {
                           <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-cyan-400 px-2 py-0.5 rounded-md bg-cyan-950/80 border border-cyan-800/40">
                             Active Live Event
                           </span>
-                          {activeEventInfo.daysRemaining !== null && (
+                          {activeEventInfo.timeRemainingStr ? (
+                            <span className="text-xs font-mono font-semibold text-amber-300">
+                              ⏱️ {activeEventInfo.timeRemainingStr}
+                            </span>
+                          ) : activeEventInfo.daysRemaining !== null ? (
                             <span className="text-xs font-mono font-semibold text-amber-300">
                               ⏱️ {activeEventInfo.daysRemaining === 0 ? 'Ending Today (Final Hours)' : activeEventInfo.daysRemaining === 1 ? '1 day remaining (Ending Today)' : `${activeEventInfo.daysRemaining} days remaining`}
                             </span>
-                          )}
-                          {activeEventInfo.endDate && (
+                          ) : null}
+                          {activeEventInfo.displayEndDate && (
                             <span className="text-[11px] font-mono text-[var(--text-muted)] hidden md:inline">
-                              (ends {activeEventInfo.endDate})
+                              (ends {activeEventInfo.displayEndDate})
                             </span>
                           )}
                         </div>
