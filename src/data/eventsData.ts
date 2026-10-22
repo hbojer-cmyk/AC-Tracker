@@ -12,7 +12,7 @@ export const ACTIVE_EVENT_CONFIG: ActiveEventConfig = {
   startDate: "2026-10-22",
   endDate: "2026-11-02T20:31:00Z",
   endDateDisplay: "Nov 3, 2026",
-  wikiUrl: "https://www.airportcitygame.com/wiki/dark-skies/",
+  wikiUrl: "https://www.airportcitygame.com/wiki/dark_skies/",
   filterKeyword: "Dark Skies"
 };
 
@@ -306,7 +306,7 @@ export const EVENTS_CALENDAR: MonthCalendarData[] = [
       },
       {
         title: "Dark Skies",
-        wikiUrl: "https://www.airportcitygame.com/wiki/dark-skies/",
+        wikiUrl: "https://www.airportcitygame.com/wiki/dark_skies/",
         description: "Spooky Halloween night missions dodging thunderstorm phantoms, haunted towers, and carved jack-o'-lanterns.",
         badges: ["Halloween", "Spooky", "9 Routes"],
         filterKeyword: "Dark Skies"
