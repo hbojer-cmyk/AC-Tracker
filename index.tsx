@@ -67,12 +67,16 @@ import { getMapDuration } from './mapTimers';
 import { AirplanesPage, AIRCRAFT_SPRITES } from './AirplanesPage';
 import { AboutPage } from './AboutPage';
 import { EventsPage } from './EventsPage';
+import { StatsPage } from './StatsPage';
 import { ACTIVE_EVENT_CONFIG } from './src/data/eventsData';
 import { adjustAircraftList } from './src/aircraftData';
 import {
   ProfileData,
   ProfileMeta,
   UserDataEntry,
+  StarHistoryEntry,
+  StarSyncOffsets,
+  DEFAULT_STAR_SYNC_OFFSETS,
   loadAllProfiles,
   saveAllProfiles,
   getActiveProfileId,
@@ -83,35 +87,22 @@ import {
   generateProfileId,
   getDefaultPrefs,
 } from './profiles';
+import {
+  FlightDestination,
+  GAME_STAR_RANKS,
+  getMaxStars,
+  getStars,
+  getNextStarInfo,
+  getLocalDateString,
+} from './flightUtils';
 import { ProfileModal, MigrationModal } from './ProfileModal';
 
 // --- App Version & Maintenance Tracker ---
 // NOTE: Always update APP_UPDATED_DATE whenever making changes in the app
-export const APP_VERSION = 'Version 2.2.1';
-export const APP_UPDATED_DATE = 'Oct 20, 2026';
+export const APP_VERSION = 'Version 2.3';
+export const APP_UPDATED_DATE = 'Oct 22, 2026';
 
 // --- Types & Interfaces ---
-interface FlightDestination {
-  id: string;
-  aircraft: string;
-  category: string;
-  group: string;
-  destination: string;
-  icon?: string;
-  star1Req: number;
-  star2Req: number;
-  star3Req: number;
-  star4Req?: number;
-  star5Req?: number;
-  maxStars: number;
-  flightsDone: number;
-  mapsDone?: number;
-  needsMap: boolean;
-  mapDuration?: string;
-  lastUpdated: number;
-  isCustomList?: boolean;
-}
-
 type SortField =
   | 'destination'
   | 'aircraft'
@@ -541,22 +532,6 @@ const CATEGORY_ICONS: Record<string, string> = {
   'Event Flights': 'icons/event_icon.png',
 };
 
-const getMaxStars = (d: { star4Req?: number; star5Req?: number; maxStars?: number }) => {
-  if (d.maxStars) return d.maxStars;
-  if (d.star5Req && d.star5Req > 0) return 5;
-  if (d.star4Req && d.star4Req > 0) return 4;
-  return 3;
-};
-
-const getStars = (done: number, s1: number, s2: number, s3: number, s4?: number, s5?: number) => {
-  if (s5 && s5 > 0 && done >= s5) return 5;
-  if (s4 && s4 > 0 && done >= s4) return 4;
-  if (done >= s3) return 3;
-  if (done >= s2) return 2;
-  if (done >= s1) return 1;
-  return 0;
-};
-
 const STAR_RANKS = [
   { star: 1, name: 'Specialist', short: 'Spec' },
   { star: 2, name: 'Master', short: 'Mast' },
@@ -564,39 +539,6 @@ const STAR_RANKS = [
   { star: 4, name: 'Captain', short: 'Capt' },
   { star: 5, name: 'Ace', short: 'Ace' },
 ];
-
-const GAME_STAR_RANKS = [
-  { star: 5, name: 'Ace', key: 'ace' as const },
-  { star: 4, name: 'Captain', key: 'captain' as const },
-  { star: 3, name: 'Expert', key: 'expert' as const },
-  { star: 2, name: 'Master', key: 'master' as const },
-  { star: 1, name: 'Specialist', key: 'specialist' as const },
-];
-
-const getNextStarInfo = (d: FlightDestination) => {
-  const reqs: { req: number; star: number; rank: string }[] = [
-    { req: d.star1Req, star: 1, rank: 'Specialist' },
-    { req: d.star2Req, star: 2, rank: 'Master' },
-    { req: d.star3Req, star: 3, rank: 'Expert' },
-  ];
-  if (d.star4Req && d.star4Req > 0) reqs.push({ req: d.star4Req, star: 4, rank: 'Captain' });
-  if (d.star5Req && d.star5Req > 0) reqs.push({ req: d.star5Req, star: 5, rank: 'Ace' });
-
-  for (const item of reqs) {
-    if (d.flightsDone < item.req) {
-      return {
-        nextReq: item.req,
-        nextStar: item.star,
-        rank: item.rank,
-        needed: item.req - d.flightsDone,
-      };
-    }
-  }
-  const maxReq = reqs[reqs.length - 1].req;
-  const maxStar = reqs[reqs.length - 1].star;
-  const maxRank = reqs[reqs.length - 1].rank;
-  return { nextReq: maxReq, nextStar: maxStar, rank: maxRank, needed: 0 };
-};
 
 interface CurrentStarDetails {
   currentStar: number;
@@ -811,6 +753,7 @@ export const ACTracker = () => {
 
   const [destinations, setDestinations] = useState<FlightDestination[]>([]);
   const [ownedAirplanes, setOwnedAirplanes] = useState<any[]>([]);
+  const [starHistory, setStarHistory] = useState<StarHistoryEntry[]>([]);
   const [activeCategory, setActiveCategory] = useState<string>('All Destinations');
   const [selectedQuickFilters, setSelectedQuickFilters] = useState<string[]>([
     'regular',
@@ -823,9 +766,10 @@ export const ACTracker = () => {
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStarRank, setFilterStarRank] = useState<number | null>(null);
-  const [starCountMode, setStarCountMode] = useState<'cumulative' | 'exact'>('cumulative');
+  const [starCountMode, setStarCountMode] = useState<'cumulative' | 'exact' | 'offset'>('cumulative');
+  const [starOffsets, setStarOffsets] = useState<StarSyncOffsets>(DEFAULT_STAR_SYNC_OFFSETS);
 
-  const toggleStarCountMode = (mode: 'cumulative' | 'exact') => {
+  const toggleStarCountMode = (mode: 'cumulative' | 'exact' | 'offset') => {
     setStarCountMode(mode);
   };
   const [view, setView] = useState<ViewMode>('list');
@@ -857,8 +801,32 @@ export const ACTracker = () => {
   const [expandedRowId, setExpandedRowId] = useState<string | null>(null);
   const [showOnlyMaps, setShowOnlyMaps] = useState(false);
   const [hide3Star, setHide3Star] = useState(false);
-  const [hideZeroMaps, setHideZeroMaps] = useState(false);
-  const [hideEventDestinations, setHideEventDestinations] = useState(false);
+  const [hideZeroMaps, setHideZeroMaps] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('act_hide_zero_maps') === 'true';
+    } catch {
+      return false;
+    }
+  });
+  const [hideEventDestinations, setHideEventDestinations] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('act_hide_event_destinations') === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('act_hide_zero_maps', String(hideZeroMaps));
+    } catch {}
+  }, [hideZeroMaps]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('act_hide_event_destinations', String(hideEventDestinations));
+    } catch {}
+  }, [hideEventDestinations]);
   const [missingSearch, setMissingSearch] = useState('');
   const [showMissingAlliance, setShowMissingAlliance] = useState(true);
   const [showMissingAdventure, setShowMissingAdventure] = useState(true);
@@ -948,6 +916,31 @@ export const ACTracker = () => {
     setDestinations(parseDestinationsFromUserData(profile.userData || {}));
     const loadedPlanes = profile.airplanes && Array.isArray(profile.airplanes) ? adjustAircraftList(profile.airplanes) : [];
     setOwnedAirplanes(loadedPlanes);
+    setStarHistory(profile.starHistory || []);
+    setStarOffsets(
+      profile.starOffsets
+        ? { ...DEFAULT_STAR_SYNC_OFFSETS, ...profile.starOffsets }
+        : { ...DEFAULT_STAR_SYNC_OFFSETS }
+    );
+  };
+
+  // Helper to update star offsets for the active profile
+  const handleUpdateStarOffsets = (newOffsets: StarSyncOffsets) => {
+    setStarOffsets(newOffsets);
+    if (activeProfileId) {
+      setProfiles(prev => {
+        if (!prev[activeProfileId]) return prev;
+        const nextMap = {
+          ...prev,
+          [activeProfileId]: {
+            ...prev[activeProfileId],
+            starOffsets: newOffsets,
+          },
+        };
+        saveAllProfiles(nextMap);
+        return nextMap;
+      });
+    }
   };
 
   // Switch Active Profile
@@ -1347,12 +1340,26 @@ export const ACTracker = () => {
     };
   }, [destinations]);
 
-  const globalStars = useMemo(() => {
+  const trackedGlobalStars = useMemo(() => {
     return destinations.reduce(
       (acc, d) => acc + getStars(d.flightsDone, d.star1Req, d.star2Req, d.star3Req, d.star4Req, d.star5Req),
       0
     );
   }, [destinations]);
+
+  const totalOffsetStars = useMemo(() => {
+    return (
+      (starOffsets.ace || 0) +
+      (starOffsets.captain || 0) +
+      (starOffsets.expert || 0) +
+      (starOffsets.master || 0) +
+      (starOffsets.specialist || 0)
+    );
+  }, [starOffsets]);
+
+  const globalStars = useMemo(() => {
+    return trackedGlobalStars + totalOffsetStars;
+  }, [trackedGlobalStars, totalOffsetStars]);
 
   const maxGlobalStars = useMemo(() => {
     return destinations.reduce((acc, d) => acc + getMaxStars(d), 0);
@@ -1582,6 +1589,81 @@ export const ACTracker = () => {
     };
   }, []);
 
+  // Automatic Daily Star History Snapshot
+  useEffect(() => {
+    if (!isLoaded || !activeProfileId) return;
+
+    const todayStr = getLocalDateString();
+    let eventTag: string | undefined = undefined;
+    if (ACTIVE_EVENT_CONFIG && ACTIVE_EVENT_CONFIG.startDate && ACTIVE_EVENT_CONFIG.endDate) {
+      if (todayStr >= ACTIVE_EVENT_CONFIG.startDate && todayStr <= ACTIVE_EVENT_CONFIG.endDate) {
+        eventTag = ACTIVE_EVENT_CONFIG.eventName;
+      }
+    }
+
+    setStarHistory(prev => {
+      const todayIdx = prev.findIndex(item => item.date === todayStr);
+      let updated: StarHistoryEntry[];
+
+      if (todayIdx >= 0) {
+        const existing = prev[todayIdx];
+        if (existing.stars === globalStars && existing.totalFlights === totalFlightsAll) {
+          return prev;
+        }
+        updated = [...prev];
+        updated[todayIdx] = {
+          ...existing,
+          stars: globalStars,
+          totalFlights: totalFlightsAll,
+          ...(eventTag ? { eventTag: existing.eventTag || eventTag } : {}),
+        };
+      } else {
+        const newEntry: StarHistoryEntry = {
+          date: todayStr,
+          stars: globalStars,
+          totalFlights: totalFlightsAll,
+          ...(eventTag ? { eventTag } : {}),
+        };
+        updated = [...prev, newEntry].sort((a, b) => a.date.localeCompare(b.date));
+      }
+
+      // Persist into active profile
+      setProfiles(currentProfiles => {
+        if (!currentProfiles[activeProfileId]) return currentProfiles;
+        const nextMap = {
+          ...currentProfiles,
+          [activeProfileId]: {
+            ...currentProfiles[activeProfileId],
+            starHistory: updated,
+          },
+        };
+        saveAllProfiles(nextMap);
+        return nextMap;
+      });
+
+      return updated;
+    });
+  }, [globalStars, totalFlightsAll, isLoaded, activeProfileId]);
+
+  const handleUpdateStarHistory = (newHistory: StarHistoryEntry[]) => {
+    const sorted = [...newHistory].sort((a, b) => a.date.localeCompare(b.date));
+    setStarHistory(sorted);
+    if (activeProfileId) {
+      setProfiles(prev => {
+        if (!prev[activeProfileId]) return prev;
+        const nextMap = {
+          ...prev,
+          [activeProfileId]: {
+            ...prev[activeProfileId],
+            starHistory: sorted,
+          },
+        };
+        saveAllProfiles(nextMap);
+        return nextMap;
+      });
+    }
+  };
+
   // Handlers
   const handleStarRankClick = (star: number) => {
     setFilterStarRank(prev => (prev === star ? null : star));
@@ -1665,6 +1747,8 @@ export const ACTracker = () => {
         ...profile,
         userData: currentUserData,
         airplanes: profId === activeProfileId ? ownedAirplanes : profile.airplanes,
+        starHistory: profId === activeProfileId ? starHistory : (profile.starHistory || []),
+        starOffsets: profId === activeProfileId ? starOffsets : (profile.starOffsets || DEFAULT_STAR_SYNC_OFFSETS),
       },
     };
 
@@ -1704,6 +1788,8 @@ export const ACTracker = () => {
               ...profiles[activeProfileId],
               userData: storageObj,
               airplanes: ownedAirplanes,
+              starHistory,
+              starOffsets,
             },
           }
         : {}),
@@ -1766,6 +1852,9 @@ export const ACTracker = () => {
 
           const finalProfile: ProfileData = {
             ...importedProfile,
+            starOffsets: importedProfile.starOffsets
+              ? { ...DEFAULT_STAR_SYNC_OFFSETS, ...importedProfile.starOffsets }
+              : { ...DEFAULT_STAR_SYNC_OFFSETS },
             meta: {
               ...importedProfile.meta,
               id: targetId,
@@ -1817,6 +1906,20 @@ export const ACTracker = () => {
           handleSaveOwnedAirplanes(importedAirplanes);
         }
 
+        if (Array.isArray(json.starHistory)) {
+          handleUpdateStarHistory(json.starHistory);
+        }
+
+        if (json.starOffsets && typeof json.starOffsets === 'object') {
+          handleUpdateStarOffsets({
+            ace: Number(json.starOffsets.ace) || 0,
+            captain: Number(json.starOffsets.captain) || 0,
+            expert: Number(json.starOffsets.expert) || 0,
+            master: Number(json.starOffsets.master) || 0,
+            specialist: Number(json.starOffsets.specialist) || 0,
+          });
+        }
+
         setShowBackupModal(false);
         alert('Flight data imported successfully into active profile!');
       } catch (err) {
@@ -1838,6 +1941,7 @@ export const ACTracker = () => {
       prev.map(d => ({ ...d, flightsDone: 0, mapsDone: 0, lastUpdated: 0, isCustomList: false }))
     );
     handleSaveOwnedAirplanes([]);
+    handleUpdateStarOffsets({ ...DEFAULT_STAR_SYNC_OFFSETS });
     setActiveCategory('All Destinations');
     setFilterAircraft('All');
     setFilterGroup('All');
@@ -1921,7 +2025,7 @@ export const ACTracker = () => {
             <div className="hidden md:flex items-center justify-center gap-3 shrink-0">
               <div
                 className="px-4 py-2 rounded-2xl bg-black/35 border border-amber-500/35 shadow-inner flex items-center gap-2.5 select-none"
-                title="Total Stars Earned"
+                title={`Total Stars Earned: ${globalStars.toLocaleString()}${totalOffsetStars > 0 ? ` (${trackedGlobalStars.toLocaleString()} tracked + ${totalOffsetStars.toLocaleString()} manual sync offset)` : ''}`}
               >
                 <Star className="w-6 h-6 text-amber-400 fill-amber-400 drop-shadow-md" />
                 <span className="font-heading font-bold text-xl text-amber-300 tracking-tight leading-none">
@@ -2152,7 +2256,7 @@ export const ACTracker = () => {
           </button>
           <div
             className="px-2.5 py-1 rounded-xl text-xs font-mono font-bold whitespace-nowrap flex items-center gap-1 bg-amber-500/20 text-amber-300 border border-amber-500/30 select-none"
-            title="Total Stars"
+            title={`Total Stars: ${globalStars.toLocaleString()}${totalOffsetStars > 0 ? ` (+${totalOffsetStars.toLocaleString()} manual sync)` : ''}`}
           >
             <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
             {globalStars.toLocaleString()}
@@ -2613,195 +2717,34 @@ export const ACTracker = () => {
 
           {/* VIEW: PILOT ANALYTICS & STATS */}
           {view === 'stats' && (
-            <div className="space-y-6 animate-in fade-in duration-300">
-              {/* Analytics Header */}
-              <div className="glass-panel rounded-3xl p-6 sm:p-8 relative overflow-hidden border border-[var(--border-card)] shadow-xl">
-                <div
-                  className="absolute -right-10 -bottom-10 w-64 h-64 rounded-full blur-3xl pointer-events-none opacity-20"
-                  style={{ backgroundColor: 'var(--accent)' }}
-                />
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
-                  <div className="flex items-center gap-5 sm:gap-6">
-                    <div className="w-28 h-28 sm:w-36 sm:h-36 rounded-3xl theme-badge flex items-center justify-center shadow-2xl shrink-0 p-1 sm:p-1.5 border border-white/10 group">
-                      <img src="icons/deck-stars-3d.png" alt="Statistics" className="w-full h-full object-contain drop-shadow-2xl group-hover:scale-110 transition-transform duration-300" />
-                    </div>
-                    <div>
-                      <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-[var(--text-main)] font-heading">
-                        Statistics
-                      </h1>
-                      <p className="text-xs sm:text-sm text-[var(--text-muted)] mt-1 font-normal">
-                        Track total flight progression, star milestones, and progress across all categories
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="bg-black/20 p-4 rounded-2xl border border-white/5 text-center shrink-0 flex flex-col justify-center">
-                    <div className="text-3xl font-heading font-semibold text-amber-300">
-                      {globalStars.toLocaleString()}
-                      <span className="text-sm font-mono text-[var(--text-muted)]"> / {maxGlobalStars.toLocaleString()}</span>
-                    </div>
-                    <div className="text-xs font-mono font-medium text-amber-400 mt-1">
-                      {globalPercentage}% Global Progress
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Flight Progress / Star Ranks Panel (Game HUD Replica) */}
-              <div className="glass-panel rounded-3xl p-5 sm:p-7 border border-[var(--border-card)] shadow-xl relative overflow-hidden space-y-4">
-                <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-white/5">
-                  <div className="flex items-center gap-2.5">
-                    <img src="icons/star-icon.png" alt="Star Ranks" className="w-5 h-5 object-contain drop-shadow" />
-                    <div>
-                      <h3 className="text-xs sm:text-sm font-semibold uppercase tracking-wider text-[var(--text-main)] font-heading">
-                        Flight Progress Ranks
-                      </h3>
-                      <p className="text-[11px] text-[var(--text-muted)] mt-0.5">
-                        {starCountMode === 'cumulative'
-                          ? 'Cumulative destinations reaching each milestone tier (In-Game HUD format)'
-                          : 'Destinations currently at each exact star level'}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Mode Toggle: In-Game Milestones vs Exact Tier */}
-                  <div className="flex items-center bg-black/40 p-0.5 rounded-xl border border-white/10 text-xs font-mono shrink-0">
-                    <button
-                      onClick={() => toggleStarCountMode('cumulative')}
-                      className={`px-3 py-1 rounded-lg transition-all ${
-                        starCountMode === 'cumulative'
-                          ? 'theme-btn-accent font-semibold shadow-sm text-white'
-                          : 'text-[var(--text-muted)] hover:text-white'
-                      }`}
-                      title="Cumulative milestones (matches the in-game Flight Progress popup)"
-                    >
-                      In-Game Milestones
-                    </button>
-                    <button
-                      onClick={() => toggleStarCountMode('exact')}
-                      className={`px-3 py-1 rounded-lg transition-all ${
-                        starCountMode === 'exact'
-                          ? 'theme-btn-accent font-semibold shadow-sm text-white'
-                          : 'text-[var(--text-muted)] hover:text-white'
-                      }`}
-                      title="Exact current star tier breakdown"
-                    >
-                      Exact Tier
-                    </button>
-                  </div>
-                </div>
-
-                {/* The 5 Stacked Star Rank Rows (Ace 5★ down to Specialist 1★) */}
-                <div className="space-y-1.5 sm:space-y-2">
-                  {GAME_STAR_RANKS.map(rank => {
-                    const count =
-                      starCountMode === 'cumulative'
-                        ? starCounts.cumulative[rank.key]
-                        : starCounts.exact[rank.key];
-                    const isFiltered = filterStarRank === rank.star;
-
-                    return (
-                      <div
-                        key={rank.star}
-                        onClick={() => handleStarRankClick(rank.star)}
-                        className={`py-2.5 sm:py-3 px-3 sm:px-4 rounded-2xl flex items-center justify-between transition-all duration-150 cursor-pointer group select-none border ${
-                          isFiltered
-                            ? 'bg-amber-500/15 border-amber-500/40 shadow-sm'
-                            : 'hover:bg-white/5 border-transparent'
-                        }`}
-                        title={`Click to view ${starCountMode === 'cumulative' ? `≥ ${rank.star}★` : `${rank.star}★`} ${rank.name} routes in Flights table`}
-                      >
-                        {/* Stars (left-aligned, 3D golden game stars) */}
-                        <div className="flex items-center gap-1 shrink-0">
-                          {Array.from({ length: rank.star }).map((_, i) => (
-                            <img
-                              key={i}
-                              src="icons/star-icon.png"
-                              alt="★"
-                              className="w-5 h-5 sm:w-6 sm:h-6 object-contain drop-shadow select-none pointer-events-none group-hover:scale-105 transition-transform"
-                            />
-                          ))}
-                        </div>
-
-                        {/* Rank Name (cascading staircase right after the stars) */}
-                        <span className="font-heading font-medium sm:font-semibold text-base sm:text-lg text-[var(--text-main)] ml-2.5 sm:ml-4 shrink-0 tracking-tight">
-                          {rank.name}
-                        </span>
-
-                        {/* Hatched Runway-Style Leader Line (Game HUD replica) */}
-                        <div
-                          className="flex-1 min-w-[20px] mx-3 sm:mx-4 h-2 rounded-sm opacity-30 group-hover:opacity-65 transition-opacity"
-                          style={{
-                            background:
-                              'repeating-linear-gradient(65deg, currentColor 0px, currentColor 6px, transparent 6px, transparent 10px)',
-                          }}
-                        />
-
-                        {/* Count (right-aligned, tabular numbers) */}
-                        <div className="flex items-center gap-2 shrink-0">
-                          <span className="font-heading font-semibold text-lg sm:text-xl text-[var(--text-main)] tabular-nums group-hover:text-amber-300 transition-colors">
-                            {count.toLocaleString()}
-                          </span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Category Breakdown Table */}
-              <div className="glass-panel rounded-3xl p-6 border border-[var(--border-card)] space-y-4">
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] flex items-center gap-2">
-                  <BarChart3 className="w-4 h-4 theme-accent-text" /> Progress by Category
-                </h3>
-                <div className="divide-y divide-white/5">
-                  {categories.map(cat => {
-                    const stats = categoryStarsMap[cat];
-                    if (!stats || stats.max === 0) return null;
-                    const pct = Math.round((stats.earned / stats.max) * 100);
-                    return (
-                      <div
-                        key={cat}
-                        onClick={() => handleCategoryClick(cat)}
-                        className="py-3.5 flex items-center justify-between gap-4 hover:bg-white/5 px-3 rounded-xl transition-all cursor-pointer group"
-                      >
-                        <div className="flex items-center gap-3.5 min-w-0">
-                          {CATEGORY_ICONS[cat] ? (
-                            <img src={CATEGORY_ICONS[cat]} alt={cat} className="w-10 h-10 sm:w-11 sm:h-11 object-contain shrink-0 drop-shadow" />
-                          ) : (
-                            <Navigation className="w-8 h-8 theme-accent-text shrink-0" />
-                          )}
-                          <div className="min-w-0">
-                            <div className="text-sm sm:text-base font-semibold text-[var(--text-main)] truncate group-hover:text-[var(--accent)] transition-colors">
-                              {cat}
-                            </div>
-                            <div className="text-xs sm:text-sm font-mono text-[var(--text-muted)] mt-0.5 flex items-center gap-1.5">
-                              <span className="font-bold text-amber-300 text-sm sm:text-base">{stats.earned.toLocaleString()}</span>
-                              <span className="opacity-40 font-normal">/</span>
-                              <span className="font-semibold text-[var(--text-main)] text-sm sm:text-base">{stats.max.toLocaleString()}</span>
-                              <span className="text-xs text-[var(--text-muted)] font-sans ml-0.5">Stars Earned</span>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-4 shrink-0">
-                          <div className="w-28 sm:w-44 h-2.5 bg-black/40 rounded-full overflow-hidden hidden sm:block">
-                            <div
-                              className="h-full theme-progress-fill rounded-full"
-                              style={{ width: `${pct}%` }}
-                            />
-                          </div>
-                          <span className="text-sm font-mono font-bold theme-accent-text w-14 text-right">
-                            {pct}%
-                          </span>
-                          <ChevronRight className="w-4 h-4 text-[var(--text-muted)] group-hover:translate-x-1 transition-transform" />
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
+            <StatsPage
+              globalStars={globalStars}
+              maxGlobalStars={maxGlobalStars}
+              globalPercentage={globalPercentage}
+              starCountMode={starCountMode}
+              toggleStarCountMode={toggleStarCountMode}
+              filterStarRank={filterStarRank}
+              handleStarRankClick={handleStarRankClick}
+              starCounts={starCounts}
+              starOffsets={starOffsets}
+              onUpdateStarOffsets={handleUpdateStarOffsets}
+              totalOffsetStars={totalOffsetStars}
+              categories={categories}
+              categoryStarsMap={categoryStarsMap}
+              CATEGORY_ICONS={CATEGORY_ICONS}
+              handleCategoryClick={handleCategoryClick}
+              starHistory={starHistory}
+              onUpdateStarHistory={handleUpdateStarHistory}
+              destinations={destinations}
+              onNavigateToDestination={(destName) => {
+                setSearchQuery(destName);
+                setView('list');
+              }}
+              hideZeroMaps={hideZeroMaps}
+              setHideZeroMaps={setHideZeroMaps}
+              hideEventDestinations={hideEventDestinations}
+              setHideEventDestinations={setHideEventDestinations}
+            />
           )}
 
           {/* VIEW: FLIGHT DECK (LIST OR GRID) */}
@@ -4841,52 +4784,52 @@ export const ACTracker = () => {
               {/* Feature 1 */}
               <div className="p-4 rounded-2xl bg-black/20 border border-white/5 space-y-2">
                 <div className="flex items-center gap-2">
-                  <span className="text-base">📅</span>
+                  <span className="text-base">🌟</span>
                   <h4 className="text-xs font-semibold text-[var(--text-main)] font-heading">
-                    12-Month Event Calendar
+                    Star Sync Offsets (HUD Sync)
                   </h4>
                 </div>
                 <p className="text-xs text-[var(--text-muted)] leading-relaxed">
-                  Browse the comprehensive 12-month event schedule with thematic banners, walkthrough Wiki guides, and 1-click "View Event Flights" routing.
+                  Calibrate your flight deck with manual milestone offsets (Ace 5★ down to Specialist 1★) via the new "Sync Offset" tab so AC-Tracker reflects your true in-game star total.
                 </p>
               </div>
 
               {/* Feature 2 */}
               <div className="p-4 rounded-2xl bg-black/20 border border-white/5 space-y-2">
                 <div className="flex items-center gap-2">
-                  <span className="text-base">📡</span>
+                  <span className="text-base">🎛️</span>
                   <h4 className="text-xs font-semibold text-[var(--text-main)] font-heading">
-                    Active Event Cockpit Banner
+                    3-Way Flight Progress Ranks
                   </h4>
                 </div>
                 <p className="text-xs text-[var(--text-muted)] leading-relaxed">
-                  Live flight-deck telemetry banner showing the active in-game event, pulsing radar indicator, remaining days countdown, and instant filter toggling.
+                  Toggle between In-Game Milestones (cumulative + badges), Exact Tier, and the interactive Sync Offset editor with intuitive -/+ steppers and Tracked + Offset = Total calculation.
                 </p>
               </div>
 
               {/* Feature 3 */}
               <div className="p-4 rounded-2xl bg-black/20 border border-white/5 space-y-2">
                 <div className="flex items-center gap-2">
-                  <span className="text-base">⭐</span>
+                  <span className="text-base">📈</span>
                   <h4 className="text-xs font-semibold text-[var(--text-main)] font-heading">
-                    Star Count Discrepancy Guidance
+                    Star Progression Telemetry & Radar
                   </h4>
                 </div>
                 <p className="text-xs text-[var(--text-muted)] leading-relaxed">
-                  New About page guidance explaining why pilot star counts diverge from in-game totals after limited-time events end, with tips on logging flight numbers.
+                  Interactive telemetry curve with timeframe filters (7D to ALL), velocity KPIs (Stars/Wk & Stars/Mo), Next Milestone ETA forecasting, and Lowest Hanging Fruit radar.
                 </p>
               </div>
 
               {/* Feature 4 */}
               <div className="p-4 rounded-2xl bg-black/20 border border-white/5 space-y-2">
                 <div className="flex items-center gap-2">
-                  <span className="text-base">⚡</span>
+                  <span className="text-base">💾</span>
                   <h4 className="text-xs font-semibold text-[var(--text-main)] font-heading">
-                    Flight Deck & Theme Upgrades
+                    Multi-Profile JSON Backup & Restore
                   </h4>
                 </div>
                 <p className="text-xs text-[var(--text-muted)] leading-relaxed">
-                  Recent flights quick-jump bar with +1 increment, high-contrast daylight theme normalization, and installable offline-ready PWA support.
+                  Seamless multi-profile JSON backup & import preserving all flight logs, aircraft hangars, star telemetry history, and manual star sync offsets.
                 </p>
               </div>
             </div>

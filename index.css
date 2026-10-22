@@ -1025,3 +1025,151 @@ input[type="number"].hide-arrows {
 }
 
 
+
+/* Event Calendar Month Cards & Sub-Cards */
+.month-card {
+  background-color: #0d1626;
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+:is(.theme-first-class, .theme-alpine-flight, .theme-arctic-frost, .theme-botanical-garden, .theme-golden-autumn, .theme-modern-minimalist) .month-card {
+  background-color: #ffffff !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
+}
+
+.event-sub-card {
+  background-color: #070c14;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: all 0.2s ease-in-out;
+}
+
+.event-sub-card:hover {
+  border-color: var(--border-active);
+}
+
+:is(.theme-first-class, .theme-alpine-flight, .theme-arctic-frost, .theme-botanical-garden, .theme-golden-autumn, .theme-modern-minimalist) .event-sub-card {
+  background-color: #f8fafc !important;
+  border: 1px solid #e2e8f0 !important;
+}
+
+:is(.theme-first-class, .theme-alpine-flight, .theme-arctic-frost, .theme-botanical-garden, .theme-golden-autumn, .theme-modern-minimalist) .event-sub-card:hover {
+  border-color: var(--border-active) !important;
+  background-color: #fdfdfd !important;
+}
+
+.event-title {
+  color: #ffffff;
+  font-weight: 700;
+}
+
+:is(.theme-first-class, .theme-alpine-flight, .theme-arctic-frost, .theme-botanical-garden, .theme-golden-autumn, .theme-modern-minimalist) .event-title {
+  color: #0f172a !important;
+  font-weight: 700 !important;
+}
+
+.event-desc {
+  color: #cbd5e1;
+}
+
+:is(.theme-first-class, .theme-alpine-flight, .theme-arctic-frost, .theme-botanical-garden, .theme-golden-autumn, .theme-modern-minimalist) .event-desc {
+  color: #475569 !important;
+}
+
+/* Event Metadata Pills */
+.event-pill {
+  background-color: var(--badge-bg);
+  border: 1px solid var(--badge-border);
+  color: var(--badge-text);
+}
+
+:is(.theme-first-class, .theme-alpine-flight, .theme-arctic-frost, .theme-botanical-garden, .theme-golden-autumn, .theme-modern-minimalist) .event-pill {
+  background-color: #f1f5f9 !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #334155 !important;
+  font-weight: 600 !important;
+}
+
+.theme-botanical-garden .event-pill {
+  background-color: #f5efe6 !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #2e573a !important;
+}
+
+/* Event Action Button ("View Event Flights →" and "Airport City Events Wiki") */
+.event-action-btn {
+  background-color: var(--accent-muted);
+  border: 1px solid var(--badge-border);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.event-action-btn:hover {
+  background-color: var(--accent);
+  color: #ffffff;
+}
+
+.theme-first-class .event-action-btn {
+  background-color: #fdf8ed !important;
+  border: 1px solid rgba(217, 119, 6, 0.4) !important;
+  color: #92400e !important;
+  font-weight: 600 !important;
+}
+
+.theme-first-class .event-action-btn:hover {
+  background-color: #fde68a !important;
+  border-color: #b45309 !important;
+  color: #78350f !important;
+}
+
+.theme-botanical-garden .event-action-btn {
+  background-color: #f0fdf4 !important;
+  border: 1px solid rgba(6, 95, 70, 0.35) !important;
+  color: #065f46 !important;
+  font-weight: 600 !important;
+}
+
+.theme-botanical-garden .event-action-btn:hover {
+  background-color: #dcfce7 !important;
+  border-color: #047857 !important;
+  color: #064e3b !important;
+}
+
+:is(.theme-alpine-flight, .theme-arctic-frost) .event-action-btn {
+  background-color: #f0f9ff !important;
+  border: 1px solid rgba(2, 132, 199, 0.35) !important;
+  color: #0369a1 !important;
+  font-weight: 600 !important;
+}
+
+:is(.theme-alpine-flight, .theme-arctic-frost) .event-action-btn:hover {
+  background-color: #e0f2fe !important;
+  border-color: #0284c7 !important;
+  color: #0c4a6e !important;
+}
+
+.theme-golden-autumn .event-action-btn {
+  background-color: #fffbeb !important;
+  border: 1px solid rgba(217, 119, 6, 0.4) !important;
+  color: #92400e !important;
+  font-weight: 600 !important;
+}
+
+.theme-golden-autumn .event-action-btn:hover {
+  background-color: #fef3c7 !important;
+  border-color: #b45309 !important;
+  color: #78350f !important;
+}
+
+.theme-modern-minimalist .event-action-btn {
+  background-color: #f1f5f9 !important;
+  border: 1px solid rgba(51, 65, 85, 0.35) !important;
+  color: #0f172a !important;
+  font-weight: 600 !important;
+}
+
+.theme-modern-minimalist .event-action-btn:hover {
+  background-color: #e2e8f0 !important;
+  border-color: #334155 !important;
+  color: #020617 !important;
+}

@@ -235,6 +235,12 @@ export const AboutPage: React.FC<AboutPageProps> = ({
         <p className="text-xs sm:text-sm text-[var(--text-muted)] leading-relaxed font-normal pt-1">
           Because you don't have access to the flight numbers from the event destinations outside of the event duration, you have no way of knowing those numbers and cannot accurately input them into AC-Tracker. Please note that it's important to note down all the flight numbers from the event before the event timer runs out.
         </p>
+        <div className="pt-2 text-xs sm:text-sm text-[var(--text-muted)] leading-relaxed border-t border-white/5 flex items-start gap-2">
+          <span className="text-amber-400 font-bold shrink-0">💡 Calibration Tip:</span>
+          <span>
+            Use the <strong className="text-[var(--text-main)]">Sync Offset</strong> tab under <em className="text-[var(--accent)] not-italic">Flight Progress Ranks</em> on the Statistics page to add manual milestone offsets (Ace, Captain, Expert, Master, Specialist). AC-Tracker will automatically add these to your total star counter, telemetry charts, and milestone ranks to match your in-game Airport City HUD.
+          </span>
+        </div>
       </div>
 
       {/* Flight Resources & Community Links */}

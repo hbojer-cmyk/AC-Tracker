@@ -20,18 +20,44 @@ export interface ProfilePrefs {
   themeId: string;
   logoId: string;
   density: 'compact' | 'comfortable';
-  starCountMode: 'cumulative' | 'exact';
+  starCountMode: 'cumulative' | 'exact' | 'offset';
   sidebarOpen: boolean;
   flightDeckHeaderOpen: boolean;
   showMissingAlliance: boolean;
   showMissingAdventure: boolean;
 }
 
+export interface StarHistoryEntry {
+  date: string;       // YYYY-MM-DD
+  stars: number;      // Total star count on this date
+  totalFlights?: number; // Optional total flights logged
+  eventTag?: string;  // Optional: populated if an active event from ACTIVE_EVENT_CONFIG was running on this date
+  isManual?: boolean; // True if manually backfilled by the user
+}
+
+export interface StarSyncOffsets {
+  ace: number;        // 5-star cumulative milestone offset
+  captain: number;    // 4-star cumulative milestone offset
+  expert: number;     // 3-star cumulative milestone offset
+  master: number;     // 2-star cumulative milestone offset
+  specialist: number; // 1-star cumulative milestone offset
+}
+
+export const DEFAULT_STAR_SYNC_OFFSETS: StarSyncOffsets = {
+  ace: 0,
+  captain: 0,
+  expert: 0,
+  master: 0,
+  specialist: 0,
+};
+
 export interface ProfileData {
   meta: ProfileMeta;
   userData: Record<string, UserDataEntry>;
   airplanes: any[] | null;
   prefs: ProfilePrefs;
+  starHistory?: StarHistoryEntry[];
+  starOffsets?: StarSyncOffsets;
 }
 
 export const STORAGE_KEYS = {
@@ -194,6 +220,8 @@ export function migrateLegacyData(
     userData,
     airplanes,
     prefs,
+    starHistory: [],
+    starOffsets: { ...DEFAULT_STAR_SYNC_OFFSETS },
   };
 
   const allProfiles: Record<string, ProfileData> = {
@@ -220,6 +248,8 @@ export function createBlankProfile(meta: ProfileMeta): ProfileData {
     userData: {},
     airplanes: null,
     prefs: getDefaultPrefs(),
+    starHistory: [],
+    starOffsets: { ...DEFAULT_STAR_SYNC_OFFSETS },
   };
 }
 
@@ -230,6 +260,8 @@ export function cloneProfile(source: ProfileData, newMeta: ProfileMeta): Profile
     userData: JSON.parse(JSON.stringify(source.userData || {})),
     airplanes: source.airplanes ? JSON.parse(JSON.stringify(source.airplanes)) : null,
     prefs: { ...source.prefs },
+    starHistory: source.starHistory ? JSON.parse(JSON.stringify(source.starHistory)) : [],
+    starOffsets: source.starOffsets ? { ...source.starOffsets } : { ...DEFAULT_STAR_SYNC_OFFSETS },
   };
 }
 
