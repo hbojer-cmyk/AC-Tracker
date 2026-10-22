@@ -265,15 +265,15 @@ Owl|Event Flights|Dancing With Leprechauns|Dublin|icons/events/dancingwiththelep
 Raven|Event Flights|Dancing With Leprechauns|Cork|icons/events/dancingwiththeleprechauns.png|23|46|92||
 Swift|Event Flights|Dancing With Leprechauns|Tullamore|icons/events/dancingwiththeleprechauns.png|10|20|40||
 Thunderbird|Event Flights|Dancing With Leprechauns|Kilkenny|icons/events/dancingwiththeleprechauns.png|150|250|500||
-Condor|Event Flights|Dark Skies|Oaxaca City|icons/events/darkskies.png|200|300|600||
-Eagle|Event Flights|Dark Skies|Fontainebleau|icons/events/darkskies.png|23|46|92||
-Falcon|Event Flights|Dark Skies|Savannah|icons/events/darkskies.png|100|200|400||
-Giant|Event Flights|Dark Skies|Portland|icons/events/darkskies.png|50|100|150||
-Hawk|Event Flights|Dark Skies|Machu-Pichu|icons/events/darkskies.png|19|38|75||
-Jumbo|Event Flights|Dark Skies|Windsor|icons/events/darkskies.png|30|60|120||
-Owl|Event Flights|Dark Skies|Transylvania|icons/events/darkskies.png|10|20|40||
-Raven|Event Flights|Dark Skies|Salem|icons/events/darkskies.png|20|41|81||
-Thunderbird|Event Flights|Dark Skies|Aokigahara|icons/events/darkskies.png|150|250|500||
+Condor|Event Flights|Dark Skies|Oaxaca City|icons/events/darkskies.png|200|300|600|1500|3750
+Eagle|Event Flights|Dark Skies|Fontainebleau|icons/events/darkskies.png|23|46|92|230|580
+Falcon|Event Flights|Dark Skies|Savannah|icons/events/darkskies.png|100|200|400|1000|2500
+Giant|Event Flights|Dark Skies|Portland|icons/events/darkskies.png|50|100|150|380|950
+Hawk|Event Flights|Dark Skies|Machu-Pichu|icons/events/darkskies.png|19|38|75|190|480
+Jumbo|Event Flights|Dark Skies|Windsor|icons/events/darkskies.png|30|60|120|300|750
+Owl|Event Flights|Dark Skies|Transylvania|icons/events/darkskies.png|10|20|40|100|250
+Raven|Event Flights|Dark Skies|Salem|icons/events/darkskies.png|20|41|81|200|500
+Thunderbird|Event Flights|Dark Skies|Aokigahara|icons/events/darkskies.png|150|250|500|1250|3130
 Condor|Event Flights|Down The Rabbit Hole|Bradford|icons/events/downtherabbithole.png|200|300|600|1500|3750
 Eagle|Event Flights|Down The Rabbit Hole|Bristol|icons/events/downtherabbithole.png|23|46|92|230|580
 Falcon|Event Flights|Down The Rabbit Hole|Salisbury|icons/events/downtherabbithole.png|100|200|400|1000|2500
