@@ -7,10 +7,11 @@ export interface ActiveEventConfig {
   filterKeyword: string; // Used to filter flights on the main Flights page
 }
 
+// ACTIVE_EVENT_CONFIG: Populated when an in-game live event officially begins.
 export const ACTIVE_EVENT_CONFIG: ActiveEventConfig = {
   eventName: "Dark Skies",
   startDate: "2026-10-22",
-  endDate: "2026-11-02T20:31:00Z",
+  endDate: "2026-11-02T21:00:00Z",
   endDateDisplay: "Nov 3, 2026",
   wikiUrl: "https://www.airportcitygame.com/wiki/dark_skies/",
   filterKeyword: "Dark Skies"

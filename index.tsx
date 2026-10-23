@@ -99,7 +99,7 @@ import { ProfileModal, MigrationModal } from './ProfileModal';
 
 // --- App Version & Maintenance Tracker ---
 // NOTE: Always update APP_UPDATED_DATE whenever making changes in the app
-export const APP_VERSION = 'Version 2.3';
+export const APP_VERSION = 'Version 2.3.1';
 export const APP_UPDATED_DATE = 'Oct 23, 2026';
 
 // --- Types & Interfaces ---
@@ -1448,7 +1448,7 @@ export const ACTracker = () => {
         (!hideZeroMaps || !d.needsMap || (d.mapsDone || 0) > 0) &&
         (!hideEventDestinations || activeCategory === 'Event Flights' || d.category !== 'Event Flights') &&
         (filterStarRank === null ||
-          (starCountMode === 'cumulative'
+          (starCountMode !== 'exact'
             ? getStars(d.flightsDone, d.star1Req, d.star2Req, d.star3Req, d.star4Req, d.star5Req) >= filterStarRank
             : getStars(d.flightsDone, d.star1Req, d.star2Req, d.star3Req, d.star4Req, d.star5Req) === filterStarRank)) &&
         (d.destination.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -1597,10 +1597,10 @@ export const ACTracker = () => {
 
     let timeRemainingStr = '';
     if (days > 0) {
-      timeRemainingStr = `${days}d ${hours}h remaining`;
+      timeRemainingStr = `${days}d ${String(hours).padStart(2, '0')}h remaining`;
     } else if (hours > 0) {
       const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-      timeRemainingStr = `${hours}h ${minutes}m remaining`;
+      timeRemainingStr = `${hours}h ${String(minutes).padStart(2, '0')}m remaining`;
     } else {
       timeRemainingStr = 'Ending Today (Final Hours)';
     }
@@ -3298,7 +3298,7 @@ export const ACTracker = () => {
                       <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs">
                         <img src="icons/star-icon.png" alt="" className="w-3.5 h-3.5 object-contain" />
                         <span>
-                          {starCountMode === 'cumulative' ? `≥ ${filterStarRank}★` : `${filterStarRank}★`}{' '}
+                          {starCountMode !== 'exact' ? `≥ ${filterStarRank}★` : `${filterStarRank}★`}{' '}
                           {STAR_RANKS.find(r => r.star === filterStarRank)?.name}
                         </span>
                         <button
@@ -4190,6 +4190,7 @@ export const ACTracker = () => {
                     const info = getNextStarInfo(dest);
                     const starDetails = getCurrentStarDetails(dest);
                     const planeSprite = AIRCRAFT_SPRITES[dest.aircraft];
+                    const maxReq = dest.star5Req || dest.star4Req || dest.star3Req;
 
                     return (
                       <div
@@ -4280,7 +4281,7 @@ export const ACTracker = () => {
                             <div className="h-1 w-full bg-black/40 rounded-full overflow-hidden">
                               <div
                                 className="h-full theme-progress-fill rounded-full"
-                                style={{ width: `${Math.min(100, (dest.flightsDone / info.nextReq) * 100)}%` }}
+                                style={{ width: `${Math.min(100, (dest.flightsDone / maxReq) * 100)}%` }}
                               />
                             </div>
                           </div>

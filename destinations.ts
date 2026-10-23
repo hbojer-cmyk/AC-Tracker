@@ -518,7 +518,7 @@ Thunderbird|Regular Flights|Thunderbird Flights|Riyadh||150|250|500|1250|3750
 Thunderbird|Regular Flights|Thunderbird Flights|Tehran||150|250|500|1250|3750
 Green Launch Rocket|Space Launches|Apogee|Apogee|icons/apogee.png|10|50|100||
 Red Launch Shuttle|Space Launches|Lunar|Lunar|icons/lunar.png|10|50|100||
-Blue Launch Rocket|Space Launches|Promotheus|Prometheus|icons/promotheus.png|10|50|100||
+Blue Launch Rocket|Space Launches|Prometheus|Prometheus|icons/prometheus.png|10|50|100||
 Jumbo|Space Map Flights|Edge of Tomorrow|Beverly Hills|icons/maps/red space maps.png|30|60|120||
 Jumbo|Space Map Flights|Edge of Tomorrow|Glasgow|icons/maps/red space maps.png|30|60|120||
 Jumbo|Space Map Flights|Edge of Tomorrow|Potsdam|icons/maps/red space maps.png|30|60|120||
