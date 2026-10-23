@@ -100,7 +100,7 @@ import { ProfileModal, MigrationModal } from './ProfileModal';
 // --- App Version & Maintenance Tracker ---
 // NOTE: Always update APP_UPDATED_DATE whenever making changes in the app
 export const APP_VERSION = 'Version 2.3';
-export const APP_UPDATED_DATE = 'Oct 22, 2026';
+export const APP_UPDATED_DATE = 'Oct 23, 2026';
 
 // --- Types & Interfaces ---
 type SortField =
@@ -861,6 +861,7 @@ export const ACTracker = () => {
           'Cincinnati': 'Cincinatti',
           'Kuala Lumpur': 'Kuala Lampur',
           'Fontainebleau': 'Fountainbleau',
+          'Machu Picchu (Dark Skies)': 'Machu-Pichu',
         };
         const entry = savedData[dest] || (LEGACY_DEST_ALIASES[dest] ? savedData[LEGACY_DEST_ALIASES[dest]] : undefined) || savedData[id];
         let flightsDone = 0;
