@@ -3,7 +3,6 @@ import {
   TrendingUp,
   Calendar,
   Zap,
-  Target,
   Activity,
   Plus,
   Minus,
@@ -16,13 +15,13 @@ import {
   X,
   History,
   Plane,
-  Award,
 } from 'lucide-react';
 import { StarHistoryEntry, StarSyncOffsets, DEFAULT_STAR_SYNC_OFFSETS } from './profiles';
 import {
   FlightDestination,
   GAME_STAR_RANKS,
   getStars,
+  getMaxStars,
   getLocalDateString,
 } from './flightUtils';
 
@@ -323,33 +322,38 @@ export const StatsPage: React.FC<StatsPageProps> = ({
       return true;
     });
 
-    // 2. First priority: destinations that have at least 1 flight logged and < 3 stars
+    // 2. First priority: destinations that have at least 1 flight logged and < getMaxStars(d)
     const activeDestinations = candidatePool.filter(d => {
       const stars = getStars(d.flightsDone, d.star1Req, d.star2Req, d.star3Req, d.star4Req, d.star5Req);
-      return d.flightsDone > 0 && stars < 3;
+      return d.flightsDone > 0 && stars < getMaxStars(d);
     });
 
-    // Fallback: all candidate destinations with < 3 stars (if no logged flights yet in filtered pool)
+    // Fallback: all candidate destinations with < getMaxStars(d) (if no logged flights yet in filtered pool)
     const pool =
       activeDestinations.length > 0
         ? activeDestinations
         : candidatePool.filter(d => {
             const stars = getStars(d.flightsDone, d.star1Req, d.star2Req, d.star3Req, d.star4Req, d.star5Req);
-            return stars < 3;
+            return stars < getMaxStars(d);
           });
 
     return pool
       .map(d => {
         const stars = getStars(d.flightsDone, d.star1Req, d.star2Req, d.star3Req, d.star4Req, d.star5Req);
         const nextStar = stars + 1;
+        const maxStars = getMaxStars(d);
         const reqs = [d.star1Req, d.star2Req, d.star3Req, d.star4Req || 0, d.star5Req || 0];
+        const prevReq = stars > 0 ? reqs[stars - 1] : 0;
         const nextReq = reqs[stars] || d.star3Req;
         const flightsRemaining = Math.max(0, nextReq - d.flightsDone);
-        const progressPct = Math.min(100, Math.round((d.flightsDone / nextReq) * 100));
+        const tierTarget = Math.max(1, nextReq - prevReq);
+        const tierDone = Math.max(0, d.flightsDone - prevReq);
+        const progressPct = Math.min(100, Math.round((tierDone / tierTarget) * 100));
 
         return {
           destination: d,
           currentStars: stars,
+          maxStars,
           nextStar,
           nextReq,
           flightsRemaining,
@@ -368,7 +372,7 @@ export const StatsPage: React.FC<StatsPageProps> = ({
   const innerHeight = chartHeight - padding.top - padding.bottom;
 
   const chartPoints = useMemo(() => {
-    if (filteredHistory.length === 0) return [];
+    if (filteredHistory.length === 0) return null;
 
     const starVals = filteredHistory.map(d => d.stars);
     const minVal = Math.min(...starVals);
@@ -737,7 +741,10 @@ export const StatsPage: React.FC<StatsPageProps> = ({
           {/* Right Toolbar Actions: Backfill, Manage History, Timeframe Pills */}
           <div className="flex flex-wrap items-center gap-2">
             <button
-              onClick={() => setShowAddMilestoneModal(true)}
+              onClick={() => {
+                setBackfillStars(globalStars);
+                setShowAddMilestoneModal(true);
+              }}
               className="tactile-btn px-2.5 py-1.5 rounded-xl border border-[var(--border-card)] hover:border-[var(--border-active)] text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm theme-btn-soft"
               title="Add a past milestone to backfill history"
             >
@@ -1106,7 +1113,7 @@ export const StatsPage: React.FC<StatsPageProps> = ({
                     <div className="flex items-center justify-between sm:justify-end gap-3 w-full">
                       {/* Current Star Badges */}
                       <div className="flex items-center gap-0.5">
-                        {Array.from({ length: 3 }).map((_, starIdx) => {
+                        {Array.from({ length: item.maxStars }).map((_, starIdx) => {
                           const earned = starIdx < item.currentStars;
                           return (
                             <span
@@ -1502,7 +1509,7 @@ export const StatsPage: React.FC<StatsPageProps> = ({
                 <input
                   type="number"
                   min="0"
-                  max={maxGlobalStars}
+                  max={Math.max(maxGlobalStars, globalStars)}
                   value={backfillStars}
                   onChange={e => setBackfillStars(parseInt(e.target.value) || 0)}
                   className="w-full px-3.5 py-2.5 rounded-xl bg-black/30 border border-white/10 text-[var(--text-main)] text-sm font-mono focus:outline-none focus:border-[var(--accent)]"

@@ -4,14 +4,10 @@ import {
   X,
   User,
   Plus,
-  Copy,
   Trash2,
   Check,
-  AlertTriangle,
   Download,
-  Shield,
   Sparkles,
-  Plane,
   Edit2
 } from 'lucide-react';
 import {

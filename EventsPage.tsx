@@ -80,6 +80,7 @@ export const EventsPage: React.FC<EventsPageProps> = ({
                 <div className="space-y-3">
                   {month.events.map((evt, idx) => {
                     const isLiveActive = Boolean(
+                      month.monthNumber === (new Date().getMonth() + 1) &&
                       ACTIVE_EVENT_CONFIG?.eventName?.trim() &&
                       (() => {
                         if (!ACTIVE_EVENT_CONFIG.startDate || !ACTIVE_EVENT_CONFIG.endDate) return false;
@@ -170,18 +171,30 @@ export const EventsPage: React.FC<EventsPageProps> = ({
                           </div>
                         )}
 
-                        {/* View Event Flights Action Button */}
+                        {/* View Event Flights Action Button or Walkthrough Guide Link */}
                         <div className="pt-1 flex justify-end">
-                          <button
-                            type="button"
-                            onClick={() => onNavigateToFlightsWithEvent?.(evt.filterKeyword || evt.title)}
-                            className={`tactile-btn text-xs font-semibold event-action-btn px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-all shadow-sm group/btn ${
-                              isLiveActive ? 'ring-1 ring-cyan-500/40' : ''
-                            }`}
-                          >
-                            <span>{isLiveActive ? 'View Active Event Flights' : 'View Event Flights'}</span>
-                            <ArrowRight className="w-3 h-3 group-hover/btn:translate-x-0.5 transition-transform" />
-                          </button>
+                          {evt.filterKeyword ? (
+                            <button
+                              type="button"
+                              onClick={() => onNavigateToFlightsWithEvent?.(evt.filterKeyword || evt.title)}
+                              className={`tactile-btn text-xs font-semibold event-action-btn px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-all shadow-sm group/btn ${
+                                isLiveActive ? 'ring-1 ring-cyan-500/40' : ''
+                              }`}
+                            >
+                              <span>{isLiveActive ? 'View Active Event Flights' : 'View Event Flights'}</span>
+                              <ArrowRight className="w-3 h-3 group-hover/btn:translate-x-0.5 transition-transform" />
+                            </button>
+                          ) : (
+                            <a
+                              href={evt.wikiUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="tactile-btn text-xs font-semibold event-action-btn px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-all shadow-sm group/btn"
+                            >
+                              <span>Walkthrough Guide</span>
+                              <ExternalLink className="w-3 h-3" />
+                            </a>
+                          )}
                         </div>
                       </div>
                     );

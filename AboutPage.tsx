@@ -5,9 +5,7 @@ import {
   Keyboard, 
   ExternalLink,
   Globe,
-  User,
-  Layers,
-  Copy
+  User
 } from 'lucide-react';
 import { APP_VERSION, APP_UPDATED_DATE } from './index';
 

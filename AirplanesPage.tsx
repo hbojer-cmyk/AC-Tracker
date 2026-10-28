@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Plus, Trash2, X, Plane, Sliders, Zap, Coins, Gift, ShieldAlert, Sparkles, Filter, Gauge, CircleDollarSign, Package } from 'lucide-react';
-import { OWNABLE_AIRCRAFT, AircraftInstance, getAircraftTypeFromName, adjustAircraftList } from './src/aircraftData';
+import { Plus, Trash2, X, Plane, Sliders, Gauge, CircleDollarSign } from 'lucide-react';
+import { OWNABLE_AIRCRAFT, ALL_AIRCRAFT_TYPES, AircraftInstance, getAircraftTypeFromName, adjustAircraftList } from './src/aircraftData';
 
 export const AIRCRAFT_SPRITES: Record<string, string> = {
   Swift: 'icons/aircraft/swift.png',
@@ -118,7 +118,10 @@ export const AirplanesPage: React.FC<AirplanesPageProps> = ({
   };
 
   const getAircraftType = (airplane: AircraftInstance): string => {
-    return getAircraftTypeFromName(airplane.nickname, airplane.type);
+    if (airplane.type && ALL_AIRCRAFT_TYPES.includes(airplane.type)) {
+      return airplane.type;
+    }
+    return getAircraftTypeFromName(airplane.nickname, 'Swift');
   };
 
   const filteredAirplanes = useMemo(() => {

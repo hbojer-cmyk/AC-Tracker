@@ -24,32 +24,20 @@ import {
   Palette,
   Layers,
   Clock,
-  Medal,
   Trash2,
-  MapPin,
-  Home,
   Bookmark,
   PanelLeftClose,
-  PanelLeftOpen,
   PanelLeft,
   Compass,
   Calendar,
   Sparkles,
-  Sliders,
-  Filter,
   Check,
   AlertTriangle,
   X,
   ExternalLink,
-  ShieldCheck,
-  Zap,
-  RefreshCw,
-  Eye,
-  EyeOff,
   Info,
   User,
-  Settings,
-  UserCheck
+  Settings
 } from 'lucide-react';
 import {
   BarChart,
@@ -58,8 +46,7 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  ResponsiveContainer,
-  Cell
+  ResponsiveContainer
 } from 'recharts';
 import { RAW_MASTER_LIST } from './destinations';
 import { MAP_LOCATIONS } from './MAPLOCATIONS';
@@ -99,7 +86,7 @@ import { ProfileModal, MigrationModal } from './ProfileModal';
 
 // --- App Version & Maintenance Tracker ---
 // NOTE: Always update APP_UPDATED_DATE whenever making changes in the app
-export const APP_VERSION = 'Version 2.4';
+export const APP_VERSION = 'Version 2.5';
 export const APP_UPDATED_DATE = 'Oct 29, 2026';
 
 // --- Types & Interfaces ---
@@ -1288,19 +1275,30 @@ export const ACTracker = () => {
     return map;
   }, [subItemStatsByCategory]);
 
+  const totalOffsetStars = useMemo(() => {
+    return (
+      (starOffsets.ace || 0) +
+      (starOffsets.captain || 0) +
+      (starOffsets.expert || 0) +
+      (starOffsets.master || 0) +
+      (starOffsets.specialist || 0)
+    );
+  }, [starOffsets]);
+
   const categoryStarsMap = useMemo(() => {
     const map: Record<string, { earned: number; max: number }> = {};
     categories.forEach(cat => {
       const catDests = cat === 'All Destinations' ? destinations : destinations.filter(d => d.category === cat);
-      const earned = catDests.reduce(
+      const trackedEarned = catDests.reduce(
         (acc, d) => acc + getStars(d.flightsDone, d.star1Req, d.star2Req, d.star3Req, d.star4Req, d.star5Req),
         0
       );
+      const earned = cat === 'All Destinations' ? trackedEarned + totalOffsetStars : trackedEarned;
       const max = catDests.reduce((acc, d) => acc + getMaxStars(d), 0);
       map[cat] = { earned, max };
     });
     return map;
-  }, [destinations, categories]);
+  }, [destinations, categories, totalOffsetStars]);
 
   const starCounts = useMemo(() => {
     let ace = 0,
@@ -1349,16 +1347,6 @@ export const ACTracker = () => {
     );
   }, [destinations]);
 
-  const totalOffsetStars = useMemo(() => {
-    return (
-      (starOffsets.ace || 0) +
-      (starOffsets.captain || 0) +
-      (starOffsets.expert || 0) +
-      (starOffsets.master || 0) +
-      (starOffsets.specialist || 0)
-    );
-  }, [starOffsets]);
-
   const globalStars = useMemo(() => {
     return trackedGlobalStars + totalOffsetStars;
   }, [trackedGlobalStars, totalOffsetStars]);
@@ -1368,7 +1356,7 @@ export const ACTracker = () => {
   }, [destinations]);
 
   const globalPercentage = useMemo(() => {
-    return maxGlobalStars > 0 ? Math.round((globalStars / maxGlobalStars) * 100) : 0;
+    return maxGlobalStars > 0 ? Math.min(100, Math.round((globalStars / maxGlobalStars) * 100)) : 0;
   }, [globalStars, maxGlobalStars]);
 
   // Maps Dashboard Statistics
@@ -1984,6 +1972,7 @@ export const ACTracker = () => {
     );
     handleSaveOwnedAirplanes([]);
     handleUpdateStarOffsets({ ...DEFAULT_STAR_SYNC_OFFSETS });
+    handleUpdateStarHistory([]);
     setActiveCategory('All Destinations');
     setFilterAircraft('All');
     setFilterGroup('All');
@@ -2779,6 +2768,12 @@ export const ACTracker = () => {
               onUpdateStarHistory={handleUpdateStarHistory}
               destinations={destinations}
               onNavigateToDestination={(destName) => {
+                setActiveCategory('All Destinations');
+                setFilterAircraft('All');
+                setFilterGroup('All');
+                setFilterStarRank(null);
+                setShowOnlyMaps(false);
+                setHide3Star(false);
                 setSearchQuery(destName);
                 setView('list');
               }}

@@ -141,8 +141,7 @@ export const EVENTS_CALENDAR: MonthCalendarData[] = [
         title: "Riding the Comet",
         wikiUrl: "https://www.airportcitygame.com/wiki/riding-the-comet/",
         description: "Track cosmic perihelion flybys, collecting telemetry data and deep space observatory crystals.",
-        badges: ["Cosmic", "Astronomy", "Space Race"],
-        filterKeyword: "Riding the Comet"
+        badges: ["Cosmic", "Astronomy", "Space Race"]
       },
       {
         title: "Valley of the Kings Curse",
@@ -261,8 +260,7 @@ export const EVENTS_CALENDAR: MonthCalendarData[] = [
         title: "Cinemania",
         wikiUrl: "https://www.airportcitygame.com/wiki/cinemania/",
         description: "Roll out the red carpet for world cinema festivals, film reels, Oscar statues, and blockbuster movie sets.",
-        badges: ["Hollywood", "Cinema", "Special"],
-        filterKeyword: "Cinemania"
+        badges: ["Hollywood", "Cinema", "Special"]
       },
       {
         title: "Age of Ash",
@@ -284,8 +282,7 @@ export const EVENTS_CALENDAR: MonthCalendarData[] = [
         title: "The Great Game",
         wikiUrl: "https://www.airportcitygame.com/wiki/the-great-game/",
         description: "Summer sports tournaments, championship trophies, athletic stadiums, and international friendly competitions.",
-        badges: ["Sports", "Tournament", "Summer"],
-        filterKeyword: "The Great Game"
+        badges: ["Sports", "Tournament", "Summer"]
       },
       {
         title: "The Land of Opportunity",
@@ -314,8 +311,7 @@ export const EVENTS_CALENDAR: MonthCalendarData[] = [
         title: "Riding the Comet",
         wikiUrl: "https://www.airportcitygame.com/wiki/riding-the-comet/",
         description: "Mid-year celestial tracking missions collecting meteor fragments and deep-space observatory supplies.",
-        badges: ["Cosmic", "Astronomy", "Repeat"],
-        filterKeyword: "Riding the Comet"
+        badges: ["Cosmic", "Astronomy", "Repeat"]
       }
     ]
   },
@@ -367,8 +363,7 @@ export const EVENTS_CALENDAR: MonthCalendarData[] = [
         title: "Cinemania",
         wikiUrl: "https://www.airportcitygame.com/wiki/cinemania/",
         description: "Roll out the red carpet for world cinema festivals, film reels, Oscar statues, and blockbuster movie sets.",
-        badges: ["Hollywood", "Cinema", "Special"],
-        filterKeyword: "Cinemania"
+        badges: ["Hollywood", "Cinema", "Special"]
       }
     ]
   },
@@ -383,8 +378,7 @@ export const EVENTS_CALENDAR: MonthCalendarData[] = [
         title: "Riding the Comet",
         wikiUrl: "https://www.airportcitygame.com/wiki/riding-the-comet/",
         description: "Track cosmic perihelion flybys, collecting telemetry data and deep space observatory crystals.",
-        badges: ["Cosmic", "Astronomy", "Repeat"],
-        filterKeyword: "Riding the Comet"
+        badges: ["Cosmic", "Astronomy", "Repeat"]
       },
       {
         title: "Down the Rabbit Hole",

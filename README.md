@@ -10,7 +10,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-3178c6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Vite](https://img.shields.io/badge/Vite-6.2-646cff?style=flat-square&logo=vite&logoColor=white)](https://vitejs.dev/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.x-38bdf8?style=flat-square&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
-[![Version](https://img.shields.io/badge/Version-2.0.0-00d2ff?style=flat-square)](package.json)
+[![Version](https://img.shields.io/badge/Version-2.5.0-00d2ff?style=flat-square)](package.json)
 [![Data Privacy](https://img.shields.io/badge/Storage-100%25_Local_&_Offline-10b981?style=flat-square)](#offline-storage--privacy)
 
 [Overview](#overview) • [Key Features](#key-features) • [Flight Deck Modules](#flight-deck-modules) • [Map Timer System](#map-timer-system) • [Getting Started](#getting-started) • [Shortcuts & Ergonomics](#shortcuts--ergonomics) • [Community Resources](#community-resources)

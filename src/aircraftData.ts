@@ -40,7 +40,9 @@ export const adjustAircraftList = (airplanes: any[]): AircraftInstance[] => {
   if (!Array.isArray(airplanes)) return [];
   return airplanes.map((plane, index) => {
     const name = plane.nickname || plane.name || `Aircraft ${index + 1}`;
-    const derivedType = getAircraftTypeFromName(name, plane.type || 'Swift');
+    const derivedType = (plane.type && ALL_AIRCRAFT_TYPES.includes(plane.type))
+      ? plane.type
+      : getAircraftTypeFromName(name, 'Swift');
     return {
       id: plane.id || `${Date.now()}-${index}`,
       type: derivedType,
