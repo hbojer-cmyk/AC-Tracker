@@ -32,7 +32,7 @@ Every destination, map requirement, and flight milestone in Airport City is cata
 
 ## Key Features
 
-- **535 Cataloged Flight Routes**: Comprehensive coverage across Standard, Adventure, Space, Alliance, and Seasonal Event destinations with exact star requirements (1★ to 5★).
+- **536 Cataloged Flight Routes**: Comprehensive coverage across Standard, Adventure, Space, Alliance, and Seasonal Event destinations with exact star requirements (1★ to 5★).
 - **Authentic In-Game Flight Counters**: Dual-input tracking matching the Airport City HUD — log progress directly on your active star tier (`XX / [Target]`) alongside cumulative lifetime flights.
 - **Accurate Map Duration Timers**: 100% coverage across all 150 map destinations. Models authentic Airport City timed-flight windows (3h, 6h, 12h 30m, 17h, and single-use) instead of outdated 1-map-per-flight consumption.
 - **Flight Progress HUD**: Descending progression board mirroring the in-game star status screen (Ace 5★ down to Specialist 1★), complete with cumulative milestone vs. exact tier mode toggle.
@@ -47,7 +47,7 @@ Every destination, map requirement, and flight milestone in Airport City is cata
 
 | Module | Icon | Description |
 | :--- | :---: | :--- |
-| **Flights Table & Radar** | <img src="./icons/deck-radar-3d.png" width="36" height="36" alt="Radar" /> | Dense table and card views for managing all 535 destinations. Includes instant search, aircraft filters, collection grouping, and priority sorting. |
+| **Flights Table & Radar** | <img src="./icons/deck-radar-3d.png" width="36" height="36" alt="Radar" /> | Dense table and card views for managing all 536 destinations. Includes instant search, aircraft filters, collection grouping, and priority sorting. |
 | **Map Inventory** | <img src="./icons/deck-mapdepot-3d.png" width="36" height="36" alt="Maps" /> | Inventory tracking for Adventure, Space, and Alliance map sets. Monitor collected stock, view active flight windows, and spot missing collection maps. |
 | **Fleet Hangar** | <img src="./icons/deck-hangar-3d.png" width="36" height="36" alt="Hangar" /> | Fleet management suite for ownable planes (Swift through Goldfinch). Configure nicknames, flight stats, and upgrade perks. |
 | **Flight Progress & Stats** | <img src="./icons/deck-stars-3d.png" width="36" height="36" alt="Stars" /> | Flight volume analytics, star completion ratios, aircraft tier distribution charts, and in-game rank breakdown. |

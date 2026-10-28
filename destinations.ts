@@ -1,4 +1,4 @@
-// Master List Data (All 535 Destinations)
+// Master List Data (All 536 Destinations)
 // Format: Aircraft|Category|Group|Destination|Icon|Star1Req|Star2Req|Star3Req|Star4Req|Star5Req
 export const RAW_MASTER_LIST = `Owl|Adventure Map Flights|Aztec Legacy|Chichen Itza|icons/maps/ex01 mesoamerica.png|20|50|100|250|750
 Owl|Adventure Map Flights|Aztec Legacy|Excavations: Mesoamerica|icons/maps/ex01 mesoamerica.png|20|50|100|250|750
@@ -423,6 +423,7 @@ Eagle|Regular Flights|Eagle Flights|Shanghai||23|46|92|230|700
 Eagle|Regular Flights|Eagle Flights|Tasmania||23|46|92|230|700
 Eagle|Regular Flights|Eagle Flights|Delhi||25|51|102|255|775
 Eagle|Regular Flights|Eagle Flights|Iceland||26|53|105|265|800
+Eagle|Regular Flights|Eagle Flights|Sharjah||26|53|105|265|800
 Eagle|Regular Flights|Eagle Flights|Antarctic||30|59|118|295|875
 Eagle|Regular Flights|Eagle Flights|Brasília||30|59|118|295|875
 Eagle|Regular Flights|Eagle Flights|Hong Kong||29|58|116|290|875

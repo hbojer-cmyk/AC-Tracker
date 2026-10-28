@@ -100,7 +100,7 @@ import { ProfileModal, MigrationModal } from './ProfileModal';
 // --- App Version & Maintenance Tracker ---
 // NOTE: Always update APP_UPDATED_DATE whenever making changes in the app
 export const APP_VERSION = 'Version 2.3.1';
-export const APP_UPDATED_DATE = 'Oct 23, 2026';
+export const APP_UPDATED_DATE = 'Oct 28, 2026';
 
 // --- Types & Interfaces ---
 type SortField =
