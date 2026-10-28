@@ -68,7 +68,7 @@ import { AirplanesPage, AIRCRAFT_SPRITES } from './AirplanesPage';
 import { AboutPage } from './AboutPage';
 import { EventsPage } from './EventsPage';
 import { StatsPage } from './StatsPage';
-import { ACTIVE_EVENT_CONFIG } from './src/data/eventsData';
+import { ACTIVE_EVENT_CONFIG, getEventIcon } from './src/data/eventsData';
 import { adjustAircraftList } from './src/aircraftData';
 import {
   ProfileData,
@@ -99,8 +99,8 @@ import { ProfileModal, MigrationModal } from './ProfileModal';
 
 // --- App Version & Maintenance Tracker ---
 // NOTE: Always update APP_UPDATED_DATE whenever making changes in the app
-export const APP_VERSION = 'Version 2.3.1';
-export const APP_UPDATED_DATE = 'Oct 28, 2026';
+export const APP_VERSION = 'Version 2.4';
+export const APP_UPDATED_DATE = 'Oct 29, 2026';
 
 // --- Types & Interfaces ---
 type SortField =
@@ -1609,8 +1609,11 @@ export const ACTracker = () => {
       ACTIVE_EVENT_CONFIG.endDateDisplay ||
       endD.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
 
+    const eventIcon = ACTIVE_EVENT_CONFIG.icon || getEventIcon(ACTIVE_EVENT_CONFIG.eventName);
+
     return {
       ...ACTIVE_EVENT_CONFIG,
+      icon: eventIcon,
       daysRemaining,
       timeRemainingStr,
       displayEndDate,
@@ -2878,25 +2881,41 @@ export const ACTracker = () => {
                   />
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
                     <div className="flex items-center gap-3.5 min-w-0">
-                      {/* Pulsing radar indicator */}
+                      {/* Event Icon with pulsing live radar beacon */}
                       <div
-                        className={`relative flex items-center justify-center shrink-0 w-10 h-10 rounded-xl ${
+                        className={`relative flex items-center justify-center shrink-0 w-11 h-11 sm:w-12 sm:h-12 rounded-xl p-1 transition-all shadow-md group ${
                           isDarkTheme
-                            ? 'bg-cyan-500/15 border border-cyan-500/30'
-                            : 'bg-[#fef3c7] border border-amber-300/60'
+                            ? 'bg-cyan-950/50 border border-cyan-500/40 shadow-[0_0_15px_rgba(0,229,255,0.15)] hover:border-cyan-400/70'
+                            : 'bg-amber-100/90 border border-amber-300/90 shadow-sm hover:border-amber-400'
                         }`}
                       >
-                        <span
-                          className={`absolute w-3 h-3 rounded-full animate-ping opacity-75 ${
-                            isDarkTheme ? 'bg-cyan-400' : 'bg-amber-500'
-                          }`}
-                        />
-                        <span
-                          className={`relative w-2.5 h-2.5 rounded-full ${
-                            isDarkTheme
-                              ? 'bg-cyan-300 shadow-[0_0_8px_#00e5ff]'
-                              : 'bg-amber-600 shadow-[0_0_8px_rgba(217,119,6,0.5)]'
-                          }`}
+                        {/* Live active beacon ping in top-right corner */}
+                        <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5 z-20 pointer-events-none">
+                          <span
+                            className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
+                              isDarkTheme ? 'bg-cyan-400' : 'bg-amber-500'
+                            }`}
+                          />
+                          <span
+                            className={`relative inline-flex rounded-full h-2.5 w-2.5 border ${
+                              isDarkTheme
+                                ? 'bg-cyan-300 border-[#0d1626] shadow-[0_0_8px_#00e5ff]'
+                                : 'bg-amber-600 border-amber-50 shadow-[0_0_8px_rgba(217,119,6,0.5)]'
+                            }`}
+                          />
+                        </span>
+
+                        {/* Event Icon Image */}
+                        <img
+                          src={activeEventInfo.icon}
+                          alt={activeEventInfo.eventName}
+                          className="w-full h-full object-contain drop-shadow-md relative z-10 transition-transform duration-300 group-hover:scale-110"
+                          onError={(e) => {
+                            const target = e.currentTarget;
+                            if (target.src.indexOf('icons/event_icon.png') === -1) {
+                              target.src = 'icons/event_icon.png';
+                            }
+                          }}
                         />
                       </div>
 
@@ -4875,52 +4894,52 @@ export const ACTracker = () => {
               {/* Feature 1 */}
               <div className="p-4 rounded-2xl bg-black/20 border border-white/5 space-y-2">
                 <div className="flex items-center gap-2">
-                  <span className="text-base">🌟</span>
+                  <span className="text-base">🎃</span>
                   <h4 className="text-xs font-semibold text-[var(--text-main)] font-heading">
-                    Star Sync Offsets (HUD Sync)
+                    Live Event Artwork & Radar Beacon
                   </h4>
                 </div>
                 <p className="text-xs text-[var(--text-muted)] leading-relaxed">
-                  Calibrate your flight deck with manual milestone offsets (Ace 5★ down to Specialist 1★) via the new "Sync Offset" tab so AC-Tracker reflects your true in-game star total.
+                  The Flights page "Active Live Event" banner now displays official transparent event artwork (featuring Dark Skies) with a live pulsing radar beacon and one-click route filtering.
                 </p>
               </div>
 
               {/* Feature 2 */}
               <div className="p-4 rounded-2xl bg-black/20 border border-white/5 space-y-2">
                 <div className="flex items-center gap-2">
-                  <span className="text-base">🎛️</span>
+                  <span className="text-base">📅</span>
                   <h4 className="text-xs font-semibold text-[var(--text-main)] font-heading">
-                    3-Way Flight Progress Ranks
+                    12-Month Calendar Event Icons
                   </h4>
                 </div>
                 <p className="text-xs text-[var(--text-muted)] leading-relaxed">
-                  Toggle between In-Game Milestones (cumulative + badges), Exact Tier, and the interactive Sync Offset editor with intuitive -/+ steppers and Tracked + Offset = Total calculation.
+                  Every limited-time event and recurring festival across all 12 calendar cards now features its authentic game icon paired with direct wiki walkthrough links and route badges.
                 </p>
               </div>
 
               {/* Feature 3 */}
               <div className="p-4 rounded-2xl bg-black/20 border border-white/5 space-y-2">
                 <div className="flex items-center gap-2">
-                  <span className="text-base">📈</span>
+                  <span className="text-base">✨</span>
                   <h4 className="text-xs font-semibold text-[var(--text-main)] font-heading">
-                    Star Progression Telemetry & Radar
+                    High-Definition 3D Category Icons
                   </h4>
                 </div>
                 <p className="text-xs text-[var(--text-muted)] leading-relaxed">
-                  Interactive telemetry curve with timeframe filters (7D to ALL), velocity KPIs (Stars/Wk & Stars/Mo), Next Milestone ETA forecasting, and Lowest Hanging Fruit radar.
+                  Upgraded all category icons and progression star badges to high-definition 3D flight-deck renders with alpha transparency across all navigation bars and stats views.
                 </p>
               </div>
 
               {/* Feature 4 */}
               <div className="p-4 rounded-2xl bg-black/20 border border-white/5 space-y-2">
                 <div className="flex items-center gap-2">
-                  <span className="text-base">💾</span>
+                  <span className="text-base">🌟</span>
                   <h4 className="text-xs font-semibold text-[var(--text-main)] font-heading">
-                    Multi-Profile JSON Backup & Restore
+                    Star Sync Offsets & HUD Calibration
                   </h4>
                 </div>
                 <p className="text-xs text-[var(--text-muted)] leading-relaxed">
-                  Seamless multi-profile JSON backup & import preserving all flight logs, aircraft hangars, star telemetry history, and manual star sync offsets.
+                  Calibrate your flight deck with manual milestone offsets (Ace 5★ down to Specialist 1★) via the Sync Offset tab so AC-Tracker reflects your exact in-game star total.
                 </p>
               </div>
             </div>

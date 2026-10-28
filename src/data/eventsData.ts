@@ -5,6 +5,93 @@ export interface ActiveEventConfig {
   endDateDisplay?: string; // Optional user-friendly display date e.g. "Nov 3, 2026"
   wikiUrl: string;
   filterKeyword: string; // Used to filter flights on the main Flights page
+  icon?: string;         // Image path under icons/events/
+}
+
+// Comprehensive mapping of in-game events to their custom PNG icons in icons/events/
+export const EVENT_ICON_MAP: Record<string, string> = {
+  "Age of Ash": "icons/events/ageofash.png",
+  "Airport City": "icons/events/airportcity.png",
+  "A Walk in the Clouds": "icons/events/awalkintheclouds.png",
+  "A Walk In The Clouds": "icons/events/awalkintheclouds.png",
+  "Back to School": "icons/events/backtoschool.png",
+  "Back To School": "icons/events/backtoschool.png",
+  "Celestial Festival": "icons/events/celestialfestival.png",
+  "Cinemania": "icons/events/cinemania.png",
+  "Dancing with Leprechauns": "icons/events/dancingwiththeleprechauns.png",
+  "Dancing with the Leprechauns": "icons/events/dancingwiththeleprechauns.png",
+  "Dancing With Leprechauns": "icons/events/dancingwiththeleprechauns.png",
+  "Dark Skies": "icons/events/darkskies.png",
+  "Down the Rabbit Hole": "icons/events/downtherabbithole.png",
+  "Down The Rabbit Hole": "icons/events/downtherabbithole.png",
+  "Dragon Rising": "icons/events/dragonrising.png",
+  "Easter Cheer": "icons/events/eastercheer.png",
+  "Holiday Rush": "icons/events/holidayrush.png",
+  "It Came from Outer Space": "icons/events/itcamefromouterspace.png",
+  "It Came From Outer Space": "icons/events/itcamefromouterspace.png",
+  "Long-awaited Mail": "icons/events/longawaitedmail.png",
+  "Long-Awaited Mail": "icons/events/longawaitedmail.png",
+  "On the Wings of Love": "icons/events/onthewingsoflove.png",
+  "On The Wings Of Love": "icons/events/onthewingsoflove.png",
+  "Riding the Comet": "icons/events/ridingthecomet.png",
+  "Riding The Comet": "icons/events/ridingthecomet.png",
+  "Rock the Sky": "icons/events/rockthesky.png",
+  "Rock The Sky": "icons/events/rockthesky.png",
+  "Santa's Bad Day": "icons/events/santasbadday.png",
+  "Santas Bad Day": "icons/events/santasbadday.png",
+  "Spring is Here": "icons/events/springishere.png",
+  "Spring Is Here": "icons/events/springishere.png",
+  "Thanksgiving Day": "icons/events/thanksgivingday.png",
+  "The Great Game": "icons/events/thegreatgame.png",
+  "The Land of Opportunity": "icons/events/thelandofopportunity.png",
+  "The Land Of Opportunity": "icons/events/thelandofopportunity.png",
+  "Time to Rock": "icons/events/timetorock.png",
+  "Time To Rock": "icons/events/timetorock.png",
+  "Valley of the Kings Curse": "icons/events/valleyofthekingscurse.png",
+  "Valley Of The Kings Curse": "icons/events/valleyofthekingscurse.png",
+  "Winter Dream": "icons/events/winterdream.png",
+  "World of Wildlife": "icons/events/worldofwildlife.png",
+  "World Of Wildlife": "icons/events/worldofwildlife.png",
+};
+
+/**
+ * Returns the relative icon path for any event name, falling back to slug or generic event icon.
+ */
+export function getEventIcon(eventName?: string): string {
+  if (!eventName) return "icons/event_icon.png";
+  if (EVENT_ICON_MAP[eventName]) return EVENT_ICON_MAP[eventName];
+
+  const slug = eventName.toLowerCase().replace(/[^a-z0-9]/g, "");
+  if (!slug) return "icons/event_icon.png";
+
+  if (slug.includes("outerspace")) return "icons/events/itcamefromouterspace.png";
+  if (slug.includes("rabbit")) return "icons/events/downtherabbithole.png";
+  if (slug.includes("clouds")) return "icons/events/awalkintheclouds.png";
+  if (slug.includes("leprechaun")) return "icons/events/dancingwiththeleprechauns.png";
+  if (slug.includes("ash")) return "icons/events/ageofash.png";
+  if (slug.includes("comet")) return "icons/events/ridingthecomet.png";
+  if (slug.includes("valley")) return "icons/events/valleyofthekingscurse.png";
+  if (slug.includes("mail")) return "icons/events/longawaitedmail.png";
+  if (slug.includes("love")) return "icons/events/onthewingsoflove.png";
+  if (slug.includes("wildlife")) return "icons/events/worldofwildlife.png";
+  if (slug.includes("opportunity")) return "icons/events/thelandofopportunity.png";
+  if (slug.includes("rock") && !slug.includes("timetorock")) return "icons/events/rockthesky.png";
+  if (slug.includes("timetorock")) return "icons/events/timetorock.png";
+  if (slug.includes("santa")) return "icons/events/santasbadday.png";
+  if (slug.includes("spring")) return "icons/events/springishere.png";
+  if (slug.includes("thanksgiving")) return "icons/events/thanksgivingday.png";
+  if (slug.includes("easter")) return "icons/events/eastercheer.png";
+  if (slug.includes("game")) return "icons/events/thegreatgame.png";
+  if (slug.includes("celestial")) return "icons/events/celestialfestival.png";
+  if (slug.includes("cinemania")) return "icons/events/cinemania.png";
+  if (slug.includes("holiday")) return "icons/events/holidayrush.png";
+  if (slug.includes("winter")) return "icons/events/winterdream.png";
+  if (slug.includes("school")) return "icons/events/backtoschool.png";
+  if (slug.includes("dragon")) return "icons/events/dragonrising.png";
+  if (slug.includes("airportcity")) return "icons/events/airportcity.png";
+  if (slug.includes("darkskies")) return "icons/events/darkskies.png";
+
+  return `icons/events/${slug}.png`;
 }
 
 // ACTIVE_EVENT_CONFIG: Populated when an in-game live event officially begins.
@@ -14,7 +101,8 @@ export const ACTIVE_EVENT_CONFIG: ActiveEventConfig = {
   endDate: "2026-11-02T21:00:00Z",
   endDateDisplay: "Nov 3, 2026",
   wikiUrl: "https://www.airportcitygame.com/wiki/dark_skies/",
-  filterKeyword: "Dark Skies"
+  filterKeyword: "Dark Skies",
+  icon: "icons/events/darkskies.png"
 };
 
 export interface CalendarEventItem {

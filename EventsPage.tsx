@@ -1,6 +1,6 @@
 import React from 'react';
 import { ExternalLink, ArrowRight, Info } from 'lucide-react';
-import { EVENTS_CALENDAR, ACTIVE_EVENT_CONFIG, MonthCalendarData } from './src/data/eventsData';
+import { EVENTS_CALENDAR, ACTIVE_EVENT_CONFIG, MonthCalendarData, getEventIcon } from './src/data/eventsData';
 
 interface EventsPageProps {
   onNavigateToFlightsWithEvent?: (eventKeyword: string) => void;
@@ -110,20 +110,36 @@ export const EventsPage: React.FC<EventsPageProps> = ({
                         }`}
                       >
                         {/* Title & Wiki Link Icon at top-right */}
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="event-title text-sm tracking-tight font-bold">
-                              {evt.title}
-                            </span>
-                            {isLiveActive && (
-                              <span className="inline-flex items-center gap-1.5 text-[10px] font-mono font-bold uppercase tracking-wider text-cyan-600 dark:text-cyan-300 px-2 py-0.5 rounded-full bg-cyan-100/90 dark:bg-cyan-950/90 border border-cyan-400/50 shadow-sm">
-                                <span className="relative flex h-2 w-2">
-                                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
-                                  <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
-                                </span>
-                                Active Now
+                        <div className="flex items-start justify-between gap-2.5">
+                          <div className="flex items-center gap-2.5 flex-1 min-w-0">
+                            {/* Event Icon badge */}
+                            <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-[#0b1320] p-1 flex items-center justify-center shrink-0 border border-black/5 dark:border-cyan-500/20">
+                              <img
+                                src={getEventIcon(evt.title)}
+                                alt={evt.title}
+                                className="w-full h-full object-contain drop-shadow-sm"
+                                onError={(e) => {
+                                  const target = e.currentTarget;
+                                  if (target.src.indexOf('icons/event_icon.png') === -1) {
+                                    target.src = 'icons/event_icon.png';
+                                  }
+                                }}
+                              />
+                            </div>
+                            <div className="flex items-center gap-2 flex-wrap min-w-0">
+                              <span className="event-title text-sm tracking-tight font-bold">
+                                {evt.title}
                               </span>
-                            )}
+                              {isLiveActive && (
+                                <span className="inline-flex items-center gap-1.5 text-[10px] font-mono font-bold uppercase tracking-wider text-cyan-600 dark:text-cyan-300 px-2 py-0.5 rounded-full bg-cyan-100/90 dark:bg-cyan-950/90 border border-cyan-400/50 shadow-sm">
+                                  <span className="relative flex h-2 w-2">
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
+                                  </span>
+                                  Active Now
+                                </span>
+                              )}
+                            </div>
                           </div>
                           <a
                             href={evt.wikiUrl}
