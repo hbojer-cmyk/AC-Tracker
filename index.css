@@ -855,10 +855,12 @@
   background-color: var(--table-header-bg, rgba(0, 0, 0, 0.55));
   border-bottom: 1px solid var(--table-header-border, rgba(255, 255, 255, 0.08));
   color: var(--table-header-text, var(--text-muted));
+  white-space: nowrap;
 }
 
 .dense-table-row {
   min-height: 40px;
+  white-space: nowrap;
 }
 
 .dense-table-row:hover {

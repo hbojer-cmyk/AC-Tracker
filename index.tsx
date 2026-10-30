@@ -37,7 +37,10 @@ import {
   ExternalLink,
   Info,
   User,
-  Settings
+  Settings,
+  SlidersHorizontal,
+  Minimize2,
+  Maximize2
 } from 'lucide-react';
 import {
   BarChart,
@@ -73,6 +76,8 @@ import {
   createBlankProfile,
   generateProfileId,
   getDefaultPrefs,
+  VisibleColumnsConfig,
+  DEFAULT_VISIBLE_COLUMNS,
 } from './profiles';
 import {
   FlightDestination,
@@ -86,8 +91,8 @@ import { ProfileModal, MigrationModal } from './ProfileModal';
 
 // --- App Version & Maintenance Tracker ---
 // NOTE: Always update APP_UPDATED_DATE whenever making changes in the app
-export const APP_VERSION = 'Version 2.5';
-export const APP_UPDATED_DATE = 'Oct 29, 2026';
+export const APP_VERSION = 'Version 2.6';
+export const APP_UPDATED_DATE = 'Oct 30, 2026';
 
 // --- Types & Interfaces ---
 type SortField =
@@ -771,6 +776,34 @@ export const ACTracker = () => {
   const toggleFlightDeckHeader = () => {
     setIsFlightDeckHeaderOpen(prev => !prev);
   };
+  const [visibleColumns, setVisibleColumns] = useState<VisibleColumnsConfig>(DEFAULT_VISIBLE_COLUMNS);
+  const [showColumnsPopover, setShowColumnsPopover] = useState(false);
+  const columnsPopoverRef = useRef<HTMLDivElement>(null);
+  const [focusMode, setFocusMode] = useState<boolean>(false);
+
+  const toggleFocusMode = () => {
+    setFocusMode(prev => {
+      const next = !prev;
+      if (next) {
+        setIsFlightDeckHeaderOpen(false);
+      }
+      return next;
+    });
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (columnsPopoverRef.current && !columnsPopoverRef.current.contains(e.target as Node)) {
+        setShowColumnsPopover(false);
+      }
+    };
+    if (showColumnsPopover) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showColumnsPopover]);
   const [theme, setTheme] = useState<ThemeId>('stealth-ghost');
   const isDarkTheme = THEME_CONFIGS[theme]?.isDark ?? true;
   const [isLoaded, setIsLoaded] = useState(false);
@@ -898,9 +931,20 @@ export const ACTracker = () => {
     setDensity(prefs.density || 'compact');
     setStarCountMode(prefs.starCountMode || 'cumulative');
     setIsSidebarOpen(Boolean(prefs.sidebarOpen));
-    setIsFlightDeckHeaderOpen(prefs.flightDeckHeaderOpen !== false);
+    const fm = Boolean(prefs.focusMode);
+    setFocusMode(fm);
+    if (fm) {
+      setIsFlightDeckHeaderOpen(false);
+    } else {
+      setIsFlightDeckHeaderOpen(prefs.flightDeckHeaderOpen !== false);
+    }
     setShowMissingAlliance(prefs.showMissingAlliance !== false);
     setShowMissingAdventure(prefs.showMissingAdventure !== false);
+    setVisibleColumns(
+      prefs.visibleColumns
+        ? { ...DEFAULT_VISIBLE_COLUMNS, ...prefs.visibleColumns }
+        : { ...DEFAULT_VISIBLE_COLUMNS }
+    );
 
     setDestinations(parseDestinationsFromUserData(profile.userData || {}));
     const loadedPlanes = profile.airplanes && Array.isArray(profile.airplanes) ? adjustAircraftList(profile.airplanes) : [];
@@ -1100,6 +1144,8 @@ export const ACTracker = () => {
             flightDeckHeaderOpen: isFlightDeckHeaderOpen,
             showMissingAlliance,
             showMissingAdventure,
+            visibleColumns,
+            focusMode,
           };
           const nextMap = {
             ...prev,
@@ -1113,7 +1159,7 @@ export const ACTracker = () => {
         });
       }
     }
-  }, [theme, logoId, density, starCountMode, isSidebarOpen, isFlightDeckHeaderOpen, showMissingAlliance, showMissingAdventure, isLoaded, activeProfileId]);
+  }, [theme, logoId, density, starCountMode, isSidebarOpen, isFlightDeckHeaderOpen, showMissingAlliance, showMissingAdventure, visibleColumns, focusMode, isLoaded, activeProfileId]);
 
   // Destination Progress Persistence into Active Profile
   useEffect(() => {
@@ -1556,6 +1602,43 @@ export const ACTracker = () => {
       .slice(0, 6);
   }, [destinations]);
 
+  const hiddenColumnCount = useMemo(() => {
+    return Object.values(visibleColumns).filter(v => !v).length;
+  }, [visibleColumns]);
+
+  const isSpaciousMode = hiddenColumnCount >= 4;
+
+  const denseGridTemplate = useMemo(() => {
+    const cols: string[] = [];
+    if (visibleColumns.bookmark) cols.push('32px');
+    cols.push('28px'); // icon / sprite
+    cols.push(isSpaciousMode ? 'minmax(140px, 1.6fr)' : 'minmax(130px, 1.3fr)'); // Destination
+    if (visibleColumns.collection) cols.push('minmax(110px, 1.1fr)');
+    if (visibleColumns.aircraft) cols.push('minmax(65px, 0.6fr)');
+    if (visibleColumns.progress) cols.push('minmax(105px, 0.9fr)');
+    if (visibleColumns.toNextStar) cols.push('minmax(80px, 0.7fr)');
+    if (visibleColumns.maps) cols.push('minmax(95px, 0.8fr)');
+    cols.push(isSpaciousMode ? 'minmax(135px, 1.1fr)' : 'minmax(120px, 1.0fr)'); // Flights scrubber
+    if (visibleColumns.totalFlights) cols.push('minmax(75px, 0.6fr)');
+    if (visibleColumns.info) cols.push('32px');
+    return cols.join(' ');
+  }, [visibleColumns, isSpaciousMode]);
+
+  const denseGridMinWidth = useMemo(() => {
+    let minW = 28 + (isSpaciousMode ? 140 : 130) + (isSpaciousMode ? 135 : 120);
+    let colCount = 3;
+    if (visibleColumns.bookmark) { minW += 32; colCount++; }
+    if (visibleColumns.collection) { minW += 110; colCount++; }
+    if (visibleColumns.aircraft) { minW += 65; colCount++; }
+    if (visibleColumns.progress) { minW += 105; colCount++; }
+    if (visibleColumns.toNextStar) { minW += 80; colCount++; }
+    if (visibleColumns.maps) { minW += 95; colCount++; }
+    if (visibleColumns.totalFlights) { minW += 75; colCount++; }
+    if (visibleColumns.info) { minW += 32; colCount++; }
+    minW += (colCount - 1) * 8 + 24;
+    return `${minW}px`;
+  }, [visibleColumns, isSpaciousMode]);
+
   // Real-time minute tick for live event countdown
   const [nowTick, setNowTick] = useState<number>(() => Date.now());
   useEffect(() => {
@@ -1997,14 +2080,14 @@ export const ACTracker = () => {
       {/* Top Operations Command Header */}
       <header className="sticky top-0 z-40 glass-panel border-b border-[var(--border-subtle)] shadow-lg backdrop-blur-xl">
         <div className="max-w-[1700px] mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-[1fr_auto_1fr] items-center h-14 sm:h-16 gap-4">
+          <div className="flex items-center justify-between gap-3 min-h-[3.5rem] sm:min-h-[4rem] py-1.5">
             {/* Brand Logo & Brand Crest */}
             <div className="flex items-center justify-start min-w-0 gap-3 shrink-0">
               <button
                 type="button"
                 onClick={() => setShowLogoModal(true)}
                 title="Click to customize AC-Tracker logo (4 options available)"
-                className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center shadow-lg hover:scale-105 transition-all shrink-0 relative group p-0.5 focus:outline-none cursor-pointer"
+                className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl flex items-center justify-center shadow-lg hover:scale-105 transition-all shrink-0 relative group p-0.5 focus:outline-none cursor-pointer"
               >
                 <img
                   src={activeLogo.file}
@@ -2024,14 +2107,14 @@ export const ACTracker = () => {
                   setFilterGroup('All');
                   setSearchQuery('');
                 }}
-                className="flex flex-col justify-center cursor-pointer group select-none"
+                className="flex flex-col justify-center cursor-pointer group select-none whitespace-nowrap shrink-0"
                 title="Reset filters and view all flights"
               >
-                <span className="font-heading font-bold text-base sm:text-lg tracking-tight text-[var(--text-main)] group-hover:text-[var(--accent)] transition-colors leading-none">
+                <span className="font-heading font-bold text-base sm:text-lg tracking-tight text-[var(--text-main)] group-hover:text-[var(--accent)] transition-colors leading-none whitespace-nowrap">
                   AC-TRACKER
                 </span>
-                <div className="flex items-center gap-1.5 mt-1">
-                  <span className="text-[11px] font-medium text-[var(--text-muted)] leading-none">
+                <div className="flex items-center gap-1.5 mt-1 whitespace-nowrap">
+                  <span className="text-[11px] font-medium text-[var(--text-muted)] leading-none whitespace-nowrap">
                     by Soupha
                   </span>
                   <button
@@ -2040,31 +2123,31 @@ export const ACTracker = () => {
                       e.stopPropagation();
                       setShowWhatsNewModal(true);
                     }}
-                    className="px-1.5 py-0.5 rounded text-[9px] font-mono font-medium theme-badge leading-none hover:scale-105 transition-transform cursor-pointer"
+                    className="px-1.5 py-0.5 rounded text-[9px] font-mono font-medium theme-badge leading-none hover:scale-105 transition-transform cursor-pointer whitespace-nowrap"
                     title="View What's New in this release"
                   >
                     {APP_VERSION}
                   </button>
                 </div>
-                <span className="text-[9px] font-mono text-[var(--text-muted)] opacity-75 mt-0.5 leading-none">
+                <span className="text-[9px] font-mono text-[var(--text-muted)] opacity-75 mt-0.5 leading-none whitespace-nowrap">
                   Updated: {APP_UPDATED_DATE}
                 </span>
               </div>
             </div>
 
-            {/* Left of Header Links: Star Count with Yellow Star Icon (Informational Only, Doubled Size) */}
-            <div className="hidden md:flex items-center justify-center gap-3 shrink-0">
+            {/* Left of Header Links: Star Count with Yellow Star Icon (Only on xl: >= 1280px) */}
+            <div className="hidden xl:flex items-center justify-center gap-3 shrink-0">
               <div
-                className="px-4 py-2 rounded-2xl bg-black/35 border border-amber-500/35 shadow-inner flex items-center gap-2.5 select-none"
+                className="px-4 py-2 rounded-2xl bg-black/35 border border-amber-500/35 shadow-inner flex items-center gap-2.5 select-none shrink-0"
                 title={`Total Stars Earned: ${globalStars.toLocaleString()}${totalOffsetStars > 0 ? ` (${trackedGlobalStars.toLocaleString()} tracked + ${totalOffsetStars.toLocaleString()} manual sync offset)` : ''}`}
               >
-                <Star className="w-6 h-6 text-amber-400 fill-amber-400 drop-shadow-md" />
-                <span className="font-heading font-bold text-xl text-amber-300 tracking-tight leading-none">
+                <Star className="w-5 h-5 text-amber-400 fill-amber-400 drop-shadow-md" />
+                <span className="font-heading font-bold text-lg text-amber-300 tracking-tight leading-none">
                   {globalStars.toLocaleString()}
                 </span>
               </div>
 
-              {/* View Switcher Tabs (Header Link Row - Static & Centered) */}
+              {/* View Switcher Tabs (Header Link Row - Static & Centered on xl: and up) */}
               <nav className="flex items-center gap-1.5 bg-black/25 p-1 rounded-2xl border border-white/5">
                 <button
                   onClick={() => setView('list')}
@@ -2134,8 +2217,18 @@ export const ACTracker = () => {
               </nav>
             </div>
 
-            {/* Global Utility Actions (Always Static on Every Page) */}
-            <div className="flex items-center justify-end gap-2 min-w-0">
+            {/* Global Utility Actions (Always Visible on Every Page) */}
+            <div className="flex items-center justify-end gap-2 shrink-0">
+              {/* Star Badge for Viewports < xl (compact, prevents top row collision) */}
+              <div
+                className="xl:hidden px-2.5 py-1.5 rounded-xl bg-black/35 border border-amber-500/35 flex items-center gap-1.5 select-none shrink-0"
+                title={`Total Stars Earned: ${globalStars.toLocaleString()}${totalOffsetStars > 0 ? ` (${trackedGlobalStars.toLocaleString()} tracked + ${totalOffsetStars.toLocaleString()} manual sync offset)` : ''}`}
+              >
+                <Star className="w-4 h-4 text-amber-400 fill-amber-400 drop-shadow-sm" />
+                <span className="font-heading font-bold text-xs sm:text-sm text-amber-300 leading-none">
+                  {globalStars.toLocaleString()}
+                </span>
+              </div>
               {/* Profile Selector Dropdown */}
               <div className="relative">
                 <button
@@ -2274,7 +2367,7 @@ export const ACTracker = () => {
         </div>
 
         {/* Mobile View Switcher Bar */}
-        <div className="md:hidden flex items-center overflow-x-auto px-4 py-2 border-t border-white/5 gap-1.5 no-scrollbar bg-black/20">
+        <div className="xl:hidden flex items-center overflow-x-auto px-4 py-2 border-t border-white/5 gap-1.5 no-scrollbar bg-black/20">
           <button
             onClick={() => setView('list')}
             className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap flex items-center gap-1.5 ${
@@ -2285,13 +2378,6 @@ export const ACTracker = () => {
           >
             <Compass className="w-3.5 h-3.5" /> Flights
           </button>
-          <div
-            className="px-2.5 py-1 rounded-xl text-xs font-mono font-bold whitespace-nowrap flex items-center gap-1 bg-amber-500/20 text-amber-300 border border-amber-500/30 select-none"
-            title={`Total Stars: ${globalStars.toLocaleString()}${totalOffsetStars > 0 ? ` (+${totalOffsetStars.toLocaleString()} manual sync)` : ''}`}
-          >
-            <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
-            {globalStars.toLocaleString()}
-          </div>
           <button
             onClick={() => setView('maps')}
             className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap flex items-center gap-1.5 ${
@@ -2338,7 +2424,7 @@ export const ACTracker = () => {
 
 
       {/* Main Body with Optional Category Drawer */}
-      <div className="flex-1 max-w-[1700px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4 flex gap-5">
+      <div className={`flex-1 max-w-[1700px] w-full mx-auto px-4 sm:px-6 lg:px-8 ${focusMode ? 'py-2' : 'py-3 sm:py-4'} flex gap-5`}>
         {/* Collapsible Category Drawer */}
         {isSidebarOpen && (view === 'list' || view === 'grid') && (
           <aside className="w-72 shrink-0 space-y-4 animate-in slide-in-from-left duration-200">
@@ -2449,7 +2535,7 @@ export const ACTracker = () => {
         )}
 
         {/* Main Content Area */}
-        <main className="flex-1 min-w-0 space-y-6">
+        <main className={`flex-1 min-w-0 ${focusMode ? 'space-y-2' : 'space-y-6'}`}>
           {/* VIEW: FLEET HANGAR */}
           {view === 'airplanes' && (
             <AirplanesPage
@@ -2786,7 +2872,7 @@ export const ACTracker = () => {
 
           {/* VIEW: FLIGHT DECK (LIST OR GRID) */}
           {(view === 'list' || view === 'grid') && (
-            <div className="space-y-4 animate-in fade-in duration-200">
+            <div className={`${focusMode ? 'space-y-2' : 'space-y-4'} animate-in fade-in duration-200`}>
               {/* Flight Deck HUD Header Banner */}
               {isFlightDeckHeaderOpen ? (
                 <div className="glass-panel rounded-3xl p-6 sm:p-8 relative overflow-hidden border border-[var(--border-card)] shadow-xl">
@@ -2863,7 +2949,7 @@ export const ACTracker = () => {
               {/* Current Event Cyber Flight-Deck Banner */}
               {activeEventInfo && (
                 <div
-                  className={`rounded-2xl p-4 sm:p-5 relative overflow-hidden backdrop-blur-md transition-all ${
+                  className={`rounded-2xl py-2.5 px-4 relative overflow-hidden backdrop-blur-md transition-all ${
                     isDarkTheme
                       ? 'bg-[#0d1626]/90 border border-cyan-500/30 hover:border-cyan-500/50 shadow-xl'
                       : 'bg-amber-50/70 border border-amber-200/80 hover:border-amber-300 shadow-sm'
@@ -2874,25 +2960,25 @@ export const ACTracker = () => {
                       isDarkTheme ? 'opacity-20 bg-cyan-400' : 'opacity-30 bg-amber-200'
                     }`}
                   />
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
-                    <div className="flex items-center gap-3.5 min-w-0">
+                  <div className="flex flex-wrap sm:flex-nowrap items-center justify-between gap-2.5 relative z-10">
+                    <div className="flex items-center gap-2.5 min-w-0">
                       {/* Event Icon with pulsing live radar beacon */}
                       <div
-                        className={`relative flex items-center justify-center shrink-0 w-11 h-11 sm:w-12 sm:h-12 rounded-xl p-1 transition-all shadow-md group ${
+                        className={`relative flex items-center justify-center shrink-0 w-8 h-8 rounded-lg p-0.5 transition-all shadow-md group ${
                           isDarkTheme
-                            ? 'bg-cyan-950/50 border border-cyan-500/40 shadow-[0_0_15px_rgba(0,229,255,0.15)] hover:border-cyan-400/70'
+                            ? 'bg-cyan-950/50 border border-cyan-500/40 shadow-[0_0_12px_rgba(0,229,255,0.15)] hover:border-cyan-400/70'
                             : 'bg-amber-100/90 border border-amber-300/90 shadow-sm hover:border-amber-400'
                         }`}
                       >
                         {/* Live active beacon ping in top-right corner */}
-                        <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5 z-20 pointer-events-none">
+                        <span className="absolute -top-1 -right-1 flex h-2 w-2 z-20 pointer-events-none">
                           <span
                             className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
                               isDarkTheme ? 'bg-cyan-400' : 'bg-amber-500'
                             }`}
                           />
                           <span
-                            className={`relative inline-flex rounded-full h-2.5 w-2.5 border ${
+                            className={`relative inline-flex rounded-full h-2 w-2 border ${
                               isDarkTheme
                                 ? 'bg-cyan-300 border-[#0d1626] shadow-[0_0_8px_#00e5ff]'
                                 : 'bg-amber-600 border-amber-50 shadow-[0_0_8px_rgba(217,119,6,0.5)]'
@@ -2914,43 +3000,41 @@ export const ACTracker = () => {
                         />
                       </div>
 
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span
-                            className={`text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-md ${
-                              isDarkTheme
-                                ? 'text-cyan-400 bg-cyan-950/80 border border-cyan-800/40'
-                                : 'text-amber-800 bg-amber-100/90 border border-amber-300/80'
-                            }`}
-                          >
-                            Active Live Event
-                          </span>
-                          {activeEventInfo.timeRemainingStr ? (
-                            <span className={`text-xs font-mono font-semibold ${isDarkTheme ? 'text-amber-300' : 'text-amber-900'}`}>
-                              ⏱️ {activeEventInfo.timeRemainingStr}
-                            </span>
-                          ) : activeEventInfo.daysRemaining !== null ? (
-                            <span className={`text-xs font-mono font-semibold ${isDarkTheme ? 'text-amber-300' : 'text-amber-900'}`}>
-                              ⏱️ {activeEventInfo.daysRemaining === 0 ? 'Ending Today (Final Hours)' : activeEventInfo.daysRemaining === 1 ? '1 day remaining (Ending Today)' : `${activeEventInfo.daysRemaining} days remaining`}
-                            </span>
-                          ) : null}
-                          {activeEventInfo.displayEndDate && (
-                            <span className={`text-[11px] font-mono hidden md:inline ${isDarkTheme ? 'text-[var(--text-muted)]' : 'text-slate-600'}`}>
-                              (ends {activeEventInfo.displayEndDate})
-                            </span>
-                          )}
-                        </div>
+                      <div className="min-w-0 flex items-center gap-2 flex-wrap">
+                        <span
+                          className={`text-[9px] font-mono font-bold uppercase tracking-wider px-1.5 py-0.5 rounded shrink-0 ${
+                            isDarkTheme
+                              ? 'text-cyan-400 bg-cyan-950/80 border border-cyan-800/40'
+                              : 'text-amber-800 bg-amber-100/90 border border-amber-300/80'
+                          }`}
+                        >
+                          Active Live Event
+                        </span>
                         <h2
-                          className={`text-base sm:text-lg font-bold font-heading mt-0.5 truncate flex items-center gap-2 ${
+                          className={`text-xs sm:text-sm font-bold font-heading truncate flex items-center gap-1.5 shrink-0 ${
                             isDarkTheme ? 'text-white' : 'text-slate-900'
                           }`}
                         >
                           Current Event: <span className={isDarkTheme ? 'text-cyan-300' : 'text-[#0f172a]'}>{activeEventInfo.eventName}</span>
                         </h2>
+                        {activeEventInfo.timeRemainingStr ? (
+                          <span className={`text-[11px] font-mono font-semibold shrink-0 ${isDarkTheme ? 'text-amber-300' : 'text-amber-900'}`}>
+                            ⏱️ {activeEventInfo.timeRemainingStr}
+                          </span>
+                        ) : activeEventInfo.daysRemaining !== null ? (
+                          <span className={`text-[11px] font-mono font-semibold shrink-0 ${isDarkTheme ? 'text-amber-300' : 'text-amber-900'}`}>
+                            ⏱️ {activeEventInfo.daysRemaining === 0 ? 'Ending Today (Final Hours)' : activeEventInfo.daysRemaining === 1 ? '1 day remaining' : `${activeEventInfo.daysRemaining} days remaining`}
+                          </span>
+                        ) : null}
+                        {activeEventInfo.displayEndDate && (
+                          <span className={`text-[10px] font-mono hidden lg:inline shrink-0 ${isDarkTheme ? 'text-[var(--text-muted)]' : 'text-slate-600'}`}>
+                            (ends {activeEventInfo.displayEndDate})
+                          </span>
+                        )}
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2.5 shrink-0 flex-wrap sm:flex-nowrap">
+                    <div className="flex items-center gap-2 shrink-0">
                       {/* Toggle / Filter Button */}
                       {activeCategory === 'Event Flights' && filterGroup === activeEventInfo.filterKeyword ? (
                         <button
@@ -2960,27 +3044,27 @@ export const ACTracker = () => {
                             setFilterGroup('All');
                             setFilterAircraft('All');
                           }}
-                          className={`tactile-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm ${
+                          className={`tactile-btn px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all shadow-sm ${
                             isDarkTheme
                               ? 'bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-400/40 text-cyan-200'
                               : 'bg-amber-100 hover:bg-amber-200 border border-amber-300 text-amber-900'
                           }`}
                         >
-                          <X className="w-3.5 h-3.5" />
-                          <span>Clear Filter / Show All</span>
+                          <X className="w-3 h-3" />
+                          <span>Clear Filter</span>
                         </button>
                       ) : (
                         <button
                           type="button"
                           onClick={() => handleFilterForEvent(activeEventInfo.filterKeyword)}
                           style={!isDarkTheme ? { backgroundColor: 'var(--accent)' } : undefined}
-                          className={`tactile-btn px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-md ${
+                          className={`tactile-btn px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all shadow-md ${
                             isDarkTheme
                               ? 'bg-cyan-500 hover:bg-cyan-400 text-slate-950 shadow-cyan-500/20'
                               : 'text-white hover:opacity-90 shadow-slate-900/10'
                           }`}
                         >
-                          <Compass className="w-3.5 h-3.5" />
+                          <Compass className="w-3 h-3" />
                           <span>Show Event Flights</span>
                         </button>
                       )}
@@ -2991,7 +3075,7 @@ export const ACTracker = () => {
                           href={activeEventInfo.wikiUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className={`tactile-btn px-3 py-1.5 rounded-xl text-xs font-medium flex items-center gap-1.5 transition-all ${
+                          className={`tactile-btn px-2.5 py-1 rounded-lg text-xs font-medium flex items-center gap-1 transition-all ${
                             isDarkTheme
                               ? 'border border-white/10 hover:border-cyan-500/30 bg-black/30 hover:bg-white/10 text-[var(--text-muted)] hover:text-white'
                               : 'border border-slate-300/80 hover:border-slate-400 bg-white/80 hover:bg-slate-100 text-[#475569] hover:text-slate-900 shadow-sm'
@@ -2999,7 +3083,7 @@ export const ACTracker = () => {
                           title="Open Event Wiki Guide"
                         >
                           <span>Wiki Guide</span>
-                          <ExternalLink className="w-3 h-3 opacity-70" />
+                          <ExternalLink className="w-2.5 h-2.5 opacity-70" />
                         </a>
                       )}
                     </div>
@@ -3008,42 +3092,44 @@ export const ACTracker = () => {
               )}
 
               {/* Category Quick Filter Pills Strip (Responsive Wrapped Layout - No Scrolling Required) */}
-              <div className="glass-panel rounded-2xl p-2 sm:p-2.5 border border-[var(--border-card)] flex flex-wrap items-center gap-1.5">
-                {categories.map(cat => {
-                  const isActive = activeCategory === cat;
-                  const stats = categoryStarsMap[cat];
-                  return (
-                    <button
-                      key={cat}
-                      onClick={() => handleCategoryClick(cat)}
-                      className={`tactile-btn px-2.5 py-1 rounded-xl text-xs font-medium transition-all flex items-center gap-1.5 ${
-                        isActive
-                          ? 'theme-btn-accent font-semibold shadow-md'
-                          : 'bg-black/20 hover:bg-white/10 text-[var(--text-muted)] hover:text-white border border-white/5'
-                      }`}
-                    >
-                      <span>{cat}</span>
-                      {stats && (
-                        <span className="px-1.5 py-0.2 rounded-full bg-black/30 text-[9px] font-mono opacity-90">
-                          {stats.earned}/{stats.max}★
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
+              {!focusMode && (
+                <div className="glass-panel rounded-2xl p-2 sm:p-2.5 border border-[var(--border-card)] flex flex-wrap items-center gap-1.5">
+                  {categories.map(cat => {
+                    const isActive = activeCategory === cat;
+                    const stats = categoryStarsMap[cat];
+                    return (
+                      <button
+                        key={cat}
+                        onClick={() => handleCategoryClick(cat)}
+                        className={`tactile-btn px-2.5 py-1 rounded-xl text-xs font-medium transition-all flex items-center gap-1.5 ${
+                          isActive
+                            ? 'theme-btn-accent font-semibold shadow-md'
+                            : 'bg-black/20 hover:bg-white/10 text-[var(--text-muted)] hover:text-white border border-white/5'
+                        }`}
+                      >
+                        <span>{cat}</span>
+                        {stats && (
+                          <span className="px-1.5 py-0.2 rounded-full bg-black/30 text-[9px] font-mono opacity-90">
+                            {stats.earned}/{stats.max}★
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
 
-                <button
-                  onClick={() => handleCategoryClick('Bookmarks')}
-                  className={`tactile-btn px-2.5 py-1 rounded-xl text-xs font-medium transition-all flex items-center gap-1.5 ${
-                    activeCategory === 'Bookmarks'
-                      ? 'bg-amber-500 text-slate-950 font-semibold shadow-md'
-                      : 'bg-black/20 hover:bg-white/10 text-amber-300 border border-amber-500/20'
-                  }`}
-                >
-                  <Bookmark className="w-3 h-3 fill-amber-400" />
-                  <span>Bookmarks ({destinations.filter(d => d.isCustomList).length})</span>
-                </button>
-              </div>
+                  <button
+                    onClick={() => handleCategoryClick('Bookmarks')}
+                    className={`tactile-btn px-2.5 py-1 rounded-xl text-xs font-medium transition-all flex items-center gap-1.5 ${
+                      activeCategory === 'Bookmarks'
+                        ? 'bg-amber-500 text-slate-950 font-semibold shadow-md'
+                        : 'bg-black/20 hover:bg-white/10 text-amber-300 border border-amber-500/20'
+                    }`}
+                  >
+                    <Bookmark className="w-3 h-3 fill-amber-400" />
+                    <span>Bookmarks ({destinations.filter(d => d.isCustomList).length})</span>
+                  </button>
+                </div>
+              )}
 
               {/* Recently Flown Quick-Jump Bar */}
               {recentDestinations.length > 0 && (
@@ -3111,10 +3197,11 @@ export const ACTracker = () => {
               )}
 
               {/* Filter & Command Controller Bar */}
-              <div className="glass-panel rounded-2xl p-2.5 sm:p-3 border border-[var(--border-card)] space-y-2">
-                <div className="flex flex-col md:flex-row items-stretch md:items-center gap-2">
+              <div className={`glass-panel rounded-2xl p-2 sm:p-2.5 border border-[var(--border-card)] ${focusMode ? 'space-y-1.5' : 'space-y-2'} relative z-40`}>
+                {/* Top Row: Search Input + View & Deck Ergonomics Controls */}
+                <div className="flex flex-wrap items-center gap-2">
                   {/* Search Bar with Shortcut hint */}
-                  <div className="relative flex-1">
+                  <div className="relative flex-1 min-w-[180px] sm:min-w-[220px]">
                     <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
                     <input
                       id="command-search-input"
@@ -3134,58 +3221,8 @@ export const ACTracker = () => {
                     )}
                   </div>
 
-                  {/* Aircraft Dropdown */}
+                  {/* View & Deck Controls Cluster */}
                   <div className="flex items-center gap-1.5 shrink-0 flex-wrap sm:flex-nowrap">
-                    <select
-                      value={filterAircraft}
-                      onChange={e => setFilterAircraft(e.target.value)}
-                      className="bg-black/30 border border-white/10 rounded-xl px-2.5 py-1.5 text-xs font-normal text-[var(--text-main)] focus:outline-none focus:border-[var(--border-active)] transition-all cursor-pointer"
-                    >
-                      <option value="All">All Aircraft ({allAircraft.length - 1})</option>
-                      {allAircraft.filter(ac => ac !== 'All').map(ac => (
-                        <option key={ac} value={ac}>{ac}</option>
-                      ))}
-                    </select>
-
-                    {/* Mission / Group Dropdown */}
-                    <select
-                      value={filterGroup}
-                      onChange={e => setFilterGroup(e.target.value)}
-                      className="bg-black/30 border border-white/10 rounded-xl px-2.5 py-1.5 text-xs font-normal text-[var(--text-main)] focus:outline-none focus:border-[var(--border-active)] transition-all cursor-pointer max-w-[140px] truncate"
-                    >
-                      <option value="All">All Missions</option>
-                      {allGroups.filter(g => g !== 'All').map(g => (
-                        <option key={g} value={g}>{g}</option>
-                      ))}
-                    </select>
-
-                    {/* Sort Controller */}
-                    <div className="flex items-center bg-black/30 rounded-xl border border-white/10 overflow-hidden">
-                      <select
-                        value={sortConfig.field}
-                        onChange={e => handleSort(e.target.value as SortField)}
-                        className="bg-transparent px-2.5 py-1.5 text-xs font-normal text-[var(--text-main)] focus:outline-none cursor-pointer"
-                      >
-                        <option value="destination">Sort: Destination</option>
-                        <option value="group">Sort: Collection</option>
-                        <option value="aircraft">Sort: Aircraft</option>
-                        <option value="neededToNextStar">Sort: Closest Star</option>
-                        <option value="currentStarFlights">Sort: Star Flights</option>
-                        <option value="flightsDone">Sort: Total Flights</option>
-                        <option value="stars">Sort: Star Rank</option>
-                        <option value="mastery">Sort: Progress %</option>
-                        <option value="maps">Sort: Maps Stocked</option>
-                        <option value="lastUpdated">Sort: Last Updated</option>
-                      </select>
-                      <button
-                        onClick={() => setSortConfig(prev => ({ ...prev, direction: prev.direction === 'asc' ? 'desc' : 'asc' }))}
-                        title={`Sort ${sortConfig.direction === 'asc' ? 'Descending' : 'Ascending'}`}
-                        className="p-1.5 border-l border-white/10 hover:bg-white/10 theme-accent-text transition-all"
-                      >
-                        <ArrowUpDown className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-
                     {/* Density Switcher (in toolbar) */}
                     {view === 'list' && (
                       <div className="flex items-center bg-black/30 rounded-xl p-0.5 border border-white/10 shrink-0">
@@ -3209,6 +3246,153 @@ export const ACTracker = () => {
                         </button>
                       </div>
                     )}
+
+                    {/* Columns Popover Toggle */}
+                    {view === 'list' && density === 'compact' && (
+                      <div className="relative shrink-0" ref={columnsPopoverRef}>
+                        <button
+                          type="button"
+                          onClick={() => setShowColumnsPopover(prev => !prev)}
+                          className={`tactile-btn px-2.5 py-1.5 rounded-xl border border-white/10 text-xs font-mono flex items-center gap-1.5 transition-all ${
+                            showColumnsPopover || isSpaciousMode
+                              ? 'theme-btn-soft font-semibold shadow-sm'
+                              : 'bg-black/30 text-[var(--text-muted)] hover:text-white'
+                          }`}
+                          title="Visible Columns Customizer (Split-Screen optimization)"
+                        >
+                          <SlidersHorizontal className="w-3.5 h-3.5" />
+                          <span className="hidden sm:inline">Columns</span>
+                          {hiddenColumnCount > 0 && (
+                            <span className="w-4 h-4 rounded-full bg-amber-500/20 text-amber-300 text-[10px] font-mono font-bold flex items-center justify-center">
+                              {8 - hiddenColumnCount}
+                            </span>
+                          )}
+                        </button>
+
+                        {/* Columns Popover Menu */}
+                        {showColumnsPopover && (
+                          <div
+                            className="absolute left-0 sm:left-auto sm:right-0 top-full mt-2 w-64 sm:w-72 rounded-2xl border border-[var(--border-card)] shadow-2xl p-3 z-60 backdrop-blur-xl text-xs animate-in fade-in slide-in-from-top-2 duration-150 max-w-[calc(100vw-2rem)]"
+                            style={{ backgroundColor: 'var(--bg-card)' }}
+                          >
+                            <div className="flex items-center justify-between pb-2 mb-2 border-b border-white/10">
+                              <span className="font-semibold text-[var(--text-main)] font-heading flex items-center gap-1.5">
+                                <SlidersHorizontal className="w-3.5 h-3.5 theme-accent-text" />
+                                Visible Columns
+                              </span>
+                              <button
+                                onClick={() => setShowColumnsPopover(false)}
+                                className="p-1 text-[var(--text-muted)] hover:text-white rounded-lg hover:bg-white/10"
+                              >
+                                <X className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+
+                            {/* Quick Presets */}
+                            <div className="grid grid-cols-2 gap-1.5 mb-2.5">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setVisibleColumns({
+                                    bookmark: true,
+                                    collection: false,
+                                    aircraft: true,
+                                    progress: false,
+                                    toNextStar: false,
+                                    maps: false,
+                                    totalFlights: false,
+                                    info: false,
+                                  });
+                                }}
+                                className="tactile-btn py-1 px-2 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 font-medium text-[11px] text-center transition-all truncate"
+                                title="Keeps Bookmark, Aircraft, Destination & Flights"
+                              >
+                                Split-Screen Minimal
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setVisibleColumns({
+                                    bookmark: true,
+                                    collection: true,
+                                    aircraft: true,
+                                    progress: true,
+                                    toNextStar: true,
+                                    maps: true,
+                                    totalFlights: true,
+                                    info: true,
+                                  });
+                                }}
+                                className="tactile-btn py-1 px-2 rounded-lg bg-white/5 hover:bg-white/15 border border-white/10 text-[var(--text-main)] font-medium text-[11px] text-center transition-all truncate"
+                              >
+                                Show All
+                              </button>
+                            </div>
+
+                            <div className="text-[10px] uppercase font-mono tracking-wider text-[var(--text-faint)] mb-1.5 px-1">
+                              Toggle Columns
+                            </div>
+
+                            {/* Individual Checkboxes */}
+                            <div className="space-y-1 max-h-56 overflow-y-auto custom-scrollbar pr-1">
+                              {[
+                                { key: 'bookmark', label: 'Bookmark (★)' },
+                                { key: 'collection', label: 'Collection' },
+                                { key: 'aircraft', label: 'Aircraft' },
+                                { key: 'progress', label: 'Progress (Stars)' },
+                                { key: 'toNextStar', label: 'To Next Star' },
+                                { key: 'maps', label: 'Maps' },
+                                { key: 'totalFlights', label: 'Total Flights' },
+                                { key: 'info', label: 'Expand / Info Arrow' },
+                              ].map(({ key, label }) => {
+                                const isChecked = visibleColumns[key as keyof VisibleColumnsConfig];
+                                return (
+                                  <label
+                                    key={key}
+                                    className="flex items-center justify-between p-1.5 rounded-lg hover:bg-white/5 cursor-pointer select-none transition-colors"
+                                  >
+                                    <span className={`text-xs ${isChecked ? 'text-[var(--text-main)] font-medium' : 'text-[var(--text-muted)]'}`}>
+                                      {label}
+                                    </span>
+                                    <input
+                                      type="checkbox"
+                                      checked={isChecked}
+                                      onChange={e => {
+                                        setVisibleColumns(prev => ({
+                                          ...prev,
+                                          [key]: e.target.checked,
+                                        }));
+                                      }}
+                                      style={{ accentColor: 'var(--accent)' }}
+                                      className="rounded cursor-pointer"
+                                    />
+                                  </label>
+                                );
+                              })}
+                            </div>
+
+                            <div className="mt-2 pt-2 border-t border-white/10 text-[10px] text-[var(--text-faint)] italic px-1">
+                              Note: Destination & Flights scrubber are always visible.
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Compact Deck / Focus Mode Toggle */}
+                    <button
+                      type="button"
+                      onClick={toggleFocusMode}
+                      className={`tactile-btn px-2.5 py-1.5 rounded-xl border border-white/10 text-xs font-mono flex items-center gap-1.5 transition-all shrink-0 ${
+                        focusMode
+                          ? 'theme-btn-accent font-semibold shadow-md'
+                          : 'bg-black/30 text-[var(--text-muted)] hover:text-white'
+                      }`}
+                      title={focusMode ? 'Disable Focus / Split-Screen Mode' : 'Enable Focus / Split-Screen Mode (Slim Header & Dropdown)'}
+                    >
+                      {focusMode ? <Maximize2 className="w-3.5 h-3.5" /> : <Minimize2 className="w-3.5 h-3.5" />}
+                      <span className="hidden sm:inline">Focus</span>
+                    </button>
 
                     {/* Tactical List vs Grid Switcher */}
                     <div className="flex items-center bg-black/30 rounded-xl p-0.5 border border-white/10 shrink-0">
@@ -3236,13 +3420,89 @@ export const ACTracker = () => {
                     <button
                       onClick={() => setIsSidebarOpen(!isSidebarOpen)}
                       title={isSidebarOpen ? 'Hide Category Drawer' : 'Show Category Drawer'}
-                      className={`tactile-btn p-1.5 rounded-xl border border-white/10 transition-all ${
+                      className={`tactile-btn p-1.5 rounded-xl border border-white/10 transition-all shrink-0 ${
                         isSidebarOpen
                           ? 'theme-btn-soft'
                           : 'bg-black/30 text-[var(--text-muted)] hover:text-white'
                       }`}
                     >
                       <PanelLeft className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Bottom Row: Filter Dropdowns (Category [if focusMode], Aircraft, Missions, Sort) */}
+                <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-white/5">
+                  {/* Focus Mode Compact Category Dropdown */}
+                  {focusMode && (
+                    <select
+                      value={activeCategory}
+                      onChange={e => handleCategoryClick(e.target.value)}
+                      className="flex-1 sm:flex-none bg-black/30 border border-white/10 rounded-xl px-2.5 py-1.5 text-xs font-normal text-[var(--text-main)] focus:outline-none focus:border-[var(--border-active)] transition-all cursor-pointer min-w-[130px] max-w-[200px] truncate"
+                    >
+                      {categories.map(cat => {
+                        const stats = categoryStarsMap[cat];
+                        const countStr = stats ? ` (${stats.earned}/${stats.max}★)` : '';
+                        return (
+                          <option key={cat} value={cat}>
+                            Category: {cat}{countStr}
+                          </option>
+                        );
+                      })}
+                      <option value="Bookmarks">
+                        Category: Bookmarks ({destinations.filter(d => d.isCustomList).length})
+                      </option>
+                    </select>
+                  )}
+
+                  {/* Aircraft Dropdown */}
+                  <select
+                    value={filterAircraft}
+                    onChange={e => setFilterAircraft(e.target.value)}
+                    className="flex-1 sm:flex-none bg-black/30 border border-white/10 rounded-xl px-2.5 py-1.5 text-xs font-normal text-[var(--text-main)] focus:outline-none focus:border-[var(--border-active)] transition-all cursor-pointer min-w-[110px]"
+                  >
+                    <option value="All">All Aircraft ({allAircraft.length - 1})</option>
+                    {allAircraft.filter(ac => ac !== 'All').map(ac => (
+                      <option key={ac} value={ac}>{ac}</option>
+                    ))}
+                  </select>
+
+                  {/* Mission / Group Dropdown */}
+                  <select
+                    value={filterGroup}
+                    onChange={e => setFilterGroup(e.target.value)}
+                    className="flex-1 sm:flex-none bg-black/30 border border-white/10 rounded-xl px-2.5 py-1.5 text-xs font-normal text-[var(--text-main)] focus:outline-none focus:border-[var(--border-active)] transition-all cursor-pointer min-w-[120px] max-w-[160px] truncate"
+                  >
+                    <option value="All">All Missions</option>
+                    {allGroups.filter(g => g !== 'All').map(g => (
+                      <option key={g} value={g}>{g}</option>
+                    ))}
+                  </select>
+
+                  {/* Sort Controller */}
+                  <div className="flex-1 sm:flex-none flex items-center bg-black/30 rounded-xl border border-white/10 overflow-hidden min-w-[140px]">
+                    <select
+                      value={sortConfig.field}
+                      onChange={e => handleSort(e.target.value as SortField)}
+                      className="w-full bg-transparent px-2.5 py-1.5 text-xs font-normal text-[var(--text-main)] focus:outline-none cursor-pointer"
+                    >
+                      <option value="destination">Sort: Destination</option>
+                      <option value="group">Sort: Collection</option>
+                      <option value="aircraft">Sort: Aircraft</option>
+                      <option value="neededToNextStar">Sort: Closest Star</option>
+                      <option value="currentStarFlights">Sort: Star Flights</option>
+                      <option value="flightsDone">Sort: Total Flights</option>
+                      <option value="stars">Sort: Star Rank</option>
+                      <option value="mastery">Sort: Progress %</option>
+                      <option value="maps">Sort: Maps Stocked</option>
+                      <option value="lastUpdated">Sort: Last Updated</option>
+                    </select>
+                    <button
+                      onClick={() => setSortConfig(prev => ({ ...prev, direction: prev.direction === 'asc' ? 'desc' : 'asc' }))}
+                      title={`Sort ${sortConfig.direction === 'asc' ? 'Descending' : 'Ascending'}`}
+                      className="p-1.5 border-l border-white/10 hover:bg-white/10 theme-accent-text transition-all shrink-0"
+                    >
+                      <ArrowUpDown className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 </div>
@@ -3358,12 +3618,17 @@ export const ACTracker = () => {
                 /* HIGH-DENSITY FLIGHT OPERATIONS TABLE (25+ DESTINATIONS PER SCREEN) */
                 <div className="glass-panel rounded-2xl border border-[var(--border-card)] overflow-x-auto shadow-sm">
                   {/* Sticky Table Header */}
-                  <div className="hidden lg:grid grid-cols-[32px_28px_minmax(140px,1.3fr)_minmax(120px,1.1fr)_minmax(70px,0.6fr)_minmax(110px,0.9fr)_minmax(85px,0.7fr)_minmax(105px,0.8fr)_minmax(125px,1.0fr)_minmax(80px,0.6fr)_32px] items-center gap-2 px-3 py-2 text-[10px] font-mono font-semibold uppercase tracking-wider dense-table-header sticky top-0 z-30 backdrop-blur-md select-none min-w-[1020px]">
-                    <div className="text-center" title="Bookmark / Pin">★</div>
-                    <div className="text-center" aria-hidden="true"></div>
+                  <div
+                    className="hidden sm:grid items-center gap-2 px-3 py-2 text-[10px] font-mono font-semibold uppercase tracking-wider dense-table-header sticky top-0 z-30 backdrop-blur-md select-none"
+                    style={{ gridTemplateColumns: denseGridTemplate, minWidth: denseGridMinWidth }}
+                  >
+                    {visibleColumns.bookmark && (
+                      <div className="text-center whitespace-nowrap" title="Bookmark / Pin">★</div>
+                    )}
+                    <div className="text-center whitespace-nowrap" aria-hidden="true"></div>
                     <div
                       onClick={() => handleSort('destination')}
-                      className="cursor-pointer hover:text-[var(--text-main)] transition-colors flex items-center gap-1 group/col"
+                      className="cursor-pointer hover:text-[var(--text-main)] transition-colors flex items-center gap-1 group/col whitespace-nowrap truncate"
                     >
                       <span>Destination</span>
                       {sortConfig.field === 'destination' ? (
@@ -3372,64 +3637,74 @@ export const ACTracker = () => {
                         <ArrowUpDown className="w-3 h-3 opacity-30 group-hover/col:opacity-80" />
                       )}
                     </div>
-                    <div
-                      onClick={() => handleSort('group')}
-                      className="cursor-pointer hover:text-[var(--text-main)] transition-colors flex items-center gap-1 group/col"
-                    >
-                      <span>Collection</span>
-                      {sortConfig.field === 'group' ? (
-                        sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3 theme-accent-text" /> : <ChevronDown className="w-3 h-3 theme-accent-text" />
-                      ) : (
-                        <ArrowUpDown className="w-3 h-3 opacity-30 group-hover/col:opacity-80" />
-                      )}
-                    </div>
-                    <div
-                      onClick={() => handleSort('aircraft')}
-                      className="text-center cursor-pointer hover:text-[var(--text-main)] transition-colors flex items-center justify-center gap-1 group/col"
-                    >
-                      <span>Aircraft</span>
-                      {sortConfig.field === 'aircraft' ? (
-                        sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3 theme-accent-text" /> : <ChevronDown className="w-3 h-3 theme-accent-text" />
-                      ) : (
-                        <ArrowUpDown className="w-3 h-3 opacity-30 group-hover/col:opacity-80" />
-                      )}
-                    </div>
-                    <div
-                      onClick={() => handleSort('stars')}
-                      className="cursor-pointer hover:text-[var(--text-main)] transition-colors flex items-center gap-1 group/col"
-                    >
-                      <span>Progress</span>
-                      {sortConfig.field === 'stars' || sortConfig.field === 'mastery' ? (
-                        sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3 theme-accent-text" /> : <ChevronDown className="w-3 h-3 theme-accent-text" />
-                      ) : (
-                        <ArrowUpDown className="w-3 h-3 opacity-30 group-hover/col:opacity-80" />
-                      )}
-                    </div>
-                    <div
-                      onClick={() => handleSort('neededToNextStar')}
-                      className="text-center cursor-pointer hover:text-[var(--text-main)] transition-colors flex items-center justify-center gap-1 group/col"
-                    >
-                      <span>To Next Star</span>
-                      {sortConfig.field === 'neededToNextStar' ? (
-                        sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3 theme-accent-text" /> : <ChevronDown className="w-3 h-3 theme-accent-text" />
-                      ) : (
-                        <ArrowUpDown className="w-3 h-3 opacity-30 group-hover/col:opacity-80" />
-                      )}
-                    </div>
-                    <div
-                      onClick={() => handleSort('maps')}
-                      className="text-center cursor-pointer hover:text-[var(--text-main)] transition-colors flex items-center justify-center gap-1 group/col"
-                    >
-                      <span>Maps</span>
-                      {sortConfig.field === 'maps' ? (
-                        sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3 theme-accent-text" /> : <ChevronDown className="w-3 h-3 theme-accent-text" />
-                      ) : (
-                        <ArrowUpDown className="w-3 h-3 opacity-30 group-hover/col:opacity-80" />
-                      )}
-                    </div>
+                    {visibleColumns.collection && (
+                      <div
+                        onClick={() => handleSort('group')}
+                        className="cursor-pointer hover:text-[var(--text-main)] transition-colors flex items-center gap-1 group/col whitespace-nowrap truncate"
+                      >
+                        <span>Collection</span>
+                        {sortConfig.field === 'group' ? (
+                          sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3 theme-accent-text" /> : <ChevronDown className="w-3 h-3 theme-accent-text" />
+                        ) : (
+                          <ArrowUpDown className="w-3 h-3 opacity-30 group-hover/col:opacity-80" />
+                        )}
+                      </div>
+                    )}
+                    {visibleColumns.aircraft && (
+                      <div
+                        onClick={() => handleSort('aircraft')}
+                        className="text-center cursor-pointer hover:text-[var(--text-main)] transition-colors flex items-center justify-center gap-1 group/col whitespace-nowrap truncate"
+                      >
+                        <span>Aircraft</span>
+                        {sortConfig.field === 'aircraft' ? (
+                          sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3 theme-accent-text" /> : <ChevronDown className="w-3 h-3 theme-accent-text" />
+                        ) : (
+                          <ArrowUpDown className="w-3 h-3 opacity-30 group-hover/col:opacity-80" />
+                        )}
+                      </div>
+                    )}
+                    {visibleColumns.progress && (
+                      <div
+                        onClick={() => handleSort('stars')}
+                        className="cursor-pointer hover:text-[var(--text-main)] transition-colors flex items-center gap-1 group/col whitespace-nowrap truncate"
+                      >
+                        <span>Progress</span>
+                        {sortConfig.field === 'stars' || sortConfig.field === 'mastery' ? (
+                          sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3 theme-accent-text" /> : <ChevronDown className="w-3 h-3 theme-accent-text" />
+                        ) : (
+                          <ArrowUpDown className="w-3 h-3 opacity-30 group-hover/col:opacity-80" />
+                        )}
+                      </div>
+                    )}
+                    {visibleColumns.toNextStar && (
+                      <div
+                        onClick={() => handleSort('neededToNextStar')}
+                        className="text-center cursor-pointer hover:text-[var(--text-main)] transition-colors flex items-center justify-center gap-1 group/col whitespace-nowrap truncate"
+                      >
+                        <span>To Next Star</span>
+                        {sortConfig.field === 'neededToNextStar' ? (
+                          sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3 theme-accent-text" /> : <ChevronDown className="w-3 h-3 theme-accent-text" />
+                        ) : (
+                          <ArrowUpDown className="w-3 h-3 opacity-30 group-hover/col:opacity-80" />
+                        )}
+                      </div>
+                    )}
+                    {visibleColumns.maps && (
+                      <div
+                        onClick={() => handleSort('maps')}
+                        className="text-center cursor-pointer hover:text-[var(--text-main)] transition-colors flex items-center justify-center gap-1 group/col whitespace-nowrap truncate"
+                      >
+                        <span>Maps</span>
+                        {sortConfig.field === 'maps' ? (
+                          sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3 theme-accent-text" /> : <ChevronDown className="w-3 h-3 theme-accent-text" />
+                        ) : (
+                          <ArrowUpDown className="w-3 h-3 opacity-30 group-hover/col:opacity-80" />
+                        )}
+                      </div>
+                    )}
                     <div
                       onClick={() => handleSort('currentStarFlights')}
-                      className="text-center cursor-pointer hover:text-[var(--text-main)] transition-colors flex items-center justify-center gap-1 group/col"
+                      className="text-center cursor-pointer hover:text-[var(--text-main)] transition-colors flex items-center justify-center gap-1 group/col whitespace-nowrap truncate"
                     >
                       <span>Flights</span>
                       {sortConfig.field === 'currentStarFlights' ? (
@@ -3438,22 +3713,26 @@ export const ACTracker = () => {
                         <ArrowUpDown className="w-3 h-3 opacity-30 group-hover/col:opacity-80" />
                       )}
                     </div>
-                    <div
-                      onClick={() => handleSort('flightsDone')}
-                      className="text-center cursor-pointer hover:text-[var(--text-main)] transition-colors flex items-center justify-center gap-1 group/col"
-                    >
-                      <span>Total Flights</span>
-                      {sortConfig.field === 'flightsDone' ? (
-                        sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3 theme-accent-text" /> : <ChevronDown className="w-3 h-3 theme-accent-text" />
-                      ) : (
-                        <ArrowUpDown className="w-3 h-3 opacity-30 group-hover/col:opacity-80" />
-                      )}
-                    </div>
-                    <div className="text-center">Info</div>
+                    {visibleColumns.totalFlights && (
+                      <div
+                        onClick={() => handleSort('flightsDone')}
+                        className="text-center cursor-pointer hover:text-[var(--text-main)] transition-colors flex items-center justify-center gap-1 group/col whitespace-nowrap truncate"
+                      >
+                        <span>Total Flights</span>
+                        {sortConfig.field === 'flightsDone' ? (
+                          sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3 theme-accent-text" /> : <ChevronDown className="w-3 h-3 theme-accent-text" />
+                        ) : (
+                          <ArrowUpDown className="w-3 h-3 opacity-30 group-hover/col:opacity-80" />
+                        )}
+                      </div>
+                    )}
+                    {visibleColumns.info && (
+                      <div className="text-center whitespace-nowrap">Info</div>
+                    )}
                   </div>
 
                   {/* Dense Table Rows */}
-                  <div className="divide-y divide-[var(--border-subtle)] lg:min-w-[1020px]">
+                  <div className="divide-y divide-[var(--border-subtle)]" style={{ minWidth: denseGridMinWidth }}>
                     {sortedAndFilteredDestinations.map(dest => {
                       const stars = getStars(dest.flightsDone, dest.star1Req, dest.star2Req, dest.star3Req, dest.star4Req, dest.star5Req);
                       const maxStars = getMaxStars(dest);
@@ -3475,20 +3754,25 @@ export const ACTracker = () => {
                           }`}
                         >
                           {/* Desktop Dense Row */}
-                          <div className="hidden lg:grid grid-cols-[32px_28px_minmax(140px,1.3fr)_minmax(120px,1.1fr)_minmax(70px,0.6fr)_minmax(110px,0.9fr)_minmax(85px,0.7fr)_minmax(105px,0.8fr)_minmax(125px,1.0fr)_minmax(80px,0.6fr)_32px] items-center gap-2 px-3 py-1.5 text-xs dense-table-row min-w-[1020px]">
+                          <div
+                            className="hidden sm:grid items-center gap-2 px-3 py-1.5 text-xs dense-table-row"
+                            style={{ gridTemplateColumns: denseGridTemplate, minWidth: denseGridMinWidth }}
+                          >
                             {/* Pin / Bookmark */}
-                            <div className="flex justify-center">
-                              <button
-                                onClick={e => toggleBookmark(dest.id, e)}
-                                className="p-0.5 text-[var(--text-muted)] hover:text-amber-400 transition-colors"
-                                title={dest.isCustomList ? 'Remove Bookmark' : 'Bookmark Route'}
-                              >
-                                <Star className={`w-3.5 h-3.5 ${dest.isCustomList ? 'fill-amber-400 text-amber-400 glow-star' : ''}`} />
-                              </button>
-                            </div>
+                            {visibleColumns.bookmark && (
+                              <div className="flex justify-center whitespace-nowrap">
+                                <button
+                                  onClick={e => toggleBookmark(dest.id, e)}
+                                  className="p-0.5 text-[var(--text-muted)] hover:text-amber-400 transition-colors"
+                                  title={dest.isCustomList ? 'Remove Bookmark' : 'Bookmark Route'}
+                                >
+                                  <Star className={`w-3.5 h-3.5 ${dest.isCustomList ? 'fill-amber-400 text-amber-400 glow-star' : ''}`} />
+                                </button>
+                              </div>
+                            )}
 
                             {/* Icon / Sprite */}
-                            <div className="flex justify-center">
+                            <div className="flex justify-center whitespace-nowrap">
                               <div className="w-6 h-6 rounded-md bg-black/40 border border-white/10 flex items-center justify-center p-0.5 overflow-hidden">
                                 {dest.icon ? (
                                   <img src={dest.icon} alt={dest.destination} className="w-5 h-5 object-contain" />
@@ -3501,10 +3785,12 @@ export const ACTracker = () => {
                             </div>
 
                             {/* Destination Name */}
-                            <div className="min-w-0 flex items-center">
+                            <div className="min-w-0 flex items-center whitespace-nowrap truncate">
                               <span
                                 onClick={() => setExpandedRowId(isExpanded ? null : dest.id)}
-                                className="font-semibold text-[var(--text-main)] truncate cursor-pointer hover:text-[var(--accent)] transition-colors"
+                                className={`${
+                                  isSpaciousMode ? 'text-sm sm:text-base font-semibold' : 'text-xs font-semibold'
+                                } text-[var(--text-main)] truncate cursor-pointer hover:text-[var(--accent)] transition-colors whitespace-nowrap`}
                                 title={dest.destination}
                               >
                                 {dest.destination}
@@ -3512,98 +3798,108 @@ export const ACTracker = () => {
                             </div>
 
                             {/* Collection / Set */}
-                            <div className="min-w-0 flex items-center">
-                              {dest.group && dest.group !== 'None' ? (
-                                <span
-                                  className="text-[11px] text-[var(--text-muted)] bg-white/5 px-1.5 py-0.5 rounded truncate max-w-full hover:text-[var(--text-main)] transition-colors"
-                                  title={dest.group}
-                                >
-                                  {dest.group}
-                                </span>
-                              ) : (
-                                <span className="text-[var(--text-faint)] text-xs select-none pl-1">—</span>
-                              )}
-                            </div>
+                            {visibleColumns.collection && (
+                              <div className="min-w-0 flex items-center whitespace-nowrap truncate">
+                                {dest.group && dest.group !== 'None' ? (
+                                  <span
+                                    className="text-[11px] text-[var(--text-muted)] bg-white/5 px-1.5 py-0.5 rounded truncate max-w-full hover:text-[var(--text-main)] transition-colors whitespace-nowrap"
+                                    title={dest.group}
+                                  >
+                                    {dest.group}
+                                  </span>
+                                ) : (
+                                  <span className="text-[var(--text-faint)] text-xs select-none pl-1 whitespace-nowrap">—</span>
+                                )}
+                              </div>
+                            )}
 
                             {/* Aircraft Class */}
-                            <div className="text-center">
-                              <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-medium theme-badge uppercase inline-block truncate max-w-[80px]" title={dest.aircraft}>
-                                {dest.aircraft}
-                              </span>
-                            </div>
+                            {visibleColumns.aircraft && (
+                              <div className="text-center whitespace-nowrap truncate">
+                                <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-medium theme-badge uppercase inline-block truncate max-w-[80px] whitespace-nowrap" title={dest.aircraft}>
+                                  {dest.aircraft}
+                                </span>
+                              </div>
+                            )}
 
                             {/* Star Progress HUD */}
-                            <div className="flex items-center gap-1.5">
-                              <div className="flex items-center gap-0.5 shrink-0">
-                                {Array.from({ length: maxStars }).map((_, idx) => (
-                                  <Star
-                                    key={idx}
-                                    className={`w-2.5 h-2.5 ${
-                                      stars >= idx + 1 ? 'theme-star-active' : 'theme-star-inactive'
+                            {visibleColumns.progress && (
+                              <div className="flex items-center gap-1.5 whitespace-nowrap">
+                                <div className="flex items-center gap-0.5 shrink-0">
+                                  {Array.from({ length: maxStars }).map((_, idx) => (
+                                    <Star
+                                      key={idx}
+                                      className={`w-2.5 h-2.5 ${
+                                        stars >= idx + 1 ? 'theme-star-active' : 'theme-star-inactive'
+                                      }`}
+                                    />
+                                  ))}
+                                </div>
+                                <div className="flex-1 h-1.5 bg-black/40 rounded-full overflow-hidden min-w-[36px]">
+                                  <div
+                                    className={`h-full rounded-full transition-all duration-300 ${
+                                      stars >= maxStars ? 'bg-[var(--star-color)]' : 'theme-progress-fill'
                                     }`}
+                                    style={{ width: `${Math.min(100, Math.round((dest.flightsDone / maxReq) * 100))}%` }}
                                   />
-                                ))}
+                                </div>
                               </div>
-                              <div className="flex-1 h-1.5 bg-black/40 rounded-full overflow-hidden min-w-[36px]">
-                                <div
-                                  className={`h-full rounded-full transition-all duration-300 ${
-                                    stars >= maxStars ? 'bg-[var(--star-color)]' : 'theme-progress-fill'
-                                  }`}
-                                  style={{ width: `${Math.min(100, Math.round((dest.flightsDone / maxReq) * 100))}%` }}
-                                />
-                              </div>
-                            </div>
+                            )}
 
                             {/* To Next Star */}
-                            <div className="text-center">
-                              {stars >= maxStars ? (
-                                <span className="text-[9px] font-mono font-semibold text-amber-400 bg-amber-400/15 px-1.5 py-0.2 rounded">
-                                  ACE ★
-                                </span>
-                              ) : (
-                                <span className="text-[11px] font-mono text-[var(--text-muted)]">
-                                  <span className="font-semibold text-[var(--text-main)]">{info.needed}</span> to ★{info.nextStar}
-                                </span>
-                              )}
-                            </div>
+                            {visibleColumns.toNextStar && (
+                              <div className="text-center whitespace-nowrap truncate">
+                                {stars >= maxStars ? (
+                                  <span className="text-[9px] font-mono font-semibold text-amber-400 bg-amber-400/15 px-1.5 py-0.2 rounded whitespace-nowrap">
+                                    ACE ★
+                                  </span>
+                                ) : (
+                                  <span className="text-[11px] font-mono text-[var(--text-muted)] whitespace-nowrap">
+                                    <span className="font-semibold text-[var(--text-main)]">{info.needed}</span> to ★{info.nextStar}
+                                  </span>
+                                )}
+                              </div>
+                            )}
 
                             {/* Map Stock */}
-                            <div className="flex items-center justify-center">
-                              {dest.needsMap ? (
-                                <div
-                                  className="inline-flex items-center gap-1 bg-black/40 border border-white/10 px-1 py-0.5 rounded-lg shadow-inner"
-                                  title={dest.mapDuration ? `Map count (${dest.mapDuration} active window per map)` : 'Map count (click to edit)'}
-                                >
-                                  <button
-                                    onClick={() => updateMapCount(dest.id, (dest.mapsDone || 0) - 1)}
-                                    disabled={(dest.mapsDone || 0) <= 0}
-                                    className="tactile-btn w-6 h-7 rounded bg-white/5 hover:bg-white/15 text-[var(--text-muted)] hover:text-white flex items-center justify-center disabled:opacity-20 text-xs font-mono font-bold transition-all"
-                                    title="Subtract 1 Map"
-                                  >
-                                    -
-                                  </button>
-                                  <EditableNumberInput
-                                    value={dest.mapsDone || 0}
-                                    onChange={val => updateMapCount(dest.id, val)}
-                                    ariaLabel={`Map count for ${dest.destination}`}
+                            {visibleColumns.maps && (
+                              <div className="flex items-center justify-center whitespace-nowrap">
+                                {dest.needsMap ? (
+                                  <div
+                                    className="inline-flex items-center gap-1 bg-black/40 border border-white/10 px-1 py-0.5 rounded-lg shadow-inner whitespace-nowrap"
                                     title={dest.mapDuration ? `Map count (${dest.mapDuration} active window per map)` : 'Map count (click to edit)'}
-                                    className="w-12 h-7 text-center font-mono font-bold text-sm bg-black/50 border border-white/10 rounded-md focus:border-[var(--border-active)] theme-accent-text shadow-inner"
-                                  />
-                                  <button
-                                    onClick={() => updateMapCount(dest.id, (dest.mapsDone || 0) + 1)}
-                                    className="tactile-btn w-6 h-7 rounded theme-btn-soft flex items-center justify-center text-xs font-mono font-bold transition-all"
-                                    title="Add 1 Map"
                                   >
-                                    +
-                                  </button>
-                                </div>
-                              ) : (
-                                <span className="text-[var(--text-faint)] text-xs select-none">—</span>
-                              )}
-                            </div>
+                                    <button
+                                      onClick={() => updateMapCount(dest.id, (dest.mapsDone || 0) - 1)}
+                                      disabled={(dest.mapsDone || 0) <= 0}
+                                      className="tactile-btn w-6 h-7 rounded bg-white/5 hover:bg-white/15 text-[var(--text-muted)] hover:text-white flex items-center justify-center disabled:opacity-20 text-xs font-mono font-bold transition-all"
+                                      title="Subtract 1 Map"
+                                    >
+                                      -
+                                    </button>
+                                    <EditableNumberInput
+                                      value={dest.mapsDone || 0}
+                                      onChange={val => updateMapCount(dest.id, val)}
+                                      ariaLabel={`Map count for ${dest.destination}`}
+                                      title={dest.mapDuration ? `Map count (${dest.mapDuration} active window per map)` : 'Map count (click to edit)'}
+                                      className="w-12 h-7 text-center font-mono font-bold text-sm bg-black/50 border border-white/10 rounded-md focus:border-[var(--border-active)] theme-accent-text shadow-inner"
+                                    />
+                                    <button
+                                      onClick={() => updateMapCount(dest.id, (dest.mapsDone || 0) + 1)}
+                                      className="tactile-btn w-6 h-7 rounded theme-btn-soft flex items-center justify-center text-xs font-mono font-bold transition-all"
+                                      title="Add 1 Map"
+                                    >
+                                      +
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <span className="text-[var(--text-faint)] text-xs select-none whitespace-nowrap">—</span>
+                                )}
+                              </div>
+                            )}
 
                             {/* Current Star Flight Scrubber */}
-                            <div className="flex items-center justify-center gap-1">
+                            <div className="flex items-center justify-center gap-1 whitespace-nowrap">
                               <button
                                 onClick={() => updateFlightCount(dest.id, Math.max(0, dest.flightsDone - 1))}
                                 disabled={dest.flightsDone <= 0}
@@ -3614,11 +3910,11 @@ export const ACTracker = () => {
                               </button>
 
                               {starDetails.isMastered ? (
-                                <div className="inline-flex items-center justify-center px-2.5 h-7 rounded-lg bg-amber-400/10 border border-amber-400/25 text-amber-300 font-mono font-semibold text-xs select-none">
+                                <div className="inline-flex items-center justify-center px-2.5 h-7 rounded-lg bg-amber-400/10 border border-amber-400/25 text-amber-300 font-mono font-semibold text-xs select-none whitespace-nowrap">
                                   ★ ACE
                                 </div>
                               ) : (
-                                <div className="inline-flex items-center bg-black/50 border border-white/10 rounded-lg px-2 h-7 focus-within:border-[var(--border-active)] shadow-inner">
+                                <div className="inline-flex items-center bg-black/50 border border-white/10 rounded-lg px-2 h-7 focus-within:border-[var(--border-active)] shadow-inner whitespace-nowrap">
                                   <EditableNumberInput
                                     value={starDetails.tierDone}
                                     onChange={val => {
@@ -3627,9 +3923,11 @@ export const ACTracker = () => {
                                     }}
                                     ariaLabel={`Flights on Star ${starDetails.currentStar} for ${dest.destination}`}
                                     title={`Flights on Star ${starDetails.currentStar} (click to edit)`}
-                                    className="w-10 h-5 text-center font-mono font-bold text-xs bg-transparent border-0 focus:ring-0 theme-accent-text p-0"
+                                    className={`w-10 h-5 text-center font-mono font-bold ${
+                                      isSpaciousMode ? 'text-sm' : 'text-xs'
+                                    } bg-transparent border-0 focus:ring-0 theme-accent-text p-0`}
                                   />
-                                  <span className="text-[11px] font-mono text-[var(--text-muted)] select-none">
+                                  <span className={`${isSpaciousMode ? 'text-xs' : 'text-[11px]'} font-mono text-[var(--text-muted)] select-none`}>
                                     /{starDetails.tierTarget}
                                   </span>
                                 </div>
@@ -3645,32 +3943,36 @@ export const ACTracker = () => {
                             </div>
 
                             {/* Total Flights */}
-                            <div className="flex items-center justify-center">
-                              <EditableNumberInput
-                                value={dest.flightsDone}
-                                onChange={val => updateFlightCount(dest.id, Math.max(0, val))}
-                                ariaLabel={`Total flights for ${dest.destination}`}
-                                title="Total flights completed (click to edit)"
-                                className="w-14 h-7 text-center font-mono font-bold text-xs bg-black/40 border border-white/10 rounded-lg focus:border-[var(--border-active)] text-[var(--text-main)] shadow-inner"
-                              />
-                            </div>
+                            {visibleColumns.totalFlights && (
+                              <div className="flex items-center justify-center whitespace-nowrap">
+                                <EditableNumberInput
+                                  value={dest.flightsDone}
+                                  onChange={val => updateFlightCount(dest.id, Math.max(0, val))}
+                                  ariaLabel={`Total flights for ${dest.destination}`}
+                                  title="Total flights completed (click to edit)"
+                                  className="w-14 h-7 text-center font-mono font-bold text-xs bg-black/40 border border-white/10 rounded-lg focus:border-[var(--border-active)] text-[var(--text-main)] shadow-inner"
+                                />
+                              </div>
+                            )}
 
                             {/* Details Chevron */}
-                            <div className="flex justify-center">
-                              <button
-                                onClick={() => setExpandedRowId(isExpanded ? null : dest.id)}
-                                className={`p-1 rounded-lg transition-colors ${
-                                  isExpanded ? 'theme-btn-soft' : 'text-[var(--text-muted)] hover:text-white hover:bg-white/5'
-                                }`}
-                                title={isExpanded ? 'Collapse Details' : 'Expand Details'}
-                              >
-                                {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-                              </button>
-                            </div>
+                            {visibleColumns.info && (
+                              <div className="flex justify-center whitespace-nowrap">
+                                <button
+                                  onClick={() => setExpandedRowId(isExpanded ? null : dest.id)}
+                                  className={`p-1 rounded-lg transition-colors ${
+                                    isExpanded ? 'theme-btn-soft' : 'text-[var(--text-muted)] hover:text-white hover:bg-white/5'
+                                  }`}
+                                  title={isExpanded ? 'Collapse Details' : 'Expand Details'}
+                                >
+                                  {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                                </button>
+                              </div>
+                            )}
                           </div>
 
-                          {/* Mobile/Tablet Fallback (< lg) */}
-                          <div className="lg:hidden p-2.5 flex items-center justify-between gap-2 text-xs">
+                          {/* Mobile/Tablet Fallback (< sm) */}
+                          <div className="sm:hidden p-2.5 flex items-center justify-between gap-2 text-xs">
                             <div className="flex items-center gap-2 min-w-0 flex-1">
                               <button
                                 onClick={e => toggleBookmark(dest.id, e)}

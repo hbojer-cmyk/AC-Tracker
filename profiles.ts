@@ -16,6 +16,28 @@ export interface UserDataEntry {
   isCustomList?: boolean;
 }
 
+export interface VisibleColumnsConfig {
+  bookmark: boolean;
+  collection: boolean;
+  aircraft: boolean;
+  progress: boolean;
+  toNextStar: boolean;
+  maps: boolean;
+  totalFlights: boolean;
+  info: boolean;
+}
+
+export const DEFAULT_VISIBLE_COLUMNS: VisibleColumnsConfig = {
+  bookmark: true,
+  collection: true,
+  aircraft: true,
+  progress: true,
+  toNextStar: true,
+  maps: true,
+  totalFlights: true,
+  info: true,
+};
+
 export interface ProfilePrefs {
   themeId: string;
   logoId: string;
@@ -25,6 +47,8 @@ export interface ProfilePrefs {
   flightDeckHeaderOpen: boolean;
   showMissingAlliance: boolean;
   showMissingAdventure: boolean;
+  visibleColumns?: VisibleColumnsConfig;
+  focusMode?: boolean;
 }
 
 export interface StarHistoryEntry {
@@ -110,6 +134,8 @@ export function getDefaultPrefs(): ProfilePrefs {
     flightDeckHeaderOpen: true,
     showMissingAlliance: true,
     showMissingAdventure: true,
+    visibleColumns: { ...DEFAULT_VISIBLE_COLUMNS },
+    focusMode: false,
   };
 }
 
@@ -206,6 +232,8 @@ export function migrateLegacyData(
     flightDeckHeaderOpen: localStorage.getItem('aeroquest_flight_deck_header_open') !== 'false',
     showMissingAlliance: localStorage.getItem('aeroquest_show_missing_alliance') !== 'false',
     showMissingAdventure: localStorage.getItem('aeroquest_show_missing_adventure') !== 'false',
+    visibleColumns: { ...DEFAULT_VISIBLE_COLUMNS },
+    focusMode: false,
   };
 
   const newProfile: ProfileData = {
@@ -259,7 +287,12 @@ export function cloneProfile(source: ProfileData, newMeta: ProfileMeta): Profile
     meta: newMeta,
     userData: JSON.parse(JSON.stringify(source.userData || {})),
     airplanes: source.airplanes ? JSON.parse(JSON.stringify(source.airplanes)) : null,
-    prefs: { ...source.prefs },
+    prefs: {
+      ...source.prefs,
+      visibleColumns: source.prefs.visibleColumns
+        ? { ...source.prefs.visibleColumns }
+        : { ...DEFAULT_VISIBLE_COLUMNS },
+    },
     starHistory: source.starHistory ? JSON.parse(JSON.stringify(source.starHistory)) : [],
     starOffsets: source.starOffsets ? { ...source.starOffsets } : { ...DEFAULT_STAR_SYNC_OFFSETS },
   };
