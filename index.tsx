@@ -58,6 +58,7 @@ import { AirplanesPage, AIRCRAFT_SPRITES } from './AirplanesPage';
 import { AboutPage } from './AboutPage';
 import { EventsPage } from './EventsPage';
 import { StatsPage } from './StatsPage';
+import { MissionsPage } from './MissionsPage';
 import { ACTIVE_EVENT_CONFIG, getEventIcon } from './src/data/eventsData';
 import { adjustAircraftList } from './src/aircraftData';
 import {
@@ -91,8 +92,8 @@ import { ProfileModal, MigrationModal } from './ProfileModal';
 
 // --- App Version & Maintenance Tracker ---
 // NOTE: Always update APP_UPDATED_DATE whenever making changes in the app
-export const APP_VERSION = 'Version 2.6';
-export const APP_UPDATED_DATE = 'Oct 30, 2026';
+export const APP_VERSION = 'Version 2.7';
+export const APP_UPDATED_DATE = 'Nov 5, 2026';
 
 // --- Types & Interfaces ---
 type SortField =
@@ -110,7 +111,7 @@ type SortField =
 
 type SortDirection = 'asc' | 'desc';
 
-type ViewMode = 'list' | 'grid' | 'maps' | 'airplanes' | 'stats' | 'events' | 'about';
+type ViewMode = 'list' | 'grid' | 'maps' | 'airplanes' | 'stats' | 'events' | 'about' | 'missions';
 
 export type ThemeId =
   | 'mach-blue'
@@ -765,6 +766,7 @@ export const ACTracker = () => {
     setStarCountMode(mode);
   };
   const [view, setView] = useState<ViewMode>('list');
+  const [missionProgress, setMissionProgress] = useState<Record<string, Record<string, number>>>({});
   const [density, setDensity] = useState<'compact' | 'comfortable'>('compact');
 
   const toggleDensity = (newDensity: 'compact' | 'comfortable') => {
@@ -950,6 +952,7 @@ export const ACTracker = () => {
     const loadedPlanes = profile.airplanes && Array.isArray(profile.airplanes) ? adjustAircraftList(profile.airplanes) : [];
     setOwnedAirplanes(loadedPlanes);
     setStarHistory(profile.starHistory || []);
+    setMissionProgress(profile.missions || {});
     setStarOffsets(
       profile.starOffsets
         ? { ...DEFAULT_STAR_SYNC_OFFSETS, ...profile.starOffsets }
@@ -974,6 +977,51 @@ export const ACTracker = () => {
         return nextMap;
       });
     }
+  };
+
+  // Helper to update mission item counters
+  const handleMissionItemChange = (missionId: string, itemId: string, count: number) => {
+    setMissionProgress(prev => {
+      const updatedMission = { ...(prev[missionId] || {}), [itemId]: Math.max(0, count) };
+      const next = { ...prev, [missionId]: updatedMission };
+      if (activeProfileId) {
+        setProfiles(pMap => {
+          if (!pMap[activeProfileId]) return pMap;
+          const nextMap = {
+            ...pMap,
+            [activeProfileId]: {
+              ...pMap[activeProfileId],
+              missions: next,
+            },
+          };
+          saveAllProfiles(nextMap);
+          return nextMap;
+        });
+      }
+      return next;
+    });
+  };
+
+  const handleBatchMissionProgress = (missionId: string, updates: Record<string, number>) => {
+    setMissionProgress(prev => {
+      const updatedMission = { ...(prev[missionId] || {}), ...updates };
+      const next = { ...prev, [missionId]: updatedMission };
+      if (activeProfileId) {
+        setProfiles(pMap => {
+          if (!pMap[activeProfileId]) return pMap;
+          const nextMap = {
+            ...pMap,
+            [activeProfileId]: {
+              ...pMap[activeProfileId],
+              missions: next,
+            },
+          };
+          saveAllProfiles(nextMap);
+          return nextMap;
+        });
+      }
+      return next;
+    });
   };
 
   // Switch Active Profile
@@ -1780,13 +1828,13 @@ export const ACTracker = () => {
   // Handlers
   const handleStarRankClick = (star: number) => {
     setFilterStarRank(prev => (prev === star ? null : star));
-    if (view === 'stats' || view === 'airplanes' || view === 'maps' || view === 'events' || view === 'about') {
+    if (view === 'stats' || view === 'airplanes' || view === 'maps' || view === 'events' || view === 'about' || view === 'missions') {
       setView('list');
     }
   };
 
   const handleCategoryClick = (cat: string) => {
-    if (view === 'stats' || view === 'airplanes' || view === 'maps' || view === 'events' || view === 'about') {
+    if (view === 'stats' || view === 'airplanes' || view === 'maps' || view === 'events' || view === 'about' || view === 'missions') {
       setView('list');
     }
     setActiveCategory(cat);
@@ -1799,7 +1847,7 @@ export const ACTracker = () => {
   };
 
   const handleSubItemClick = (cat: string, item: string) => {
-    if (view === 'stats' || view === 'airplanes' || view === 'maps' || view === 'events' || view === 'about') {
+    if (view === 'stats' || view === 'airplanes' || view === 'maps' || view === 'events' || view === 'about' || view === 'missions') {
       setView('list');
     }
     setActiveCategory(cat);
@@ -2194,6 +2242,17 @@ export const ACTracker = () => {
                 </button>
 
                 <button
+                  onClick={() => setView('missions')}
+                  className={`tactile-btn px-3.5 py-1.5 rounded-xl text-xs font-medium flex items-center gap-2 transition-all ${
+                    view === 'missions'
+                      ? 'theme-btn-accent font-semibold shadow-md'
+                      : 'text-[var(--text-muted)] hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  <Trophy className="w-4 h-4" /> Missions
+                </button>
+
+                <button
                   onClick={() => setView('events')}
                   className={`tactile-btn px-3.5 py-1.5 rounded-xl text-xs font-medium flex items-center gap-2 transition-all ${
                     view === 'events'
@@ -2403,6 +2462,14 @@ export const ACTracker = () => {
             <BarChart3 className="w-3.5 h-3.5" /> Stats
           </button>
           <button
+            onClick={() => setView('missions')}
+            className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap flex items-center gap-1.5 ${
+              view === 'missions' ? 'theme-btn-accent font-semibold shadow-sm' : 'text-[var(--text-muted)] hover:bg-white/5'
+            }`}
+          >
+            <Trophy className="w-3.5 h-3.5" /> Missions
+          </button>
+          <button
             onClick={() => setView('events')}
             className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap flex items-center gap-1.5 ${
               view === 'events' ? 'theme-btn-accent font-semibold shadow-sm' : 'text-[var(--text-muted)] hover:bg-white/5'
@@ -2541,6 +2608,25 @@ export const ACTracker = () => {
             <AirplanesPage
               airplanes={ownedAirplanes}
               onSaveAirplanes={handleSaveOwnedAirplanes}
+            />
+          )}
+
+          {/* VIEW: MISSIONS DEPOT */}
+          {view === 'missions' && (
+            <MissionsPage
+              missionProgress={missionProgress}
+              onUpdateCount={handleMissionItemChange}
+              onBatchUpdate={handleBatchMissionProgress}
+              onNavigateToDestination={(destName) => {
+                setActiveCategory('All Destinations');
+                setFilterAircraft('All');
+                setFilterGroup('All');
+                setFilterStarRank(null);
+                setShowOnlyMaps(false);
+                setHide3Star(false);
+                setSearchQuery(destName);
+                setView('list');
+              }}
             />
           )}
 
@@ -5191,13 +5277,13 @@ export const ACTracker = () => {
               {/* Feature 1 */}
               <div className="p-4 rounded-2xl bg-black/20 border border-white/5 space-y-2">
                 <div className="flex items-center gap-2">
-                  <span className="text-base">🎃</span>
+                  <span className="text-base">🗼</span>
                   <h4 className="text-xs font-semibold text-[var(--text-main)] font-heading">
-                    Live Event Artwork & Radar Beacon
+                    Mission Depot & Special Prizes (Eiffel Tower)
                   </h4>
                 </div>
                 <p className="text-xs text-[var(--text-muted)] leading-relaxed">
-                  The Flights page "Active Live Event" banner now displays official transparent event artwork (featuring Dark Skies) with a live pulsing radar beacon and one-click route filtering.
+                  Track rare item requirements across 5 aircraft tiers (250 items total) to construct grand city wonders like the Eiffel Tower. Features interactive steppers, quick Max/Reset, flight jumps, and multi-profile persistence.
                 </p>
               </div>
 

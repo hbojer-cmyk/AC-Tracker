@@ -54,7 +54,30 @@ Event walkthroughs
 
 ---
 
+## 🎯 Missions Backlog
+
+- [x] **Mission: Aztec Pyramid** (Implemented in v2.7 — Adventure Tier: Owl)
+    - 30 items total (6 each across 5 items in Owl class from Aztec Legacy collection)
+    - Reward: Collectible building (+50 Max Population, 3x3 footprint, drops Aztec collection items / 24h)
+
+- [x] **Mission: Colosseum** (Implemented in v2.7 — Adventure Tier: Hawk)
+    - 30 items total (6 each across 5 items in Hawk class from Roman Holiday collection)
+    - Reward: Collectible building (+50 Max Population, 3x3 footprint, drops Roman collection items / 24h)
+
+- [x] **Mission: Tower of London** (Implemented in v2.7 — Regional Tier: Swift, Owl, Hawk, Raven, Eagle)
+    - 250 items total (10 each across 25 items in Swift, Owl, Hawk, Raven, Eagle classes)
+    - Reward: Commerce landmark (+25% bonus, 2 radius, 600 coins / 24h)
+
+- [x] **Mission: Eiffel Tower** (Implemented in v2.7 — Heavy Long-Haul Tier: Jumbo, Giant, Falcon, Thunderbird, Condor)
+    - 250 items total (10 each across 25 items in Jumbo, Giant, Falcon, Thunderbird, Condor classes)
+    - Reward: Commerce landmark (+25% bonus, 2 radius, 630 coins / 24h)
+
+- [ ] **Mission: Temple of Ah Cacao** (Pending data)
+
+
 ## ✅ Implemented / Done
+- [x] November Calendar Banner Update (Nov 5, 2026): Updated the 12-month event calendar month banner for November (`icons/calendar/11.jpg`) with fresh, high-definition seasonal artwork. Bumped `APP_UPDATED_DATE` to `'Nov 5, 2026'`.
+- [x] Mission Depot & Special Prize Counters — Eiffel Tower Template (Nov 5, 2026 - v2.7): Built a dedicated Missions Depot view and extensible mission template architecture for tracking items required to reach grand landmark prizes in Airport City, headlined by the Eiffel Tower (Commerce, +25% bonus, 2 radius, 630 coins/day). Features all 25 cataloged item requirements across 5 aircraft tiers (Jumbo Aquarium Fish, Giant World Delicacies, Falcon Hotel Furnishings, Thunderbird Ice Cream Parlor, Condor Dining Forks; 10 each = 250 items total) with tactile -/+ steppers, direct number inputs, +5 quick steps, Max and Reset controls, completion badges, collapsible group accordions, search & filter toolbar, in-game stats dossier preview modal, one-click flight jump navigation to the Flights tab, and full multi-profile persistence. Bumped `APP_VERSION` to `Version 2.7` and verified `APP_UPDATED_DATE = 'Nov 5, 2026'`.
 - [x] Filter Toolbar Responsive Wrapping & Split-Screen Usability (Oct 30, 2026 - v2.6): Resolved rigid non-wrapping flex layout bug in filter toolbar by changing container to `flex flex-wrap items-center gap-2`, applying `flex-1 sm:flex-none` with responsive min-widths on aircraft, mission, and sort dropdowns, and expanding search input smoothly so controls stack into two balanced, clean rows on narrow and split-screen monitors (700px–960px). Bumped `APP_VERSION` to `Version 2.6` and verified `APP_UPDATED_DATE = 'Oct 30, 2026'`.
 - [x] Side-by-Side Split-Screen Monitor Optimization (Oct 30, 2026 - v2.4.1): Built custom Visible Columns picker with 8 independent toggles and quick presets ("Split-Screen Minimal" & "Show All") persisted to multi-profile preferences; dynamic grid layout and font scale-up (`text-sm sm:text-base`) when 4+ columns are hidden; lowered dense table desktop breakpoint from `lg:` (1024px) to `sm:` (640px) to guarantee compact single-line rows across 700px–960px half-monitor windows with `whitespace-nowrap` truncation; streamlined Live Event banner to a compact 48px flex row; added "Focus Mode" toolbar toggle collapsing the hero banner and replacing the 2-row category pills with a compact toolbar dropdown while tightening vertical spacing. Bumped `APP_VERSION` to `Version 2.4.1` and `APP_UPDATED_DATE` to `Oct 30, 2026`.
 - [x] Bug-Fix & Polish Overhaul (Oct 29, 2026 - v2.5): Resolved 4★ & 5★ route inclusion in "Lowest Hanging Fruit" radar and 5-star visual badge rendering in `StatsPage.tsx`; stabilized `chartPoints` SVG telemetry return type (`null` on empty) and initialized backfill milestone star count to current synced stars with clamped maximum; auto-reset active category, aircraft, group, and star filters when navigating to a route from the Lowest Hanging Fruit radar in `index.tsx`; synced "All Destinations" category pill and sidebar count with `totalOffsetStars` and clamped `globalPercentage` to 100%; wiped historical `starHistory` telemetry when resetting active profile progress; replaced non-flight event buttons with direct Forum Wiki walkthrough guide links across quest events ("Riding the Comet", "Cinemania", "The Great Game") in `eventsData.ts` and `EventsPage.tsx`; aligned active event calendar month check with current calendar month; preserved manual aircraft class selection in `AirplanesPage.tsx` and `aircraftData.ts`; stripped all unused imports across `StatsPage.tsx`, `index.tsx`, `AboutPage.tsx`, `AirplanesPage.tsx`, and `ProfileModal.tsx`; and ensured `README.md` is standard UTF-8. Updated `APP_VERSION` to `Version 2.5` and verified `APP_UPDATED_DATE = 'Oct 29, 2026'`.

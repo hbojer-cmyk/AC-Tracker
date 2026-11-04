@@ -82,6 +82,7 @@ export interface ProfileData {
   prefs: ProfilePrefs;
   starHistory?: StarHistoryEntry[];
   starOffsets?: StarSyncOffsets;
+  missions?: Record<string, Record<string, number>>; // missionId -> { itemId: count }
 }
 
 export const STORAGE_KEYS = {
@@ -250,6 +251,7 @@ export function migrateLegacyData(
     prefs,
     starHistory: [],
     starOffsets: { ...DEFAULT_STAR_SYNC_OFFSETS },
+    missions: {},
   };
 
   const allProfiles: Record<string, ProfileData> = {
@@ -278,6 +280,7 @@ export function createBlankProfile(meta: ProfileMeta): ProfileData {
     prefs: getDefaultPrefs(),
     starHistory: [],
     starOffsets: { ...DEFAULT_STAR_SYNC_OFFSETS },
+    missions: {},
   };
 }
 
@@ -295,6 +298,7 @@ export function cloneProfile(source: ProfileData, newMeta: ProfileMeta): Profile
     },
     starHistory: source.starHistory ? JSON.parse(JSON.stringify(source.starHistory)) : [],
     starOffsets: source.starOffsets ? { ...source.starOffsets } : { ...DEFAULT_STAR_SYNC_OFFSETS },
+    missions: source.missions ? JSON.parse(JSON.stringify(source.missions)) : {},
   };
 }
 
