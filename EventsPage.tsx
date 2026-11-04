@@ -80,7 +80,6 @@ export const EventsPage: React.FC<EventsPageProps> = ({
                 <div className="space-y-3">
                   {month.events.map((evt, idx) => {
                     const isLiveActive = Boolean(
-                      month.monthNumber === (new Date().getMonth() + 1) &&
                       ACTIVE_EVENT_CONFIG?.eventName?.trim() &&
                       (() => {
                         if (!ACTIVE_EVENT_CONFIG.startDate || !ACTIVE_EVENT_CONFIG.endDate) return false;
@@ -95,7 +94,11 @@ export const EventsPage: React.FC<EventsPageProps> = ({
                             ? ACTIVE_EVENT_CONFIG.endDate
                             : ACTIVE_EVENT_CONFIG.endDate + 'T23:59:59'
                         );
-                        return now >= startD.getTime() && now <= endD.getTime();
+                        const inDateWindow = now >= startD.getTime() && now <= endD.getTime();
+                        const inEventMonth =
+                          month.monthNumber === startD.getMonth() + 1 ||
+                          month.monthNumber === endD.getMonth() + 1;
+                        return inDateWindow && inEventMonth;
                       })() &&
                       (evt.filterKeyword === ACTIVE_EVENT_CONFIG.filterKeyword ||
                         evt.title.toLowerCase() === ACTIVE_EVENT_CONFIG.eventName.toLowerCase())

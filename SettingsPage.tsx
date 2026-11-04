@@ -651,7 +651,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                   Milestone Offsets
                 </span>
                 <span className="text-[10px] font-mono text-[var(--text-muted)] font-bold">
-                  Total: {Object.values(starOffsets).reduce((a, b) => a + (b || 0), 0)}
+                  Total: {Object.values(starOffsets).reduce<number>((a, b) => a + Number(b || 0), 0)}
                 </span>
               </div>
               <div className="space-y-1.5">

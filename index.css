@@ -3,6 +3,11 @@
 @tailwind utilities;
 
 @layer base {
+  *, ::before, ::after {
+    --theme-accent: var(--accent);
+    --theme-accent-soft: var(--accent-muted);
+  }
+
   html {
     scrollbar-gutter: stable;
   }

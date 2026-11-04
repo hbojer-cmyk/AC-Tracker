@@ -58,6 +58,14 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
   // Deletion confirmation state
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
+  React.useEffect(() => {
+    if (isOpen) {
+      setMode(initialMode);
+      setEditingProfileId(null);
+      setDeletingId(null);
+    }
+  }, [isOpen, initialMode]);
+
   if (!isOpen) return null;
 
   const profileList = Object.values(profiles) as ProfileData[];

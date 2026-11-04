@@ -21,15 +21,9 @@ export interface AircraftInstance {
 
 export const getAircraftTypeFromName = (name: string, fallback: string = 'Swift'): string => {
   if (!name) return fallback;
-  for (const type of ALL_AIRCRAFT_TYPES) {
-    const regex = new RegExp(`\\b${type}\\b`, 'i');
+  for (const type of OWNABLE_AIRCRAFT) {
+    const regex = new RegExp(`(?:^|\\b|_|-)${type}(?:\\b|\\d|_|-|$)`, 'i');
     if (regex.test(name)) {
-      return type;
-    }
-  }
-  const lowerName = name.toLowerCase();
-  for (const type of ALL_AIRCRAFT_TYPES) {
-    if (lowerName.includes(type.toLowerCase())) {
       return type;
     }
   }

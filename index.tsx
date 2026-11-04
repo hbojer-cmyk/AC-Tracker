@@ -1005,13 +1005,24 @@ export const ACTracker = () => {
     }
     setShowMissingAlliance(prefs.showMissingAlliance !== false);
     setShowMissingAdventure(prefs.showMissingAdventure !== false);
-    setEnabledViews(prefs.enabledViews || DEFAULT_ENABLED_VIEWS);
-    setDefaultFlightView(prefs.defaultFlightView || 'list');
+    const nextEnabledViews = prefs.enabledViews || DEFAULT_ENABLED_VIEWS;
+    setEnabledViews(nextEnabledViews);
+    const nextDefaultFlightView = prefs.defaultFlightView || 'list';
+    setDefaultFlightView(nextDefaultFlightView);
     setShowRecentFlights(prefs.showRecentFlights !== false);
     setShowActiveEventBanner(prefs.showActiveEventBanner !== false);
     setSelectedMissionId(prefs.selectedMissionId || 'aztec-pyramid');
     if (isInitialMount && (view === 'list' || view === 'grid')) {
-      setView(prefs.defaultFlightView || 'list');
+      setView(nextDefaultFlightView);
+    } else if (
+      (view === 'maps' && nextEnabledViews.maps === false) ||
+      (view === 'airplanes' && nextEnabledViews.airplanes === false) ||
+      (view === 'stats' && nextEnabledViews.stats === false) ||
+      (view === 'missions' && nextEnabledViews.missions === false) ||
+      (view === 'events' && nextEnabledViews.events === false) ||
+      (view === 'about' && nextEnabledViews.about === false)
+    ) {
+      setView(nextDefaultFlightView);
     }
     setVisibleColumns(
       prefs.visibleColumns
@@ -1930,14 +1941,14 @@ export const ACTracker = () => {
   // Handlers
   const handleStarRankClick = (star: number) => {
     setFilterStarRank(prev => (prev === star ? null : star));
-    if (view === 'stats' || view === 'airplanes' || view === 'maps' || view === 'events' || view === 'about' || view === 'missions') {
-      setView('list');
+    if (view !== 'list' && view !== 'grid') {
+      setView(defaultFlightView || 'list');
     }
   };
 
   const handleCategoryClick = (cat: string) => {
-    if (view === 'stats' || view === 'airplanes' || view === 'maps' || view === 'events' || view === 'about' || view === 'missions') {
-      setView('list');
+    if (view !== 'list' && view !== 'grid') {
+      setView(defaultFlightView || 'list');
     }
     setActiveCategory(cat);
     if (cat === 'Event Flights') {
@@ -1949,8 +1960,8 @@ export const ACTracker = () => {
   };
 
   const handleSubItemClick = (cat: string, item: string) => {
-    if (view === 'stats' || view === 'airplanes' || view === 'maps' || view === 'events' || view === 'about' || view === 'missions') {
-      setView('list');
+    if (view !== 'list' && view !== 'grid') {
+      setView(defaultFlightView || 'list');
     }
     setActiveCategory(cat);
     if (cat === 'Event Flights') {
@@ -1972,12 +1983,27 @@ export const ACTracker = () => {
 
   // Navigate to Flights and filter for an event
   const handleFilterForEvent = (eventKeyword: string) => {
-    setView('list');
+    if (view !== 'list' && view !== 'grid') {
+      setView(defaultFlightView || 'list');
+    }
     setActiveCategory('Event Flights');
     setHideEventDestinations(false);
     setFilterAircraft('All');
     setFilterGroup(eventKeyword);
     setSearchQuery('');
+  };
+
+  const handleNavigateToDestination = (destName: string) => {
+    setActiveCategory('All Destinations');
+    setFilterAircraft('All');
+    setFilterGroup('All');
+    setFilterStarRank(null);
+    setShowOnlyMaps(false);
+    setHide3Star(false);
+    setHideZeroMaps(false);
+    setHideEventDestinations(false);
+    setSearchQuery(destName);
+    setView(defaultFlightView || 'list');
   };
 
   // Export Active Profile to JSON
@@ -2012,6 +2038,7 @@ export const ACTracker = () => {
         airplanes: profId === activeProfileId ? ownedAirplanes : profile.airplanes,
         starHistory: profId === activeProfileId ? starHistory : (profile.starHistory || []),
         starOffsets: profId === activeProfileId ? starOffsets : (profile.starOffsets || DEFAULT_STAR_SYNC_OFFSETS),
+        missions: profId === activeProfileId ? missionProgress : (profile.missions || {}),
       },
     };
 
@@ -2053,6 +2080,7 @@ export const ACTracker = () => {
               airplanes: ownedAirplanes,
               starHistory,
               starOffsets,
+              missions: missionProgress,
             },
           }
         : {}),
@@ -2115,6 +2143,7 @@ export const ACTracker = () => {
 
           const finalProfile: ProfileData = {
             ...importedProfile,
+            missions: importedProfile.missions || {},
             starOffsets: importedProfile.starOffsets
               ? { ...DEFAULT_STAR_SYNC_OFFSETS, ...importedProfile.starOffsets }
               : { ...DEFAULT_STAR_SYNC_OFFSETS },
@@ -2150,20 +2179,25 @@ export const ACTracker = () => {
         });
 
         // Apply into current active profile
-        setDestinations(prev =>
-          prev.map(d => {
-            const entry = sanitizedJson[d.destination] || sanitizedJson[d.id];
-            return entry
-              ? {
-                  ...d,
-                  flightsDone: entry.count || 0,
-                  mapsDone: entry.maps || 0,
-                  lastUpdated: entry.lastUpdated || 0,
-                  isCustomList: entry.isCustomList || false,
-                }
-              : d;
-          })
-        );
+        setDestinations(parseDestinationsFromUserData(sanitizedJson));
+
+        if (json.missions && typeof json.missions === 'object') {
+          setMissionProgress(json.missions);
+          if (activeProfileId) {
+            setProfiles(prev => {
+              if (!prev[activeProfileId]) return prev;
+              const nextMap = {
+                ...prev,
+                [activeProfileId]: {
+                  ...prev[activeProfileId],
+                  missions: json.missions,
+                },
+              };
+              saveAllProfiles(nextMap);
+              return nextMap;
+            });
+          }
+        }
 
         if (importedAirplanes) {
           handleSaveOwnedAirplanes(importedAirplanes);
@@ -2206,6 +2240,21 @@ export const ACTracker = () => {
     handleSaveOwnedAirplanes([]);
     handleUpdateStarOffsets({ ...DEFAULT_STAR_SYNC_OFFSETS });
     handleUpdateStarHistory([]);
+    setMissionProgress({});
+    if (activeProfileId) {
+      setProfiles(prev => {
+        if (!prev[activeProfileId]) return prev;
+        const nextMap = {
+          ...prev,
+          [activeProfileId]: {
+            ...prev[activeProfileId],
+            missions: {},
+          },
+        };
+        saveAllProfiles(nextMap);
+        return nextMap;
+      });
+    }
     setActiveCategory('All Destinations');
     setFilterAircraft('All');
     setFilterGroup('All');
@@ -2804,16 +2853,7 @@ export const ACTracker = () => {
               onSelectMission={setSelectedMissionId}
               onUpdateCount={handleMissionItemChange}
               onBatchUpdate={handleBatchMissionProgress}
-              onNavigateToDestination={(destName) => {
-                setActiveCategory('All Destinations');
-                setFilterAircraft('All');
-                setFilterGroup('All');
-                setFilterStarRank(null);
-                setShowOnlyMaps(false);
-                setHide3Star(false);
-                setSearchQuery(destName);
-                setView('list');
-              }}
+              onNavigateToDestination={handleNavigateToDestination}
             />
           )}
 
@@ -2918,33 +2958,39 @@ export const ACTracker = () => {
                   <Plane className="w-4 h-4 theme-accent-text" /> Maps In Stock by Aircraft Class
                 </h3>
                 <div className="h-64 w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={mapCollectionStats.airplaneStats} margin={{ top: 10, right: 10, left: -20, bottom: 20 }}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.06)" />
-                      <XAxis
-                        dataKey="name"
-                        axisLine={false}
-                        tickLine={false}
-                        tick={{ fill: 'var(--text-muted)', fontSize: 11, fontWeight: 500 }}
-                        angle={-30}
-                        textAnchor="end"
-                        height={40}
-                      />
-                      <YAxis axisLine={false} tickLine={false} tick={{ fill: 'var(--text-muted)', fontSize: 11 }} />
-                      <Tooltip
-                        cursor={{ fill: 'rgba(255,255,255,0.04)' }}
-                        contentStyle={{
-                          backgroundColor: 'var(--bg-surface)',
-                          borderColor: 'var(--border-card)',
-                          borderRadius: '16px',
-                          color: 'var(--text-main)',
-                          fontSize: '12px',
-                          fontWeight: '500',
-                        }}
-                      />
-                      <Bar dataKey="maps" fill="var(--accent)" radius={[6, 6, 0, 0]} />
-                    </BarChart>
-                  </ResponsiveContainer>
+                  {mapCollectionStats.airplaneStats.length === 0 ? (
+                    <div className="w-full h-full flex items-center justify-center text-xs font-mono text-[var(--text-muted)]">
+                      No maps currently in stock across any aircraft class.
+                    </div>
+                  ) : (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={mapCollectionStats.airplaneStats} margin={{ top: 10, right: 10, left: -20, bottom: 20 }}>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.06)" />
+                        <XAxis
+                          dataKey="name"
+                          axisLine={false}
+                          tickLine={false}
+                          tick={{ fill: 'var(--text-muted)', fontSize: 11, fontWeight: 500 }}
+                          angle={-30}
+                          textAnchor="end"
+                          height={40}
+                        />
+                        <YAxis axisLine={false} tickLine={false} tick={{ fill: 'var(--text-muted)', fontSize: 11 }} />
+                        <Tooltip
+                          cursor={{ fill: 'rgba(255,255,255,0.04)' }}
+                          contentStyle={{
+                            backgroundColor: 'var(--bg-surface)',
+                            borderColor: 'var(--border-card)',
+                            borderRadius: '16px',
+                            color: 'var(--text-main)',
+                            fontSize: '12px',
+                            fontWeight: '500',
+                          }}
+                        />
+                        <Bar dataKey="maps" fill="var(--accent)" radius={[6, 6, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  )}
                 </div>
               </div>
 
@@ -2953,36 +2999,39 @@ export const ACTracker = () => {
                 <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] flex items-center gap-2">
                   <Trophy className="w-4 h-4 text-amber-400" /> Most Stocked Flight Maps
                 </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-                  {mapCollectionStats.topStock.map((dest, idx) => (
-                    <div
-                      key={dest.id}
-                      onClick={() => {
-                        setView('list');
-                        setSearchQuery(dest.destination);
-                      }}
-                      className="bg-black/20 hover:bg-white/5 p-3.5 rounded-2xl border border-white/5 cursor-pointer transition-all flex items-center gap-3 group"
-                    >
-                      <div className="w-7 h-7 rounded-xl theme-badge flex items-center justify-center font-mono font-medium text-xs shrink-0">
-                        #{idx + 1}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="text-xs font-medium text-[var(--text-main)] truncate group-hover:text-[var(--accent)] transition-colors">
-                          {dest.destination}
+                {mapCollectionStats.topStock.length === 0 ? (
+                  <div className="p-8 text-center text-xs font-mono text-[var(--text-muted)]">
+                    No flight maps currently in stock. Add maps to routes in the Flights table to populate leaderboard.
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+                    {mapCollectionStats.topStock.map((dest, idx) => (
+                      <div
+                        key={dest.id}
+                        onClick={() => handleNavigateToDestination(dest.destination)}
+                        className="bg-black/20 hover:bg-white/5 p-3.5 rounded-2xl border border-white/5 cursor-pointer transition-all flex items-center gap-3 group"
+                      >
+                        <div className="w-7 h-7 rounded-xl theme-badge flex items-center justify-center font-mono font-medium text-xs shrink-0">
+                          #{idx + 1}
                         </div>
-                        <div className="text-[10px] text-[var(--text-muted)] font-mono flex items-center gap-1.5">
-                          <span>{dest.mapsDone} maps</span>
-                          {dest.mapDuration && (
-                            <>
-                              <span>•</span>
-                              <span className="theme-accent-text flex items-center gap-0.5"><Clock className="w-2.5 h-2.5" />{dest.mapDuration}</span>
-                            </>
-                          )}
+                        <div className="min-w-0 flex-1">
+                          <div className="text-xs font-medium text-[var(--text-main)] truncate group-hover:text-[var(--accent)] transition-colors">
+                            {dest.destination}
+                          </div>
+                          <div className="text-[10px] text-[var(--text-muted)] font-mono flex items-center gap-1.5">
+                            <span>{dest.mapsDone} maps</span>
+                            {dest.mapDuration && (
+                              <>
+                                <span>•</span>
+                                <span className="theme-accent-text flex items-center gap-0.5"><Clock className="w-2.5 h-2.5" />{dest.mapDuration}</span>
+                              </>
+                            )}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Missing Maps Radar Checklist */}
@@ -3126,16 +3175,7 @@ export const ACTracker = () => {
               starHistory={starHistory}
               onUpdateStarHistory={handleUpdateStarHistory}
               destinations={destinations}
-              onNavigateToDestination={(destName) => {
-                setActiveCategory('All Destinations');
-                setFilterAircraft('All');
-                setFilterGroup('All');
-                setFilterStarRank(null);
-                setShowOnlyMaps(false);
-                setHide3Star(false);
-                setSearchQuery(destName);
-                setView('list');
-              }}
+              onNavigateToDestination={handleNavigateToDestination}
               hideZeroMaps={hideZeroMaps}
               setHideZeroMaps={setHideZeroMaps}
               hideEventDestinations={hideEventDestinations}
@@ -3426,6 +3466,11 @@ export const ACTracker = () => {
                               setActiveCategory('All Destinations');
                               setFilterAircraft('All');
                               setFilterGroup('All');
+                              setFilterStarRank(null);
+                              setShowOnlyMaps(false);
+                              setHide3Star(false);
+                              setHideZeroMaps(false);
+                              setHideEventDestinations(false);
                               setSearchQuery('');
                             }
                             setExpandedRowId(prev => (prev === dest.id ? null : dest.id));

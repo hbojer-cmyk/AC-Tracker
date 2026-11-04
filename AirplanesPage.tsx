@@ -124,6 +124,12 @@ export const AirplanesPage: React.FC<AirplanesPageProps> = ({
     return getAircraftTypeFromName(airplane.nickname, 'Swift');
   };
 
+  useEffect(() => {
+    if (filterType !== 'All' && !ownedAirplanes.some(a => getAircraftType(a) === filterType)) {
+      setFilterType('All');
+    }
+  }, [ownedAirplanes, filterType]);
+
   const filteredAirplanes = useMemo(() => {
     const list = [...ownedAirplanes].sort(
       (a, b) => OWNABLE_AIRCRAFT.indexOf(getAircraftType(a)) - OWNABLE_AIRCRAFT.indexOf(getAircraftType(b))

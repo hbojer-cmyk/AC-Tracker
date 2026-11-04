@@ -256,7 +256,7 @@ export const MISSIONS_LIST: Mission[] = [
     items: [
       { id: 'trans-handbook', name: 'Transmutation Handbook', destination: 'Strasbourg', aircraft: 'Giant', required: 6 },
       { id: 'trans-alembic', name: 'Alembic', destination: 'Basel', aircraft: 'Giant', required: 6 },
-      { id: 'trans-mortar', name: 'Mortar', destination: 'Montpellier', aircraft: 'Giant', required: 6 },
+      { id: 'trans-mortar', name: 'Mortar', destination: 'Montpelier', aircraft: 'Giant', required: 6 },
       { id: 'trans-liquid-gold', name: 'Liquid Gold', destination: 'Zaragoza', aircraft: 'Giant', required: 6 },
       { id: 'trans-aqua-regia', name: 'Aqua Regia', destination: 'Salzburg', aircraft: 'Giant', required: 6 },
     ],
@@ -282,7 +282,7 @@ export const MISSIONS_LIST: Mission[] = [
       { id: 'twenties-suit', name: 'Suit', destination: 'Manhattan', aircraft: 'Falcon', required: 6 },
       { id: 'twenties-fedora', name: 'Fedora', destination: 'Brooklyn', aircraft: 'Falcon', required: 6 },
       { id: 'twenties-tommy-gun', name: 'Tommy Gun', destination: 'Queens', aircraft: 'Falcon', required: 6 },
-      { id: 'twenties-switchblade', name: 'Switchblade', destination: 'The Bronx', aircraft: 'Falcon', required: 6 },
+      { id: 'twenties-switchblade', name: 'Switchblade', destination: 'Bronx', aircraft: 'Falcon', required: 6 },
       { id: 'twenties-brogues', name: 'Brogues', destination: 'Staten Island', aircraft: 'Falcon', required: 6 },
     ],
   },

@@ -253,16 +253,15 @@ export function migrateLegacyData(
   }
 
   const prefs: ProfilePrefs = {
+    ...getDefaultPrefs(),
     themeId: localStorage.getItem('aeroquest_theme_id') || 'stealth-ghost',
     logoId: localStorage.getItem('act_logo_choice') || 'opt1',
     density: (localStorage.getItem('aeroquest_density') as 'compact' | 'comfortable') || 'compact',
-    starCountMode: (localStorage.getItem('aeroquest_star_count_mode') as 'cumulative' | 'exact') || 'cumulative',
+    starCountMode: (localStorage.getItem('aeroquest_star_count_mode') as 'cumulative' | 'exact' | 'offset') || 'cumulative',
     sidebarOpen: localStorage.getItem('aeroquest_sidebar_open') !== 'false',
     flightDeckHeaderOpen: localStorage.getItem('aeroquest_flight_deck_header_open') !== 'false',
     showMissingAlliance: localStorage.getItem('aeroquest_show_missing_alliance') !== 'false',
     showMissingAdventure: localStorage.getItem('aeroquest_show_missing_adventure') !== 'false',
-    visibleColumns: { ...DEFAULT_VISIBLE_COLUMNS },
-    focusMode: false,
   };
 
   const newProfile: ProfileData = {
@@ -319,10 +318,14 @@ export function cloneProfile(source: ProfileData, newMeta: ProfileMeta): Profile
     userData: JSON.parse(JSON.stringify(source.userData || {})),
     airplanes: source.airplanes ? JSON.parse(JSON.stringify(source.airplanes)) : null,
     prefs: {
+      ...getDefaultPrefs(),
       ...source.prefs,
       visibleColumns: source.prefs.visibleColumns
         ? { ...source.prefs.visibleColumns }
         : { ...DEFAULT_VISIBLE_COLUMNS },
+      enabledViews: source.prefs.enabledViews
+        ? { ...source.prefs.enabledViews }
+        : { ...DEFAULT_ENABLED_VIEWS },
     },
     starHistory: source.starHistory ? JSON.parse(JSON.stringify(source.starHistory)) : [],
     starOffsets: source.starOffsets ? { ...source.starOffsets } : { ...DEFAULT_STAR_SYNC_OFFSETS },

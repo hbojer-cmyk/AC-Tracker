@@ -100,8 +100,9 @@ export const MissionsPage: React.FC<MissionsPageProps> = ({
   }, [missions, activeMissionId]);
 
   const activeIndex = useMemo(() => {
-    return missions.findIndex(m => m.id === activeMissionId);
-  }, [missions, activeMissionId]);
+    const idx = missions.findIndex(m => m.id === activeMission?.id);
+    return idx >= 0 ? idx : 0;
+  }, [missions, activeMission]);
 
   // Current counts for active mission
   const currentCounts = useMemo(() => {
@@ -143,8 +144,8 @@ export const MissionsPage: React.FC<MissionsPageProps> = ({
 
     activeMission.items.forEach(item => {
       const count = currentCounts[item.id] || 0;
-      // Items belonging to this specific landmark stage:
-      const itemsInStage = Math.max(0, Math.min(item.required, count - builtCount * item.required));
+      // Items belonging to this specific landmark stage (current stockpile towards the next build):
+      const itemsInStage = Math.max(0, Math.min(item.required, count));
       collected += itemsInStage;
       if (itemsInStage >= item.required) {
         completeItemsInStage += 1;
@@ -353,7 +354,7 @@ export const MissionsPage: React.FC<MissionsPageProps> = ({
             <div className="w-14 h-16 sm:w-16 sm:h-20 rounded-xl bg-black/30 border border-white/10 flex items-center justify-center p-1 relative shrink-0">
               <MissionThumbnail
                 src={activeMission.reward.image}
-                alt={activeMission.name}
+                name={activeMission.name}
                 className="w-full h-full object-contain"
                 fallbackIconClass="w-8 h-8 text-amber-400 opacity-80"
               />
@@ -478,7 +479,7 @@ export const MissionsPage: React.FC<MissionsPageProps> = ({
                       ? 'bg-amber-400'
                       : stageStats.isFullyComplete
                       ? 'bg-emerald-400'
-                      : 'theme-progress-bar'
+                      : 'theme-progress-fill'
                   }`}
                   style={{ width: `${stageStats.percent}%` }}
                 />
@@ -531,9 +532,8 @@ export const MissionsPage: React.FC<MissionsPageProps> = ({
             const isFull6xMax = count >= fullTarget6x;
 
             // Progress towards the current landmark stage (#1, #2, ... #6)
-            const thresholdForStage = Math.min(fullTarget6x, (builtCount + 1) * item.required);
-            const itemsInStage = Math.max(0, Math.min(item.required, count - builtCount * item.required));
-            const isReadyForStage = count >= thresholdForStage;
+            const itemsInStage = Math.max(0, Math.min(item.required, count));
+            const isReadyForStage = count >= item.required;
             const sprite = AIRCRAFT_SPRITES[item.aircraft];
 
             return (
@@ -647,7 +647,7 @@ export const MissionsPage: React.FC<MissionsPageProps> = ({
                         ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
                         : 'bg-black/40 text-[var(--text-main)] border-white/10'
                     }`}
-                    title={`Current inventory count (target: ${thresholdForStage} for #${builtCount + 1})`}
+                    title={`Current inventory count (target: ${item.required} for #${builtCount + 1})`}
                   />
 
                   {/* Plus 1 */}

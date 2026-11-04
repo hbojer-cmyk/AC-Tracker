@@ -171,10 +171,10 @@ export const StatsPage: React.FC<StatsPageProps> = ({
   // exact[tier] = max(0, cum[tier] - cum[tierAbove])
   const adjustedExactCounts = useMemo(() => {
     const cumAce = starCounts.cumulative.ace + (safeStarOffsets.ace || 0);
-    const cumCaptain = starCounts.cumulative.captain + (safeStarOffsets.captain || 0);
-    const cumExpert = starCounts.cumulative.expert + (safeStarOffsets.expert || 0);
-    const cumMaster = starCounts.cumulative.master + (safeStarOffsets.master || 0);
-    const cumSpecialist = starCounts.cumulative.specialist + (safeStarOffsets.specialist || 0);
+    const cumCaptain = Math.max(cumAce, starCounts.cumulative.captain + (safeStarOffsets.captain || 0));
+    const cumExpert = Math.max(cumCaptain, starCounts.cumulative.expert + (safeStarOffsets.expert || 0));
+    const cumMaster = Math.max(cumExpert, starCounts.cumulative.master + (safeStarOffsets.master || 0));
+    const cumSpecialist = Math.max(cumMaster, starCounts.cumulative.specialist + (safeStarOffsets.specialist || 0));
 
     return {
       ace: cumAce,
@@ -232,10 +232,17 @@ export const StatsPage: React.FC<StatsPageProps> = ({
   // Velocity KPI 1: Stars This Week (Last 7 Days)
   const starsThisWeek = useMemo(() => {
     if (sortedHistory.length === 0) return 0;
-    const weekAgoDate = new Date(Date.now() - 7 * 86400000);
+    const nowMs = Date.now();
+    const weekAgoDate = new Date(nowMs - 7 * 86400000);
     const weekAgoStr = getLocalDateString(weekAgoDate);
-    const baseline = sortedHistory.filter(h => h.date <= weekAgoStr).pop() || sortedHistory[0];
-    return Math.max(0, globalStars - baseline.stars);
+    const onOrBefore = sortedHistory.filter(h => h.date <= weekAgoStr).pop();
+    if (onOrBefore) {
+      const baselineMs = new Date(onOrBefore.date + 'T12:00:00').getTime();
+      const daysElapsed = Math.max(1, (nowMs - baselineMs) / 86400000);
+      const rawDelta = Math.max(0, globalStars - onOrBefore.stars);
+      return daysElapsed > 7 ? Math.round((rawDelta / daysElapsed) * 7) : rawDelta;
+    }
+    return Math.max(0, globalStars - sortedHistory[0].stars);
   }, [sortedHistory, globalStars]);
 
   // Velocity KPI 2: Stars This Month (Since 1st of current month)
@@ -360,7 +367,7 @@ export const StatsPage: React.FC<StatsPageProps> = ({
           progressPct,
         };
       })
-      .sort((a, b) => a.flightsRemaining - b.flightsRemaining)
+      .sort((a, b) => a.flightsRemaining - b.flightsRemaining || b.progressPct - a.progressPct)
       .slice(0, 5);
   }, [destinations, effectiveHideZeroMaps, effectiveHideEventDestinations]);
 
