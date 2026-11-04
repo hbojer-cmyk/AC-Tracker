@@ -38,6 +38,24 @@ export const DEFAULT_VISIBLE_COLUMNS: VisibleColumnsConfig = {
   info: true,
 };
 
+export interface EnabledViewsConfig {
+  maps: boolean;
+  airplanes: boolean;
+  stats: boolean;
+  missions: boolean;
+  events: boolean;
+  about: boolean;
+}
+
+export const DEFAULT_ENABLED_VIEWS: EnabledViewsConfig = {
+  maps: true,
+  airplanes: true,
+  stats: true,
+  missions: true,
+  events: true,
+  about: true,
+};
+
 export interface ProfilePrefs {
   themeId: string;
   logoId: string;
@@ -49,6 +67,11 @@ export interface ProfilePrefs {
   showMissingAdventure: boolean;
   visibleColumns?: VisibleColumnsConfig;
   focusMode?: boolean;
+  enabledViews?: EnabledViewsConfig;
+  defaultFlightView?: 'list' | 'grid';
+  showRecentFlights?: boolean;
+  showActiveEventBanner?: boolean;
+  selectedMissionId?: string;
 }
 
 export interface StarHistoryEntry {
@@ -131,12 +154,17 @@ export function getDefaultPrefs(): ProfilePrefs {
     logoId: 'opt1',
     density: 'compact',
     starCountMode: 'cumulative',
-    sidebarOpen: false,
+    sidebarOpen: true,
     flightDeckHeaderOpen: true,
     showMissingAlliance: true,
     showMissingAdventure: true,
     visibleColumns: { ...DEFAULT_VISIBLE_COLUMNS },
     focusMode: false,
+    enabledViews: { ...DEFAULT_ENABLED_VIEWS },
+    defaultFlightView: 'list',
+    showRecentFlights: true,
+    showActiveEventBanner: true,
+    selectedMissionId: 'aztec-pyramid',
   };
 }
 
@@ -229,7 +257,7 @@ export function migrateLegacyData(
     logoId: localStorage.getItem('act_logo_choice') || 'opt1',
     density: (localStorage.getItem('aeroquest_density') as 'compact' | 'comfortable') || 'compact',
     starCountMode: (localStorage.getItem('aeroquest_star_count_mode') as 'cumulative' | 'exact') || 'cumulative',
-    sidebarOpen: localStorage.getItem('aeroquest_sidebar_open') === 'true',
+    sidebarOpen: localStorage.getItem('aeroquest_sidebar_open') !== 'false',
     flightDeckHeaderOpen: localStorage.getItem('aeroquest_flight_deck_header_open') !== 'false',
     showMissingAlliance: localStorage.getItem('aeroquest_show_missing_alliance') !== 'false',
     showMissingAdventure: localStorage.getItem('aeroquest_show_missing_adventure') !== 'false',

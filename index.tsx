@@ -59,6 +59,7 @@ import { AboutPage } from './AboutPage';
 import { EventsPage } from './EventsPage';
 import { StatsPage } from './StatsPage';
 import { MissionsPage } from './MissionsPage';
+import { SettingsPage } from './SettingsPage';
 import { ACTIVE_EVENT_CONFIG, getEventIcon } from './src/data/eventsData';
 import { adjustAircraftList } from './src/aircraftData';
 import {
@@ -79,6 +80,8 @@ import {
   getDefaultPrefs,
   VisibleColumnsConfig,
   DEFAULT_VISIBLE_COLUMNS,
+  EnabledViewsConfig,
+  DEFAULT_ENABLED_VIEWS,
 } from './profiles';
 import {
   FlightDestination,
@@ -92,7 +95,7 @@ import { ProfileModal, MigrationModal } from './ProfileModal';
 
 // --- App Version & Maintenance Tracker ---
 // NOTE: Always update APP_UPDATED_DATE whenever making changes in the app
-export const APP_VERSION = 'Version 2.7';
+export const APP_VERSION = 'Version 2.75';
 export const APP_UPDATED_DATE = 'Nov 5, 2026';
 
 // --- Types & Interfaces ---
@@ -111,7 +114,7 @@ type SortField =
 
 type SortDirection = 'asc' | 'desc';
 
-type ViewMode = 'list' | 'grid' | 'maps' | 'airplanes' | 'stats' | 'events' | 'about' | 'missions';
+type ViewMode = 'list' | 'grid' | 'maps' | 'airplanes' | 'stats' | 'events' | 'about' | 'missions' | 'settings';
 
 export type ThemeId =
   | 'mach-blue'
@@ -767,13 +770,69 @@ export const ACTracker = () => {
   };
   const [view, setView] = useState<ViewMode>('list');
   const [missionProgress, setMissionProgress] = useState<Record<string, Record<string, number>>>({});
+  const [selectedMissionId, setSelectedMissionId] = useState<string>('aztec-pyramid');
+  const [enabledViews, setEnabledViews] = useState<EnabledViewsConfig>(DEFAULT_ENABLED_VIEWS);
+  const [defaultFlightView, setDefaultFlightView] = useState<'list' | 'grid'>('list');
+  const [showRecentFlights, setShowRecentFlights] = useState<boolean>(true);
+  const [showActiveEventBanner, setShowActiveEventBanner] = useState<boolean>(true);
+
+  const handleToggleView = (viewKey: keyof EnabledViewsConfig) => {
+    setEnabledViews(prev => {
+      const next = { ...prev, [viewKey]: !prev[viewKey] };
+      if (!next[viewKey] && view === viewKey) {
+        setView(defaultFlightView || 'list');
+      }
+      return next;
+    });
+  };
+
+  const handleSetAllViews = (enabled: boolean) => {
+    setEnabledViews({
+      maps: enabled,
+      airplanes: enabled,
+      stats: enabled,
+      missions: enabled,
+      events: enabled,
+      about: enabled,
+    });
+  };
+
+  const handleApplyPreset = (preset: 'all' | 'streamlined' | 'minimal') => {
+    if (preset === 'all') {
+      handleSetAllViews(true);
+    } else if (preset === 'streamlined') {
+      setEnabledViews({
+        maps: true,
+        airplanes: false,
+        stats: true,
+        missions: false,
+        events: true,
+        about: true,
+      });
+      if (view === 'airplanes' || view === 'missions') {
+        setView('list');
+      }
+    } else if (preset === 'minimal') {
+      setEnabledViews({
+        maps: false,
+        airplanes: false,
+        stats: true,
+        missions: false,
+        events: false,
+        about: false,
+      });
+      if (view !== 'list' && view !== 'grid' && view !== 'stats' && view !== 'settings') {
+        setView('list');
+      }
+    }
+  };
   const [density, setDensity] = useState<'compact' | 'comfortable'>('compact');
 
   const toggleDensity = (newDensity: 'compact' | 'comfortable') => {
     setDensity(newDensity);
   };
 
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isFlightDeckHeaderOpen, setIsFlightDeckHeaderOpen] = useState(true);
   const toggleFlightDeckHeader = () => {
     setIsFlightDeckHeaderOpen(prev => !prev);
@@ -925,14 +984,18 @@ export const ACTracker = () => {
   };
 
   // Helper to apply profile state (preferences, flights, aircraft)
-  const applyProfileState = (profile: ProfileData) => {
+  const applyProfileState = (profile: ProfileData, isInitialMount = false) => {
     const prefs = profile.prefs || getDefaultPrefs();
     const mappedTheme = THEME_FALLBACK_MAP[prefs.themeId] || (THEME_CONFIGS[prefs.themeId as ThemeId] ? (prefs.themeId as ThemeId) : 'stealth-ghost');
     setTheme(mappedTheme);
     setLogoId(prefs.logoId || 'opt1');
     setDensity(prefs.density || 'compact');
     setStarCountMode(prefs.starCountMode || 'cumulative');
-    setIsSidebarOpen(Boolean(prefs.sidebarOpen));
+    if (!isInitialMount) {
+      setIsSidebarOpen(prefs.sidebarOpen !== false);
+    } else {
+      setIsSidebarOpen(true);
+    }
     const fm = Boolean(prefs.focusMode);
     setFocusMode(fm);
     if (fm) {
@@ -942,6 +1005,14 @@ export const ACTracker = () => {
     }
     setShowMissingAlliance(prefs.showMissingAlliance !== false);
     setShowMissingAdventure(prefs.showMissingAdventure !== false);
+    setEnabledViews(prefs.enabledViews || DEFAULT_ENABLED_VIEWS);
+    setDefaultFlightView(prefs.defaultFlightView || 'list');
+    setShowRecentFlights(prefs.showRecentFlights !== false);
+    setShowActiveEventBanner(prefs.showActiveEventBanner !== false);
+    setSelectedMissionId(prefs.selectedMissionId || 'aztec-pyramid');
+    if (isInitialMount && (view === 'list' || view === 'grid')) {
+      setView(prefs.defaultFlightView || 'list');
+    }
     setVisibleColumns(
       prefs.visibleColumns
         ? { ...DEFAULT_VISIBLE_COLUMNS, ...prefs.visibleColumns }
@@ -977,6 +1048,15 @@ export const ACTracker = () => {
         return nextMap;
       });
     }
+  };
+
+  const handleOffsetChange = (tier: keyof StarSyncOffsets, delta: number) => {
+    const current = starOffsets[tier] || 0;
+    const nextVal = Math.max(0, current + delta);
+    handleUpdateStarOffsets({
+      ...starOffsets,
+      [tier]: nextVal,
+    });
   };
 
   // Helper to update mission item counters
@@ -1064,12 +1144,29 @@ export const ACTracker = () => {
       persistActiveProfileId(defaultId);
       setProfiles(initialMap);
       setActiveProfileId(defaultId);
-      applyProfileState(newDefaultProfile);
+      applyProfileState(newDefaultProfile, true);
       setIsLoaded(true);
       return;
     }
 
     // Normal profile loading
+    // Ensure all existing profiles default to sidebarOpen: true on initial startup upgrade
+    try {
+      const sidebarDefaultMigrated = localStorage.getItem('act_sidebar_default_open_v1');
+      if (!sidebarDefaultMigrated) {
+        let changed = false;
+        Object.values(allProfiles).forEach(p => {
+          if (p.prefs && p.prefs.sidebarOpen === false) {
+            p.prefs.sidebarOpen = true;
+            changed = true;
+          }
+        });
+        if (changed) {
+          saveAllProfiles(allProfiles);
+        }
+        localStorage.setItem('act_sidebar_default_open_v1', 'true');
+      }
+    } catch {}
     setProfiles(allProfiles);
     const savedActiveId = getActiveProfileId();
     const resolvedActiveId = savedActiveId && allProfiles[savedActiveId]
@@ -1078,7 +1175,7 @@ export const ACTracker = () => {
 
     setActiveProfileId(resolvedActiveId);
     persistActiveProfileId(resolvedActiveId);
-    applyProfileState(allProfiles[resolvedActiveId]);
+    applyProfileState(allProfiles[resolvedActiveId], true);
     setIsLoaded(true);
   }, []);
 
@@ -1194,6 +1291,11 @@ export const ACTracker = () => {
             showMissingAdventure,
             visibleColumns,
             focusMode,
+            enabledViews,
+            defaultFlightView,
+            showRecentFlights,
+            showActiveEventBanner,
+            selectedMissionId,
           };
           const nextMap = {
             ...prev,
@@ -1207,7 +1309,7 @@ export const ACTracker = () => {
         });
       }
     }
-  }, [theme, logoId, density, starCountMode, isSidebarOpen, isFlightDeckHeaderOpen, showMissingAlliance, showMissingAdventure, visibleColumns, focusMode, isLoaded, activeProfileId]);
+  }, [theme, logoId, density, starCountMode, isSidebarOpen, isFlightDeckHeaderOpen, showMissingAlliance, showMissingAdventure, visibleColumns, focusMode, enabledViews, defaultFlightView, showRecentFlights, showActiveEventBanner, selectedMissionId, isLoaded, activeProfileId]);
 
   // Destination Progress Persistence into Active Profile
   useEffect(() => {
@@ -2198,7 +2300,7 @@ export const ACTracker = () => {
               {/* View Switcher Tabs (Header Link Row - Static & Centered on xl: and up) */}
               <nav className="flex items-center gap-1.5 bg-black/25 p-1 rounded-2xl border border-white/5">
                 <button
-                  onClick={() => setView('list')}
+                  onClick={() => setView(defaultFlightView || 'list')}
                   className={`tactile-btn px-3.5 py-1.5 rounded-xl text-xs font-medium flex items-center gap-2 transition-all ${
                     view === 'list' || view === 'grid'
                       ? 'theme-btn-accent font-semibold shadow-md'
@@ -2208,71 +2310,83 @@ export const ACTracker = () => {
                   <Compass className="w-4 h-4" /> Flights
                 </button>
 
-                <button
-                  onClick={() => setView('maps')}
-                  className={`tactile-btn px-3.5 py-1.5 rounded-xl text-xs font-medium flex items-center gap-2 transition-all ${
-                    view === 'maps'
-                      ? 'theme-btn-accent font-semibold shadow-md'
-                      : 'text-[var(--text-muted)] hover:text-white hover:bg-white/5'
-                  }`}
-                >
-                  <MapIcon className="w-4 h-4" /> Maps
-                </button>
+                {enabledViews.maps !== false && (
+                  <button
+                    onClick={() => setView('maps')}
+                    className={`tactile-btn px-3.5 py-1.5 rounded-xl text-xs font-medium flex items-center gap-2 transition-all ${
+                      view === 'maps'
+                        ? 'theme-btn-accent font-semibold shadow-md'
+                        : 'text-[var(--text-muted)] hover:text-white hover:bg-white/5'
+                    }`}
+                  >
+                    <MapIcon className="w-4 h-4" /> Maps
+                  </button>
+                )}
 
-                <button
-                  onClick={() => setView('airplanes')}
-                  className={`tactile-btn px-3.5 py-1.5 rounded-xl text-xs font-medium flex items-center gap-2 transition-all ${
-                    view === 'airplanes'
-                      ? 'theme-btn-accent font-semibold shadow-md'
-                      : 'text-[var(--text-muted)] hover:text-white hover:bg-white/5'
-                  }`}
-                >
-                  <Layers className="w-4 h-4" /> Aircraft
-                </button>
+                {enabledViews.airplanes !== false && (
+                  <button
+                    onClick={() => setView('airplanes')}
+                    className={`tactile-btn px-3.5 py-1.5 rounded-xl text-xs font-medium flex items-center gap-2 transition-all ${
+                      view === 'airplanes'
+                        ? 'theme-btn-accent font-semibold shadow-md'
+                        : 'text-[var(--text-muted)] hover:text-white hover:bg-white/5'
+                    }`}
+                  >
+                    <Layers className="w-4 h-4" /> Aircraft
+                  </button>
+                )}
 
-                <button
-                  onClick={() => setView('stats')}
-                  className={`tactile-btn px-3.5 py-1.5 rounded-xl text-xs font-medium flex items-center gap-2 transition-all ${
-                    view === 'stats'
-                      ? 'theme-btn-accent font-semibold shadow-md'
-                      : 'text-[var(--text-muted)] hover:text-white hover:bg-white/5'
-                  }`}
-                >
-                  <BarChart3 className="w-4 h-4" /> Stats
-                </button>
+                {enabledViews.stats !== false && (
+                  <button
+                    onClick={() => setView('stats')}
+                    className={`tactile-btn px-3.5 py-1.5 rounded-xl text-xs font-medium flex items-center gap-2 transition-all ${
+                      view === 'stats'
+                        ? 'theme-btn-accent font-semibold shadow-md'
+                        : 'text-[var(--text-muted)] hover:text-white hover:bg-white/5'
+                    }`}
+                  >
+                    <BarChart3 className="w-4 h-4" /> Stats
+                  </button>
+                )}
 
-                <button
-                  onClick={() => setView('missions')}
-                  className={`tactile-btn px-3.5 py-1.5 rounded-xl text-xs font-medium flex items-center gap-2 transition-all ${
-                    view === 'missions'
-                      ? 'theme-btn-accent font-semibold shadow-md'
-                      : 'text-[var(--text-muted)] hover:text-white hover:bg-white/5'
-                  }`}
-                >
-                  <Trophy className="w-4 h-4" /> Missions
-                </button>
+                {enabledViews.missions !== false && (
+                  <button
+                    onClick={() => setView('missions')}
+                    className={`tactile-btn px-3.5 py-1.5 rounded-xl text-xs font-medium flex items-center gap-2 transition-all ${
+                      view === 'missions'
+                        ? 'theme-btn-accent font-semibold shadow-md'
+                        : 'text-[var(--text-muted)] hover:text-white hover:bg-white/5'
+                    }`}
+                  >
+                    <Trophy className="w-4 h-4" /> Missions
+                  </button>
+                )}
 
-                <button
-                  onClick={() => setView('events')}
-                  className={`tactile-btn px-3.5 py-1.5 rounded-xl text-xs font-medium flex items-center gap-2 transition-all ${
-                    view === 'events'
-                      ? 'theme-btn-accent font-semibold shadow-md'
-                      : 'text-[var(--text-muted)] hover:text-white hover:bg-white/5'
-                  }`}
-                >
-                  <Calendar className="w-4 h-4" /> Events
-                </button>
+                {enabledViews.events !== false && (
+                  <button
+                    onClick={() => setView('events')}
+                    className={`tactile-btn px-3.5 py-1.5 rounded-xl text-xs font-medium flex items-center gap-2 transition-all ${
+                      view === 'events'
+                        ? 'theme-btn-accent font-semibold shadow-md'
+                        : 'text-[var(--text-muted)] hover:text-white hover:bg-white/5'
+                    }`}
+                  >
+                    <Calendar className="w-4 h-4" /> Events
+                  </button>
+                )}
 
-                <button
-                  onClick={() => setView('about')}
-                  className={`tactile-btn px-3.5 py-1.5 rounded-xl text-xs font-medium flex items-center gap-2 transition-all ${
-                    view === 'about'
-                      ? 'theme-btn-accent font-semibold shadow-md'
-                      : 'text-[var(--text-muted)] hover:text-white hover:bg-white/5'
-                  }`}
-                >
-                  <Info className="w-4 h-4" /> About ACT
-                </button>
+                {enabledViews.about !== false && (
+                  <button
+                    onClick={() => setView('about')}
+                    className={`tactile-btn px-3.5 py-1.5 rounded-xl text-xs font-medium flex items-center gap-2 transition-all ${
+                      view === 'about'
+                        ? 'theme-btn-accent font-semibold shadow-md'
+                        : 'text-[var(--text-muted)] hover:text-white hover:bg-white/5'
+                    }`}
+                  >
+                    <Info className="w-4 h-4" /> About ACT
+                  </button>
+                )}
               </nav>
             </div>
 
@@ -2421,6 +2535,20 @@ export const ACTracker = () => {
                 <Download className="w-4 h-4 theme-accent-text" />
                 <span className="text-xs font-medium hidden lg:inline">Data</span>
               </button>
+
+              {/* Avionics Settings Button */}
+              <button
+                onClick={() => setView(view === 'settings' ? (defaultFlightView || 'list') : 'settings')}
+                title="Avionics & Cockpit Settings"
+                className={`tactile-btn p-2 sm:p-2.5 rounded-xl border flex items-center gap-1.5 transition-all ${
+                  view === 'settings'
+                    ? 'theme-btn-accent shadow-md'
+                    : 'glass-panel border-[var(--border-subtle)] hover:border-[var(--border-active)] text-[var(--text-main)]'
+                }`}
+              >
+                <SlidersHorizontal className="w-4 h-4 theme-accent-text" />
+                <span className="text-xs font-medium hidden lg:inline">Settings</span>
+              </button>
             </div>
           </div>
         </div>
@@ -2428,7 +2556,7 @@ export const ACTracker = () => {
         {/* Mobile View Switcher Bar */}
         <div className="xl:hidden flex items-center overflow-x-auto px-4 py-2 border-t border-white/5 gap-1.5 no-scrollbar bg-black/20">
           <button
-            onClick={() => setView('list')}
+            onClick={() => setView(defaultFlightView || 'list')}
             className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap flex items-center gap-1.5 ${
               view === 'list' || view === 'grid'
                 ? 'theme-btn-accent font-semibold shadow-sm'
@@ -2437,53 +2565,73 @@ export const ACTracker = () => {
           >
             <Compass className="w-3.5 h-3.5" /> Flights
           </button>
+          {enabledViews.maps !== false && (
+            <button
+              onClick={() => setView('maps')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap flex items-center gap-1.5 ${
+                view === 'maps' ? 'theme-btn-accent font-semibold shadow-sm' : 'text-[var(--text-muted)] hover:bg-white/5'
+              }`}
+            >
+              <MapIcon className="w-3.5 h-3.5" /> Maps
+            </button>
+          )}
+          {enabledViews.airplanes !== false && (
+            <button
+              onClick={() => setView('airplanes')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap flex items-center gap-1.5 ${
+                view === 'airplanes' ? 'theme-btn-accent font-semibold shadow-sm' : 'text-[var(--text-muted)] hover:bg-white/5'
+              }`}
+            >
+              <Layers className="w-3.5 h-3.5" /> Aircraft
+            </button>
+          )}
+          {enabledViews.stats !== false && (
+            <button
+              onClick={() => setView('stats')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap flex items-center gap-1.5 ${
+                view === 'stats' ? 'theme-btn-accent font-semibold shadow-sm' : 'text-[var(--text-muted)] hover:bg-white/5'
+              }`}
+            >
+              <BarChart3 className="w-3.5 h-3.5" /> Stats
+            </button>
+          )}
+          {enabledViews.missions !== false && (
+            <button
+              onClick={() => setView('missions')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap flex items-center gap-1.5 ${
+                view === 'missions' ? 'theme-btn-accent font-semibold shadow-sm' : 'text-[var(--text-muted)] hover:bg-white/5'
+              }`}
+            >
+              <Trophy className="w-3.5 h-3.5" /> Missions
+            </button>
+          )}
+          {enabledViews.events !== false && (
+            <button
+              onClick={() => setView('events')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap flex items-center gap-1.5 ${
+                view === 'events' ? 'theme-btn-accent font-semibold shadow-sm' : 'text-[var(--text-muted)] hover:bg-white/5'
+              }`}
+            >
+              <Calendar className="w-3.5 h-3.5" /> Events
+            </button>
+          )}
+          {enabledViews.about !== false && (
+            <button
+              onClick={() => setView('about')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap flex items-center gap-1.5 ${
+                view === 'about' ? 'theme-btn-accent font-semibold shadow-sm' : 'text-[var(--text-muted)] hover:bg-white/5'
+              }`}
+            >
+              <Info className="w-3.5 h-3.5" /> About ACT
+            </button>
+          )}
           <button
-            onClick={() => setView('maps')}
+            onClick={() => setView('settings')}
             className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap flex items-center gap-1.5 ${
-              view === 'maps' ? 'theme-btn-accent font-semibold shadow-sm' : 'text-[var(--text-muted)] hover:bg-white/5'
+              view === 'settings' ? 'theme-btn-accent font-semibold shadow-sm' : 'text-[var(--text-muted)] hover:bg-white/5'
             }`}
           >
-            <MapIcon className="w-3.5 h-3.5" /> Maps
-          </button>
-          <button
-            onClick={() => setView('airplanes')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap flex items-center gap-1.5 ${
-              view === 'airplanes' ? 'theme-btn-accent font-semibold shadow-sm' : 'text-[var(--text-muted)] hover:bg-white/5'
-            }`}
-          >
-            <Layers className="w-3.5 h-3.5" /> Aircraft
-          </button>
-          <button
-            onClick={() => setView('stats')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap flex items-center gap-1.5 ${
-              view === 'stats' ? 'theme-btn-accent font-semibold shadow-sm' : 'text-[var(--text-muted)] hover:bg-white/5'
-            }`}
-          >
-            <BarChart3 className="w-3.5 h-3.5" /> Stats
-          </button>
-          <button
-            onClick={() => setView('missions')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap flex items-center gap-1.5 ${
-              view === 'missions' ? 'theme-btn-accent font-semibold shadow-sm' : 'text-[var(--text-muted)] hover:bg-white/5'
-            }`}
-          >
-            <Trophy className="w-3.5 h-3.5" /> Missions
-          </button>
-          <button
-            onClick={() => setView('events')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap flex items-center gap-1.5 ${
-              view === 'events' ? 'theme-btn-accent font-semibold shadow-sm' : 'text-[var(--text-muted)] hover:bg-white/5'
-            }`}
-          >
-            <Calendar className="w-3.5 h-3.5" /> Events
-          </button>
-          <button
-            onClick={() => setView('about')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap flex items-center gap-1.5 ${
-              view === 'about' ? 'theme-btn-accent font-semibold shadow-sm' : 'text-[var(--text-muted)] hover:bg-white/5'
-            }`}
-          >
-            <Info className="w-3.5 h-3.5" /> About ACT
+            <SlidersHorizontal className="w-3.5 h-3.5" /> Settings
           </button>
         </div>
       </header>
@@ -2603,6 +2751,43 @@ export const ACTracker = () => {
 
         {/* Main Content Area */}
         <main className={`flex-1 min-w-0 ${focusMode ? 'space-y-2' : 'space-y-6'}`}>
+          {/* VIEW: AVIONICS & COCKPIT SETTINGS */}
+          {view === 'settings' && (
+            <SettingsPage
+              enabledViews={enabledViews}
+              onToggleView={handleToggleView}
+              onSetAllViews={handleSetAllViews}
+              onApplyPreset={handleApplyPreset}
+              defaultFlightView={defaultFlightView}
+              onChangeDefaultFlightView={setDefaultFlightView}
+              density={density}
+              onChangeDensity={setDensity}
+              showRecentFlights={showRecentFlights}
+              onToggleRecentFlights={() => setShowRecentFlights(prev => !prev)}
+              showActiveEventBanner={showActiveEventBanner}
+              onToggleActiveEventBanner={() => setShowActiveEventBanner(prev => !prev)}
+              focusMode={focusMode}
+              onToggleFocusMode={() => setFocusMode(prev => !prev)}
+              showMissingAlliance={showMissingAlliance}
+              onToggleMissingAlliance={() => setShowMissingAlliance(prev => !prev)}
+              showMissingAdventure={showMissingAdventure}
+              onToggleMissingAdventure={() => setShowMissingAdventure(prev => !prev)}
+              starCountMode={starCountMode}
+              onChangeStarCountMode={setStarCountMode}
+              starOffsets={starOffsets}
+              onUpdateOffset={handleOffsetChange}
+              activeThemeId={theme}
+              onOpenThemeModal={() => setShowThemeModal(true)}
+              activeLogoId={logoId}
+              onOpenLogoModal={() => setShowLogoModal(true)}
+              activeProfile={activeProfile}
+              onOpenProfileModal={() => setShowProfileModal(true)}
+              onOpenBackupModal={() => setShowBackupModal(true)}
+              onOpenWhatsNewModal={() => setShowWhatsNewModal(true)}
+              onNavigateToFlights={() => setView(defaultFlightView || 'list')}
+            />
+          )}
+
           {/* VIEW: FLEET HANGAR */}
           {view === 'airplanes' && (
             <AirplanesPage
@@ -2615,6 +2800,8 @@ export const ACTracker = () => {
           {view === 'missions' && (
             <MissionsPage
               missionProgress={missionProgress}
+              selectedMissionId={selectedMissionId}
+              onSelectMission={setSelectedMissionId}
               onUpdateCount={handleMissionItemChange}
               onBatchUpdate={handleBatchMissionProgress}
               onNavigateToDestination={(destName) => {
@@ -3033,7 +3220,7 @@ export const ACTracker = () => {
               )}
 
               {/* Current Event Cyber Flight-Deck Banner */}
-              {activeEventInfo && (
+              {showActiveEventBanner && activeEventInfo && (
                 <div
                   className={`rounded-2xl py-2.5 px-4 relative overflow-hidden backdrop-blur-md transition-all ${
                     isDarkTheme
@@ -3218,7 +3405,7 @@ export const ACTracker = () => {
               )}
 
               {/* Recently Flown Quick-Jump Bar */}
-              {recentDestinations.length > 0 && (
+              {showRecentFlights && recentDestinations.length > 0 && (
                 <div className="glass-panel rounded-2xl p-2 sm:p-2.5 border border-[var(--border-card)] flex flex-wrap items-center gap-1.5 animate-in fade-in duration-200">
                   <div className="flex items-center gap-1.5 px-2 py-1 text-xs font-medium text-[var(--text-muted)] shrink-0">
                     <Clock className="w-3 h-3 theme-accent-text" />
@@ -5274,55 +5461,55 @@ export const ACTracker = () => {
 
             {/* Feature Cards Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 font-normal">
-              {/* Feature 1 */}
+              {/* Feature 1: Missions Page */}
               <div className="p-4 rounded-2xl bg-black/20 border border-white/5 space-y-2">
                 <div className="flex items-center gap-2">
-                  <span className="text-base">🗼</span>
+                  <span className="text-base">🏆</span>
                   <h4 className="text-xs font-semibold text-[var(--text-main)] font-heading">
-                    Mission Depot & Special Prizes (Eiffel Tower)
+                    Missions Depot (21 Active Missions)
                   </h4>
                 </div>
                 <p className="text-xs text-[var(--text-muted)] leading-relaxed">
-                  Track rare item requirements across 5 aircraft tiers (250 items total) to construct grand city wonders like the Eiffel Tower. Features interactive steppers, quick Max/Reset, flight jumps, and multi-profile persistence.
+                  Track required items across all 19 collectible adventure landmarks and 2 grand commerce towers (Aztec Pyramid up to Eiffel Tower). Features authentic 3D renders, unconstrained stockpiling steppers, meta-collection badges, and direct jump navigation.
                 </p>
               </div>
 
-              {/* Feature 2 */}
+              {/* Feature 2: Settings Page */}
               <div className="p-4 rounded-2xl bg-black/20 border border-white/5 space-y-2">
                 <div className="flex items-center gap-2">
-                  <span className="text-base">📅</span>
+                  <span className="text-base">⚙️</span>
                   <h4 className="text-xs font-semibold text-[var(--text-main)] font-heading">
-                    12-Month Calendar Event Icons
+                    Cockpit & Avionics Settings Page
                   </h4>
                 </div>
                 <p className="text-xs text-[var(--text-muted)] leading-relaxed">
-                  Every limited-time event and recurring festival across all 12 calendar cards now features its authentic game icon paired with direct wiki walkthrough links and route badges.
+                  A dedicated settings hub empowering pilots to customize navigation module visibility (Maps Depot, Fleet Hangar, Stats, Missions, Calendar, About), table row density, star milestone calculation mode, and multi-profile backups.
                 </p>
               </div>
 
-              {/* Feature 3 */}
+              {/* Feature 3: Stage Progression */}
               <div className="p-4 rounded-2xl bg-black/20 border border-white/5 space-y-2">
                 <div className="flex items-center gap-2">
-                  <span className="text-base">✨</span>
+                  <span className="text-base">📈</span>
                   <h4 className="text-xs font-semibold text-[var(--text-main)] font-heading">
-                    High-Definition 3D Category Icons
+                    Stage-by-Stage % Progress Tracker
                   </h4>
                 </div>
                 <p className="text-xs text-[var(--text-muted)] leading-relaxed">
-                  Upgraded all category icons and progression star badges to high-definition 3D flight-deck renders with alpha transparency across all navigation bars and stats views.
+                  Progress bar and percentages dynamically track readiness toward building your next single landmark (#1 through #6) rather than dividing across all 6 runs, with excess stockpiled items automatically rolling into subsequent builds.
                 </p>
               </div>
 
-              {/* Feature 4 */}
+              {/* Feature 4: 100% 3D Artwork */}
               <div className="p-4 rounded-2xl bg-black/20 border border-white/5 space-y-2">
                 <div className="flex items-center gap-2">
-                  <span className="text-base">🌟</span>
+                  <span className="text-base">🎨</span>
                   <h4 className="text-xs font-semibold text-[var(--text-main)] font-heading">
-                    Star Sync Offsets & HUD Calibration
+                    Complete 3D Landmark Artwork Suite
                   </h4>
                 </div>
                 <p className="text-xs text-[var(--text-muted)] leading-relaxed">
-                  Calibrate your flight deck with manual milestone offsets (Ace 5★ down to Specialist 1★) via the Sync Offset tab so AC-Tracker reflects your exact in-game star total.
+                  All 21 mission landmarks and all 26 seasonal calendar events now feature official high-definition 3D in-game renders with graceful fallback handling across both dark and daylight cyber flight-deck themes.
                 </p>
               </div>
             </div>

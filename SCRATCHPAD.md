@@ -56,26 +56,42 @@ Event walkthroughs
 
 ## 🎯 Missions Backlog
 
-- [x] **Mission: Aztec Pyramid** (Implemented in v2.7 — Adventure Tier: Owl)
-    - 30 items total (6 each across 5 items in Owl class from Aztec Legacy collection)
-    - Reward: Collectible building (+50 Max Population, 3x3 footprint, drops Aztec collection items / 24h)
-
-- [x] **Mission: Colosseum** (Implemented in v2.7 — Adventure Tier: Hawk)
-    - 30 items total (6 each across 5 items in Hawk class from Roman Holiday collection)
-    - Reward: Collectible building (+50 Max Population, 3x3 footprint, drops Roman collection items / 24h)
-
-- [x] **Mission: Tower of London** (Implemented in v2.7 — Regional Tier: Swift, Owl, Hawk, Raven, Eagle)
-    - 250 items total (10 each across 25 items in Swift, Owl, Hawk, Raven, Eagle classes)
-    - Reward: Commerce landmark (+25% bonus, 2 radius, 600 coins / 24h)
-
-- [x] **Mission: Eiffel Tower** (Implemented in v2.7 — Heavy Long-Haul Tier: Jumbo, Giant, Falcon, Thunderbird, Condor)
-    - 250 items total (10 each across 25 items in Jumbo, Giant, Falcon, Thunderbird, Condor classes)
-    - Reward: Commerce landmark (+25% bonus, 2 radius, 630 coins / 24h)
-
-- [ ] **Mission: Temple of Ah Cacao** (Pending data)
+- [x] **21 Total Missions Implemented — Sorted by Aircraft Tier from Lowest to Highest** (v2.7):
+    - **1. Aztec Pyramid** (Owl — Class 2)
+    - **2. Colosseum** (Hawk — Class 3)
+    - **3. Stonehenge** (Raven — Class 4)
+    - **4. Sphinx** (Eagle — Class 5)
+    - **5. Ancient Greek Temple** (Jumbo — Class 6)
+    - **6. Odessa Opera and Ballet Theater** (Jumbo — Class 6)
+    - **7. Egeskov Castle** (Jumbo — Class 6)
+    - **8. Winter Palace** (Giant — Class 7)
+    - **9. Moai Statues** (Giant — Class 7)
+    - **10. Sagrada Familia** (Giant — Class 7)
+    - **11. Stone Skyscraper** (Falcon — Class 8)
+    - **12. Tower of Babel** (Falcon — Class 8)
+    - **13. Taj Mahal** (Thunderbird — Class 9)
+    - **14. Great Pyramid** (Thunderbird — Class 9)
+    - **15. Temple of Ah Cacao** (Condor — Class 10)
+    - **16. Forbidden City** (Condor — Class 10)
+    - **17. The Louvre** (Meta-Collections: Owl–Jumbo collections)
+    - **18. Notre Dame de Paris** (Meta-Collections: Jumbo–Giant collections)
+    - **19. The Kremlin** (Meta-Collections: Falcon–Thunderbird collections)
+    - **20. Tower of London** (Swift–Eagle Regional Commerce — 25 items × 10 = 250)
+    - **21. Eiffel Tower** (Jumbo–Condor Heavy Long-Haul Commerce — 25 items × 10 = 250, highest mission)
 
 
 ## ✅ Implemented / Done
+- [x] Version 2.75 Release Deployment — Missions Depot & Settings Overhaul (Nov 5, 2026 - v2.75): Bumped release version to Version 2.75 (package version 2.7.5) and updated the "What's New in AC-Tracker" release notes modal highlighting the newly launched Missions Depot (complete 21-mission roster sorted by aircraft class from Owl to Condor, single-build stage % progress tracking, stockpiling counter steppers, and 100% 3D renders) and the Cockpit & Avionics Settings page (independent navigation module toggles, flight deck table density, star calculation mode, and multi-profile backups). Verified zero errors on `npm run build` and updated `APP_UPDATED_DATE = 'Nov 5, 2026'`.
+- [x] Standardized Landmark Drop & Yield Specification (Nov 5, 2026 - v2.7): Corrected the reward yield labeling and data across all 19 collectible adventure buildings from themed item strings to "Drops: Random Collection Item / 24h", accurately reflecting Airport City game mechanics where all adventure landmarks share the same random collection item drop pool rather than exclusive themed items. Replaced misleading "Coins:" prefix with "Drops:" for collectible landmarks while preserving "Coins:" income strictly for the 2 grand commerce towers (Tower of London & Eiffel Tower), and adjusted "Radius" to "Size: 3x3" for collectible buildings. Updated `APP_UPDATED_DATE = 'Nov 5, 2026'`.
+- [x] Aircraft Tier Sorting for Missions Roster (Nov 5, 2026 - v2.7): Reordered all missions in `src/data/missionsData.ts` strictly by aircraft class tier from lowest to highest: Owl (Aztec) -> Hawk (Colosseum) -> Raven (Stonehenge) -> Eagle (Sphinx) -> Jumbo (Ancient Greek Temple, Odessa Opera, Egeskov Castle) -> Giant (Winter Palace, Moai Statues, Sagrada Familia) -> Falcon (Stone Skyscraper, Tower of Babel) -> Thunderbird (Taj Mahal, Great Pyramid) -> Condor (Temple of Ah Cacao, Forbidden City) -> Meta-Collections (The Louvre, Notre Dame, The Kremlin) -> Grand Commerce Landmarks (Tower of London -> Eiffel Tower). Verified with zero errors on `npm run build` and updated `APP_UPDATED_DATE = 'Nov 5, 2026'`.
+- [x] Ancient Greek Temple Mission Added (Nov 5, 2026 - v2.7): Added the Ancient Greek Temple adventure mission (Jumbo class, 5 items × 6 = 30 items required) to `src/data/missionsData.ts` with direct flight route linkages to Troy, Thebes, Delphi, Athens, and Sparta in "The Ancient World" map set. Linked official artwork (`icons/missions/ancient_greek_temple.png`), verified zero build errors, and updated total cataloged missions to 21. Updated `APP_UPDATED_DATE = 'Nov 5, 2026'`.
+- [x] Official 3D Mission Landmark Artwork Integration (Nov 5, 2026 - v2.7): Integrated the full suite of in-game 3D landmark renders added to `icons/missions/` covering 15 adventure missions (Winter Palace, Temple of Ah Cacao, Odessa Opera and Ballet Theater, Stonehenge, Moai Statues, Taj Mahal, Sphinx, The Louvre, Sagrada Familia, Great Pyramid, Stone Skyscraper, Tower of Babel, The Kremlin, Egeskov Castle, and Notre Dame de Paris). Standardized image filenames across both source and distribution directories, cleaned up duplicate files, and verified full render display in local preview and production build with zero errors. Updated `APP_UPDATED_DATE = 'Nov 5, 2026'`.
+- [x] Full 20 Missions Roster & Collection Item Badging (Nov 5, 2026 - v2.7): Expanded the Missions Depot with 16 newly cataloged adventure & collectible missions (Winter Palace, Temple of Ah Cacao, Odessa Opera and Ballet Theater, Stonehenge, Moai Statues, Taj Mahal, Sphinx, The Louvre, Sagrada Familia, Great Pyramid, Stone Skyscraper, Tower of Babel, The Kremlin, Egeskov Castle, Notre Dame de Paris, and Forbidden City), bringing the mission catalog to 20 total active prize landmarks alongside Aztec Pyramid, Colosseum, Tower of London, and Eiffel Tower. Enhanced destination rendering to detect collection items (`aircraft === 'N/A'` or `destination.includes('Collection')`) with custom purple collection badges and layer icons, and integrated `MissionThumbnail` component providing automated graceful fallback to cyber trophy icons whenever landmark image artwork is loading or unavailable. Updated `APP_UPDATED_DATE = 'Nov 5, 2026'`.
+- [x] Event Wiki URL Normalization to Underscore Format (Nov 5, 2026): Fixed all 26 Airport City event wiki external links across `src/data/eventsData.ts` to use underscores (`_`) instead of hyphens (`-`) matching the authentic community wiki URL taxonomy (e.g. `santas_bad_day/`, `down_the_rabbit_hole/`, `it_came_from_outer_space/`, `riding_the_comet/`), and confirmed HTTP 200 live status across all 26 destination pages.
+- [x] Event Calendar Discontinued Status for Santa's Bad Day (Nov 5, 2026): Marked the legacy December holiday event "Santa's Bad Day" as discontinued with a dedicated high-visibility rose pill badge (`DISCONTINUED`) in `eventsData.ts` and `EventsPage.tsx`, updated the description with a legacy disclaimer, and highlighted the badge with custom styling while preserving the historical 6-route flight catalog links.
+- [x] Missions Depot Selected Mission Persistence & Building Integrity (Nov 5, 2026 - v2.7): Persisted the currently selected mission ID (`selectedMissionId`) across navigation view changes (e.g. jumping between Flights, Missions, and Settings) and multi-profile preferences so the active landmark depot never resets. Added strict landmark build validation ensuring unbuilt landmark slots cannot be clicked or built without a complete set of required items ready, and resolved the `#150` visual collision by cleanly separating the stage target from the progress count with a dedicated line break.
+- [x] Avionics & Cockpit Settings Page (Nov 5, 2026 - v2.7): Built a dedicated Settings page with custom glassmorphic avionics cards empowering pilots to customize their application layout. Features independent navigation module visibility toggles (Maps Depot, Fleet Hangar, Telemetry & Stats, Missions Depot, 12-Month Calendar, About ACT) with quick presets ("All", "Streamlined", "Minimal") and auto-redirection safety; flight deck display controls (default flight view table vs cards, row density compact vs comfortable, show/hide recently flown quick-jump bar, show/hide live event banner, focus mode, and alliance/adventure missing badges); star progression calculation mode and direct milestone star sync offset steppers; active theme and brand emblem launchers; and active pilot profile summaries with backup and restore shortcuts. Top desktop utility bar and mobile switcher bar now feature a dedicated Settings gear button. Verified with zero errors on `npm run build` and updated `APP_UPDATED_DATE = 'Nov 5, 2026'`.
+- [x] Categories Sidebar Open by Default on Startup (Nov 5, 2026): Configured the Flight Categories drawer/sidebar to be open by default whenever starting the application (`isSidebarOpen = true`, `getDefaultPrefs().sidebarOpen = true`, and initial mount priority), allowing pilots to immediately access regular, event, space, and alliance route filters upon launching the flight deck. Updated `APP_UPDATED_DATE` to `'Nov 5, 2026'`.
 - [x] November Calendar Banner Update (Nov 5, 2026): Updated the 12-month event calendar month banner for November (`icons/calendar/11.jpg`) with fresh, high-definition seasonal artwork. Bumped `APP_UPDATED_DATE` to `'Nov 5, 2026'`.
 - [x] Mission Depot & Special Prize Counters — Eiffel Tower Template (Nov 5, 2026 - v2.7): Built a dedicated Missions Depot view and extensible mission template architecture for tracking items required to reach grand landmark prizes in Airport City, headlined by the Eiffel Tower (Commerce, +25% bonus, 2 radius, 630 coins/day). Features all 25 cataloged item requirements across 5 aircraft tiers (Jumbo Aquarium Fish, Giant World Delicacies, Falcon Hotel Furnishings, Thunderbird Ice Cream Parlor, Condor Dining Forks; 10 each = 250 items total) with tactile -/+ steppers, direct number inputs, +5 quick steps, Max and Reset controls, completion badges, collapsible group accordions, search & filter toolbar, in-game stats dossier preview modal, one-click flight jump navigation to the Flights tab, and full multi-profile persistence. Bumped `APP_VERSION` to `Version 2.7` and verified `APP_UPDATED_DATE = 'Nov 5, 2026'`.
 - [x] Filter Toolbar Responsive Wrapping & Split-Screen Usability (Oct 30, 2026 - v2.6): Resolved rigid non-wrapping flex layout bug in filter toolbar by changing container to `flex flex-wrap items-center gap-2`, applying `flex-1 sm:flex-none` with responsive min-widths on aircraft, mission, and sort dropdowns, and expanding search input smoothly so controls stack into two balanced, clean rows on narrow and split-screen monitors (700px–960px). Bumped `APP_VERSION` to `Version 2.6` and verified `APP_UPDATED_DATE = 'Oct 30, 2026'`.

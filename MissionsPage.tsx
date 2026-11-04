@@ -13,9 +13,42 @@ import {
   ChevronUp,
   ChevronLeft,
   ChevronRight,
+  Trophy,
+  Layers,
 } from 'lucide-react';
 import { Mission, MISSIONS_LIST } from './src/data/missionsData';
 import { AIRCRAFT_SPRITES } from './AirplanesPage';
+
+// Graceful thumbnail loader with cyber landmark icon fallback if image asset is not yet available
+const MissionThumbnail: React.FC<{
+  src?: string;
+  name?: string;
+  className?: string;
+  fallbackIconClass?: string;
+}> = ({ src, name = 'Mission', className = 'w-full h-full object-contain', fallbackIconClass = 'w-4 h-4 text-amber-400' }) => {
+  const [hasError, setHasError] = useState(false);
+
+  useEffect(() => {
+    setHasError(false);
+  }, [src]);
+
+  if (hasError || !src) {
+    return (
+      <div className="w-full h-full flex items-center justify-center bg-black/40 rounded">
+        <Trophy className={fallbackIconClass} />
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={src}
+      alt={name}
+      className={className}
+      onError={() => setHasError(true)}
+    />
+  );
+};
 
 interface MissionsPageProps {
   missions?: Mission[];
@@ -23,6 +56,8 @@ interface MissionsPageProps {
   onUpdateCount: (missionId: string, itemId: string, count: number) => void;
   onBatchUpdate: (missionId: string, updates: Record<string, number>) => void;
   onNavigateToDestination?: (destName: string) => void;
+  selectedMissionId?: string;
+  onSelectMission?: (missionId: string) => void;
 }
 
 export const MissionsPage: React.FC<MissionsPageProps> = ({
@@ -31,8 +66,16 @@ export const MissionsPage: React.FC<MissionsPageProps> = ({
   onUpdateCount,
   onBatchUpdate,
   onNavigateToDestination,
+  selectedMissionId,
+  onSelectMission,
 }) => {
-  const [activeMissionId, setActiveMissionId] = useState<string>(missions[0]?.id || 'aztec-pyramid');
+  const [internalMissionId, setInternalMissionId] = useState<string>(selectedMissionId || missions[0]?.id || 'aztec-pyramid');
+
+  const activeMissionId = selectedMissionId !== undefined ? selectedMissionId : internalMissionId;
+  const setActiveMissionId = (id: string) => {
+    setInternalMissionId(id);
+    onSelectMission?.(id);
+  };
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [showStatsModal, setShowStatsModal] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
@@ -77,27 +120,51 @@ export const MissionsPage: React.FC<MissionsPageProps> = ({
     return Math.max(0, Math.min(...runsPerItem));
   }, [activeMission, currentCounts]);
 
-  // Total collected items towards the grand 6x target
-  const grandStats = useMemo(() => {
-    if (!activeMission) return { totalCollected: 0, grandRequired: 0, grandPercent: 0 };
+  // Current landmark stage progress (how far the player is to making landmark #1, #2, ... #6)
+  const stageStats = useMemo(() => {
+    if (!activeMission) return { collected: 0, required: 0, percent: 0, targetIndex: 1, isFullyComplete: false, isAllBuilt: false };
+
+    const required = activeMission.totalRequired; // items needed for ONE build (e.g. 250 or 30)
+
+    if (builtCount >= maxCompletions) {
+      return {
+        collected: required,
+        required,
+        percent: 100,
+        targetIndex: maxCompletions,
+        isFullyComplete: true,
+        isAllBuilt: true,
+      };
+    }
+
+    const targetIndex = builtCount + 1; // 1 to 6
     let collected = 0;
-    const grandRequired = activeMission.totalRequired * maxCompletions;
+    let completeItemsInStage = 0;
 
     activeMission.items.forEach(item => {
       const count = currentCounts[item.id] || 0;
-      collected += count;
+      // Items belonging to this specific landmark stage:
+      const itemsInStage = Math.max(0, Math.min(item.required, count - builtCount * item.required));
+      collected += itemsInStage;
+      if (itemsInStage >= item.required) {
+        completeItemsInStage += 1;
+      }
     });
 
-    const grandPercent = grandRequired > 0
-      ? Math.min(100, Math.round((collected / grandRequired) * 100))
-      : 0;
+    const percent = required > 0 ? Math.min(100, Math.round((collected / required) * 100)) : 0;
+    const isFullyComplete = collected >= required;
 
     return {
-      totalCollected: collected,
-      grandRequired,
-      grandPercent,
+      collected,
+      required,
+      percent,
+      targetIndex,
+      completeItemsInStage,
+      totalItems: activeMission.items.length,
+      isFullyComplete,
+      isAllBuilt: false,
     };
-  }, [activeMission, currentCounts, maxCompletions]);
+  }, [activeMission, currentCounts, builtCount, maxCompletions]);
 
   // Cycle to previous / next mission
   const handlePrevMission = () => {
@@ -181,7 +248,7 @@ export const MissionsPage: React.FC<MissionsPageProps> = ({
           >
             <div className="flex items-center gap-3 min-w-0">
               <div className="w-7 h-7 rounded-lg theme-badge flex items-center justify-center p-0.5 shrink-0 overflow-hidden">
-                <img src={activeMission?.reward.image} alt={activeMission?.name} className="w-full h-full object-contain" />
+                <MissionThumbnail src={activeMission?.reward.image} name={activeMission?.name} />
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
@@ -243,7 +310,7 @@ export const MissionsPage: React.FC<MissionsPageProps> = ({
                   >
                     <div className="flex items-center gap-3 min-w-0">
                       <div className="w-7 h-7 rounded-lg theme-badge flex items-center justify-center p-0.5 shrink-0 overflow-hidden">
-                        <img src={m.reward.image} alt={m.name} className="w-full h-full object-contain" />
+                        <MissionThumbnail src={m.reward.image} name={m.name} />
                       </div>
                       <div className="min-w-0">
                         <div className="text-xs font-heading font-semibold text-[var(--text-main)] truncate">
@@ -279,15 +346,16 @@ export const MissionsPage: React.FC<MissionsPageProps> = ({
         )}
       </div>
 
-      {/* Reward & 6x Progression Cockpit Header */}
+      {/* Reward & Next Landmark Progression Cockpit Header */}
       {activeMission && (
         <div className="glass-card rounded-2xl p-4 sm:p-5 border border-[var(--border-card)] flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-md">
           <div className="flex items-center gap-3.5 w-full md:w-auto">
             <div className="w-14 h-16 sm:w-16 sm:h-20 rounded-xl bg-black/30 border border-white/10 flex items-center justify-center p-1 relative shrink-0">
-              <img
+              <MissionThumbnail
                 src={activeMission.reward.image}
                 alt={activeMission.name}
                 className="w-full h-full object-contain"
+                fallbackIconClass="w-8 h-8 text-amber-400 opacity-80"
               />
               {activeMission.reward.statsImage && (
                 <button
@@ -316,11 +384,21 @@ export const MissionsPage: React.FC<MissionsPageProps> = ({
               </div>
 
               <div className="flex flex-wrap items-center gap-2 text-xs font-mono">
-                <span className="text-amber-300">Bonus: {activeMission.reward.bonus}</span>
+                <span className="text-amber-300">
+                  {activeMission.reward.category === 'Commerce' ? 'Bonus: ' : 'Max Pop: '}
+                  {activeMission.reward.bonus.replace('+50 Max Pop', '+50')}
+                </span>
                 <span className="text-[var(--text-muted)]">•</span>
-                <span className="text-emerald-300">Radius: {activeMission.reward.radius}</span>
+                <span className="text-emerald-300">
+                  {activeMission.reward.category === 'Commerce' ? 'Radius: ' : 'Footprint: '}
+                  {activeMission.reward.radius}
+                </span>
                 <span className="text-[var(--text-muted)]">•</span>
-                <span className="text-yellow-300">Coins: {activeMission.reward.coins}</span>
+                {activeMission.reward.category === 'Commerce' ? (
+                  <span className="text-yellow-300">Coins: {activeMission.reward.coins}</span>
+                ) : (
+                  <span className="text-cyan-300">Produces: 1 collectible item / 24h</span>
+                )}
               </div>
 
               {/* 6x Built Tracker & Claim Button */}
@@ -329,16 +407,32 @@ export const MissionsPage: React.FC<MissionsPageProps> = ({
                 <div className="flex items-center gap-1">
                   {[1, 2, 3, 4, 5, 6].map(num => {
                     const isBuilt = num <= builtCount;
+                    const canBuildThis = num === builtCount + 1 && setsReady > 0;
                     return (
                       <button
                         key={num}
-                        onClick={() => handleSetBuilt(isBuilt && num === builtCount ? num - 1 : num)}
+                        disabled={!isBuilt && !canBuildThis}
+                        onClick={() => {
+                          if (isBuilt && num === builtCount) {
+                            handleSetBuilt(num - 1);
+                          } else if (canBuildThis) {
+                            handleClaimRun();
+                          }
+                        }}
                         className={`w-5 h-5 rounded text-[10px] font-mono font-bold transition-all border flex items-center justify-center ${
                           isBuilt
-                            ? 'bg-amber-500/30 border-amber-500/60 text-amber-300 shadow-[0_0_8px_rgba(245,158,11,0.3)]'
-                            : 'bg-black/30 border-white/10 text-[var(--text-muted)] hover:border-white/30'
+                            ? 'bg-amber-500/30 border-amber-500/60 text-amber-300 shadow-[0_0_8px_rgba(245,158,11,0.3)] cursor-pointer'
+                            : canBuildThis
+                            ? 'bg-emerald-500/25 border-emerald-500/50 text-emerald-300 animate-pulse cursor-pointer hover:scale-110'
+                            : 'bg-black/20 border-white/5 text-[var(--text-muted)] opacity-35 cursor-not-allowed'
                         }`}
-                        title={`Click to set built landmarks to ${num} of 6`}
+                        title={
+                          isBuilt
+                            ? `Landmark #${num} built (Click to undo)`
+                            : canBuildThis
+                            ? `Build Landmark #${num} (1 full set ready! Click to build)`
+                            : `Landmark #${num}: Collect all required items to build`
+                        }
                       >
                         {isBuilt ? '★' : num}
                       </button>
@@ -364,25 +458,37 @@ export const MissionsPage: React.FC<MissionsPageProps> = ({
             </div>
           </div>
 
-          {/* 6x Total Stockpile Progress Bar & Quick Actions */}
+          {/* Progress towards making NEXT Landmark (Not all 6) & Quick Actions */}
           <div className="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end shrink-0">
-            <div className="bg-black/25 px-3.5 py-2 rounded-xl border border-white/5 text-right min-w-[190px]">
-              <div className="flex justify-between items-center text-xs mb-1 font-mono">
-                <span className="text-[var(--text-muted)]">6x Total Items</span>
-                <span className="font-bold text-[var(--text-main)]">
-                  {grandStats.totalCollected} / {grandStats.grandRequired} ({grandStats.grandPercent}%)
-                </span>
+            <div className="bg-black/25 px-3.5 py-2 rounded-xl border border-[var(--border-subtle)] text-right min-w-[210px]">
+              <div className="text-xs mb-1.5 font-mono">
+                <div className="text-[var(--text-muted)] text-[11px] text-left">
+                  {stageStats.isAllBuilt
+                    ? 'All 6 Built'
+                    : `Progress to #${stageStats.targetIndex}`}
+                </div>
+                <div className="font-bold text-[var(--text-main)] text-right">
+                  {stageStats.collected} / {stageStats.required} ({stageStats.percent}%)
+                </div>
               </div>
-              <div className="w-full bg-black/50 h-2 rounded-full overflow-hidden border border-white/5">
+              <div className="w-full bg-black/50 h-2 rounded-full overflow-hidden border border-[var(--border-subtle)]">
                 <div
                   className={`h-full rounded-full transition-all duration-300 ${
-                    grandStats.grandPercent >= 100 ? 'bg-amber-400' : 'theme-progress-bar'
+                    stageStats.isAllBuilt
+                      ? 'bg-amber-400'
+                      : stageStats.isFullyComplete
+                      ? 'bg-emerald-400'
+                      : 'theme-progress-bar'
                   }`}
-                  style={{ width: `${grandStats.grandPercent}%` }}
+                  style={{ width: `${stageStats.percent}%` }}
                 />
               </div>
               <div className="text-[10px] text-[var(--text-muted)] mt-1 font-mono text-right">
-                {activeMission.totalRequired} items per build • Up to 6 builds
+                {stageStats.isAllBuilt
+                  ? 'Maximum 6 builds completed ★'
+                  : stageStats.isFullyComplete
+                  ? `Ready to build Landmark #${stageStats.targetIndex}!`
+                  : `${stageStats.required - stageStats.collected} needed for Landmark #${stageStats.targetIndex}`}
               </div>
             </div>
 
@@ -406,14 +512,14 @@ export const MissionsPage: React.FC<MissionsPageProps> = ({
         </div>
       )}
 
-      {/* Clean Items List with 6x Support */}
+      {/* Clean Items List with Stage Progress & Stockpile Support */}
       <div className="glass-panel rounded-2xl border border-[var(--border-card)] overflow-hidden shadow-lg">
         {/* List Header */}
         <div className="grid grid-cols-12 gap-2 sm:gap-4 px-4 py-2.5 bg-black/35 border-b border-white/5 text-[11px] font-mono uppercase tracking-wider text-[var(--text-muted)] select-none">
           <div className="col-span-1 text-center">#</div>
           <div className="col-span-4 sm:col-span-4">Item ({activeMission?.items.length})</div>
           <div className="col-span-3 sm:col-span-3">Destination</div>
-          <div className="col-span-4 sm:col-span-4 text-right">Stockpile & 6x Progress</div>
+          <div className="col-span-4 sm:col-span-4 text-right">Stockpile & Stepper</div>
         </div>
 
         {/* Item Rows */}
@@ -423,7 +529,11 @@ export const MissionsPage: React.FC<MissionsPageProps> = ({
             const fullTarget6x = item.required * maxCompletions; // e.g. 6x6=36 or 10x6=60
             const runsCovered = Math.floor(count / item.required); // e.g. 20 / 6 = 3 full runs
             const isFull6xMax = count >= fullTarget6x;
-            const hasAtLeastOneRun = count >= item.required;
+
+            // Progress towards the current landmark stage (#1, #2, ... #6)
+            const thresholdForStage = Math.min(fullTarget6x, (builtCount + 1) * item.required);
+            const itemsInStage = Math.max(0, Math.min(item.required, count - builtCount * item.required));
+            const isReadyForStage = count >= thresholdForStage;
             const sprite = AIRCRAFT_SPRITES[item.aircraft];
 
             return (
@@ -432,7 +542,7 @@ export const MissionsPage: React.FC<MissionsPageProps> = ({
                 className={`grid grid-cols-12 gap-2 sm:gap-4 px-4 py-2.5 items-center transition-colors ${
                   isFull6xMax
                     ? 'bg-amber-950/15 hover:bg-amber-950/25'
-                    : hasAtLeastOneRun
+                    : isReadyForStage
                     ? 'bg-emerald-950/15 hover:bg-emerald-950/25'
                     : 'hover:bg-white/[0.02]'
                 }`}
@@ -440,13 +550,11 @@ export const MissionsPage: React.FC<MissionsPageProps> = ({
                 {/* Index / Status */}
                 <div className="col-span-1 text-center font-mono text-xs flex items-center justify-center">
                   {isFull6xMax ? (
-                    <span className="text-amber-400 font-bold" title="6 of 6 missions covered!">
+                    <span className="text-amber-400 font-bold" title="All 6 missions covered!">
                       ★6
                     </span>
-                  ) : hasAtLeastOneRun ? (
-                    <span className="text-emerald-400 font-mono font-bold text-[11px]" title={`${runsCovered} of 6 missions covered`}>
-                      {runsCovered}x
-                    </span>
+                  ) : isReadyForStage ? (
+                    <Check className="w-4 h-4 text-emerald-400 stroke-[3]" title={`Ready for Landmark #${builtCount + 1}`} />
                   ) : (
                     <span className="text-[var(--text-muted)]">{idx + 1}</span>
                   )}
@@ -458,17 +566,27 @@ export const MissionsPage: React.FC<MissionsPageProps> = ({
                     {item.name}
                   </div>
                   <div className="text-[10px] font-mono text-[var(--text-muted)] flex items-center gap-1.5">
-                    <span>{item.required} / mission</span>
+                    <span>
+                      {itemsInStage}/{item.required} for #{Math.min(maxCompletions, builtCount + 1)}
+                    </span>
                     <span>•</span>
                     <span className={runsCovered >= 6 ? 'text-amber-300 font-semibold' : runsCovered > 0 ? 'text-emerald-300' : ''}>
-                      {runsCovered >= 6 ? 'Covers all 6 runs' : `Covers ${runsCovered}/6 runs`}
+                      {runsCovered >= 6 ? 'All 6 covered' : `${runsCovered}/6 covered`}
                     </span>
                   </div>
                 </div>
 
-                {/* Destination & Aircraft */}
+                {/* Destination & Aircraft / Collection */}
                 <div className="col-span-3 sm:col-span-3 flex items-center gap-2 min-w-0">
-                  {onNavigateToDestination ? (
+                  {item.aircraft === 'N/A' || item.destination.toLowerCase().includes('collection') ? (
+                    <span
+                      className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-purple-500/15 text-purple-300 text-xs font-medium border border-purple-500/25 truncate shadow-sm"
+                      title={`Obtained by completing: ${item.destination}`}
+                    >
+                      <Layers className="w-3 h-3 text-purple-400 shrink-0" />
+                      <span className="truncate">{item.destination}</span>
+                    </span>
+                  ) : onNavigateToDestination ? (
                     <button
                       onClick={() => onNavigateToDestination(item.destination)}
                       className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-white/5 hover:bg-white/10 text-[var(--text-main)] text-xs font-medium border border-white/10 transition-colors group/dest truncate"
@@ -493,9 +611,11 @@ export const MissionsPage: React.FC<MissionsPageProps> = ({
                       title={item.aircraft}
                     />
                   )}
-                  <span className="text-[11px] font-mono text-[var(--text-muted)] hidden md:inline">
-                    ({item.aircraft})
-                  </span>
+                  {item.aircraft !== 'N/A' && (
+                    <span className="text-[11px] font-mono text-[var(--text-muted)] hidden md:inline">
+                      ({item.aircraft})
+                    </span>
+                  )}
                 </div>
 
                 {/* Unconstrained Stockpile Steppers */}
@@ -523,11 +643,11 @@ export const MissionsPage: React.FC<MissionsPageProps> = ({
                     className={`w-12 h-6 text-center rounded-md border text-xs font-mono font-bold focus:outline-none focus:border-[var(--accent)] transition-all ${
                       isFull6xMax
                         ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 shadow-[0_0_6px_rgba(245,158,11,0.2)]'
-                        : hasAtLeastOneRun
+                        : isReadyForStage
                         ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
                         : 'bg-black/40 text-[var(--text-main)] border-white/10'
                     }`}
-                    title={`Current inventory count (target: ${fullTarget6x} for 6 runs)`}
+                    title={`Current inventory count (target: ${thresholdForStage} for #${builtCount + 1})`}
                   />
 
                   {/* Plus 1 */}

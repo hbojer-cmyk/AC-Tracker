@@ -131,6 +131,11 @@ export const EventsPage: React.FC<EventsPageProps> = ({
                               <span className="event-title text-sm tracking-tight font-bold">
                                 {evt.title}
                               </span>
+                              {evt.isDiscontinued && (
+                                <span className="inline-flex items-center gap-1 text-[10px] font-mono font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400 px-2 py-0.5 rounded-full bg-rose-500/15 border border-rose-500/30 shadow-sm">
+                                  Discontinued
+                                </span>
+                              )}
                               {isLiveActive && (
                                 <span className="inline-flex items-center gap-1.5 text-[10px] font-mono font-bold uppercase tracking-wider text-cyan-600 dark:text-cyan-300 px-2 py-0.5 rounded-full bg-cyan-100/90 dark:bg-cyan-950/90 border border-cyan-400/50 shadow-sm">
                                   <span className="relative flex h-2 w-2">
@@ -160,14 +165,21 @@ export const EventsPage: React.FC<EventsPageProps> = ({
                         {/* Clean and theme-adaptive metadata pills */}
                         {evt.badges && evt.badges.length > 0 && (
                           <div className="flex flex-wrap gap-1.5 pt-0.5">
-                            {evt.badges.map((b, bIdx) => (
-                              <span
-                                key={bIdx}
-                                className="event-pill px-2.5 py-0.5 rounded-md text-[10px] font-mono"
-                              >
-                                {b}
-                              </span>
-                            ))}
+                            {evt.badges.map((b, bIdx) => {
+                              const isDiscontinuedBadge = b.toLowerCase() === 'discontinued';
+                              return (
+                                <span
+                                  key={bIdx}
+                                  className={`px-2.5 py-0.5 rounded-md text-[10px] font-mono ${
+                                    isDiscontinuedBadge
+                                      ? 'bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30 font-bold'
+                                      : 'event-pill'
+                                  }`}
+                                >
+                                  {b}
+                                </span>
+                              );
+                            })}
                           </div>
                         )}
 

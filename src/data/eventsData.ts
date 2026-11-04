@@ -111,6 +111,7 @@ export interface CalendarEventItem {
   description: string;
   badges?: string[];
   filterKeyword?: string;
+  isDiscontinued?: boolean;
 }
 
 export interface MonthCalendarData {
@@ -132,20 +133,20 @@ export const EVENTS_CALENDAR: MonthCalendarData[] = [
     events: [
       {
         title: "It Came from Outer Space",
-        wikiUrl: "https://www.airportcitygame.com/wiki/it-came-from-outer-space/",
+        wikiUrl: "https://www.airportcitygame.com/wiki/it_came_from_outer_space/",
         description: "Investigate mysterious extraterrestrial signals, UFO sightings, and cosmic artifacts across deep sky routes.",
         badges: ["Sci-Fi", "Space", "10 Routes"],
         filterKeyword: "It Came From Outer Space"
       },
       {
         title: "Riding the Comet",
-        wikiUrl: "https://www.airportcitygame.com/wiki/riding-the-comet/",
+        wikiUrl: "https://www.airportcitygame.com/wiki/riding_the_comet/",
         description: "Track cosmic perihelion flybys, collecting telemetry data and deep space observatory crystals.",
         badges: ["Cosmic", "Astronomy", "Space Race"]
       },
       {
         title: "Valley of the Kings Curse",
-        wikiUrl: "https://www.airportcitygame.com/wiki/valley-of-the-kings-curse/",
+        wikiUrl: "https://www.airportcitygame.com/wiki/valley_of_the_kings_curse/",
         description: "Unearth ancient pharaoh tombs, archaeological relics, golden sarcophagi, and cryptic hieroglyph scrolls.",
         badges: ["Archaeology", "Ancient Egypt", "7 Routes"],
         filterKeyword: "Valley Of The Kings Curse"
@@ -161,21 +162,21 @@ export const EVENTS_CALENDAR: MonthCalendarData[] = [
     events: [
       {
         title: "On the Wings of Love",
-        wikiUrl: "https://www.airportcitygame.com/wiki/on-the-wings-of-love/",
+        wikiUrl: "https://www.airportcitygame.com/wiki/on_the_wings_of_love/",
         description: "Valentine's seasonal celebration collecting romantic gifts, bridal bouquets, and destination love tokens.",
         badges: ["Valentine's", "Seasonal", "10 Routes"],
         filterKeyword: "On The Wings Of Love"
       },
       {
         title: "Dragon Rising",
-        wikiUrl: "https://www.airportcitygame.com/wiki/dragon-rising/",
+        wikiUrl: "https://www.airportcitygame.com/wiki/dragon_rising/",
         description: "Celebrate the Lunar New Year festival with mythical dragon lanterns, temple fireworks, and cultural flights.",
         badges: ["Lunar New Year", "Festive", "10 Routes"],
         filterKeyword: "Dragon Rising"
       },
       {
         title: "A Walk in the Clouds",
-        wikiUrl: "https://www.airportcitygame.com/wiki/a-walk-in-the-clouds/",
+        wikiUrl: "https://www.airportcitygame.com/wiki/a_walk_in_the_clouds/",
         description: "Soar through high-altitude stratospheric currents, airship regattas, and sky-high atmospheric stations.",
         badges: ["Aviation", "Regatta", "10 Routes"],
         filterKeyword: "A Walk In The Clouds"
@@ -191,21 +192,21 @@ export const EVENTS_CALENDAR: MonthCalendarData[] = [
     events: [
       {
         title: "Dancing with Leprechauns",
-        wikiUrl: "https://www.airportcitygame.com/wiki/dancing-with-the-leprechauns/",
+        wikiUrl: "https://www.airportcitygame.com/wiki/dancing_with_the_leprechauns/",
         description: "Saint Patrick's Celtic carnival collecting four-leaf clovers, pots of gold, and emerald rainbows.",
         badges: ["St. Patrick's", "Celtic", "10 Routes"],
         filterKeyword: "Dancing With Leprechauns"
       },
       {
         title: "Spring is Here",
-        wikiUrl: "https://www.airportcitygame.com/wiki/spring-is-here/",
+        wikiUrl: "https://www.airportcitygame.com/wiki/spring_is_here/",
         description: "Welcoming blooming blossoms, garden sanctuaries, and spring migration routes across warming continents.",
         badges: ["Spring", "Floral", "Seasonal"],
         filterKeyword: "Spring is Here"
       },
       {
         title: "Easter Cheer",
-        wikiUrl: "https://www.airportcitygame.com/wiki/easter-cheer/",
+        wikiUrl: "https://www.airportcitygame.com/wiki/easter_cheer/",
         description: "Easter holiday festivities gathering decorative Fabergé eggs, chocolate treats, and springtime joy.",
         badges: ["Easter", "Holiday", "11 Routes"],
         filterKeyword: "Easter Cheer"
@@ -221,21 +222,21 @@ export const EVENTS_CALENDAR: MonthCalendarData[] = [
     events: [
       {
         title: "Easter Cheer",
-        wikiUrl: "https://www.airportcitygame.com/wiki/easter-cheer/",
+        wikiUrl: "https://www.airportcitygame.com/wiki/easter_cheer/",
         description: "Easter holiday festivities gathering decorative Fabergé eggs, chocolate treats, and springtime joy.",
         badges: ["Easter", "Holiday", "11 Routes"],
         filterKeyword: "Easter Cheer"
       },
       {
         title: "A Walk in the Clouds",
-        wikiUrl: "https://www.airportcitygame.com/wiki/a-walk-in-the-clouds/",
+        wikiUrl: "https://www.airportcitygame.com/wiki/a_walk_in_the_clouds/",
         description: "Soar through high-altitude stratospheric currents, airship regattas, and sky-high atmospheric stations.",
         badges: ["Aviation", "Regatta", "10 Routes"],
         filterKeyword: "A Walk In The Clouds"
       },
       {
         title: "On the Wings of Love",
-        wikiUrl: "https://www.airportcitygame.com/wiki/on-the-wings-of-love/",
+        wikiUrl: "https://www.airportcitygame.com/wiki/on_the_wings_of_love/",
         description: "Springtime romantic celebration collecting love tokens, wedding gifts, and bridal bouquets.",
         badges: ["Romance", "Seasonal", "10 Routes"],
         filterKeyword: "On The Wings Of Love"
@@ -251,7 +252,7 @@ export const EVENTS_CALENDAR: MonthCalendarData[] = [
     events: [
       {
         title: "Airport City Event",
-        wikiUrl: "https://www.airportcitygame.com/wiki/airport-city/",
+        wikiUrl: "https://www.airportcitygame.com/wiki/airport_city/",
         description: "Anniversary celebration commemorating game lore, airport infrastructure, and iconic milestone flights.",
         badges: ["Anniversary", "Special", "15 Routes"],
         filterKeyword: "Airport City"
@@ -264,7 +265,7 @@ export const EVENTS_CALENDAR: MonthCalendarData[] = [
       },
       {
         title: "Age of Ash",
-        wikiUrl: "https://www.airportcitygame.com/wiki/age-of-ash/",
+        wikiUrl: "https://www.airportcitygame.com/wiki/age_of_ash/",
         description: "Navigate active volcanic caldera plumes, geothermal stations, and volcanic obsidian recovery missions.",
         badges: ["Volcanic", "Geology", "9 Routes"],
         filterKeyword: "Age of Ash"
@@ -280,13 +281,13 @@ export const EVENTS_CALENDAR: MonthCalendarData[] = [
     events: [
       {
         title: "The Great Game",
-        wikiUrl: "https://www.airportcitygame.com/wiki/the-great-game/",
+        wikiUrl: "https://www.airportcitygame.com/wiki/the_great_game/",
         description: "Summer sports tournaments, championship trophies, athletic stadiums, and international friendly competitions.",
         badges: ["Sports", "Tournament", "Summer"]
       },
       {
         title: "The Land of Opportunity",
-        wikiUrl: "https://www.airportcitygame.com/wiki/the-land-of-opportunity/",
+        wikiUrl: "https://www.airportcitygame.com/wiki/the_land_of_opportunity/",
         description: "Journey across historic pioneer routes, iconic frontier skylines, and transcontinental express routes.",
         badges: ["Americana", "Heritage", "9 Routes"],
         filterKeyword: "The Land of Opportunity"
@@ -302,14 +303,14 @@ export const EVENTS_CALENDAR: MonthCalendarData[] = [
     events: [
       {
         title: "World of Wildlife",
-        wikiUrl: "https://www.airportcitygame.com/wiki/world-of-wildlife/",
+        wikiUrl: "https://www.airportcitygame.com/wiki/world_of_wildlife/",
         description: "Protect endangered species, ecological sanctuaries, safari reserves, and pristine rainforests.",
         badges: ["Nature", "Wildlife", "6 Routes"],
         filterKeyword: "World of Wildlife"
       },
       {
         title: "Riding the Comet",
-        wikiUrl: "https://www.airportcitygame.com/wiki/riding-the-comet/",
+        wikiUrl: "https://www.airportcitygame.com/wiki/riding_the_comet/",
         description: "Mid-year celestial tracking missions collecting meteor fragments and deep-space observatory supplies.",
         badges: ["Cosmic", "Astronomy", "Repeat"]
       }
@@ -324,14 +325,14 @@ export const EVENTS_CALENDAR: MonthCalendarData[] = [
     events: [
       {
         title: "Rock the Sky",
-        wikiUrl: "https://www.airportcitygame.com/wiki/rock-the-sky/",
+        wikiUrl: "https://www.airportcitygame.com/wiki/rock_the_sky/",
         description: "Summer rock music festival tour delivering amplifiers, electric guitars, stage pyrotechnics, and VIP passes.",
         badges: ["Concert", "Music Festival", "6 Routes"],
         filterKeyword: "Rock The Sky"
       },
       {
         title: "Back to School",
-        wikiUrl: "https://www.airportcitygame.com/wiki/back-to-school/",
+        wikiUrl: "https://www.airportcitygame.com/wiki/back_to_school/",
         description: "Academic semester takeoff carrying school supplies, textbooks, laboratory equipment, and campus scholars.",
         badges: ["Academic", "Back to School", "9 Routes"],
         filterKeyword: "Back To School"
@@ -347,14 +348,14 @@ export const EVENTS_CALENDAR: MonthCalendarData[] = [
     events: [
       {
         title: "Celestial Festival",
-        wikiUrl: "https://www.airportcitygame.com/wiki/celestial-festival/",
+        wikiUrl: "https://www.airportcitygame.com/wiki/celestial_festival/",
         description: "Autumn equinox lantern celebration honoring harvest moons, starlit constellations, and night sky traditions.",
         badges: ["Equinox", "Astronomy", "16 Routes"],
         filterKeyword: "Celestial Festival"
       },
       {
         title: "Valley of the Kings Curse",
-        wikiUrl: "https://www.airportcitygame.com/wiki/valley-of-the-kings-curse/",
+        wikiUrl: "https://www.airportcitygame.com/wiki/valley_of_the_kings_curse/",
         description: "Unearth ancient pharaoh tombs, archaeological relics, golden sarcophagi, and cryptic hieroglyph scrolls.",
         badges: ["Archaeology", "Ancient Egypt", "7 Routes"],
         filterKeyword: "Valley Of The Kings Curse"
@@ -376,13 +377,13 @@ export const EVENTS_CALENDAR: MonthCalendarData[] = [
     events: [
       {
         title: "Riding the Comet",
-        wikiUrl: "https://www.airportcitygame.com/wiki/riding-the-comet/",
+        wikiUrl: "https://www.airportcitygame.com/wiki/riding_the_comet/",
         description: "Track cosmic perihelion flybys, collecting telemetry data and deep space observatory crystals.",
         badges: ["Cosmic", "Astronomy", "Repeat"]
       },
       {
         title: "Down the Rabbit Hole",
-        wikiUrl: "https://www.airportcitygame.com/wiki/down-the-rabbit-hole/",
+        wikiUrl: "https://www.airportcitygame.com/wiki/down_the_rabbit_hole/",
         description: "Enter a whimsical Wonderland world of mad tea parties, clockwork rabbits, and enigmatic playing cards.",
         badges: ["Wonderland", "Fantasy", "10 Routes"],
         filterKeyword: "Down The Rabbit Hole"
@@ -405,21 +406,21 @@ export const EVENTS_CALENDAR: MonthCalendarData[] = [
     events: [
       {
         title: "Long-awaited Mail",
-        wikiUrl: "https://www.airportcitygame.com/wiki/long-awaited-mail/",
+        wikiUrl: "https://www.airportcitygame.com/wiki/long_awaited_mail/",
         description: "International airmail logistics rush sorting postal deliveries, express packages, and vintage aerogrammes.",
         badges: ["Airmail", "Postal", "9 Routes"],
         filterKeyword: "Long-awaited Mail"
       },
       {
         title: "Thanksgiving Day",
-        wikiUrl: "https://www.airportcitygame.com/wiki/thanksgiving-day/",
+        wikiUrl: "https://www.airportcitygame.com/wiki/thanksgiving_day/",
         description: "Harvest feast flights gathering roast turkeys, cranberry treats, cornucopias, and family homecoming gifts.",
         badges: ["Thanksgiving", "Harvest", "6 Routes"],
         filterKeyword: "Thanksgiving Day"
       },
       {
         title: "Time to Rock",
-        wikiUrl: "https://www.airportcitygame.com/wiki/time-to-rock/",
+        wikiUrl: "https://www.airportcitygame.com/wiki/time_to_rock/",
         description: "Rock and roll arena tour delivering sound gear, vintage vinyl, neon tour banners, and legendary riffs.",
         badges: ["Music", "Concert Tour", "6 Routes"],
         filterKeyword: "Time to Rock"
@@ -435,21 +436,22 @@ export const EVENTS_CALENDAR: MonthCalendarData[] = [
     events: [
       {
         title: "Holiday Rush",
-        wikiUrl: "https://www.airportcitygame.com/wiki/holiday-rush/",
+        wikiUrl: "https://www.airportcitygame.com/wiki/holiday_rush/",
         description: "Peak winter holiday travel surge transporting gift cargo, airport passengers, and festive holiday goodwill.",
         badges: ["Winter Holiday", "Airport Rush", "1 Route"],
         filterKeyword: "Holiday Rush"
       },
       {
         title: "Santa's Bad Day",
-        wikiUrl: "https://www.airportcitygame.com/wiki/santas-bad-day/",
-        description: "Rescue stranded reindeer, collect lost workshop presents, and save Christmas delivery worldwide.",
-        badges: ["Christmas", "Santa", "6 Routes"],
-        filterKeyword: "Santa's Bad Day"
+        wikiUrl: "https://www.airportcitygame.com/wiki/santas_bad_day/",
+        description: "Rescue stranded reindeer, collect lost workshop presents, and save Christmas delivery worldwide. (Discontinued in Airport City)",
+        badges: ["Discontinued", "Christmas", "Santa", "6 Routes"],
+        filterKeyword: "Santa's Bad Day",
+        isDiscontinued: true
       },
       {
         title: "Winter Dream",
-        wikiUrl: "https://www.airportcitygame.com/wiki/winter-dream/",
+        wikiUrl: "https://www.airportcitygame.com/wiki/winter_dream/",
         description: "New Year's Eve winter wonderland with glistening ice sculptures, snowfields, and midnight clock towers.",
         badges: ["New Year", "Ice Carnival", "9 Routes"],
         filterKeyword: "Winter Dream"
