@@ -3064,7 +3064,7 @@ export const ACTracker = () => {
                         </button>
                       )}
                     </div>
-                    <label className="flex items-center gap-2 text-xs font-normal text-[var(--text-muted)] cursor-pointer">
+                    <label className="flex items-center gap-2 text-xs font-normal text-[var(--text-muted)] cursor-pointer" title="Show/hide Alliance flights with 0 maps in inventory">
                       <input
                         type="checkbox"
                         checked={showMissingAlliance}
@@ -3074,7 +3074,7 @@ export const ACTracker = () => {
                       />
                       <span>Alliance</span>
                     </label>
-                    <label className="flex items-center gap-2 text-xs font-normal text-[var(--text-muted)] cursor-pointer">
+                    <label className="flex items-center gap-2 text-xs font-normal text-[var(--text-muted)] cursor-pointer" title="Show/hide Adventure flights with 0 maps in inventory">
                       <input
                         type="checkbox"
                         checked={showMissingAdventure}

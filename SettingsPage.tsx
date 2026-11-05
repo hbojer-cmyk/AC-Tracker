@@ -523,15 +523,15 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                 </button>
               </div>
 
-              {/* Missing Alliance & Adventure Badges */}
+              {/* Missing Alliance & Adventure Maps Radar Controls */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
                 <div
                   onClick={onToggleMissingAlliance}
                   className="p-3 rounded-2xl bg-black/25 border border-[var(--border-subtle)] flex items-center justify-between cursor-pointer hover:border-[var(--border-active)] transition-colors"
                 >
-                  <div>
-                    <div className="text-xs font-semibold text-[var(--text-main)]">Alliance Missing Badges</div>
-                    <div className="text-[11px] text-[var(--text-muted)] font-normal">Show items needed on Alliance routes</div>
+                  <div className="pr-2">
+                    <div className="text-xs font-semibold text-[var(--text-main)]">Alliance Missing Maps</div>
+                    <div className="text-[11px] text-[var(--text-muted)] font-normal">Show/hide Alliance flights with 0 maps in inventory</div>
                   </div>
                   <button
                     type="button"
@@ -559,9 +559,9 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                   onClick={onToggleMissingAdventure}
                   className="p-3 rounded-2xl bg-black/25 border border-[var(--border-subtle)] flex items-center justify-between cursor-pointer hover:border-[var(--border-active)] transition-colors"
                 >
-                  <div>
-                    <div className="text-xs font-semibold text-[var(--text-main)]">Adventure Missing Badges</div>
-                    <div className="text-[11px] text-[var(--text-muted)] font-normal">Show items needed on Adventure routes</div>
+                  <div className="pr-2">
+                    <div className="text-xs font-semibold text-[var(--text-main)]">Adventure Missing Maps</div>
+                    <div className="text-[11px] text-[var(--text-muted)] font-normal">Show/hide Adventure flights with 0 maps in inventory</div>
                   </div>
                   <button
                     type="button"
