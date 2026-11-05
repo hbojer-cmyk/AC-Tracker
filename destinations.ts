@@ -156,7 +156,7 @@ Thunderbird|Alliance Task Flights|Cold Comforts|Doha||250|500|1000|2500|7500
 Thunderbird|Alliance Task Flights|Cold Comforts|Guatemala City||250|500|1000|2500|7500
 Thunderbird|Alliance Task Flights|Cold Comforts|Guayaquil||250|500|1000|2500|7500
 Thunderbird|Alliance Task Flights|Cold Comforts|Shenzhen||250|500|1000|2500|7500
-Condor|Alliance Task Flights|Dinner Party|Abu Dhabi||250|500|1000|2500|7500
+Condor|Alliance Task Flights|Dinner Party|Fujairah|250|500|1000|2500|7500
 Condor|Alliance Task Flights|Dinner Party|Charlotte||250|500|1000|2500|7500
 Condor|Alliance Task Flights|Dinner Party|Kathmandu||250|500|1000|2500|7500
 Condor|Alliance Task Flights|Dinner Party|Tbilisi||250|500|1000|2500|7500
