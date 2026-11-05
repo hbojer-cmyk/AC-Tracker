@@ -316,15 +316,15 @@ Owl|Event Flights|It Came From Outer Space|Area 51|icons/events/itcamefromouters
 Owl|Event Flights|It Came From Outer Space|Bodie|icons/events/itcamefromouterspace.png|17|35|69||
 Raven|Event Flights|It Came From Outer Space|Barsa-Kelmes|icons/events/itcamefromouterspace.png|23|46|92||
 Thunderbird|Event Flights|It Came From Outer Space|Flatwoods|icons/events/itcamefromouterspace.png|150|250|400||
-Condor|Event Flights|Long-awaited Mail|Jamaica|icons/events/longawaitedmail.png|200|300|600||
-Eagle|Event Flights|Long-awaited Mail|Phuket|icons/events/longawaitedmail.png|23|46|92||
-Giant|Event Flights|Long-awaited Mail|Majorca|icons/events/longawaitedmail.png|50|100|150||
-Hawk|Event Flights|Long-awaited Mail|Madagascar|icons/events/longawaitedmail.png|19|38|75||
-Owl|Event Flights|Long-awaited Mail|Fiji|icons/events/longawaitedmail.png|10|20|40||
-Raven|Event Flights|Long-awaited Mail|Easter Island|icons/events/longawaitedmail.png|23|46|92||
-Thunderbird|Event Flights|Long-awaited Mail|Mauritius|icons/events/longawaitedmail.png|150|250|500||
-Falcon|Event Flights|Long-awaited Mail; Spring is Here|Zanzibar|icons/events/longawaitedmail.png|100|200|400||
-Jumbo|Event Flights|Long-awaited Mail; Spring is Here|Bora-Bora|icons/events/longawaitedmail.png|30|60|120||
+Condor|Event Flights|Long-awaited Mail|Jamaica|icons/events/longawaitedmail.png|200|300|600|1500|3750
+Eagle|Event Flights|Long-awaited Mail|Phuket|icons/events/longawaitedmail.png|23|46|92|230|580
+Giant|Event Flights|Long-awaited Mail|Majorca|icons/events/longawaitedmail.png|50|100|150|380|950
+Hawk|Event Flights|Long-awaited Mail|Madagascar|icons/events/longawaitedmail.png|19|38|75|190|480
+Owl|Event Flights|Long-awaited Mail|Fiji|icons/events/longawaitedmail.png|10|20|40|100|250
+Raven|Event Flights|Long-awaited Mail|Easter Island|icons/events/longawaitedmail.png|23|46|92|230|580
+Thunderbird|Event Flights|Long-awaited Mail|Mauritius|icons/events/longawaitedmail.png|150|250|500|1250|3130
+Falcon|Event Flights|Long-awaited Mail; Spring is Here|Zanzibar|icons/events/longawaitedmail.png|100|200|400|1000|2500
+Jumbo|Event Flights|Long-awaited Mail; Spring is Here|Bora-Bora|icons/events/longawaitedmail.png|30|60|120|300|750
 Condor|Event Flights|On The Wings Of Love|Marrakech|icons/events/onthewingsoflove.png|200|300|600||
 Eagle|Event Flights|On The Wings Of Love|Charleston|icons/events/onthewingsoflove.png|23|46|92||
 Falcon|Event Flights|On The Wings Of Love|Dubrovnik|icons/events/onthewingsoflove.png|100|200|400||
@@ -423,7 +423,7 @@ Eagle|Regular Flights|Eagle Flights|Shanghai||23|46|92|230|700
 Eagle|Regular Flights|Eagle Flights|Tasmania||23|46|92|230|700
 Eagle|Regular Flights|Eagle Flights|Delhi||25|51|102|255|775
 Eagle|Regular Flights|Eagle Flights|Iceland||26|53|105|265|800
-Eagle|Regular Flights|Eagle Flights|Sharjah||26|53|105|265|800
+Eagle|Regular Flights|Eagle Flights|Sharjah (UAE)|/icons/maps/uae.png|26|53|105|265|800
 Eagle|Regular Flights|Eagle Flights|Antarctic||30|59|118|295|875
 Eagle|Regular Flights|Eagle Flights|Brasília||30|59|118|295|875
 Eagle|Regular Flights|Eagle Flights|Hong Kong||29|58|116|290|875
@@ -442,7 +442,7 @@ Falcon|Regular Flights|Falcon Flights|Montevideo||100|200|400|1000|3000
 Falcon|Regular Flights|Falcon Flights|Stockholm||100|200|400|1000|3000
 Falcon|Regular Flights|Falcon Flights|Yekaterinburg||100|200|400|1000|3000
 Giant|Regular Flights|Giant Flights|Austin||50|100|150|375|1125
-Giant|Regular Flights|Giant Flights|Bogotá||50|100|150|375|1125
+Giant|Regular Flights|Giant Flights|Ras Al Khaimah (UAE)|/icons/maps/uae.png|50|100|150|375|1125
 Giant|Regular Flights|Giant Flights|Caracas||50|100|150|375|1125
 Giant|Regular Flights|Giant Flights|Havana||50|100|150|375|1125
 Giant|Regular Flights|Giant Flights|Helsinki||50|100|150|375|1125
@@ -456,7 +456,7 @@ Giant|Regular Flights|Giant Flights|Tortuga||50|100|150|375|1125
 Giant|Regular Flights|Giant Flights|Yokohama||50|100|150|375|1125
 Hawk|Regular Flights|Hawk Flights|London||17|35|69|175|525
 Hawk|Regular Flights|Hawk Flights|Baikonur||19|38|75|190|575
-Hawk|Regular Flights|Hawk Flights|Aswan||19|38|75|190|575
+Hawk|Regular Flights|Hawk Flights|Aswan (Egypt)|/icons/maps/egypt.png|19|38|75|190|575
 Hawk|Regular Flights|Hawk Flights|Corsica||19|38|75|190|575
 Hawk|Regular Flights|Hawk Flights|Los Angeles||19|38|75|190|575
 Hawk|Regular Flights|Hawk Flights|Rome||19|38|75|190|575
@@ -468,7 +468,7 @@ Hawk|Regular Flights|Hawk Flights|Saint Petersburg||28|55|110|275|825
 Hawk|Regular Flights|Hawk Flights|Sydney||28|55|110|275|825
 Jumbo|Regular Flights|Jumbo Flights|Amsterdam||30|60|120|300|900
 Jumbo|Regular Flights|Jumbo Flights|Berlin||30|60|120|300|900
-Jumbo|Regular Flights|Jumbo Flights|Cape Town||30|60|120|300|900
+Jumbo|Regular Flights|Jumbo Flights|Abu Dhabi (UAE)|/icons/maps/uae.png|30|60|120|300|900
 Jumbo|Regular Flights|Jumbo Flights|Hawaiian Islands||30|60|120|300|900
 Jumbo|Regular Flights|Jumbo Flights|Houston||30|60|120|300|900
 Jumbo|Regular Flights|Jumbo Flights|Jiuquan||30|60|120|300|900
@@ -482,7 +482,7 @@ Jumbo|Regular Flights|Jumbo Flights|Tokyo||30|60|120|300|900
 Jumbo|Regular Flights|Jumbo Flights|Vladivostok||30|60|120|300|900
 Owl|Regular Flights|Owl Flights|Bali Island||9|17|35|90|275
 Owl|Regular Flights|Owl Flights|Sao Paulo||10|20|40|100|300
-Owl|Regular Flights|Owl Flights|Hurghada||10|20|40|100|300
+Owl|Regular Flights|Owl Flights|Hurghada (Egypt)|/icons/maps/egypt.png|10|20|40|100|300
 Owl|Regular Flights|Owl Flights|Turkish Coast||10|20|40|100|300
 Owl|Regular Flights|Owl Flights|Washington DC||10|20|40|100|300
 Owl|Regular Flights|Owl Flights|Arctic Station||16|32|65|165|500
@@ -492,18 +492,18 @@ Owl|Regular Flights|Owl Flights|Malta||17|35|69|175|525
 Owl|Regular Flights|Owl Flights|Thailand||17|35|69|175|525
 Owl|Regular Flights|Owl Flights|San Francisco||23|46|92|230|700
 Raven|Regular Flights|Raven Flights|New York||20|39|79|200|600
-Raven|Regular Flights|Raven Flights|Dubai||20|41|81|205|625
+Raven|Regular Flights|Raven Flights|Dubai (UAE)|/icons/maps/uae.png|20|41|81|205|625
 Raven|Regular Flights|Raven Flights|Lima||23|46|92|230|700
 Raven|Regular Flights|Raven Flights|Nice||23|46|92|230|700
 Raven|Regular Flights|Raven Flights|Paris||23|46|92|230|700
 Raven|Regular Flights|Raven Flights|South Observatory||23|46|92|230|700
 Raven|Regular Flights|Raven Flights|Barcelona||27|54|107|270|800
 Raven|Regular Flights|Raven Flights|Seoul||27|54|107|270|800
-Raven|Regular Flights|Raven Flights|Sharm El Sheikh||30|59|118|295|875
+Raven|Regular Flights|Raven Flights|Sharm El Sheikh (Egypt)|/icons/maps/egypt.png|30|59|118|295|875
 Raven|Regular Flights|Raven Flights|Moscow||30|59|118|295|875
 Swallow|Regular Flights|Swallow Flights|Training Flight||2|4|8|16|32
 Swallow|Regular Flights|Swallow Flights|Small Village||4|8|16|32|64
-Swift|Regular Flights|Swift Flights|Giza||8|16|36|90|275
+Swift|Regular Flights|Swift Flights|Giza (Egypt)|/icons/maps/egypt.png|8|16|36|90|275
 Swift|Regular Flights|Swift Flights|Cyprus||10|20|39|100|300
 Thunderbird|Regular Flights|Thunderbird Flights|Aruba||150|250|500|1250|3750
 Thunderbird|Regular Flights|Thunderbird Flights|Baghdad||150|250|500|1250|3750
