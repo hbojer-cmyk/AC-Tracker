@@ -96,13 +96,13 @@ export function getEventIcon(eventName?: string): string {
 
 // ACTIVE_EVENT_CONFIG: Populated when an in-game live event officially begins.
 export const ACTIVE_EVENT_CONFIG: ActiveEventConfig = {
-  eventName: "Dark Skies",
-  startDate: "2026-10-22",
-  endDate: "2026-11-02T21:00:00Z",
-  endDateDisplay: "Nov 3, 2026",
-  wikiUrl: "https://www.airportcitygame.com/wiki/dark_skies/",
-  filterKeyword: "Dark Skies",
-  icon: "icons/events/darkskies.png"
+  eventName: "Long-Awaited Mail",
+  startDate: "2026-11-05",
+  endDate: "2026-11-16T21:00:00Z",
+  endDateDisplay: "Nov 17, 2026",
+  wikiUrl: "https://www.airportcitygame.com/wiki/long_awaited_mail/",
+  filterKeyword: "Long-awaited Mail",
+  icon: "icons/events/longawaitedmail.png"
 };
 
 export interface CalendarEventItem {
@@ -405,7 +405,7 @@ export const EVENTS_CALENDAR: MonthCalendarData[] = [
     bannerImage: "icons/calendar/11.jpg",
     events: [
       {
-        title: "Long-awaited Mail",
+        title: "Long-Awaited Mail",
         wikiUrl: "https://www.airportcitygame.com/wiki/long_awaited_mail/",
         description: "International airmail logistics rush sorting postal deliveries, express packages, and vintage aerogrammes.",
         badges: ["Airmail", "Postal", "9 Routes"],
