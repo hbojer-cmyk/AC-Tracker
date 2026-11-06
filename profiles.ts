@@ -126,7 +126,71 @@ export const LEGACY_KEYS = [
   'act_logo_choice',
 ] as const;
 
-export const DEFAULT_AVATARS = ['✈️', '🛫', '🛬', '🚀', '🚁', '🛰️', '🌍', '🧭', '⭐', '⚡', '🏆', '🎖️'];
+export interface AvatarOption {
+  id: string;
+  name: string;
+  src: string;
+}
+
+export const AIRPORT_CITY_AVATARS: AvatarOption[] = [
+  { id: 'avatar_01', name: 'Default Commander', src: 'icons/avatars/avatar_01_default.png' },
+  { id: 'avatar_02', name: 'White Rabbit', src: 'icons/avatars/avatar_02_white_rabbit.png' },
+  { id: 'avatar_03', name: 'Spooky Pumpkin', src: 'icons/avatars/avatar_03_pumpkin.png' },
+  { id: 'avatar_04', name: 'Ringed Saturn', src: 'icons/avatars/avatar_04_saturn.png' },
+  { id: 'avatar_05', name: 'Rosette Ribbon', src: 'icons/avatars/avatar_05_rosette_badge.png' },
+  { id: 'avatar_06', name: 'Flight Dispatcher', src: 'icons/avatars/avatar_06_dispatcher.png' },
+  { id: 'avatar_07', name: 'Space Station', src: 'icons/avatars/avatar_07_space_station.png' },
+  { id: 'avatar_08', name: 'Gingerbread & Milk', src: 'icons/avatars/avatar_08_gingerbread_milk.png' },
+  { id: 'avatar_09', name: 'Holiday Candy Cane', src: 'icons/avatars/avatar_09_candy_cane.png' },
+  { id: 'avatar_10', name: 'Lunar Rover', src: 'icons/avatars/avatar_10_lunar_rover.png' },
+  { id: 'avatar_11', name: 'Soccer Star', src: 'icons/avatars/avatar_11_soccer_player.png' },
+  { id: 'avatar_12', name: 'City Pigeon', src: 'icons/avatars/avatar_12_pigeon.png' },
+  { id: 'avatar_13', name: 'Travel Pillow', src: 'icons/avatars/avatar_13_neck_pillow.png' },
+  { id: 'avatar_14', name: 'Flight Attendant', src: 'icons/avatars/avatar_14_blonde_attendant.png' },
+  { id: 'avatar_15', name: 'Pizza Slice', src: 'icons/avatars/avatar_15_pizza_slice.png' },
+  { id: 'avatar_16', name: 'Toad Pilot', src: 'icons/avatars/avatar_16_toad.png' },
+  { id: 'avatar_17', name: 'Aviation Headset', src: 'icons/avatars/avatar_17_pilot_headset.png' },
+  { id: 'avatar_18', name: 'Cosmic Cactus', src: 'icons/avatars/avatar_18_space_cactus.png' },
+  { id: 'avatar_19', name: 'Yellow Duck', src: 'icons/avatars/avatar_19_duck.png' },
+  { id: 'avatar_20', name: 'Chief Stewardess', src: 'icons/avatars/avatar_20_stewardess.png' },
+  { id: 'avatar_21', name: 'Blue Turboprop', src: 'icons/avatars/avatar_21_blue_turboprop.png' },
+  { id: 'avatar_22', name: 'Pilot Giraffe', src: 'icons/avatars/avatar_22_pilot_giraffe.png' },
+  { id: 'avatar_23', name: 'Secret Agent', src: 'icons/avatars/avatar_23_secret_agent.png' },
+  { id: 'avatar_24', name: 'Diner Milkshake', src: 'icons/avatars/avatar_24_milkshake.png' },
+  { id: 'avatar_25', name: 'Aviator Pufferfish', src: 'icons/avatars/avatar_25_aviator_pufferfish.png' },
+  { id: 'avatar_26', name: 'Captain Pilot', src: 'icons/avatars/avatar_26_brunette_pilot.png' },
+  { id: 'avatar_27', name: 'Retro Walkman', src: 'icons/avatars/avatar_27_walkman.png' },
+  { id: 'avatar_28', name: 'Gentleman Penguin', src: 'icons/avatars/avatar_28_penguin.png' },
+  { id: 'avatar_29', name: 'Cyber Robot', src: 'icons/avatars/avatar_29_robot.png' },
+  { id: 'avatar_30', name: 'Glazed Donut', src: 'icons/avatars/avatar_30_pink_donut.png' },
+  { id: 'avatar_31', name: 'Rescue Helicopter', src: 'icons/avatars/avatar_31_helicopter.png' },
+  { id: 'avatar_32', name: 'Dreadlocks Pilot', src: 'icons/avatars/avatar_32_dreadlocks_guy.png' },
+  { id: 'avatar_33', name: 'Aviator Goggles', src: 'icons/avatars/avatar_33_aviator_helmet.png' },
+];
+
+export const CLASSIC_EMOJI_AVATARS = ['✈️', '🛫', '🛬', '🚀', '🚁', '🛰️', '🌍', '🧭', '⭐', '⚡', '🏆', '🎖️'];
+
+export const DEFAULT_AVATAR = 'icons/avatars/avatar_01_default.png';
+
+export const DEFAULT_AVATARS = [
+  ...AIRPORT_CITY_AVATARS.map(a => a.src),
+  ...CLASSIC_EMOJI_AVATARS,
+];
+
+export function isAvatarImage(val?: string | null): boolean {
+  if (!val) return false;
+  return (
+    val.startsWith('icons/') ||
+    val.startsWith('/') ||
+    val.startsWith('http://') ||
+    val.startsWith('https://') ||
+    val.startsWith('data:') ||
+    val.endsWith('.png') ||
+    val.endsWith('.svg') ||
+    val.endsWith('.webp') ||
+    val.endsWith('.jpg')
+  );
+}
 
 export const DEFAULT_ACCENT_COLORS = [
   '#00e5ff', // Cyan
@@ -268,7 +332,7 @@ export function migrateLegacyData(
     meta: {
       id: profileId,
       name: name.trim() || 'Pilot Commander',
-      emoji: emoji || '✈️',
+      emoji: emoji || DEFAULT_AVATAR,
       accentColor: accentColor || '#00e5ff',
       acCode: acCode.trim().toUpperCase() || '',
       createdAt: Date.now(),

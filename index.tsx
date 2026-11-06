@@ -91,12 +91,12 @@ import {
   getNextStarInfo,
   getLocalDateString,
 } from './flightUtils';
-import { ProfileModal, MigrationModal } from './ProfileModal';
+import { ProfileModal, MigrationModal, ProfileAvatar } from './ProfileModal';
 
 // --- App Version & Maintenance Tracker ---
 // NOTE: Always update APP_UPDATED_DATE whenever making changes in the app
 export const APP_VERSION = 'Version 2.75';
-export const APP_UPDATED_DATE = 'Nov 6, 2026';
+export const APP_UPDATED_DATE = 'Nov 7, 2026';
 
 // --- Types & Interfaces ---
 type SortField =
@@ -1144,7 +1144,7 @@ export const ACTracker = () => {
       const defaultMeta: ProfileMeta = {
         id: defaultId,
         name: 'Commander',
-        emoji: '✈️',
+        emoji: 'icons/avatars/avatar_01_default.png',
         acCode: '',
         accentColor: '#00e5ff',
         createdAt: Date.now(),
@@ -2463,7 +2463,7 @@ export const ACTracker = () => {
                     className="w-5 h-5 rounded-lg flex items-center justify-center text-xs shrink-0 relative"
                     style={{ backgroundColor: `${activeProfile?.meta.accentColor || '#00e5ff'}25` }}
                   >
-                    <span>{activeProfile?.meta.emoji || '✈️'}</span>
+                    <span className="w-5 h-5 flex items-center justify-center p-0.5 overflow-hidden rounded-lg inline-flex"><ProfileAvatar avatar={activeProfile?.meta.emoji} /></span>
                     <span
                       className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full border border-black/50"
                       style={{ backgroundColor: activeProfile?.meta.accentColor || 'var(--accent)' }}
@@ -2509,7 +2509,21 @@ export const ACTracker = () => {
                               }`}
                             >
                               <div className="flex items-center gap-2.5 min-w-0">
-                                <span className="text-base shrink-0">{p.meta.emoji || '✈️'}</span>
+                                <div className="relative shrink-0">
+                                  <div
+                                    className="w-6 h-6 rounded-lg flex items-center justify-center p-0.5 overflow-hidden text-sm border"
+                                    style={{
+                                      borderColor: `${p.meta.accentColor || '#00e5ff'}40`,
+                                      backgroundColor: `${p.meta.accentColor || '#00e5ff'}25`,
+                                    }}
+                                  >
+                                    <ProfileAvatar avatar={p.meta.emoji} />
+                                  </div>
+                                  <span
+                                    className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full border border-black/50"
+                                    style={{ backgroundColor: p.meta.accentColor || 'var(--accent)' }}
+                                  />
+                                </div>
                                 <div className="min-w-0 flex-1">
                                   <div className="text-xs truncate text-[var(--text-main)]">
                                     {p.meta.name}
@@ -5303,7 +5317,7 @@ export const ACTracker = () => {
                 <div className="flex items-center justify-between text-xs text-[var(--text-muted)]">
                   <span>Current Active Profile:</span>
                   <span className="font-semibold text-[var(--text-main)] flex items-center gap-1.5">
-                    <span>{activeProfile?.meta.emoji || '✈️'}</span>
+                    <span className="w-5 h-5 flex items-center justify-center p-0.5 overflow-hidden rounded-lg inline-flex"><ProfileAvatar avatar={activeProfile?.meta.emoji} /></span>
                     {activeProfile?.meta.name || 'Commander'}
                   </span>
                 </div>
@@ -5321,7 +5335,21 @@ export const ACTracker = () => {
                         }`}
                       >
                         <div className="flex items-center gap-2.5 min-w-0">
-                          <span className="text-lg shrink-0">{p.meta.emoji || '✈️'}</span>
+                          <div className="relative shrink-0">
+                            <div
+                              className="w-7 h-7 rounded-lg flex items-center justify-center p-0.5 overflow-hidden text-sm border"
+                              style={{
+                                borderColor: `${p.meta.accentColor || '#00e5ff'}40`,
+                                backgroundColor: `${p.meta.accentColor || '#00e5ff'}25`,
+                              }}
+                            >
+                              <ProfileAvatar avatar={p.meta.emoji} />
+                            </div>
+                            <span
+                              className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full border border-black/50"
+                              style={{ backgroundColor: p.meta.accentColor || 'var(--accent)' }}
+                            />
+                          </div>
                           <div className="min-w-0">
                             <div className="text-xs font-semibold text-[var(--text-main)] truncate">
                               {p.meta.name}

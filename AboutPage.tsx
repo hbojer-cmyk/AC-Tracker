@@ -163,7 +163,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({
               <span>🆔</span> Callsigns & In-Game Codes
             </div>
             <p className="text-xs text-[var(--text-muted)] leading-relaxed font-normal">
-              Assign bespoke pilot names, avatar emojis, glowing accent tags, and your authentic 9-character Airport City friend code for quick reference.
+              Assign bespoke pilot names, authentic Airport City commander avatars & flight emojis, glowing accent tags, and your authentic 9-character Airport City friend code for quick reference.
             </p>
           </div>
 

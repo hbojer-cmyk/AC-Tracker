@@ -14,11 +14,52 @@ import {
   ProfileData,
   ProfileMeta,
   DEFAULT_AVATARS,
+  DEFAULT_AVATAR,
+  AIRPORT_CITY_AVATARS,
+  CLASSIC_EMOJI_AVATARS,
+  isAvatarImage,
   DEFAULT_ACCENT_COLORS,
   generateProfileId,
   createBlankProfile,
   cloneProfile
 } from './profiles';
+
+export interface ProfileAvatarProps {
+  avatar?: string | null;
+  className?: string;
+  imgClassName?: string;
+  alt?: string;
+}
+
+export const ProfileAvatar: React.FC<ProfileAvatarProps> = ({
+  avatar,
+  className = '',
+  imgClassName = '',
+  alt = 'Pilot Avatar',
+}) => {
+  const currentAvatar = avatar || DEFAULT_AVATAR;
+  const isImage = isAvatarImage(currentAvatar);
+
+  if (isImage) {
+    return (
+      <img
+        src={currentAvatar}
+        alt={alt}
+        className={`w-full h-full object-contain pointer-events-none drop-shadow-sm ${imgClassName}`}
+        loading="lazy"
+        onError={(e) => {
+          (e.currentTarget as HTMLElement).style.display = 'none';
+        }}
+      />
+    );
+  }
+
+  return (
+    <span className={`inline-flex items-center justify-center leading-none select-none ${className}`}>
+      {currentAvatar}
+    </span>
+  );
+};
 
 interface ProfileModalProps {
   isOpen: boolean;
@@ -50,7 +91,8 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
 
   // Form states for Create / Edit
   const [formName, setFormName] = useState('');
-  const [formEmoji, setFormEmoji] = useState('✈️');
+  const [formEmoji, setFormEmoji] = useState(DEFAULT_AVATAR);
+  const [avatarTab, setAvatarTab] = useState<'game' | 'emoji'>('game');
   const [formAcCode, setFormAcCode] = useState('');
   const [formColor, setFormColor] = useState('#00e5ff');
   const [cloneSourceId, setCloneSourceId] = useState<string>('blank');
@@ -72,7 +114,8 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
 
   const startCreate = () => {
     setFormName('');
-    setFormEmoji('✈️');
+    setFormEmoji(DEFAULT_AVATAR);
+    setAvatarTab('game');
     setFormAcCode('');
     setFormColor('#00e5ff');
     setCloneSourceId('blank');
@@ -82,7 +125,9 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
   const startEdit = (profile: ProfileData) => {
     setEditingProfileId(profile.meta.id);
     setFormName(profile.meta.name);
-    setFormEmoji(profile.meta.emoji || '✈️');
+    const em = profile.meta.emoji || DEFAULT_AVATAR;
+    setFormEmoji(em);
+    setAvatarTab(isAvatarImage(em) ? 'game' : 'emoji');
     setFormAcCode(profile.meta.acCode || '');
     setFormColor(profile.meta.accentColor || '#00e5ff');
     setMode('edit');
@@ -139,8 +184,18 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
         {/* Modal Header */}
         <div className="p-4 sm:p-5 border-b border-[var(--border-subtle)] flex items-center justify-between bg-[var(--bg-base)]/40">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[var(--accent)]/15 border border-[var(--accent)]/30 flex items-center justify-center text-[var(--accent)]">
-              <User className="w-5 h-5" />
+            <div
+              className="w-11 h-11 rounded-xl border flex items-center justify-center p-1 relative overflow-hidden transition-all shadow-md shrink-0"
+              style={{
+                borderColor: mode === 'manage' ? 'var(--accent)' : formColor || 'var(--accent)',
+                backgroundColor: `${mode === 'manage' ? '#00e5ff' : formColor || '#00e5ff'}20`,
+              }}
+            >
+              {mode === 'manage' ? (
+                <User className="w-5 h-5 text-[var(--accent)]" />
+              ) : (
+                <ProfileAvatar avatar={formEmoji} />
+              )}
             </div>
             <div>
               <h2 className="text-base sm:text-lg font-bold font-heading text-[var(--text-main)] flex items-center gap-2">
@@ -203,16 +258,18 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                         }}
                         className="flex items-center gap-3 cursor-pointer flex-1 min-w-0"
                       >
-                        <div
-                          className="w-10 h-10 rounded-xl flex items-center justify-center text-xl shrink-0 border relative"
-                          style={{
-                            borderColor: p.meta.accentColor || 'var(--accent)',
-                            backgroundColor: `${p.meta.accentColor || '#00e5ff'}20`,
-                          }}
-                        >
-                          <span>{p.meta.emoji || '✈️'}</span>
+                        <div className="relative shrink-0">
+                          <div
+                            className="w-10 h-10 rounded-xl flex items-center justify-center p-1 border overflow-hidden"
+                            style={{
+                              borderColor: p.meta.accentColor || 'var(--accent)',
+                              backgroundColor: `${p.meta.accentColor || '#00e5ff'}20`,
+                            }}
+                          >
+                            <ProfileAvatar avatar={p.meta.emoji} />
+                          </div>
                           <span
-                            className="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full border border-black/40"
+                            className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border border-black/50"
                             style={{ backgroundColor: p.meta.accentColor || 'var(--accent)' }}
                           />
                         </div>
@@ -374,27 +431,82 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                 </p>
               </div>
 
-              {/* Emoji Avatar Selector */}
+              {/* Pilot Avatar Icon Selector */}
               <div>
-                <label className="block text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-1.5">
-                  Pilot Avatar Icon
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  {DEFAULT_AVATARS.map(em => (
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">
+                    Pilot Avatar Icon
+                  </label>
+                  <div className="flex items-center p-0.5 rounded-lg bg-[var(--bg-base)] border border-[var(--border-subtle)] text-[11px]">
                     <button
-                      key={em}
                       type="button"
-                      onClick={() => setFormEmoji(em)}
-                      className={`w-10 h-10 rounded-xl text-lg flex items-center justify-center transition-all ${
-                        formEmoji === em
-                          ? 'border-2 border-[var(--accent)] bg-[var(--accent)]/20 scale-105'
-                          : 'border border-[var(--border-subtle)] hover:bg-[var(--border-subtle)]/40'
+                      onClick={() => setAvatarTab('game')}
+                      className={`px-2.5 py-0.5 rounded-md font-medium transition-all ${
+                        avatarTab === 'game'
+                          ? 'bg-[var(--accent)] text-white shadow-sm'
+                          : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
                       }`}
                     >
-                      {em}
+                      Airport City ({AIRPORT_CITY_AVATARS.length})
                     </button>
-                  ))}
+                    <button
+                      type="button"
+                      onClick={() => setAvatarTab('emoji')}
+                      className={`px-2.5 py-0.5 rounded-md font-medium transition-all ${
+                        avatarTab === 'emoji'
+                          ? 'bg-[var(--accent)] text-white shadow-sm'
+                          : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
+                      }`}
+                    >
+                      Classic ({CLASSIC_EMOJI_AVATARS.length})
+                    </button>
+                  </div>
                 </div>
+
+                {avatarTab === 'game' ? (
+                  <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-11 gap-2 max-h-56 overflow-y-auto p-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-base)]/60 scrollbar-thin">
+                    {AIRPORT_CITY_AVATARS.map(av => {
+                      const isSelected = formEmoji === av.src;
+                      return (
+                        <button
+                          key={av.id}
+                          type="button"
+                          onClick={() => setFormEmoji(av.src)}
+                          title={av.name}
+                          className={`w-10 h-10 sm:w-11 sm:h-11 rounded-xl p-1 flex items-center justify-center transition-all ${
+                            isSelected
+                              ? 'border-2 border-[var(--accent)] bg-[var(--accent)]/25 scale-105 shadow-md shadow-[var(--accent)]/30 ring-2 ring-[var(--accent)]/40'
+                              : 'border border-[var(--border-subtle)] bg-[var(--bg-surface)] hover:bg-[var(--border-subtle)]/50 hover:scale-105'
+                          }`}
+                        >
+                          <img
+                            src={av.src}
+                            alt={av.name}
+                            className="w-full h-full object-contain pointer-events-none drop-shadow-sm"
+                            loading="lazy"
+                          />
+                        </button>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="flex flex-wrap gap-2 p-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-base)]/60">
+                    {CLASSIC_EMOJI_AVATARS.map(em => (
+                      <button
+                        key={em}
+                        type="button"
+                        onClick={() => setFormEmoji(em)}
+                        className={`w-10 h-10 rounded-xl text-lg flex items-center justify-center transition-all ${
+                          formEmoji === em
+                            ? 'border-2 border-[var(--accent)] bg-[var(--accent)]/25 scale-105 shadow-md shadow-[var(--accent)]/30 ring-2 ring-[var(--accent)]/40'
+                            : 'border border-[var(--border-subtle)] bg-[var(--bg-surface)] hover:bg-[var(--border-subtle)]/50 hover:scale-105'
+                        }`}
+                      >
+                        {em}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Accent Color Selector */}
@@ -478,7 +590,8 @@ interface MigrationModalProps {
 
 export const MigrationModal: React.FC<MigrationModalProps> = ({ isOpen, onMigrate }) => {
   const [name, setName] = useState('Commander');
-  const [emoji, setEmoji] = useState('✈️');
+  const [emoji, setEmoji] = useState(DEFAULT_AVATAR);
+  const [avatarTab, setAvatarTab] = useState<'game' | 'emoji'>('game');
   const [acCode, setAcCode] = useState('');
   const [accentColor, setAccentColor] = useState('#00e5ff');
 
@@ -491,11 +604,17 @@ export const MigrationModal: React.FC<MigrationModalProps> = ({ isOpen, onMigrat
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-300">
-      <div className="bg-[var(--bg-card)] border border-[var(--accent)]/40 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+      <div className="bg-[var(--bg-card)] border border-[var(--accent)]/40 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header */}
         <div className="p-5 border-b border-[var(--border-subtle)] bg-[var(--bg-base)]/50 flex items-center gap-3">
-          <div className="w-11 h-11 rounded-2xl bg-[var(--accent)]/20 border border-[var(--accent)]/40 flex items-center justify-center text-2xl">
-            {emoji}
+          <div
+            className="w-12 h-12 rounded-2xl border flex items-center justify-center p-1.5 overflow-hidden shrink-0 shadow-md"
+            style={{
+              borderColor: `${accentColor}80`,
+              backgroundColor: `${accentColor}25`,
+            }}
+          >
+            <ProfileAvatar avatar={emoji} />
           </div>
           <div>
             <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-400/20 text-amber-400 border border-amber-400/30 mb-1">
@@ -508,7 +627,7 @@ export const MigrationModal: React.FC<MigrationModalProps> = ({ isOpen, onMigrat
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="p-6 space-y-4 overflow-y-auto">
           <p className="text-xs text-[var(--text-muted)] leading-relaxed">
             Existing flight logs and aircraft hangar data were detected on this browser. Let's create your primary pilot profile to safely migrate all your progress into the new multi-profile system.
           </p>
@@ -542,25 +661,80 @@ export const MigrationModal: React.FC<MigrationModalProps> = ({ isOpen, onMigrat
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-1.5">
-              Choose Avatar
-            </label>
-            <div className="flex flex-wrap gap-2">
-              {DEFAULT_AVATARS.slice(0, 8).map(em => (
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">
+                Choose Avatar
+              </label>
+              <div className="flex items-center p-0.5 rounded-lg bg-[var(--bg-base)] border border-[var(--border-subtle)] text-[11px]">
                 <button
-                  key={em}
                   type="button"
-                  onClick={() => setEmoji(em)}
-                  className={`w-9 h-9 rounded-xl text-base flex items-center justify-center transition-all ${
-                    emoji === em
-                      ? 'border-2 border-[var(--accent)] bg-[var(--accent)]/20 scale-105'
-                      : 'border border-[var(--border-subtle)]'
+                  onClick={() => setAvatarTab('game')}
+                  className={`px-2 py-0.5 rounded font-medium transition-all ${
+                    avatarTab === 'game'
+                      ? 'bg-[var(--accent)] text-white shadow-sm'
+                      : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
                   }`}
                 >
-                  {em}
+                  Airport City ({AIRPORT_CITY_AVATARS.length})
                 </button>
-              ))}
+                <button
+                  type="button"
+                  onClick={() => setAvatarTab('emoji')}
+                  className={`px-2 py-0.5 rounded font-medium transition-all ${
+                    avatarTab === 'emoji'
+                      ? 'bg-[var(--accent)] text-white shadow-sm'
+                      : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
+                  }`}
+                >
+                  Classic ({CLASSIC_EMOJI_AVATARS.length})
+                </button>
+              </div>
             </div>
+
+            {avatarTab === 'game' ? (
+              <div className="grid grid-cols-6 sm:grid-cols-8 gap-2 max-h-48 overflow-y-auto p-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-base)]/60 scrollbar-thin">
+                {AIRPORT_CITY_AVATARS.map(av => {
+                  const isSelected = emoji === av.src;
+                  return (
+                    <button
+                      key={av.id}
+                      type="button"
+                      onClick={() => setEmoji(av.src)}
+                      title={av.name}
+                      className={`w-10 h-10 rounded-xl p-1 flex items-center justify-center transition-all ${
+                        isSelected
+                          ? 'border-2 border-[var(--accent)] bg-[var(--accent)]/25 scale-105 shadow-md shadow-[var(--accent)]/30 ring-2 ring-[var(--accent)]/40'
+                          : 'border border-[var(--border-subtle)] bg-[var(--bg-surface)] hover:bg-[var(--border-subtle)]/50 hover:scale-105'
+                      }`}
+                    >
+                      <img
+                        src={av.src}
+                        alt={av.name}
+                        className="w-full h-full object-contain pointer-events-none drop-shadow-sm"
+                        loading="lazy"
+                      />
+                    </button>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="flex flex-wrap gap-2 p-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-base)]/60">
+                {CLASSIC_EMOJI_AVATARS.map(em => (
+                  <button
+                    key={em}
+                    type="button"
+                    onClick={() => setEmoji(em)}
+                    className={`w-9 h-9 rounded-xl text-base flex items-center justify-center transition-all ${
+                      emoji === em
+                        ? 'border-2 border-[var(--accent)] bg-[var(--accent)]/25 scale-105 shadow-md shadow-[var(--accent)]/30 ring-2 ring-[var(--accent)]/40'
+                        : 'border border-[var(--border-subtle)] bg-[var(--bg-surface)] hover:bg-[var(--border-subtle)]/50'
+                    }`}
+                  >
+                    {em}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           <div>
