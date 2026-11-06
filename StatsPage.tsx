@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useLayoutEffect } from 'react';
 import {
   TrendingUp,
   Calendar,
@@ -547,6 +547,101 @@ export const StatsPage: React.FC<StatsPageProps> = ({
       ? chartPoints.points[hoveredIdx]
       : null;
 
+  // Tooltip dynamic collision positioning & boundary refs
+  const chartContainerRef = useRef<HTMLDivElement>(null);
+  const svgRef = useRef<SVGSVGElement>(null);
+  const tooltipRef = useRef<HTMLDivElement>(null);
+  const [tooltipCoords, setTooltipCoords] = useState<{
+    left: number;
+    top: number;
+    flippedBelow: boolean;
+  } | null>(null);
+
+  useLayoutEffect(() => {
+    if (!hoveredPoint || !chartContainerRef.current) {
+      setTooltipCoords(null);
+      return;
+    }
+
+    const updatePos = () => {
+      const container = chartContainerRef.current;
+      if (!container) return;
+
+      const containerRect = container.getBoundingClientRect();
+      const svg = svgRef.current;
+      const svgRect = svg ? svg.getBoundingClientRect() : containerRect;
+      const tooltip = tooltipRef.current;
+      const tooltipRect = tooltip ? tooltip.getBoundingClientRect() : null;
+
+      const tooltipWidth = tooltipRect?.width || tooltip?.offsetWidth || 210;
+      const tooltipHeight = tooltipRect?.height || tooltip?.offsetHeight || 125;
+
+      const offsetX = svgRect.left - containerRect.left;
+      const offsetY = svgRect.top - containerRect.top;
+      const scaleX = chartWidth > 0 ? svgRect.width / chartWidth : 1;
+      const scaleY = chartHeight > 0 ? svgRect.height / chartHeight : 1;
+
+      const pointX = offsetX + hoveredPoint.x * scaleX;
+      const pointY = offsetY + hoveredPoint.y * scaleY;
+
+      // Vertical flip / clamping:
+      // If point is in the top 38% of the chart area or would clip top boundary, flip below
+      const isNearTop = hoveredPoint.y / chartHeight <= 0.38;
+      const wouldClipTop = pointY - tooltipHeight - 14 < 0;
+      const flipBelow = isNearTop || wouldClipTop;
+
+      // Horizontal clamping: min 12px from left, max container width - tooltip width - 12px
+      const paddingX = 12;
+      const minLeft = paddingX;
+      const maxLeft = Math.max(minLeft, containerRect.width - tooltipWidth - paddingX);
+      const left = Math.max(minLeft, Math.min(pointX - tooltipWidth / 2, maxLeft));
+
+      let top: number;
+      if (flipBelow) {
+        top = pointY + 14;
+        // Clamp to stay within container bottom boundary
+        top = Math.min(top, Math.max(8, containerRect.height - tooltipHeight - 8));
+      } else {
+        top = pointY - tooltipHeight - 14;
+        // Clamp to stay within container top boundary
+        top = Math.max(8, top);
+      }
+
+      setTooltipCoords(prev => {
+        if (
+          prev &&
+          Math.abs(prev.left - left) < 0.5 &&
+          Math.abs(prev.top - top) < 0.5 &&
+          prev.flippedBelow === flipBelow
+        ) {
+          return prev;
+        }
+        return { left, top, flippedBelow: flipBelow };
+      });
+    };
+
+    updatePos();
+
+    let resizeObserver: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== 'undefined' && chartContainerRef.current) {
+      resizeObserver = new ResizeObserver(() => {
+        updatePos();
+      });
+      resizeObserver.observe(chartContainerRef.current);
+      if (tooltipRef.current) {
+        resizeObserver.observe(tooltipRef.current);
+      }
+    }
+
+    window.addEventListener('resize', updatePos);
+    return () => {
+      window.removeEventListener('resize', updatePos);
+      if (resizeObserver) {
+        resizeObserver.disconnect();
+      }
+    };
+  }, [hoveredPoint, chartWidth, chartHeight]);
+
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
       {/* 1. Analytics Hero Header */}
@@ -728,7 +823,7 @@ export const StatsPage: React.FC<StatsPageProps> = ({
       </div>
 
       {/* 3. Part 2: Interactive SVG Area/Line Chart ("Star Progression & Velocity Telemetry") */}
-      <div className="glass-panel rounded-3xl p-5 sm:p-7 border border-[var(--border-card)] shadow-xl relative overflow-hidden space-y-4">
+      <div className="glass-panel rounded-3xl p-5 sm:p-7 border border-[var(--border-card)] shadow-xl relative overflow-visible space-y-4">
         {/* Header toolbar */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-white/5">
           <div className="flex items-center gap-2.5">
@@ -788,11 +883,13 @@ export const StatsPage: React.FC<StatsPageProps> = ({
         </div>
 
         {/* SVG Chart Container */}
-        <div className="relative w-full overflow-hidden select-none">
+        <div ref={chartContainerRef} className="relative w-full overflow-visible select-none">
           <svg
+            ref={svgRef}
             viewBox={`0 0 ${chartWidth} ${chartHeight}`}
             className="w-full h-auto overflow-visible block"
             style={{ maxHeight: '320px' }}
+            onMouseLeave={() => setHoveredIdx(null)}
           >
             <defs>
               <linearGradient id="starProgressGrad" x1="0" y1="0" x2="0" y2="1">
@@ -947,21 +1044,27 @@ export const StatsPage: React.FC<StatsPageProps> = ({
           {/* Interactive Floating Tooltip */}
           {hoveredPoint && (
             <div
-              className="absolute z-30 pointer-events-none transition-all duration-150 glass-panel rounded-2xl p-3 border border-[var(--border-card)] shadow-2xl flex flex-col gap-1 min-w-[190px]"
-              style={{
-                left: `${Math.min(
-                  Math.max(10, (hoveredPoint.x / chartWidth) * 100),
-                  72
-                )}%`,
-                top: `${Math.max(
-                  8,
-                  Math.min(
-                    (hoveredPoint.y / chartHeight) * 100 - 30,
-                    55
-                  )
-                )}%`,
-                transform: 'translate(-50%, -100%)',
-              }}
+              ref={tooltipRef}
+              className="absolute z-50 pointer-events-none transition-all duration-150 glass-panel rounded-2xl p-3 border border-[var(--border-card)] shadow-2xl flex flex-col gap-1 min-w-[190px] max-w-[calc(100%-24px)]"
+              style={
+                tooltipCoords
+                  ? {
+                      left: `${tooltipCoords.left}px`,
+                      top: `${tooltipCoords.top}px`,
+                      opacity: 1,
+                    }
+                  : {
+                      left: `${Math.min(
+                        Math.max(12, (hoveredPoint.x / chartWidth) * 100),
+                        75
+                      )}%`,
+                      top:
+                        hoveredPoint.y / chartHeight <= 0.38
+                          ? `${Math.min(85, (hoveredPoint.y / chartHeight) * 100 + 12)}%`
+                          : `${Math.max(8, (hoveredPoint.y / chartHeight) * 100 - 35)}%`,
+                      opacity: 0,
+                    }
+              }
             >
               <div className="flex items-center justify-between gap-2 border-b border-white/10 pb-1.5">
                 <span className="text-[11px] font-mono text-[var(--text-muted)]">
