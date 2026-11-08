@@ -102,10 +102,11 @@ import {
   getLocalDateString,
 } from './flightUtils';
 import { ProfileModal, MigrationModal, ProfileAvatar } from './ProfileModal';
+import { GettingStartedModal } from './src/components/GettingStartedModal';
 
 // --- App Version & Maintenance Tracker ---
 // NOTE: Always update APP_UPDATED_DATE whenever making changes in the app
-export const APP_VERSION = 'Version 2.75';
+export const APP_VERSION = 'Version 2.9';
 export const APP_UPDATED_DATE = 'Nov 8, 2026';
 
 // --- Types & Interfaces ---
@@ -752,6 +753,7 @@ export const ACTracker = () => {
   const [profiles, setProfiles] = useState<Record<string, ProfileData>>({});
   const [activeProfileId, setActiveProfileId] = useState<string>('');
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [isGettingStartedOpen, setIsGettingStartedOpen] = useState(false);
   const [profileModalInitialMode, setProfileModalInitialMode] = useState<'manage' | 'create'>('manage');
   const [showMigrationModal, setShowMigrationModal] = useState(false);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
@@ -911,13 +913,13 @@ export const ACTracker = () => {
   useEffect(() => {
     try {
       localStorage.setItem('act_hide_zero_maps', String(hideZeroMaps));
-    } catch {}
+    } catch { }
   }, [hideZeroMaps]);
 
   useEffect(() => {
     try {
       localStorage.setItem('act_hide_event_destinations', String(hideEventDestinations));
-    } catch {}
+    } catch { }
   }, [hideEventDestinations]);
   const [showMissingAlliance, setShowMissingAlliance] = useState(true);
   const [showMissingAdventure, setShowMissingAdventure] = useState(true);
@@ -1159,6 +1161,7 @@ export const ACTracker = () => {
         createdAt: Date.now(),
       };
       const newDefaultProfile = createBlankProfile(defaultMeta);
+      newDefaultProfile.prefs.hasSeenGettingStarted = false;
       const initialMap = { [defaultId]: newDefaultProfile };
       saveAllProfiles(initialMap);
       persistActiveProfileId(defaultId);
@@ -1186,7 +1189,7 @@ export const ACTracker = () => {
         }
         localStorage.setItem('act_sidebar_default_open_v1', 'true');
       }
-    } catch {}
+    } catch { }
     setProfiles(allProfiles);
     const savedActiveId = getActiveProfileId();
     const resolvedActiveId = savedActiveId && allProfiles[savedActiveId]
@@ -1198,6 +1201,18 @@ export const ACTracker = () => {
     applyProfileState(allProfiles[resolvedActiveId], true);
     setIsLoaded(true);
   }, []);
+
+  // Check for first-time clean visitor to auto-show Pre-Flight Briefing
+  useEffect(() => {
+    if (!isLoaded) return;
+    try {
+      const hasSeenBriefing = localStorage.getItem('act_has_seen_briefing');
+      const active = profiles[activeProfileId];
+      if (!hasSeenBriefing && active && active.prefs?.hasSeenGettingStarted === false) {
+        setIsGettingStartedOpen(true);
+      }
+    } catch { }
+  }, [isLoaded, activeProfileId, profiles]);
 
   // Check for new release version to show What's New modal
   useEffect(() => {
@@ -1219,7 +1234,7 @@ export const ACTracker = () => {
           if (currentActive && updatedProfiles[currentActive]) {
             applyProfileState(updatedProfiles[currentActive]);
           }
-        } catch {}
+        } catch { }
       } else if (e.key === 'act_active_profile_id' && e.newValue) {
         const nextId = e.newValue;
         if (profiles[nextId]) {
@@ -1248,6 +1263,27 @@ export const ACTracker = () => {
       // Ignore storage errors
     }
     setShowWhatsNewModal(false);
+  };
+
+  const handleCloseGettingStarted = () => {
+    setIsGettingStartedOpen(false);
+    try {
+      localStorage.setItem('act_has_seen_briefing', 'true');
+    } catch { }
+    setProfiles(prev => {
+      const active = prev[activeProfileId];
+      if (!active) return prev;
+      return {
+        ...prev,
+        [activeProfileId]: {
+          ...active,
+          prefs: {
+            ...active.prefs,
+            hasSeenGettingStarted: true,
+          },
+        },
+      };
+    });
   };
 
 
@@ -1459,8 +1495,8 @@ export const ACTracker = () => {
       activeCategory === 'All Destinations'
         ? destinations
         : activeCategory === 'Bookmarks'
-        ? destinations.filter(d => d.isCustomList)
-        : destinations.filter(d => d.category === activeCategory);
+          ? destinations.filter(d => d.isCustomList)
+          : destinations.filter(d => d.category === activeCategory);
     const unique = new Set<string>();
     filtered.forEach(d => {
       d.group.split(/[;,]/).forEach(g => unique.add(g.trim()));
@@ -1473,8 +1509,8 @@ export const ACTracker = () => {
       activeCategory === 'All Destinations'
         ? destinations
         : activeCategory === 'Bookmarks'
-        ? destinations.filter(d => d.isCustomList)
-        : destinations.filter(d => d.category === activeCategory);
+          ? destinations.filter(d => d.isCustomList)
+          : destinations.filter(d => d.category === activeCategory);
     const unique = Array.from(new Set(filtered.map(d => d.aircraft))) as string[];
     return ['All', ...unique.sort((a, b) => (AIRCRAFT_ORDER[a] || 999) - (AIRCRAFT_ORDER[b] || 999))];
   }, [destinations, activeCategory]);
@@ -2076,15 +2112,15 @@ export const ACTracker = () => {
       ...profiles,
       ...(activeProfileId
         ? {
-            [activeProfileId]: {
-              ...profiles[activeProfileId],
-              userData: storageObj,
-              airplanes: ownedAirplanes,
-              starHistory,
-              starOffsets,
-              missions: missionProgress,
-            },
-          }
+          [activeProfileId]: {
+            ...profiles[activeProfileId],
+            userData: storageObj,
+            airplanes: ownedAirplanes,
+            starHistory,
+            starOffsets,
+            missions: missionProgress,
+          },
+        }
         : {}),
     };
 
@@ -2271,6 +2307,7 @@ export const ACTracker = () => {
         isOpen={showMigrationModal}
         onMigrate={handleMigrateLegacy}
       />
+
     );
   }
 
@@ -2352,11 +2389,10 @@ export const ACTracker = () => {
               <nav className="flex items-center gap-1.5 bg-black/25 p-1 rounded-2xl border border-white/5">
                 <button
                   onClick={() => setView(defaultFlightView || 'list')}
-                  className={`tactile-btn px-3.5 py-1.5 rounded-xl text-xs font-medium flex items-center gap-2 transition-all ${
-                    view === 'list' || view === 'grid'
+                  className={`tactile-btn px-3.5 py-1.5 rounded-xl text-xs font-medium flex items-center gap-2 transition-all ${view === 'list' || view === 'grid'
                       ? 'theme-btn-accent font-semibold shadow-md'
                       : 'text-[var(--text-muted)] hover:text-white hover:bg-white/5'
-                  }`}
+                    }`}
                 >
                   <Compass className="w-4 h-4" /> Flights
                 </button>
@@ -2364,11 +2400,10 @@ export const ACTracker = () => {
                 {enabledViews.maps !== false && (
                   <button
                     onClick={() => setView('maps')}
-                    className={`tactile-btn px-3.5 py-1.5 rounded-xl text-xs font-medium flex items-center gap-2 transition-all ${
-                      view === 'maps'
+                    className={`tactile-btn px-3.5 py-1.5 rounded-xl text-xs font-medium flex items-center gap-2 transition-all ${view === 'maps'
                         ? 'theme-btn-accent font-semibold shadow-md'
                         : 'text-[var(--text-muted)] hover:text-white hover:bg-white/5'
-                    }`}
+                      }`}
                   >
                     <MapIcon className="w-4 h-4" /> Maps
                   </button>
@@ -2377,11 +2412,10 @@ export const ACTracker = () => {
                 {enabledViews.airplanes !== false && (
                   <button
                     onClick={() => setView('airplanes')}
-                    className={`tactile-btn px-3.5 py-1.5 rounded-xl text-xs font-medium flex items-center gap-2 transition-all ${
-                      view === 'airplanes'
+                    className={`tactile-btn px-3.5 py-1.5 rounded-xl text-xs font-medium flex items-center gap-2 transition-all ${view === 'airplanes'
                         ? 'theme-btn-accent font-semibold shadow-md'
                         : 'text-[var(--text-muted)] hover:text-white hover:bg-white/5'
-                    }`}
+                      }`}
                   >
                     <Layers className="w-4 h-4" /> Aircraft
                   </button>
@@ -2390,11 +2424,10 @@ export const ACTracker = () => {
                 {enabledViews.stats !== false && (
                   <button
                     onClick={() => setView('stats')}
-                    className={`tactile-btn px-3.5 py-1.5 rounded-xl text-xs font-medium flex items-center gap-2 transition-all ${
-                      view === 'stats'
+                    className={`tactile-btn px-3.5 py-1.5 rounded-xl text-xs font-medium flex items-center gap-2 transition-all ${view === 'stats'
                         ? 'theme-btn-accent font-semibold shadow-md'
                         : 'text-[var(--text-muted)] hover:text-white hover:bg-white/5'
-                    }`}
+                      }`}
                   >
                     <BarChart3 className="w-4 h-4" /> Stats
                   </button>
@@ -2403,11 +2436,10 @@ export const ACTracker = () => {
                 {enabledViews.missions !== false && (
                   <button
                     onClick={() => setView('missions')}
-                    className={`tactile-btn px-3.5 py-1.5 rounded-xl text-xs font-medium flex items-center gap-2 transition-all ${
-                      view === 'missions'
+                    className={`tactile-btn px-3.5 py-1.5 rounded-xl text-xs font-medium flex items-center gap-2 transition-all ${view === 'missions'
                         ? 'theme-btn-accent font-semibold shadow-md'
                         : 'text-[var(--text-muted)] hover:text-white hover:bg-white/5'
-                    }`}
+                      }`}
                   >
                     <Trophy className="w-4 h-4" /> Missions
                   </button>
@@ -2416,11 +2448,10 @@ export const ACTracker = () => {
                 {enabledViews.events !== false && (
                   <button
                     onClick={() => setView('events')}
-                    className={`tactile-btn px-3.5 py-1.5 rounded-xl text-xs font-medium flex items-center gap-2 transition-all ${
-                      view === 'events'
+                    className={`tactile-btn px-3.5 py-1.5 rounded-xl text-xs font-medium flex items-center gap-2 transition-all ${view === 'events'
                         ? 'theme-btn-accent font-semibold shadow-md'
                         : 'text-[var(--text-muted)] hover:text-white hover:bg-white/5'
-                    }`}
+                      }`}
                   >
                     <Calendar className="w-4 h-4" /> Events
                   </button>
@@ -2429,11 +2460,10 @@ export const ACTracker = () => {
                 {enabledViews.about !== false && (
                   <button
                     onClick={() => setView('about')}
-                    className={`tactile-btn px-3.5 py-1.5 rounded-xl text-xs font-medium flex items-center gap-2 transition-all ${
-                      view === 'about'
+                    className={`tactile-btn px-3.5 py-1.5 rounded-xl text-xs font-medium flex items-center gap-2 transition-all ${view === 'about'
                         ? 'theme-btn-accent font-semibold shadow-md'
                         : 'text-[var(--text-muted)] hover:text-white hover:bg-white/5'
-                    }`}
+                      }`}
                   >
                     <Info className="w-4 h-4" /> About ACT
                   </button>
@@ -2504,11 +2534,10 @@ export const ACTracker = () => {
                               key={p.meta.id}
                               type="button"
                               onClick={() => switchProfile(p.meta.id)}
-                              className={`w-full p-2 rounded-xl text-left flex items-center justify-between gap-2.5 transition-colors ${
-                                isCurrent
+                              className={`w-full p-2 rounded-xl text-left flex items-center justify-between gap-2.5 transition-colors ${isCurrent
                                   ? 'bg-[var(--accent)]/15 border border-[var(--accent)]/30 text-[var(--text-main)] font-semibold'
                                   : 'hover:bg-white/5 text-[var(--text-muted)] hover:text-[var(--text-main)] border border-transparent'
-                              }`}
+                                }`}
                             >
                               <div className="flex items-center gap-2.5 min-w-0">
                                 <div className="relative shrink-0">
@@ -2576,6 +2605,17 @@ export const ACTracker = () => {
                 )}
               </div>
 
+              {/* Getting Started Guide Briefing Button */}
+              <button
+                type="button"
+                onClick={() => setIsGettingStartedOpen(true)}
+                title="Pre-Flight Briefing & Getting Started Guide"
+                className="tactile-btn p-2 sm:p-2.5 rounded-xl glass-panel border border-[var(--border-subtle)] hover:border-[var(--border-active)] text-[var(--text-main)] transition-all flex items-center gap-1.5"
+              >
+                <Sparkles className="w-4 h-4 text-amber-400" />
+                <span className="text-xs font-medium hidden lg:inline">Guide</span>
+              </button>
+
               {/* Theme Picker Button */}
               <button
                 onClick={() => setShowThemeModal(true)}
@@ -2605,11 +2645,10 @@ export const ACTracker = () => {
               <button
                 onClick={() => setView(view === 'settings' ? (defaultFlightView || 'list') : 'settings')}
                 title="Avionics & Cockpit Settings"
-                className={`tactile-btn p-2 sm:p-2.5 rounded-xl border flex items-center gap-1.5 transition-all ${
-                  view === 'settings'
+                className={`tactile-btn p-2 sm:p-2.5 rounded-xl border flex items-center gap-1.5 transition-all ${view === 'settings'
                     ? 'theme-btn-accent shadow-md'
                     : 'glass-panel border-[var(--border-subtle)] hover:border-[var(--border-active)] text-[var(--text-main)]'
-                }`}
+                  }`}
               >
                 <SlidersHorizontal className="w-4 h-4 theme-accent-text" />
                 <span className="text-xs font-medium hidden lg:inline">Settings</span>
@@ -2622,20 +2661,18 @@ export const ACTracker = () => {
         <div className="xl:hidden flex items-center overflow-x-auto px-4 py-2 border-t border-white/5 gap-1.5 no-scrollbar bg-black/20">
           <button
             onClick={() => setView(defaultFlightView || 'list')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap flex items-center gap-1.5 ${
-              view === 'list' || view === 'grid'
+            className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap flex items-center gap-1.5 ${view === 'list' || view === 'grid'
                 ? 'theme-btn-accent font-semibold shadow-sm'
                 : 'text-[var(--text-muted)] hover:bg-white/5'
-            }`}
+              }`}
           >
             <Compass className="w-3.5 h-3.5" /> Flights
           </button>
           {enabledViews.maps !== false && (
             <button
               onClick={() => setView('maps')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap flex items-center gap-1.5 ${
-                view === 'maps' ? 'theme-btn-accent font-semibold shadow-sm' : 'text-[var(--text-muted)] hover:bg-white/5'
-              }`}
+              className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap flex items-center gap-1.5 ${view === 'maps' ? 'theme-btn-accent font-semibold shadow-sm' : 'text-[var(--text-muted)] hover:bg-white/5'
+                }`}
             >
               <MapIcon className="w-3.5 h-3.5" /> Maps
             </button>
@@ -2643,9 +2680,8 @@ export const ACTracker = () => {
           {enabledViews.airplanes !== false && (
             <button
               onClick={() => setView('airplanes')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap flex items-center gap-1.5 ${
-                view === 'airplanes' ? 'theme-btn-accent font-semibold shadow-sm' : 'text-[var(--text-muted)] hover:bg-white/5'
-              }`}
+              className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap flex items-center gap-1.5 ${view === 'airplanes' ? 'theme-btn-accent font-semibold shadow-sm' : 'text-[var(--text-muted)] hover:bg-white/5'
+                }`}
             >
               <Layers className="w-3.5 h-3.5" /> Aircraft
             </button>
@@ -2653,9 +2689,8 @@ export const ACTracker = () => {
           {enabledViews.stats !== false && (
             <button
               onClick={() => setView('stats')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap flex items-center gap-1.5 ${
-                view === 'stats' ? 'theme-btn-accent font-semibold shadow-sm' : 'text-[var(--text-muted)] hover:bg-white/5'
-              }`}
+              className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap flex items-center gap-1.5 ${view === 'stats' ? 'theme-btn-accent font-semibold shadow-sm' : 'text-[var(--text-muted)] hover:bg-white/5'
+                }`}
             >
               <BarChart3 className="w-3.5 h-3.5" /> Stats
             </button>
@@ -2663,9 +2698,8 @@ export const ACTracker = () => {
           {enabledViews.missions !== false && (
             <button
               onClick={() => setView('missions')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap flex items-center gap-1.5 ${
-                view === 'missions' ? 'theme-btn-accent font-semibold shadow-sm' : 'text-[var(--text-muted)] hover:bg-white/5'
-              }`}
+              className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap flex items-center gap-1.5 ${view === 'missions' ? 'theme-btn-accent font-semibold shadow-sm' : 'text-[var(--text-muted)] hover:bg-white/5'
+                }`}
             >
               <Trophy className="w-3.5 h-3.5" /> Missions
             </button>
@@ -2673,9 +2707,8 @@ export const ACTracker = () => {
           {enabledViews.events !== false && (
             <button
               onClick={() => setView('events')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap flex items-center gap-1.5 ${
-                view === 'events' ? 'theme-btn-accent font-semibold shadow-sm' : 'text-[var(--text-muted)] hover:bg-white/5'
-              }`}
+              className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap flex items-center gap-1.5 ${view === 'events' ? 'theme-btn-accent font-semibold shadow-sm' : 'text-[var(--text-muted)] hover:bg-white/5'
+                }`}
             >
               <Calendar className="w-3.5 h-3.5" /> Events
             </button>
@@ -2683,18 +2716,23 @@ export const ACTracker = () => {
           {enabledViews.about !== false && (
             <button
               onClick={() => setView('about')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap flex items-center gap-1.5 ${
-                view === 'about' ? 'theme-btn-accent font-semibold shadow-sm' : 'text-[var(--text-muted)] hover:bg-white/5'
-              }`}
+              className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap flex items-center gap-1.5 ${view === 'about' ? 'theme-btn-accent font-semibold shadow-sm' : 'text-[var(--text-muted)] hover:bg-white/5'
+                }`}
             >
               <Info className="w-3.5 h-3.5" /> About ACT
             </button>
           )}
           <button
+            onClick={() => setIsGettingStartedOpen(true)}
+            className="px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap flex items-center gap-1.5 text-amber-400 hover:bg-white/5"
+            title="Pre-Flight Briefing"
+          >
+            <Sparkles className="w-3.5 h-3.5" /> Guide
+          </button>
+          <button
             onClick={() => setView('settings')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap flex items-center gap-1.5 ${
-              view === 'settings' ? 'theme-btn-accent font-semibold shadow-sm' : 'text-[var(--text-muted)] hover:bg-white/5'
-            }`}
+            className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap flex items-center gap-1.5 ${view === 'settings' ? 'theme-btn-accent font-semibold shadow-sm' : 'text-[var(--text-muted)] hover:bg-white/5'
+              }`}
           >
             <SlidersHorizontal className="w-3.5 h-3.5" /> Settings
           </button>
@@ -2732,11 +2770,10 @@ export const ACTracker = () => {
                     <div key={cat} className="rounded-xl overflow-hidden">
                       <button
                         onClick={() => handleCategoryClick(cat)}
-                        className={`w-full px-3 py-2.5 rounded-xl text-left text-xs font-medium transition-all flex items-center justify-between ${
-                          isActive
+                        className={`w-full px-3 py-2.5 rounded-xl text-left text-xs font-medium transition-all flex items-center justify-between ${isActive
                             ? 'theme-btn-accent font-semibold shadow-md'
                             : 'hover:bg-white/5 text-[var(--text-main)]'
-                        }`}
+                          }`}
                       >
                         <div className="flex items-center gap-2 min-w-0">
                           {icon ? (
@@ -2771,11 +2808,10 @@ export const ACTracker = () => {
                               <button
                                 key={item}
                                 onClick={() => handleSubItemClick(cat, item)}
-                                className={`w-full text-left px-2 py-1.5 rounded-lg text-[11px] font-normal transition-all flex items-center justify-between ${
-                                  isSubActive
+                                className={`w-full text-left px-2 py-1.5 rounded-lg text-[11px] font-normal transition-all flex items-center justify-between ${isSubActive
                                     ? 'theme-btn-soft font-medium'
                                     : 'text-[var(--text-muted)] hover:text-white hover:bg-white/5'
-                                }`}
+                                  }`}
                               >
                                 <span className="truncate">{item}</span>
                                 {subStat && (
@@ -2795,11 +2831,10 @@ export const ACTracker = () => {
                 {/* Bookmarks Row in Drawer */}
                 <button
                   onClick={() => handleCategoryClick('Bookmarks')}
-                  className={`w-full px-3 py-2.5 rounded-xl text-left text-xs font-medium transition-all flex items-center justify-between mt-2 border-t border-white/10 ${
-                    activeCategory === 'Bookmarks'
+                  className={`w-full px-3 py-2.5 rounded-xl text-left text-xs font-medium transition-all flex items-center justify-between mt-2 border-t border-white/10 ${activeCategory === 'Bookmarks'
                       ? 'bg-amber-500 text-slate-950 font-semibold shadow-md'
                       : 'hover:bg-white/5 text-[var(--text-main)]'
-                  }`}
+                    }`}
                 >
                   <div className="flex items-center gap-2">
                     <Bookmark className="w-4 h-4 text-amber-400 fill-amber-400" />
@@ -2820,37 +2855,38 @@ export const ACTracker = () => {
           {view === 'settings' && (
             <React.Suspense fallback={<ViewLoadingFallback />}>
               <SettingsPage
-              enabledViews={enabledViews}
-              onToggleView={handleToggleView}
-              onSetAllViews={handleSetAllViews}
-              onApplyPreset={handleApplyPreset}
-              defaultFlightView={defaultFlightView}
-              onChangeDefaultFlightView={setDefaultFlightView}
-              density={density}
-              onChangeDensity={setDensity}
-              showRecentFlights={showRecentFlights}
-              onToggleRecentFlights={() => setShowRecentFlights(prev => !prev)}
-              showActiveEventBanner={showActiveEventBanner}
-              onToggleActiveEventBanner={() => setShowActiveEventBanner(prev => !prev)}
-              focusMode={focusMode}
-              onToggleFocusMode={() => setFocusMode(prev => !prev)}
-              showMissingAlliance={showMissingAlliance}
-              onToggleMissingAlliance={() => setShowMissingAlliance(prev => !prev)}
-              showMissingAdventure={showMissingAdventure}
-              onToggleMissingAdventure={() => setShowMissingAdventure(prev => !prev)}
-              starCountMode={starCountMode}
-              onChangeStarCountMode={setStarCountMode}
-              starOffsets={starOffsets}
-              onUpdateOffset={handleOffsetChange}
-              activeThemeId={theme}
-              onOpenThemeModal={() => setShowThemeModal(true)}
-              activeLogoId={logoId}
-              onOpenLogoModal={() => setShowLogoModal(true)}
-              activeProfile={activeProfile}
-              onOpenProfileModal={() => setShowProfileModal(true)}
-              onOpenBackupModal={() => setShowBackupModal(true)}
-              onOpenWhatsNewModal={() => setShowWhatsNewModal(true)}
-              onNavigateToFlights={() => setView(defaultFlightView || 'list')}
+                enabledViews={enabledViews}
+                onToggleView={handleToggleView}
+                onSetAllViews={handleSetAllViews}
+                onApplyPreset={handleApplyPreset}
+                defaultFlightView={defaultFlightView}
+                onChangeDefaultFlightView={setDefaultFlightView}
+                density={density}
+                onChangeDensity={setDensity}
+                showRecentFlights={showRecentFlights}
+                onToggleRecentFlights={() => setShowRecentFlights(prev => !prev)}
+                showActiveEventBanner={showActiveEventBanner}
+                onToggleActiveEventBanner={() => setShowActiveEventBanner(prev => !prev)}
+                focusMode={focusMode}
+                onToggleFocusMode={() => setFocusMode(prev => !prev)}
+                showMissingAlliance={showMissingAlliance}
+                onToggleMissingAlliance={() => setShowMissingAlliance(prev => !prev)}
+                showMissingAdventure={showMissingAdventure}
+                onToggleMissingAdventure={() => setShowMissingAdventure(prev => !prev)}
+                starCountMode={starCountMode}
+                onChangeStarCountMode={setStarCountMode}
+                starOffsets={starOffsets}
+                onUpdateOffset={handleOffsetChange}
+                activeThemeId={theme}
+                onOpenThemeModal={() => setShowThemeModal(true)}
+                activeLogoId={logoId}
+                onOpenLogoModal={() => setShowLogoModal(true)}
+                activeProfile={activeProfile}
+                onOpenProfileModal={() => setShowProfileModal(true)}
+                onOpenBackupModal={() => setShowBackupModal(true)}
+                onOpenWhatsNewModal={() => setShowWhatsNewModal(true)}
+                onOpenGettingStarted={() => setIsGettingStartedOpen(true)}
+                onNavigateToFlights={() => setView(defaultFlightView || 'list')}
               />
             </React.Suspense>
           )}
@@ -2886,6 +2922,7 @@ export const ACTracker = () => {
                 onNavigate={(v) => setView(v)}
                 onOpenLogoModal={() => setShowLogoModal(true)}
                 onOpenWhatsNew={() => setShowWhatsNewModal(true)}
+                onOpenGettingStarted={() => setIsGettingStartedOpen(true)}
                 activeLogoId={logoId}
                 onSelectLogo={handleSelectLogo}
               />
@@ -2920,29 +2957,29 @@ export const ACTracker = () => {
           {view === 'stats' && (
             <React.Suspense fallback={<ViewLoadingFallback />}>
               <StatsPage
-              globalStars={globalStars}
-              maxGlobalStars={maxGlobalStars}
-              globalPercentage={globalPercentage}
-              starCountMode={starCountMode}
-              toggleStarCountMode={toggleStarCountMode}
-              filterStarRank={filterStarRank}
-              handleStarRankClick={handleStarRankClick}
-              starCounts={starCounts}
-              starOffsets={starOffsets}
-              onUpdateStarOffsets={handleUpdateStarOffsets}
-              totalOffsetStars={totalOffsetStars}
-              categories={categories}
-              categoryStarsMap={categoryStarsMap}
-              CATEGORY_ICONS={CATEGORY_ICONS}
-              handleCategoryClick={handleCategoryClick}
-              starHistory={starHistory}
-              onUpdateStarHistory={handleUpdateStarHistory}
-              destinations={destinations}
-              onNavigateToDestination={handleNavigateToDestination}
-              hideZeroMaps={hideZeroMaps}
-              setHideZeroMaps={setHideZeroMaps}
-              hideEventDestinations={hideEventDestinations}
-              setHideEventDestinations={setHideEventDestinations}
+                globalStars={globalStars}
+                maxGlobalStars={maxGlobalStars}
+                globalPercentage={globalPercentage}
+                starCountMode={starCountMode}
+                toggleStarCountMode={toggleStarCountMode}
+                filterStarRank={filterStarRank}
+                handleStarRankClick={handleStarRankClick}
+                starCounts={starCounts}
+                starOffsets={starOffsets}
+                onUpdateStarOffsets={handleUpdateStarOffsets}
+                totalOffsetStars={totalOffsetStars}
+                categories={categories}
+                categoryStarsMap={categoryStarsMap}
+                CATEGORY_ICONS={CATEGORY_ICONS}
+                handleCategoryClick={handleCategoryClick}
+                starHistory={starHistory}
+                onUpdateStarHistory={handleUpdateStarHistory}
+                destinations={destinations}
+                onNavigateToDestination={handleNavigateToDestination}
+                hideZeroMaps={hideZeroMaps}
+                setHideZeroMaps={setHideZeroMaps}
+                hideEventDestinations={hideEventDestinations}
+                setHideEventDestinations={setHideEventDestinations}
               />
             </React.Suspense>
           )}
@@ -3026,40 +3063,35 @@ export const ACTracker = () => {
               {/* Current Event Cyber Flight-Deck Banner */}
               {showActiveEventBanner && activeEventInfo && (
                 <div
-                  className={`rounded-2xl py-2.5 px-4 relative overflow-hidden backdrop-blur-md transition-all ${
-                    isDarkTheme
+                  className={`rounded-2xl py-2.5 px-4 relative overflow-hidden backdrop-blur-md transition-all ${isDarkTheme
                       ? 'bg-[#0d1626]/90 border border-cyan-500/30 hover:border-cyan-500/50 shadow-xl'
                       : 'bg-amber-50/70 border border-amber-200/80 hover:border-amber-300 shadow-sm'
-                  }`}
+                    }`}
                 >
                   <div
-                    className={`absolute -right-8 -top-8 w-40 h-40 rounded-full blur-2xl pointer-events-none ${
-                      isDarkTheme ? 'opacity-20 bg-cyan-400' : 'opacity-30 bg-amber-200'
-                    }`}
+                    className={`absolute -right-8 -top-8 w-40 h-40 rounded-full blur-2xl pointer-events-none ${isDarkTheme ? 'opacity-20 bg-cyan-400' : 'opacity-30 bg-amber-200'
+                      }`}
                   />
                   <div className="flex flex-wrap sm:flex-nowrap items-center justify-between gap-2.5 relative z-10">
                     <div className="flex items-center gap-2.5 min-w-0">
                       {/* Event Icon with pulsing live radar beacon */}
                       <div
-                        className={`relative flex items-center justify-center shrink-0 w-8 h-8 rounded-lg p-0.5 transition-all shadow-md group ${
-                          isDarkTheme
+                        className={`relative flex items-center justify-center shrink-0 w-8 h-8 rounded-lg p-0.5 transition-all shadow-md group ${isDarkTheme
                             ? 'bg-cyan-950/50 border border-cyan-500/40 shadow-[0_0_12px_rgba(0,229,255,0.15)] hover:border-cyan-400/70'
                             : 'bg-amber-100/90 border border-amber-300/90 shadow-sm hover:border-amber-400'
-                        }`}
+                          }`}
                       >
                         {/* Live active beacon ping in top-right corner */}
                         <span className="absolute -top-1 -right-1 flex h-2 w-2 z-20 pointer-events-none">
                           <span
-                            className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
-                              isDarkTheme ? 'bg-cyan-400' : 'bg-amber-500'
-                            }`}
+                            className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${isDarkTheme ? 'bg-cyan-400' : 'bg-amber-500'
+                              }`}
                           />
                           <span
-                            className={`relative inline-flex rounded-full h-2 w-2 border ${
-                              isDarkTheme
+                            className={`relative inline-flex rounded-full h-2 w-2 border ${isDarkTheme
                                 ? 'bg-cyan-300 border-[#0d1626] shadow-[0_0_8px_#00e5ff]'
                                 : 'bg-amber-600 border-amber-50 shadow-[0_0_8px_rgba(217,119,6,0.5)]'
-                            }`}
+                              }`}
                           />
                         </span>
 
@@ -3079,18 +3111,16 @@ export const ACTracker = () => {
 
                       <div className="min-w-0 flex items-center gap-2 flex-wrap">
                         <span
-                          className={`text-[9px] font-mono font-bold uppercase tracking-wider px-1.5 py-0.5 rounded shrink-0 ${
-                            isDarkTheme
+                          className={`text-[9px] font-mono font-bold uppercase tracking-wider px-1.5 py-0.5 rounded shrink-0 ${isDarkTheme
                               ? 'text-cyan-400 bg-cyan-950/80 border border-cyan-800/40'
                               : 'text-amber-800 bg-amber-100/90 border border-amber-300/80'
-                          }`}
+                            }`}
                         >
                           Active Live Event
                         </span>
                         <h2
-                          className={`text-xs sm:text-sm font-bold font-heading truncate flex items-center gap-1.5 shrink-0 ${
-                            isDarkTheme ? 'text-white' : 'text-slate-900'
-                          }`}
+                          className={`text-xs sm:text-sm font-bold font-heading truncate flex items-center gap-1.5 shrink-0 ${isDarkTheme ? 'text-white' : 'text-slate-900'
+                            }`}
                         >
                           Current Event: <span className={isDarkTheme ? 'text-cyan-300' : 'text-[#0f172a]'}>{activeEventInfo.eventName}</span>
                         </h2>
@@ -3121,11 +3151,10 @@ export const ACTracker = () => {
                             setFilterGroup('All');
                             setFilterAircraft('All');
                           }}
-                          className={`tactile-btn px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all shadow-sm ${
-                            isDarkTheme
+                          className={`tactile-btn px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all shadow-sm ${isDarkTheme
                               ? 'bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-400/40 text-cyan-200'
                               : 'bg-amber-100 hover:bg-amber-200 border border-amber-300 text-amber-900'
-                          }`}
+                            }`}
                         >
                           <X className="w-3 h-3" />
                           <span>Clear Filter</span>
@@ -3135,11 +3164,10 @@ export const ACTracker = () => {
                           type="button"
                           onClick={() => handleFilterForEvent(activeEventInfo.filterKeyword)}
                           style={!isDarkTheme ? { backgroundColor: 'var(--accent)' } : undefined}
-                          className={`tactile-btn px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all shadow-md ${
-                            isDarkTheme
+                          className={`tactile-btn px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all shadow-md ${isDarkTheme
                               ? 'bg-cyan-500 hover:bg-cyan-400 text-slate-950 shadow-cyan-500/20'
                               : 'text-white hover:opacity-90 shadow-slate-900/10'
-                          }`}
+                            }`}
                         >
                           <Compass className="w-3 h-3" />
                           <span>Show Event Flights</span>
@@ -3152,11 +3180,10 @@ export const ACTracker = () => {
                           href={activeEventInfo.wikiUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className={`tactile-btn px-2.5 py-1 rounded-lg text-xs font-medium flex items-center gap-1 transition-all ${
-                            isDarkTheme
+                          className={`tactile-btn px-2.5 py-1 rounded-lg text-xs font-medium flex items-center gap-1 transition-all ${isDarkTheme
                               ? 'border border-white/10 hover:border-cyan-500/30 bg-black/30 hover:bg-white/10 text-[var(--text-muted)] hover:text-white'
                               : 'border border-slate-300/80 hover:border-slate-400 bg-white/80 hover:bg-slate-100 text-[#475569] hover:text-slate-900 shadow-sm'
-                          }`}
+                            }`}
                           title="Open Event Wiki Guide"
                         >
                           <span>Wiki Guide</span>
@@ -3178,11 +3205,10 @@ export const ACTracker = () => {
                       <button
                         key={cat}
                         onClick={() => handleCategoryClick(cat)}
-                        className={`tactile-btn px-2.5 py-1 rounded-xl text-xs font-medium transition-all flex items-center gap-1.5 ${
-                          isActive
+                        className={`tactile-btn px-2.5 py-1 rounded-xl text-xs font-medium transition-all flex items-center gap-1.5 ${isActive
                             ? 'theme-btn-accent font-semibold shadow-md'
                             : 'bg-black/20 hover:bg-white/10 text-[var(--text-muted)] hover:text-white border border-white/5'
-                        }`}
+                          }`}
                       >
                         <span>{cat}</span>
                         {stats && (
@@ -3196,11 +3222,10 @@ export const ACTracker = () => {
 
                   <button
                     onClick={() => handleCategoryClick('Bookmarks')}
-                    className={`tactile-btn px-2.5 py-1 rounded-xl text-xs font-medium transition-all flex items-center gap-1.5 ${
-                      activeCategory === 'Bookmarks'
+                    className={`tactile-btn px-2.5 py-1 rounded-xl text-xs font-medium transition-all flex items-center gap-1.5 ${activeCategory === 'Bookmarks'
                         ? 'bg-amber-500 text-slate-950 font-semibold shadow-md'
                         : 'bg-black/20 hover:bg-white/10 text-amber-300 border border-amber-500/20'
-                    }`}
+                      }`}
                   >
                     <Bookmark className="w-3 h-3 fill-amber-400" />
                     <span>Bookmarks ({destinations.filter(d => d.isCustomList).length})</span>
@@ -3310,18 +3335,16 @@ export const ACTracker = () => {
                       <div className="flex items-center bg-black/30 rounded-xl p-0.5 border border-white/10 shrink-0">
                         <button
                           onClick={() => toggleDensity('compact')}
-                          className={`px-2 py-1 rounded-lg text-xs font-mono transition-all ${
-                            density === 'compact' ? 'theme-btn-soft font-semibold shadow-sm' : 'text-[var(--text-muted)] hover:text-white'
-                          }`}
+                          className={`px-2 py-1 rounded-lg text-xs font-mono transition-all ${density === 'compact' ? 'theme-btn-soft font-semibold shadow-sm' : 'text-[var(--text-muted)] hover:text-white'
+                            }`}
                           title="High-Density Table (25+ routes per screen)"
                         >
                           Dense
                         </button>
                         <button
                           onClick={() => toggleDensity('comfortable')}
-                          className={`px-2 py-1 rounded-lg text-xs font-mono transition-all ${
-                            density === 'comfortable' ? 'theme-btn-soft font-semibold shadow-sm' : 'text-[var(--text-muted)] hover:text-white'
-                          }`}
+                          className={`px-2 py-1 rounded-lg text-xs font-mono transition-all ${density === 'comfortable' ? 'theme-btn-soft font-semibold shadow-sm' : 'text-[var(--text-muted)] hover:text-white'
+                            }`}
                           title="Comfortable Cards"
                         >
                           Cards
@@ -3335,11 +3358,10 @@ export const ACTracker = () => {
                         <button
                           type="button"
                           onClick={() => setShowColumnsPopover(prev => !prev)}
-                          className={`tactile-btn px-2.5 py-1.5 rounded-xl border border-white/10 text-xs font-mono flex items-center gap-1.5 transition-all ${
-                            showColumnsPopover || isSpaciousMode
+                          className={`tactile-btn px-2.5 py-1.5 rounded-xl border border-white/10 text-xs font-mono flex items-center gap-1.5 transition-all ${showColumnsPopover || isSpaciousMode
                               ? 'theme-btn-soft font-semibold shadow-sm'
                               : 'bg-black/30 text-[var(--text-muted)] hover:text-white'
-                          }`}
+                            }`}
                           title="Visible Columns Customizer (Split-Screen optimization)"
                         >
                           <SlidersHorizontal className="w-3.5 h-3.5" />
@@ -3465,11 +3487,10 @@ export const ACTracker = () => {
                     <button
                       type="button"
                       onClick={toggleFocusMode}
-                      className={`tactile-btn px-2.5 py-1.5 rounded-xl border border-white/10 text-xs font-mono flex items-center gap-1.5 transition-all shrink-0 ${
-                        focusMode
+                      className={`tactile-btn px-2.5 py-1.5 rounded-xl border border-white/10 text-xs font-mono flex items-center gap-1.5 transition-all shrink-0 ${focusMode
                           ? 'theme-btn-accent font-semibold shadow-md'
                           : 'bg-black/30 text-[var(--text-muted)] hover:text-white'
-                      }`}
+                        }`}
                       title={focusMode ? 'Disable Focus / Split-Screen Mode' : 'Enable Focus / Split-Screen Mode (Slim Header & Dropdown)'}
                     >
                       {focusMode ? <Maximize2 className="w-3.5 h-3.5" /> : <Minimize2 className="w-3.5 h-3.5" />}
@@ -3481,18 +3502,16 @@ export const ACTracker = () => {
                       <button
                         onClick={() => setView('list')}
                         title="Tactical List View"
-                        className={`p-1.5 rounded-lg transition-all ${
-                          view === 'list' ? 'theme-btn-soft shadow-sm' : 'text-[var(--text-muted)] hover:text-white'
-                        }`}
+                        className={`p-1.5 rounded-lg transition-all ${view === 'list' ? 'theme-btn-soft shadow-sm' : 'text-[var(--text-muted)] hover:text-white'
+                          }`}
                       >
                         <List className="w-3.5 h-3.5" />
                       </button>
                       <button
                         onClick={() => setView('grid')}
                         title="Radar Grid View"
-                        className={`p-1.5 rounded-lg transition-all ${
-                          view === 'grid' ? 'theme-btn-soft shadow-sm' : 'text-[var(--text-muted)] hover:text-white'
-                        }`}
+                        className={`p-1.5 rounded-lg transition-all ${view === 'grid' ? 'theme-btn-soft shadow-sm' : 'text-[var(--text-muted)] hover:text-white'
+                          }`}
                       >
                         <Grid className="w-3.5 h-3.5" />
                       </button>
@@ -3502,11 +3521,10 @@ export const ACTracker = () => {
                     <button
                       onClick={() => setIsSidebarOpen(!isSidebarOpen)}
                       title={isSidebarOpen ? 'Hide Category Drawer' : 'Show Category Drawer'}
-                      className={`tactile-btn p-1.5 rounded-xl border border-white/10 transition-all shrink-0 ${
-                        isSidebarOpen
+                      className={`tactile-btn p-1.5 rounded-xl border border-white/10 transition-all shrink-0 ${isSidebarOpen
                           ? 'theme-btn-soft'
                           : 'bg-black/30 text-[var(--text-muted)] hover:text-white'
-                      }`}
+                        }`}
                     >
                       <PanelLeft className="w-3.5 h-3.5" />
                     </button>
@@ -3829,9 +3847,8 @@ export const ACTracker = () => {
                         <div
                           key={dest.id}
                           id={dest.id}
-                          className={`flight-row-virtual transition-colors ${
-                            isExpanded ? 'bg-white/[0.04]' : 'hover:bg-white/[0.02]'
-                          }`}
+                          className={`flight-row-virtual transition-colors ${isExpanded ? 'bg-white/[0.04]' : 'hover:bg-white/[0.02]'
+                            }`}
                         >
                           {/* Desktop Dense Row */}
                           <div
@@ -3868,9 +3885,8 @@ export const ACTracker = () => {
                             <div className="min-w-0 flex items-center whitespace-nowrap truncate">
                               <span
                                 onClick={() => setExpandedRowId(isExpanded ? null : dest.id)}
-                                className={`${
-                                  isSpaciousMode ? 'text-sm sm:text-base font-semibold' : 'text-xs font-semibold'
-                                } text-[var(--text-main)] truncate cursor-pointer hover:text-[var(--accent)] transition-colors whitespace-nowrap`}
+                                className={`${isSpaciousMode ? 'text-sm sm:text-base font-semibold' : 'text-xs font-semibold'
+                                  } text-[var(--text-main)] truncate cursor-pointer hover:text-[var(--accent)] transition-colors whitespace-nowrap`}
                                 title={dest.destination}
                               >
                                 {dest.destination}
@@ -3909,17 +3925,15 @@ export const ACTracker = () => {
                                   {Array.from({ length: maxStars }).map((_, idx) => (
                                     <Star
                                       key={idx}
-                                      className={`w-2.5 h-2.5 ${
-                                        stars >= idx + 1 ? 'theme-star-active' : 'theme-star-inactive'
-                                      }`}
+                                      className={`w-2.5 h-2.5 ${stars >= idx + 1 ? 'theme-star-active' : 'theme-star-inactive'
+                                        }`}
                                     />
                                   ))}
                                 </div>
                                 <div className="flex-1 h-1.5 bg-black/40 rounded-full overflow-hidden min-w-[36px]">
                                   <div
-                                    className={`h-full rounded-full transition-all duration-300 ${
-                                      stars >= maxStars ? 'bg-[var(--star-color)]' : 'theme-progress-fill'
-                                    }`}
+                                    className={`h-full rounded-full transition-all duration-300 ${stars >= maxStars ? 'bg-[var(--star-color)]' : 'theme-progress-fill'
+                                      }`}
                                     style={{ width: `${Math.min(100, Math.round((dest.flightsDone / maxReq) * 100))}%` }}
                                   />
                                 </div>
@@ -4003,9 +4017,8 @@ export const ACTracker = () => {
                                     }}
                                     ariaLabel={`Flights on Star ${starDetails.currentStar} for ${dest.destination}`}
                                     title={`Flights on Star ${starDetails.currentStar} (click to edit)`}
-                                    className={`w-10 h-5 text-center font-mono font-bold ${
-                                      isSpaciousMode ? 'text-sm' : 'text-xs'
-                                    } bg-transparent border-0 focus:ring-0 theme-accent-text p-0`}
+                                    className={`w-10 h-5 text-center font-mono font-bold ${isSpaciousMode ? 'text-sm' : 'text-xs'
+                                      } bg-transparent border-0 focus:ring-0 theme-accent-text p-0`}
                                   />
                                   <span className={`${isSpaciousMode ? 'text-xs' : 'text-[11px]'} font-mono text-[var(--text-muted)] select-none`}>
                                     /{starDetails.tierTarget}
@@ -4040,9 +4053,8 @@ export const ACTracker = () => {
                               <div className="flex justify-center whitespace-nowrap">
                                 <button
                                   onClick={() => setExpandedRowId(isExpanded ? null : dest.id)}
-                                  className={`p-1 rounded-lg transition-colors ${
-                                    isExpanded ? 'theme-btn-soft' : 'text-[var(--text-muted)] hover:text-white hover:bg-white/5'
-                                  }`}
+                                  className={`p-1 rounded-lg transition-colors ${isExpanded ? 'theme-btn-soft' : 'text-[var(--text-muted)] hover:text-white hover:bg-white/5'
+                                    }`}
                                   title={isExpanded ? 'Collapse Details' : 'Expand Details'}
                                 >
                                   {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
@@ -4172,11 +4184,10 @@ export const ACTracker = () => {
                                       return (
                                         <div
                                           key={idx}
-                                          className={`flex items-center justify-between p-1.5 rounded-lg border ${
-                                            isReached
+                                          className={`flex items-center justify-between p-1.5 rounded-lg border ${isReached
                                               ? 'bg-amber-500/10 border-amber-500/25 text-amber-300'
                                               : 'bg-white/5 border-white/5 text-[var(--text-muted)]'
-                                          }`}
+                                            }`}
                                         >
                                           <div className="flex items-center gap-1.5">
                                             <Star className={`w-3 h-3 ${isReached ? 'fill-amber-400 text-amber-400' : 'text-gray-600'}`} />
@@ -4297,9 +4308,8 @@ export const ACTracker = () => {
                       <div
                         key={dest.id}
                         id={dest.id}
-                        className={`flight-comfortable-row glass-card rounded-2xl border transition-all overflow-hidden ${
-                          isExpanded ? 'border-[var(--border-active)] shadow-md' : 'border-[var(--border-card)]'
-                        }`}
+                        className={`flight-comfortable-row glass-card rounded-2xl border transition-all overflow-hidden ${isExpanded ? 'border-[var(--border-active)] shadow-md' : 'border-[var(--border-card)]'
+                          }`}
                       >
                         <div className="p-3 sm:p-3.5 flex flex-col lg:flex-row lg:items-center justify-between gap-3">
                           <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -4309,9 +4319,8 @@ export const ACTracker = () => {
                               title={dest.isCustomList ? 'Remove from Bookmarks' : 'Pin to Bookmarks'}
                             >
                               <Star
-                                className={`w-4 h-4 transition-all ${
-                                  dest.isCustomList ? 'fill-amber-400 text-amber-400 glow-star scale-110' : ''
-                                }`}
+                                className={`w-4 h-4 transition-all ${dest.isCustomList ? 'fill-amber-400 text-amber-400 glow-star scale-110' : ''
+                                  }`}
                               />
                             </button>
 
@@ -4449,9 +4458,8 @@ export const ACTracker = () => {
 
                             <button
                               onClick={() => setExpandedRowId(isExpanded ? null : dest.id)}
-                              className={`p-1.5 rounded-xl border transition-all ${
-                                isExpanded ? 'theme-btn-soft' : 'bg-white/5 border-white/10 text-[var(--text-muted)] hover:text-white'
-                              }`}
+                              className={`p-1.5 rounded-xl border transition-all ${isExpanded ? 'theme-btn-soft' : 'bg-white/5 border-white/10 text-[var(--text-muted)] hover:text-white'
+                                }`}
                               title={isExpanded ? 'Collapse Details' : 'Expand Details'}
                             >
                               {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
@@ -4472,9 +4480,8 @@ export const ACTracker = () => {
                                     return (
                                       <div
                                         key={idx}
-                                        className={`flex items-center justify-between p-1.5 rounded-lg border ${
-                                          isReached ? 'bg-amber-500/10 border-amber-500/25 text-amber-300' : 'bg-white/5 border-white/5 text-[var(--text-muted)]'
-                                        }`}
+                                        className={`flex items-center justify-between p-1.5 rounded-lg border ${isReached ? 'bg-amber-500/10 border-amber-500/25 text-amber-300' : 'bg-white/5 border-white/5 text-[var(--text-muted)]'
+                                          }`}
                                       >
                                         <div className="flex items-center gap-1.5">
                                           <Star className={`w-3 h-3 ${isReached ? 'fill-amber-400 text-amber-400' : 'text-gray-600'}`} />
@@ -4782,17 +4789,15 @@ export const ACTracker = () => {
                     <button
                       key={tab.id}
                       onClick={() => setThemeTab(tab.id as any)}
-                      className={`tactile-btn px-3 py-1.5 rounded-xl text-xs font-mono font-medium transition-all whitespace-nowrap flex items-center gap-1.5 ${
-                        isActive
+                      className={`tactile-btn px-3 py-1.5 rounded-xl text-xs font-mono font-medium transition-all whitespace-nowrap flex items-center gap-1.5 ${isActive
                           ? 'theme-btn-accent shadow-sm'
                           : 'text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-white/5'
-                      }`}
+                        }`}
                     >
                       <span>{tab.label}</span>
                       <span
-                        className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
-                          isActive ? 'bg-black/30 text-white' : 'bg-white/10 text-[var(--text-muted)]'
-                        }`}
+                        className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${isActive ? 'bg-black/30 text-white' : 'bg-white/10 text-[var(--text-muted)]'
+                          }`}
                       >
                         {tab.count}
                       </span>
@@ -4822,11 +4827,10 @@ export const ACTracker = () => {
                           borderColor: isSelected ? cfg.accentPreview : undefined,
                           boxShadow: isSelected ? `0 0 22px -3px ${cfg.accentPreview}40` : undefined,
                         }}
-                        className={`tactile-btn p-4 rounded-2xl border text-left transition-all relative overflow-hidden flex flex-col justify-between gap-3 group ${
-                          isSelected
+                        className={`tactile-btn p-4 rounded-2xl border text-left transition-all relative overflow-hidden flex flex-col justify-between gap-3 group ${isSelected
                             ? 'bg-[var(--bg-surface)] border-2'
                             : 'bg-black/25 border-white/10 hover:border-white/20 hover:bg-white/5'
-                        }`}
+                          }`}
                       >
                         {/* Atmospheric color swatch strip */}
                         <div className="flex items-center justify-between gap-2">
@@ -4926,11 +4930,10 @@ export const ACTracker = () => {
                     onClick={() => {
                       handleSelectLogo(opt.id);
                     }}
-                    className={`tactile-btn p-5 rounded-2xl border text-left transition-all relative overflow-hidden flex flex-col justify-between gap-4 cursor-pointer group ${
-                      isSelected
+                    className={`tactile-btn p-5 rounded-2xl border text-left transition-all relative overflow-hidden flex flex-col justify-between gap-4 cursor-pointer group ${isSelected
                         ? 'border-[var(--accent)] bg-[var(--accent-muted)] shadow-xl ring-1 ring-[var(--accent)]'
                         : 'border-[var(--border-card)] bg-black/30 hover:border-white/20 hover:bg-white/5'
-                    }`}
+                      }`}
                   >
                     <div className="flex items-start gap-4">
                       {/* 3D Emblem Showcase Box */}
@@ -4944,9 +4947,8 @@ export const ACTracker = () => {
 
                       <div className="space-y-1.5 min-w-0 flex-1">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${
-                            isSelected ? 'theme-btn-accent shadow-sm' : 'bg-white/10 text-white/90'
-                          }`}>
+                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${isSelected ? 'theme-btn-accent shadow-sm' : 'bg-white/10 text-white/90'
+                            }`}>
                             {opt.badge}
                           </span>
                           {isSelected && (
@@ -4984,11 +4986,10 @@ export const ACTracker = () => {
                           e.stopPropagation();
                           handleSelectLogo(opt.id);
                         }}
-                        className={`px-3 py-1 rounded-xl text-xs font-semibold transition-all ${
-                          isSelected
+                        className={`px-3 py-1 rounded-xl text-xs font-semibold transition-all ${isSelected
                             ? 'theme-btn-accent shadow-md'
                             : 'bg-white/10 hover:bg-white/20 text-[var(--text-main)]'
-                        }`}
+                          }`}
                       >
                         {isSelected ? 'Selected' : 'Use Logo'}
                       </button>
@@ -5025,33 +5026,30 @@ export const ACTracker = () => {
               <button
                 type="button"
                 onClick={() => setBackupActiveTab('profiles')}
-                className={`py-2 text-xs font-semibold rounded-xl transition-all flex items-center justify-center gap-1.5 ${
-                  backupActiveTab === 'profiles'
+                className={`py-2 text-xs font-semibold rounded-xl transition-all flex items-center justify-center gap-1.5 ${backupActiveTab === 'profiles'
                     ? 'bg-[var(--accent)] text-white shadow-md'
                     : 'text-[var(--text-muted)] hover:text-white'
-                }`}
+                  }`}
               >
                 <User className="w-3.5 h-3.5" /> Profiles
               </button>
               <button
                 type="button"
                 onClick={() => setBackupActiveTab('backup')}
-                className={`py-2 text-xs font-semibold rounded-xl transition-all flex items-center justify-center gap-1.5 ${
-                  backupActiveTab === 'backup'
+                className={`py-2 text-xs font-semibold rounded-xl transition-all flex items-center justify-center gap-1.5 ${backupActiveTab === 'backup'
                     ? 'bg-[var(--accent)] text-white shadow-md'
                     : 'text-[var(--text-muted)] hover:text-white'
-                }`}
+                  }`}
               >
                 <Download className="w-3.5 h-3.5" /> Backup & Import
               </button>
               <button
                 type="button"
                 onClick={() => setBackupActiveTab('reset')}
-                className={`py-2 text-xs font-semibold rounded-xl transition-all flex items-center justify-center gap-1.5 ${
-                  backupActiveTab === 'reset'
+                className={`py-2 text-xs font-semibold rounded-xl transition-all flex items-center justify-center gap-1.5 ${backupActiveTab === 'reset'
                     ? 'bg-rose-600 text-white shadow-md'
                     : 'text-[var(--text-muted)] hover:text-rose-400'
-                }`}
+                  }`}
               >
                 <Trash2 className="w-3.5 h-3.5" /> Reset
               </button>
@@ -5074,11 +5072,10 @@ export const ACTracker = () => {
                     return (
                       <div
                         key={p.meta.id}
-                        className={`p-3 rounded-xl border flex items-center justify-between gap-2 ${
-                          isCur
+                        className={`p-3 rounded-xl border flex items-center justify-between gap-2 ${isCur
                             ? 'bg-[var(--accent)]/15 border-[var(--accent)]/40'
                             : 'bg-black/20 border-white/5'
-                        }`}
+                          }`}
                       >
                         <div className="flex items-center gap-2.5 min-w-0">
                           <div className="relative shrink-0">
@@ -5207,11 +5204,10 @@ export const ACTracker = () => {
 
                 <button
                   onClick={resetAllData}
-                  className={`w-full p-3.5 rounded-2xl border text-xs font-semibold transition-all flex items-center justify-center gap-2 ${
-                    showResetConfirm
+                  className={`w-full p-3.5 rounded-2xl border text-xs font-semibold transition-all flex items-center justify-center gap-2 ${showResetConfirm
                       ? 'bg-rose-600 border-rose-700 text-white animate-pulse font-bold'
                       : 'bg-rose-500/10 border-rose-500/20 text-rose-400 hover:bg-rose-500/20'
-                  }`}
+                    }`}
                 >
                   <Trash2 className="w-4 h-4" />
                   {showResetConfirm ? 'Click Again to Confirm Reset!' : `Reset "${activeProfile?.meta.name}" Progress`}
@@ -5243,6 +5239,21 @@ export const ACTracker = () => {
       <MigrationModal
         isOpen={showMigrationModal}
         onMigrate={handleMigrateLegacy}
+      />
+
+      {/* Pre-Flight Briefing & Getting Started Guide */}
+      <GettingStartedModal
+        isOpen={isGettingStartedOpen}
+        onClose={handleCloseGettingStarted}
+        activeTheme={theme}
+        onSelectTheme={(newTheme) => setTheme(newTheme as ThemeId)}
+        enabledViews={enabledViews}
+        onToggleView={(viewKey) => {
+          setEnabledViews(prev => ({
+            ...prev,
+            [viewKey]: !prev[viewKey]
+          }));
+        }}
       />
 
       {/* What's New in AC-Tracker Release Modal */}

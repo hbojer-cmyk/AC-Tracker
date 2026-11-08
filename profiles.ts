@@ -72,6 +72,7 @@ export interface ProfilePrefs {
   showRecentFlights?: boolean;
   showActiveEventBanner?: boolean;
   selectedMissionId?: string;
+  hasSeenGettingStarted?: boolean;
 }
 
 export interface StarHistoryEntry {
@@ -229,6 +230,7 @@ export function getDefaultPrefs(): ProfilePrefs {
     showRecentFlights: true,
     showActiveEventBanner: true,
     selectedMissionId: 'aztec-pyramid',
+    hasSeenGettingStarted: false,
   };
 }
 
@@ -329,6 +331,7 @@ export function migrateLegacyData(
     flightDeckHeaderOpen: localStorage.getItem('aeroquest_flight_deck_header_open') !== 'false',
     showMissingAlliance: localStorage.getItem('aeroquest_show_missing_alliance') !== 'false',
     showMissingAdventure: localStorage.getItem('aeroquest_show_missing_adventure') !== 'false',
+    hasSeenGettingStarted: true,
   };
 
   const newProfile: ProfileData = {
@@ -371,7 +374,10 @@ export function createBlankProfile(meta: ProfileMeta): ProfileData {
     meta,
     userData: {},
     airplanes: null,
-    prefs: getDefaultPrefs(),
+    prefs: {
+      ...getDefaultPrefs(),
+      hasSeenGettingStarted: true, // Experienced pilot creating an alt profile already knows the app
+    },
     starHistory: [],
     starOffsets: { ...DEFAULT_STAR_SYNC_OFFSETS },
     missions: {},
@@ -387,6 +393,7 @@ export function cloneProfile(source: ProfileData, newMeta: ProfileMeta): Profile
     prefs: {
       ...getDefaultPrefs(),
       ...source.prefs,
+      hasSeenGettingStarted: true,
       visibleColumns: source.prefs.visibleColumns
         ? { ...source.prefs.visibleColumns }
         : { ...DEFAULT_VISIBLE_COLUMNS },

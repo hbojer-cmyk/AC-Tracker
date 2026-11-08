@@ -1,11 +1,12 @@
 import React from 'react';
-import { 
-  ShieldCheck, 
-  Sparkles, 
-  Keyboard, 
+import {
+  ShieldCheck,
+  Sparkles,
+  Keyboard,
   ExternalLink,
   Globe,
-  User
+  User,
+  ChevronRight
 } from 'lucide-react';
 import { APP_VERSION, APP_UPDATED_DATE } from './index';
 
@@ -13,6 +14,7 @@ interface AboutPageProps {
   onNavigate?: (view: 'list' | 'maps' | 'airplanes' | 'stats') => void;
   onOpenLogoModal?: () => void;
   onOpenWhatsNew?: () => void;
+  onOpenGettingStarted?: () => void;
   activeLogoId?: string;
   onSelectLogo?: (id: string) => void;
 }
@@ -78,6 +80,7 @@ export const COMMUNITY_RESOURCES: PilotResource[] = [
 
 export const AboutPage: React.FC<AboutPageProps> = ({
   onOpenWhatsNew,
+  onOpenGettingStarted,
 }) => {
   return (
     <div className="space-y-6 pb-12 animate-in fade-in duration-300">
@@ -117,6 +120,33 @@ export const AboutPage: React.FC<AboutPageProps> = ({
         </div>
       </div>
 
+      {/* Pre-Flight Briefing Replay Banner */}
+      {onOpenGettingStarted && (
+        <div className="glass-panel rounded-3xl p-5 sm:p-6 border border-[var(--border-card)] shadow-lg flex flex-col sm:flex-row items-center justify-between gap-4 bg-gradient-to-r from-[var(--accent)]/10 via-transparent to-transparent">
+          <div className="flex items-center gap-4 min-w-0">
+            <div className="w-12 h-12 rounded-2xl bg-[var(--accent)]/15 border border-[var(--accent)]/30 flex items-center justify-center text-[var(--accent)] shrink-0">
+              <Sparkles className="w-6 h-6" />
+            </div>
+            <div className="min-w-0">
+              <h2 className="text-base sm:text-lg font-bold font-heading text-[var(--text-main)] truncate">
+                Pre-Flight Pilot Briefing
+              </h2>
+              <p className="text-xs sm:text-sm text-[var(--text-muted)] mt-0.5">
+                New to AC-Tracker or want a quick refresher? Replay the 6-step interactive cockpit orientation.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={onOpenGettingStarted}
+            className="w-full sm:w-auto px-4 py-2.5 rounded-xl font-mono text-xs font-bold bg-[var(--accent)] text-black hover:opacity-90 shadow-md transition-all flex items-center justify-center gap-2 shrink-0 cursor-pointer"
+          >
+            <span>Launch Briefing</span>
+            <ChevronRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
+
       {/* Overview Card */}
       <div className="glass-panel rounded-3xl p-6 border border-[var(--border-card)] space-y-3">
         <h2 className="text-base font-semibold text-[var(--text-main)] font-heading flex items-center gap-2">
@@ -138,7 +168,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({
               <h2 className="text-base font-semibold text-[var(--text-main)] font-heading flex items-center gap-2">
                 Multi-Profile Pilot Command
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-400/20 text-amber-300 border border-amber-400/30">
-                  NEW in v2.1
+                  NEW in v2
                 </span>
               </h2>
               <p className="text-xs text-[var(--text-muted)]">

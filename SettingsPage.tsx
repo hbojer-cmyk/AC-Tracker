@@ -1,5 +1,6 @@
 import React from 'react';
 import {
+  Plane,
   SlidersHorizontal,
   Compass,
   Map as MapIcon,
@@ -68,6 +69,7 @@ interface SettingsPageProps {
   onOpenProfileModal: () => void;
   onOpenBackupModal: () => void;
   onOpenWhatsNewModal: () => void;
+  onOpenGettingStarted?: () => void;
 
   // Quick navigation back to Flight Deck
   onNavigateToFlights: () => void;
@@ -104,6 +106,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
   onOpenProfileModal,
   onOpenBackupModal,
   onOpenWhatsNewModal,
+  onOpenGettingStarted,
   onNavigateToFlights,
 }) => {
   const currentTheme = THEME_CONFIGS[activeThemeId as ThemeId] || THEME_CONFIGS['stealth-ghost'];
@@ -804,16 +807,27 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
             )}
 
             {/* Backup & Restore Hub Trigger */}
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-3 gap-2">
               <button
                 onClick={onOpenBackupModal}
-                className="px-3 py-2 rounded-xl text-xs font-medium bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 text-[var(--text-main)] border border-black/10 dark:border-white/10 flex items-center justify-center gap-1.5 transition-colors"
+                className="px-2 py-2 rounded-xl text-xs font-medium bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 text-[var(--text-main)] border border-black/10 dark:border-white/10 flex items-center justify-center gap-1.5 transition-colors"
+                title="Backup and restore pilot JSON data"
               >
-                <Download className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" /> Backup Data
+                <Download className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" /> Backup
               </button>
+              {onOpenGettingStarted && (
+                <button
+                  onClick={onOpenGettingStarted}
+                  className="px-2 py-2 rounded-xl text-xs font-medium bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 text-[var(--text-main)] border border-black/10 dark:border-white/10 flex items-center justify-center gap-1.5 transition-colors"
+                  title="Replay Pre-Flight Briefing"
+                >
+                  <Plane className="w-3.5 h-3.5 text-sky-500" /> Briefing
+                </button>
+              )}
               <button
                 onClick={onOpenWhatsNewModal}
-                className="px-3 py-2 rounded-xl text-xs font-medium bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 text-[var(--text-main)] border border-black/10 dark:border-white/10 flex items-center justify-center gap-1.5 transition-colors"
+                className="px-2 py-2 rounded-xl text-xs font-medium bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 text-[var(--text-main)] border border-black/10 dark:border-white/10 flex items-center justify-center gap-1.5 transition-colors"
+                title="What's New in this release"
               >
                 <Sparkles className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" /> What's New
               </button>
