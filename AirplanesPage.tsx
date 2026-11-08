@@ -1,23 +1,15 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Plus, Trash2, X, Plane, Sliders, Gauge, CircleDollarSign } from 'lucide-react';
-import { OWNABLE_AIRCRAFT, ALL_AIRCRAFT_TYPES, AircraftInstance, getAircraftTypeFromName, adjustAircraftList } from './src/aircraftData';
+import {
+  OWNABLE_AIRCRAFT,
+  ALL_AIRCRAFT_TYPES,
+  AircraftInstance,
+  getAircraftTypeFromName,
+  adjustAircraftList,
+  AIRCRAFT_SPRITES
+} from './src/aircraftData';
 
-export const AIRCRAFT_SPRITES: Record<string, string> = {
-  Swift: 'icons/aircraft/swift.png',
-  Swallow: 'icons/aircraft/swallow.png',
-  Owl: 'icons/aircraft/owl.png',
-  Hawk: 'icons/aircraft/hawk.png',
-  Raven: 'icons/aircraft/raven.png',
-  Eagle: 'icons/aircraft/eagle.png',
-  Jumbo: 'icons/aircraft/jumbo.png',
-  Giant: 'icons/aircraft/giant.png',
-  Falcon: 'icons/aircraft/falcon.png',
-  Thunderbird: 'icons/aircraft/thunderbird.png',
-  Condor: 'icons/aircraft/condor.png',
-  Sparrow: 'icons/aircraft/sparrow.png',
-  Crossbill: 'icons/aircraft/crossbill.png',
-  Goldfinch: 'icons/aircraft/goldfinch.png',
-};
+export { AIRCRAFT_SPRITES };
 
 interface AirplanesPageProps {
   airplanes?: AircraftInstance[];

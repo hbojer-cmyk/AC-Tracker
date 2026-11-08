@@ -28,6 +28,16 @@ export default defineConfig(({ mode }) => {
       alias: {
         '@': path.resolve(__dirname, '.'),
       }
+    },
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            'vendor-recharts': ['recharts'],
+            'vendor-lucide': ['lucide-react'],
+          },
+        },
+      },
     }
   };
 });

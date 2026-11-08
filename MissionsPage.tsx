@@ -18,7 +18,7 @@ import {
   Layers,
 } from 'lucide-react';
 import { Mission, MISSIONS_LIST } from './src/data/missionsData';
-import { AIRCRAFT_SPRITES } from './AirplanesPage';
+import { AIRCRAFT_SPRITES } from './src/aircraftData';
 
 // Graceful thumbnail loader with cyber landmark icon fallback if image asset is not yet available
 const MissionThumbnail: React.FC<{
@@ -590,7 +590,9 @@ export const MissionsPage: React.FC<MissionsPageProps> = ({
                       ★6
                     </span>
                   ) : isReadyForStage ? (
-                    <Check className="w-4 h-4 text-emerald-400 stroke-[3]" title={`Ready for Landmark #${builtCount + 1}`} />
+                    <span title={`Ready for Landmark #${builtCount + 1}`} className="inline-flex">
+                      <Check className="w-4 h-4 text-emerald-400 stroke-[3]" />
+                    </span>
                   ) : (
                     <span className="text-[var(--text-muted)]">{idx + 1}</span>
                   )}

@@ -262,6 +262,9 @@ export function saveAllProfiles(profiles: Record<string, ProfileData>): void {
     localStorage.setItem(STORAGE_KEYS.profiles, JSON.stringify(profiles));
   } catch (e) {
     console.error('Failed to save act_profiles to localStorage', e);
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('act_storage_error', { detail: e }));
+    }
   }
 }
 

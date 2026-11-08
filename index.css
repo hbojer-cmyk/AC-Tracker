@@ -1180,3 +1180,23 @@ input[type="number"].hide-arrows {
   border-color: #334155 !important;
   color: #020617 !important;
 }
+
+/* =========================================================================
+   Phase 4: High-Performance Viewport Virtualization & Layout Containment
+   ========================================================================= */
+.dense-table-row,
+.flight-row-virtual {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 44px;
+}
+
+.flight-comfortable-row {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 68px;
+}
+
+.flight-grid-card {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 160px;
+}
+
