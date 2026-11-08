@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { ExternalLink, ArrowRight, Info } from 'lucide-react';
 import { EVENTS_CALENDAR, ACTIVE_EVENT_CONFIG, MonthCalendarData, getEventIcon } from './src/data/eventsData';
 
@@ -9,6 +9,18 @@ interface EventsPageProps {
 export const EventsPage: React.FC<EventsPageProps> = ({
   onNavigateToFlightsWithEvent,
 }) => {
+  const currentMonthNumber = useMemo(() => new Date().getMonth() + 1, []);
+
+  // Always show the current month first in the 12-month calendar rotation
+  const displayedMonths = useMemo(() => {
+    const currentIndex = EVENTS_CALENDAR.findIndex((m) => m.monthNumber === currentMonthNumber);
+    if (currentIndex === -1) return EVENTS_CALENDAR;
+    return [
+      ...EVENTS_CALENDAR.slice(currentIndex),
+      ...EVENTS_CALENDAR.slice(0, currentIndex),
+    ];
+  }, [currentMonthNumber]);
+
   return (
     <div className="space-y-6 pb-12 animate-in fade-in duration-300">
       {/* Header Banner - Theme-Aware Glass Panel */}
@@ -54,11 +66,16 @@ export const EventsPage: React.FC<EventsPageProps> = ({
 
       {/* 12-Month Responsive Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {EVENTS_CALENDAR.map((month: MonthCalendarData) => {
+        {displayedMonths.map((month: MonthCalendarData) => {
+          const isCurrentMonth = month.monthNumber === currentMonthNumber;
           return (
             <div
               key={month.monthNumber}
-              className="month-card rounded-3xl border border-black/[0.08] dark:border-white/[0.08] hover:border-[var(--border-active)] overflow-hidden shadow-xl flex flex-col transition-all group"
+              className={`month-card rounded-3xl border overflow-hidden shadow-xl flex flex-col transition-all group ${
+                isCurrentMonth
+                  ? 'border-cyan-500/60 dark:border-cyan-400/60 shadow-[0_0_20px_rgba(6,182,212,0.18)] ring-1 ring-cyan-500/40'
+                  : 'border-black/[0.08] dark:border-white/[0.08] hover:border-[var(--border-active)]'
+              }`}
             >
               {/* Top Banner Image: uncropped, 100% visible, sits cleanly at top of card (month name artwork already included) */}
               <div className="w-full aspect-[2/1] bg-slate-100 dark:bg-[#070c14] overflow-hidden relative border-b border-black/[0.06] dark:border-white/[0.08]">
@@ -73,6 +90,15 @@ export const EventsPage: React.FC<EventsPageProps> = ({
                     }
                   }}
                 />
+                {isCurrentMonth && (
+                  <div className="absolute top-3 right-3 z-10 flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-mono font-bold tracking-wider uppercase bg-cyan-600/95 dark:bg-cyan-500/95 text-white backdrop-blur-md shadow-lg border border-white/20">
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+                    </span>
+                    Current Month
+                  </div>
+                )}
               </div>
 
               {/* Events List for Month */}
