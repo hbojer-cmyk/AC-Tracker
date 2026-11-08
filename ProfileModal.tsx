@@ -39,24 +39,27 @@ export const ProfileAvatar: React.FC<ProfileAvatarProps> = ({
 }) => {
   const currentAvatar = avatar || DEFAULT_AVATAR;
   const isImage = isAvatarImage(currentAvatar);
+  const [imgError, setImgError] = React.useState(false);
 
-  if (isImage) {
+  React.useEffect(() => {
+    setImgError(false);
+  }, [currentAvatar]);
+
+  if (isImage && !imgError) {
     return (
       <img
         src={currentAvatar}
         alt={alt}
         className={`w-full h-full object-contain pointer-events-none drop-shadow-sm ${imgClassName}`}
         loading="lazy"
-        onError={(e) => {
-          (e.currentTarget as HTMLElement).style.display = 'none';
-        }}
+        onError={() => setImgError(true)}
       />
     );
   }
 
   return (
     <span className={`inline-flex items-center justify-center leading-none select-none ${className}`}>
-      {currentAvatar}
+      {isImage && imgError ? '✈️' : currentAvatar}
     </span>
   );
 };
@@ -107,6 +110,17 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
       setDeletingId(null);
     }
   }, [isOpen, initialMode]);
+
+  React.useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
@@ -179,8 +193,14 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] w-full max-w-xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+    <div
+      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-in fade-in duration-200"
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="bg-[var(--bg-card)] border border-[var(--border-subtle)] w-full max-w-xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+      >
         {/* Modal Header */}
         <div className="p-4 sm:p-5 border-b border-[var(--border-subtle)] flex items-center justify-between bg-[var(--bg-base)]/40">
           <div className="flex items-center gap-3">
@@ -437,9 +457,11 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                   <label className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">
                     Pilot Avatar Icon
                   </label>
-                  <div className="flex items-center p-0.5 rounded-lg bg-[var(--bg-base)] border border-[var(--border-subtle)] text-[11px]">
+                  <div role="tablist" aria-label="Avatar category" className="flex items-center p-0.5 rounded-lg bg-[var(--bg-base)] border border-[var(--border-subtle)] text-[11px]">
                     <button
                       type="button"
+                      role="tab"
+                      aria-selected={avatarTab === 'game'}
                       onClick={() => setAvatarTab('game')}
                       className={`px-2.5 py-0.5 rounded-md font-medium transition-all ${
                         avatarTab === 'game'
@@ -451,6 +473,8 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                     </button>
                     <button
                       type="button"
+                      role="tab"
+                      aria-selected={avatarTab === 'emoji'}
                       onClick={() => setAvatarTab('emoji')}
                       className={`px-2.5 py-0.5 rounded-md font-medium transition-all ${
                         avatarTab === 'emoji'
@@ -665,9 +689,11 @@ export const MigrationModal: React.FC<MigrationModalProps> = ({ isOpen, onMigrat
               <label className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">
                 Choose Avatar
               </label>
-              <div className="flex items-center p-0.5 rounded-lg bg-[var(--bg-base)] border border-[var(--border-subtle)] text-[11px]">
+              <div role="tablist" aria-label="Avatar category" className="flex items-center p-0.5 rounded-lg bg-[var(--bg-base)] border border-[var(--border-subtle)] text-[11px]">
                 <button
                   type="button"
+                  role="tab"
+                  aria-selected={avatarTab === 'game'}
                   onClick={() => setAvatarTab('game')}
                   className={`px-2 py-0.5 rounded font-medium transition-all ${
                     avatarTab === 'game'
@@ -679,6 +705,8 @@ export const MigrationModal: React.FC<MigrationModalProps> = ({ isOpen, onMigrat
                 </button>
                 <button
                   type="button"
+                  role="tab"
+                  aria-selected={avatarTab === 'emoji'}
                   onClick={() => setAvatarTab('emoji')}
                   className={`px-2 py-0.5 rounded font-medium transition-all ${
                     avatarTab === 'emoji'
