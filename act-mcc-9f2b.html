@@ -602,6 +602,7 @@
       <span class="header-badge">Mission Control</span>
     </div>
     <div class="header-right">
+      <button class="refresh-btn" style="background:rgba(16,185,129,0.15);border-color:rgba(16,185,129,0.4);color:var(--green);" onclick="pingActivePilot()">📡 Ping My Pilot</button>
       <button class="refresh-btn" onclick="refreshCurrentView()">↻ Refresh</button>
       <div class="header-time" id="live-clock">--:--:--</div>
     </div>
@@ -836,6 +837,67 @@
         fetchGlobalTelemetry();
       } else {
         loadLocalData();
+      }
+    }
+
+    async function pingActivePilot() {
+      try {
+        let profiles = [];
+        const raw = localStorage.getItem('act_profiles');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          profiles = Array.isArray(parsed) ? parsed : Object.values(parsed);
+        }
+        const activeId = localStorage.getItem('act_active_profile_id');
+        const active = profiles.find(p => p.meta?.id === activeId) || profiles[0];
+        if (!active) {
+          alert('No local profile found in this browser. Open AC-Tracker first to create or load one!');
+          return;
+        }
+
+        const ud = active.userData || {};
+        let totalFlights = 0, routesCount = 0;
+        Object.values(ud).forEach(e => {
+          if (e && e.count > 0) {
+            routesCount++;
+            totalFlights += e.count;
+          }
+        });
+
+        const history = active.starHistory || [];
+        const totalStars = history.length ? (history[history.length - 1].stars || 0) : 0;
+        const missionsCount = active.missions ? Object.keys(active.missions).length : 0;
+
+        const res = await fetch('/api/telemetry', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: active.meta.id,
+            name: active.meta.name || 'Anonymous Pilot',
+            avatar: active.meta.emoji || '✈️',
+            acCode: active.meta.acCode || '',
+            totalFlights,
+            totalStars,
+            routesCount,
+            missionsCount,
+            theme: active.prefs?.themeId || 'stealth-ghost',
+            density: active.prefs?.density || 'compact',
+            starMode: active.prefs?.starCountMode || 'cumulative',
+            features: ['flights', 'bookmarks', 'maps', 'airplanes', 'stats', 'missions', 'events'],
+            version: 'v2.9'
+          })
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          fetchGlobalTelemetry();
+        } else if (data.status === 'setup_needed') {
+          alert('Cloudflare has not yet finished deploying with the new KV binding. Please wait ~1-2 minutes for the deployment to finish and try again!');
+        } else {
+          alert('Ping response: ' + JSON.stringify(data));
+        }
+      } catch (err) {
+        alert('Ping error: ' + err.message);
       }
     }
 
