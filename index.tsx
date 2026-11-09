@@ -103,6 +103,7 @@ import {
 } from './flightUtils';
 import { ProfileModal, MigrationModal, ProfileAvatar } from './ProfileModal';
 import { GettingStartedModal } from './src/components/GettingStartedModal';
+import { sendTelemetryPing } from './telemetry';
 
 // --- App Version & Maintenance Tracker ---
 // NOTE: Always update APP_UPDATED_DATE whenever making changes in the app
@@ -1222,6 +1223,15 @@ export const ACTracker = () => {
       setShowWhatsNewModal(true);
     }
   }, [isLoaded]);
+
+  // Anonymous background fleet telemetry heartbeat (throttled)
+  useEffect(() => {
+    if (!isLoaded || !activeProfileId) return;
+    const active = profiles[activeProfileId];
+    if (active) {
+      sendTelemetryPing(active, APP_VERSION);
+    }
+  }, [isLoaded, activeProfileId, profiles]);
 
   // Cross-tab synchronization & storage error listener
   useEffect(() => {

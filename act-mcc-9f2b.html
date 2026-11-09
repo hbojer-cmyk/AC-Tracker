@@ -134,23 +134,53 @@
     }
 
     @keyframes ping {
-
-      0%,
-      100% {
-        opacity: 1;
-        transform: scale(1)
-      }
-
-      50% {
-        opacity: 0.6;
-        transform: scale(1.3)
-      }
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.6; transform: scale(1.3); }
     }
 
     .page-subtitle {
       color: var(--text-muted);
       font-size: 13px;
-      margin-bottom: 32px;
+      margin-bottom: 24px;
+    }
+
+    /* Tab switcher */
+    .scope-nav {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 28px;
+      background: rgba(10, 22, 50, 0.6);
+      padding: 5px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      width: fit-content;
+      backdrop-filter: blur(8px);
+    }
+
+    .scope-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 700;
+      padding: 8px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .scope-btn:hover {
+      color: var(--text);
+    }
+
+    .scope-btn.active {
+      background: var(--accent-soft);
+      color: var(--accent);
+      border-color: var(--border-bright);
+      box-shadow: 0 0 14px rgba(0, 229, 255, 0.15);
     }
 
     /* Section */
@@ -224,29 +254,12 @@
       margin-top: 4px;
     }
 
-    .kpi-amber .kpi-value {
-      color: var(--amber);
-    }
-
-    .kpi-amber {
-      border-color: rgba(245, 158, 11, 0.2);
-    }
-
-    .kpi-green .kpi-value {
-      color: var(--green);
-    }
-
-    .kpi-green {
-      border-color: rgba(16, 185, 129, 0.2);
-    }
-
-    .kpi-purple .kpi-value {
-      color: var(--purple);
-    }
-
-    .kpi-purple {
-      border-color: rgba(139, 92, 246, 0.2);
-    }
+    .kpi-amber .kpi-value { color: var(--amber); }
+    .kpi-amber { border-color: rgba(245, 158, 11, 0.2); }
+    .kpi-green .kpi-value { color: var(--green); }
+    .kpi-green { border-color: rgba(16, 185, 129, 0.2); }
+    .kpi-purple .kpi-value { color: var(--purple); }
+    .kpi-purple { border-color: rgba(139, 92, 246, 0.2); }
 
     /* Feature status grid */
     .feature-grid {
@@ -267,24 +280,10 @@
       transition: border-color 0.2s;
     }
 
-    .feat-card:hover {
-      border-color: var(--border-bright);
-    }
-
-    .feat-card.active {
-      border-color: rgba(16, 185, 129, 0.35);
-      background: rgba(16, 185, 129, 0.04);
-    }
-
-    .feat-card.partial {
-      border-color: rgba(245, 158, 11, 0.3);
-      background: rgba(245, 158, 11, 0.03);
-    }
-
-    .feat-card.unused {
-      border-color: rgba(100, 116, 139, 0.2);
-      opacity: 0.72;
-    }
+    .feat-card:hover { border-color: var(--border-bright); }
+    .feat-card.active { border-color: rgba(16, 185, 129, 0.35); background: rgba(16, 185, 129, 0.04); }
+    .feat-card.partial { border-color: rgba(245, 158, 11, 0.3); background: rgba(245, 158, 11, 0.03); }
+    .feat-card.unused { border-color: rgba(100, 116, 139, 0.2); opacity: 0.72; }
 
     .feat-top {
       display: flex;
@@ -302,9 +301,7 @@
       gap: 7px;
     }
 
-    .feat-icon {
-      font-size: 16px;
-    }
+    .feat-icon { font-size: 16px; }
 
     .status-pill {
       font-size: 10px;
@@ -317,23 +314,9 @@
       flex-shrink: 0;
     }
 
-    .pill-active {
-      background: rgba(16, 185, 129, 0.2);
-      color: var(--green);
-      border: 1px solid rgba(16, 185, 129, 0.35);
-    }
-
-    .pill-partial {
-      background: rgba(245, 158, 11, 0.18);
-      color: var(--amber);
-      border: 1px solid rgba(245, 158, 11, 0.35);
-    }
-
-    .pill-unused {
-      background: rgba(100, 116, 139, 0.15);
-      color: var(--text-muted);
-      border: 1px solid rgba(100, 116, 139, 0.25);
-    }
+    .pill-active { background: rgba(16, 185, 129, 0.2); color: var(--green); border: 1px solid rgba(16, 185, 129, 0.35); }
+    .pill-partial { background: rgba(245, 158, 11, 0.18); color: var(--amber); border: 1px solid rgba(245, 158, 11, 0.35); }
+    .pill-unused { background: rgba(100, 116, 139, 0.15); color: var(--text-muted); border: 1px solid rgba(100, 116, 139, 0.25); }
 
     .feat-bar-bg {
       width: 100%;
@@ -349,17 +332,9 @@
       transition: width 0.5s;
     }
 
-    .fill-green {
-      background: linear-gradient(90deg, #10b981, #34d399);
-    }
-
-    .fill-amber {
-      background: linear-gradient(90deg, #f59e0b, #fbbf24);
-    }
-
-    .fill-muted {
-      background: rgba(100, 116, 139, 0.3);
-    }
+    .fill-green { background: linear-gradient(90deg, #10b981, #34d399); }
+    .fill-amber { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+    .fill-muted { background: rgba(100, 116, 139, 0.3); }
 
     .feat-detail {
       font-size: 11px;
@@ -418,13 +393,14 @@
       background: var(--panel);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      overflow: hidden;
+      overflow-x: auto;
       backdrop-filter: blur(10px);
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
+      min-width: 700px;
     }
 
     thead th {
@@ -445,13 +421,8 @@
       transition: background 0.15s;
     }
 
-    tbody tr:last-child {
-      border-bottom: none;
-    }
-
-    tbody tr:hover {
-      background: rgba(0, 229, 255, 0.03);
-    }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: rgba(0, 229, 255, 0.03); }
 
     td {
       padding: 11px 14px;
@@ -496,197 +467,64 @@
       border-radius: 4px;
     }
 
-    /* Feature matrix table */
-    .matrix-wrap {
-      background: var(--panel);
-      border: 1px solid var(--border);
+    /* Setup Banner */
+    .setup-banner {
+      background: rgba(10, 22, 50, 0.9);
+      border: 1px solid rgba(0, 229, 255, 0.35);
       border-radius: var(--radius);
-      overflow: auto;
-      backdrop-filter: blur(10px);
+      padding: 24px;
+      margin-bottom: 28px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 0 20px rgba(0, 229, 255, 0.08);
     }
 
-    .matrix-wrap table {
-      min-width: 700px;
+    .setup-banner-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
     }
 
-    .matrix-wrap thead th {
-      text-align: center;
-    }
-
-    .matrix-wrap thead th:first-child {
-      text-align: left;
-      min-width: 160px;
-    }
-
-    .matrix-wrap td {
-      text-align: center;
-    }
-
-    .matrix-wrap td:first-child {
-      text-align: left;
-      font-weight: 600;
+    .setup-banner-desc {
+      font-size: 13px;
       color: var(--text-dim);
-      font-size: 12px;
+      line-height: 1.6;
+      margin-bottom: 18px;
     }
 
-    .check {
-      font-size: 14px;
-    }
-
-    .check-yes {
-      color: var(--green);
-    }
-
-    .check-partial {
-      color: var(--amber);
-    }
-
-    .check-no {
-      color: rgba(100, 116, 139, 0.4);
-    }
-
-    /* Storage bar */
-    .storage-wrap {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 18px 20px;
-      backdrop-filter: blur(10px);
-    }
-
-    .storage-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
-    }
-
-    .storage-bar-bg {
-      width: 100%;
-      height: 8px;
-      background: rgba(255, 255, 255, 0.08);
-      border-radius: 4px;
-      overflow: hidden;
-    }
-
-    .storage-bar-fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--accent), var(--purple));
-      border-radius: 4px;
-      transition: width 0.6s cubic-bezier(.4, 0, .2, 1);
-    }
-
-    /* Traffic cards */
-    .traffic-grid {
+    .setup-steps {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-      gap: 14px;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
     }
 
-    .traffic-card {
-      background: var(--panel);
+    .setup-step-card {
+      background: rgba(5, 9, 20, 0.6);
       border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 18px 20px;
-      backdrop-filter: blur(10px);
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      cursor: pointer;
-      transition: border-color 0.2s, transform 0.15s;
-    }
-
-    .traffic-card:hover {
-      border-color: var(--border-bright);
-      transform: translateY(-2px);
-    }
-
-    .traffic-card-header {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .traffic-icon {
-      width: 36px;
-      height: 36px;
       border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-      flex-shrink: 0;
+      padding: 14px;
     }
 
-    .icon-gh {
-      background: rgba(139, 92, 246, 0.2);
-      border: 1px solid rgba(139, 92, 246, 0.3);
-    }
-
-    .icon-cf {
-      background: rgba(245, 158, 11, 0.2);
-      border: 1px solid rgba(245, 158, 11, 0.3);
-    }
-
-    .icon-cf2 {
-      background: rgba(0, 229, 255, 0.1);
-      border: 1px solid rgba(0, 229, 255, 0.2);
-    }
-
-    .traffic-title {
+    .setup-step-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
       font-weight: 700;
-      font-size: 14px;
-      color: var(--text);
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 6px;
     }
 
-    .traffic-desc {
+    .setup-step-text {
       font-size: 12px;
-      color: var(--text-muted);
+      color: var(--text);
       line-height: 1.5;
     }
 
-    .traffic-link {
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--accent);
-      text-decoration: none;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      margin-top: 4px;
-    }
-
-    .traffic-link:hover {
-      text-decoration: underline;
-    }
-
-    .tbadge {
-      font-size: 10px;
-      font-weight: 700;
-      padding: 2px 7px;
-      border-radius: 20px;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-    }
-
-    .badge-gh {
-      background: var(--purple-soft);
-      color: var(--purple);
-      border: 1px solid rgba(139, 92, 246, 0.3);
-    }
-
-    .badge-cf {
-      background: var(--amber-soft);
-      color: var(--amber);
-      border: 1px solid rgba(245, 158, 11, 0.3);
-    }
-
-    .badge-live {
-      background: var(--green-soft);
-      color: var(--green);
-      border: 1px solid rgba(16, 185, 129, 0.3);
-    }
-
+    /* Buttons */
     .refresh-btn {
       background: var(--accent-soft);
       border: 1px solid var(--border-bright);
@@ -746,25 +584,11 @@
     }
 
     @media (max-width:640px) {
-      .header {
-        padding: 0 16px;
-      }
-
-      .main {
-        padding: 24px 16px 60px;
-      }
-
-      .kpi-grid {
-        grid-template-columns: 1fr 1fr;
-      }
-
-      .feature-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .traffic-grid {
-        grid-template-columns: 1fr;
-      }
+      .header { padding: 0 16px; }
+      .main { padding: 24px 16px 60px; }
+      .kpi-grid { grid-template-columns: 1fr 1fr; }
+      .feature-grid { grid-template-columns: 1fr; }
+      .setup-steps { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -778,7 +602,7 @@
       <span class="header-badge">Mission Control</span>
     </div>
     <div class="header-right">
-      <button class="refresh-btn" onclick="loadData()">↻ Refresh</button>
+      <button class="refresh-btn" onclick="refreshCurrentView()">↻ Refresh</button>
       <div class="header-time" id="live-clock">--:--:--</div>
     </div>
   </div>
@@ -787,17 +611,65 @@
 
     <div class="page-title">
       <div class="radar-dot"></div>
-      <h1>Owner Dashboard</h1>
+      <h1 id="view-title">Global Fleet Telemetry</h1>
     </div>
-    <p class="page-subtitle">Local-storage profile analytics · Feature adoption · Traffic sources</p>
+    <p class="page-subtitle" id="view-subtitle">Live worldwide player metrics · Serverless cloud telemetry · Real-time feature adoption</p>
+
+    <!-- Scope Tabs: Global vs Local -->
+    <div class="scope-nav">
+      <button class="scope-btn active" id="tab-global" onclick="switchScope('global')">
+        <span>🌍</span> Global Fleet (Worldwide)
+        <span class="status-pill pill-active" id="global-pill">Cloud</span>
+      </button>
+      <button class="scope-btn" id="tab-local" onclick="switchScope('local')">
+        <span>💻</span> This Browser (Local)
+      </button>
+    </div>
+
+    <!-- Global Setup Banner (Shown if KV is not yet bound) -->
+    <div id="global-setup-banner" style="display:none;" class="setup-banner">
+      <div class="setup-banner-title">
+        <span>⚡</span> Cloudflare KV Telemetry Setup Required
+      </div>
+      <p class="setup-banner-desc">
+        The backend API function (<code>/api/telemetry</code>) is deployed and ready, but requires a free Cloudflare KV namespace binding to store global player heartbeats. Follow these 2 quick steps in your Cloudflare dashboard:
+      </p>
+      <div class="setup-steps">
+        <div class="setup-step-card">
+          <div class="setup-step-num">Step 1 — Create KV Namespace</div>
+          <div class="setup-step-text">
+            Go to <strong>Cloudflare Dashboard → Storage &amp; Databases → KV</strong>.<br>
+            Click <strong>Create a namespace</strong> and name it <code>AC_TELEMETRY</code>.
+          </div>
+        </div>
+        <div class="setup-step-card">
+          <div class="setup-step-num">Step 2 — Bind Variable</div>
+          <div class="setup-step-text">
+            Go to <strong>Workers &amp; Pages → ac-tracker → Settings → Functions</strong>.<br>
+            Scroll to <strong>KV namespace bindings</strong> → Click <strong>Add binding</strong>:<br>
+            • Variable name: <code>TELEMETRY_KV</code><br>
+            • KV namespace: <code>AC_TELEMETRY</code>
+          </div>
+        </div>
+        <div class="setup-step-card">
+          <div class="setup-step-num">Step 3 — Re-check Connection</div>
+          <div class="setup-step-text">
+            Once saved, click the test button below to verify global player tracking is live!
+            <div style="margin-top:10px;">
+              <button class="refresh-btn" onclick="fetchGlobalTelemetry()">⚡ Verify Connection Now</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <!-- KPIs -->
     <div class="kpi-grid" id="kpi-grid"></div>
 
-    <!-- ═══ FEATURE STATUS ═══ -->
+    <!-- ═══ FEATURE ADOPTION SECTION ═══ -->
     <div class="section">
       <div class="section-header">
-        <span class="section-title">🛰️ Feature Adoption — All Profiles</span>
+        <span class="section-title" id="feature-section-title">🛰️ Global Feature Adoption — All Players</span>
         <div class="section-line"></div>
       </div>
       <div class="feature-grid" id="feature-grid"></div>
@@ -809,135 +681,97 @@
         <span class="section-title">📊 Usage Rate by Feature</span>
         <div class="section-line"></div>
       </div>
-      <div
-        style="background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:20px 24px;backdrop-filter:blur(10px);">
+      <div style="background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:20px 24px;backdrop-filter:blur(10px);">
         <div id="feature-bars"></div>
       </div>
-    </div>
-
-    <!-- ═══ PER-PROFILE MATRIX ═══ -->
-    <div class="section">
-      <div class="section-header">
-        <span class="section-title">🧑‍✈️ Feature Matrix — Per Pilot</span>
-        <div class="section-line"></div>
-      </div>
-      <div class="matrix-wrap" id="matrix-wrap"></div>
     </div>
 
     <!-- ═══ PILOT ROSTER ═══ -->
     <div class="section">
       <div class="section-header">
-        <span class="section-title">✈️ Pilot Profiles</span>
+        <span class="section-title" id="roster-section-title">✈️ Worldwide Pilot Roster</span>
         <div class="section-line"></div>
       </div>
       <div class="pilots-table-wrap" id="pilots-container"></div>
     </div>
 
-    <!-- ═══ STORAGE ═══ -->
-    <div class="section">
+    <!-- ═══ LOCALSTORAGE DIAGNOSTICS (Shown in local tab) ═══ -->
+    <div class="section" id="storage-section" style="display:none;">
       <div class="section-header">
-        <span class="section-title">💾 localStorage Usage</span>
+        <span class="section-title">💾 localStorage Diagnostics</span>
         <div class="section-line"></div>
       </div>
-      <div class="storage-wrap">
-        <div class="storage-row">
+      <div style="background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;backdrop-filter:blur(10px);">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
           <span style="font-size:13px;font-weight:600;color:var(--text-dim)">AC-Tracker Data (act_* keys)</span>
-          <span id="storage-size"
-            style="font-size:12px;font-family:'JetBrains Mono','Consolas',monospace;color:var(--text-muted)">— KB</span>
+          <span id="storage-size" style="font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--text-muted)">— KB</span>
         </div>
-        <div class="storage-bar-bg">
-          <div class="storage-bar-fill" id="storage-fill" style="width:0%"></div>
+        <div style="width:100%;height:8px;background:rgba(255,255,255,0.08);border-radius:4px;overflow:hidden;">
+          <div id="storage-fill" style="height:100%;background:linear-gradient(90deg,var(--accent),var(--purple));border-radius:4px;width:0%;transition:width 0.6s;"></div>
         </div>
-        <p style="font-size:11px;color:var(--text-muted);margin-top:8px">Approximate data size (UTF-16 estimate).
-          Browser localStorage limit ~5 MB.</p>
-        <div style="margin-top:14px; padding-top:12px; border-top:1px solid rgba(0,229,255,0.1); font-size:11px; font-family:'JetBrains Mono','Consolas',monospace; color:var(--text-muted); line-height:1.6;" id="storage-diagnostics">
-          <!-- Populated by JS -->
-        </div>
+        <p style="font-size:11px;color:var(--text-muted);margin-top:8px">Browser localStorage limit ~5 MB.</p>
+        <div style="margin-top:14px;padding-top:12px;border-top:1px solid rgba(0,229,255,0.1);font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--text-muted);line-height:1.6;" id="storage-diagnostics"></div>
       </div>
     </div>
 
-    <!-- ═══ TRAFFIC SOURCES ═══ -->
+    <!-- ═══ EXTERNAL TRAFFIC CARDS ═══ -->
     <div class="section">
       <div class="section-header">
-        <span class="section-title">📡 Live Player Traffic — External Analytics</span>
+        <span class="section-title">📡 External Cloudflare &amp; GitHub Analytics</span>
         <div class="section-line"></div>
       </div>
-      <p style="font-size:12px;color:var(--text-muted);margin-bottom:14px;">AC-Tracker is localStorage-only — no server
-        collects visits. Use these platforms for real visitor counts.</p>
-      <div class="traffic-grid">
-        <div class="traffic-card" onclick="window.open('https://github.com','_blank')">
-          <div class="traffic-card-header">
-            <div class="traffic-icon icon-gh">🐙</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;">
+        <div style="background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;cursor:pointer;display:flex;flex-direction:column;gap:10px;" onclick="window.open('https://dash.cloudflare.com','_blank')">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:36px;height:36px;border-radius:10px;background:rgba(245,158,11,0.2);border:1px solid rgba(245,158,11,0.3);display:flex;align-items:center;justify-content:center;font-size:18px;">🌩️</div>
             <div>
-              <div class="traffic-title">GitHub Traffic Insights</div><span class="tbadge badge-gh">GitHub Pages</span>
+              <div style="font-weight:700;font-size:14px;color:var(--text);">Cloudflare Pages Analytics</div>
+              <span class="status-pill pill-partial" style="font-size:9px;">Live CDN</span>
             </div>
           </div>
-          <p class="traffic-desc">Views &amp; unique visitors over 14 days. Navigate to your repo → <strong>Insights →
-              Traffic</strong>.</p>
-          <a class="traffic-link" href="https://github.com" target="_blank" rel="noopener">Open GitHub →</a>
+          <p style="font-size:12px;color:var(--text-muted);line-height:1.5;">Unique visitors, total requests, bandwidth, and geographic breakdown for <strong>ac-tracker.pages.dev</strong>.</p>
+          <span style="font-size:11px;color:var(--accent);font-weight:600;margin-top:auto;">Open Cloudflare Dashboard →</span>
         </div>
-        <div class="traffic-card" onclick="window.open('https://dash.cloudflare.com','_blank')">
-          <div class="traffic-card-header">
-            <div class="traffic-icon icon-cf">🌩️</div>
+
+        <div style="background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;cursor:pointer;display:flex;flex-direction:column;gap:10px;" onclick="window.open('https://github.com/hbojer-cmyk/AC-Tracker/graphs/traffic','_blank')">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:36px;height:36px;border-radius:10px;background:rgba(139,92,246,0.2);border:1px solid rgba(139,92,246,0.3);display:flex;align-items:center;justify-content:center;font-size:18px;">🐙</div>
             <div>
-              <div class="traffic-title">Cloudflare Pages Analytics</div><span class="tbadge badge-cf">Cloudflare</span>
+              <div style="font-weight:700;font-size:14px;color:var(--text);">GitHub Traffic Insights</div>
+              <span class="status-pill pill-active" style="font-size:9px;background:var(--purple-soft);color:var(--purple);border-color:rgba(139,92,246,0.3);">Repo Traffic</span>
             </div>
           </div>
-          <p class="traffic-desc">Real-time views, unique visitors, geographic &amp; referral breakdown for
-            <strong>ac-tracker.pages.dev</strong>.</p>
-          <a class="traffic-link" href="https://dash.cloudflare.com" target="_blank" rel="noopener">Open Dashboard →</a>
-        </div>
-        <div class="traffic-card" onclick="window.open('https://umami.is','_blank')">
-          <div class="traffic-card-header">
-            <div class="traffic-icon icon-cf2">📊</div>
-            <div>
-              <div class="traffic-title">Add Umami Analytics</div><span class="tbadge badge-live">Free · Open
-                Source</span>
-            </div>
-          </div>
-          <p class="traffic-desc">Lightweight privacy-friendly analytics script — tracks sessions, page views &amp;
-            referrals with zero data selling.</p>
-          <a class="traffic-link" href="https://umami.is/docs" target="_blank" rel="noopener">Setup Guide →</a>
+          <p style="font-size:12px;color:var(--text-muted);line-height:1.5;">14-day views, git clones, and visitor referrers on your GitHub repository.</p>
+          <span style="font-size:11px;color:var(--accent);font-weight:600;margin-top:auto;">Open GitHub Insights →</span>
         </div>
       </div>
     </div>
 
     <div class="info-box">
-      <div class="info-box-title">🔒 Owner Access Only</div>
-      <p>This page is not linked from the main app. Access it at <code style="color:var(--accent)">/admin.html</code>.
-        Set <code style="color:var(--accent)">const OWNER_PIN</code> in the script to lock it with <code
-          style="color:var(--accent)">?pin=YOUR_PIN</code>.</p>
+      <div class="info-box-title">🔒 Mission Control Access</div>
+      <p>This page is private to you at <code style="color:var(--accent)">/act-mcc-9f2b.html</code>. It queries <code>/api/telemetry</code> to aggregate global fleet telemetry while keeping individual player data private and anonymous.</p>
     </div>
 
   </div>
 
-  <div class="footer">AC-Tracker Mission Control · Owner-only view · Read-only from localStorage · <span
-      id="footer-time"></span></div>
+  <div class="footer">AC-Tracker Mission Control · Serverless Telemetry · <span id="footer-time"></span></div>
 
   <script>
-    // ─── Optional PIN lock ───────────────────────────────────
-    const OWNER_PIN = ''; // Set e.g. 'act2026' to require ?pin=act2026 in URL
-    if (OWNER_PIN) {
-      const p = new URLSearchParams(location.search);
-      if (p.get('pin') !== OWNER_PIN) {
-        document.body.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;flex-direction:column;gap:16px"><div style="font-size:48px">🔒</div><div style="font-size:18px;font-weight:700;color:#00e5ff">Mission Control — Restricted</div><div style="font-size:13px;color:#64748b">Access requires the owner PIN in the URL.</div></div>`;
-        throw new Error('Unauthorized');
-      }
-    }
+    let currentScope = 'global';
 
-    // ─── Live clock ──────────────────────────────────────────
+    // ─── Live Clock ──────────────────────────────────────────
     function updateClock() {
       const t = new Date().toLocaleTimeString('en-GB', { hour12: false });
       const el = document.getElementById('live-clock');
       const ft = document.getElementById('footer-time');
       if (el) el.textContent = t;
-      if (ft) ft.textContent = 'Last refreshed: ' + new Date().toLocaleString('en-GB');
+      if (ft) ft.textContent = 'Refreshed: ' + new Date().toLocaleString('en-GB');
     }
     updateClock();
     setInterval(updateClock, 1000);
 
     // ─── Helpers ─────────────────────────────────────────────
-    const mono = (s) => `<span style="font-family:'JetBrains Mono','Consolas',monospace">${s}</span>`;
+    const mono = (s) => `<span style="font-family:'JetBrains Mono',monospace">${s}</span>`;
     function relativeTime(ts) {
       if (!ts) return '—';
       const diff = Date.now() - ts;
@@ -957,252 +791,249 @@
       return v.startsWith('icons/') || /\.(png|jpg|webp|svg)$/i.test(v);
     }
 
-    // ─── Feature definitions ──────────────────────────────────
-    // Each returns { used: bool, partial: bool, detail: string, value: number 0-1 }
-    const FEATURES = [
-      {
-        key: 'flights',
-        label: 'Flight Deck',
-        icon: '✈️',
-        desc: 'Core feature — routes with flight counts > 0',
-        check: (p) => {
-          const ud = p.userData || {};
-          const count = Object.values(ud).reduce((s, e) => s + (e.count || 0), 0);
-          return { used: count > 0, partial: false, count, label: `${count.toLocaleString()} flights logged` };
-        }
-      },
-      {
-        key: 'bookmarks',
-        label: 'Bookmarks',
-        icon: '🔖',
-        desc: 'Routes starred/bookmarked (isCustomList)',
-        check: (p) => {
-          const ud = p.userData || {};
-          const count = Object.values(ud).filter(e => e.isCustomList).length;
-          return { used: count > 0, partial: false, count, label: `${count} route${count !== 1 ? 's' : ''} bookmarked` };
-        }
-      },
-      {
-        key: 'maps',
-        label: 'Map Inventory',
-        icon: '🗺️',
-        desc: 'Maps view enabled & map counts tracked',
-        check: (p) => {
-          const enabled = p.prefs?.enabledViews?.maps !== false;
-          const ud = p.userData || {};
-          const hasMapData = Object.values(ud).some(e => (e.maps || 0) > 0);
-          return { used: enabled && hasMapData, partial: enabled && !hasMapData, count: 0, label: enabled ? (hasMapData ? 'Enabled + map counts tracked' : 'Enabled but no map counts') : 'Disabled in nav' };
-        }
-      },
-      {
-        key: 'airplanes',
-        label: 'Fleet Hangar',
-        icon: '🛩️',
-        desc: 'Aircraft added to the hangar',
-        check: (p) => {
-          const enabled = p.prefs?.enabledViews?.airplanes !== false;
-          const count = Array.isArray(p.airplanes) ? p.airplanes.length : 0;
-          return { used: enabled && count > 0, partial: enabled && count === 0, count, label: enabled ? `${count} aircraft in hangar` : 'Disabled in nav' };
-        }
-      },
-      {
-        key: 'stats',
-        label: 'Telemetry & Stats',
-        icon: '📈',
-        desc: 'Stats view enabled & star history recorded',
-        check: (p) => {
-          const enabled = p.prefs?.enabledViews?.stats !== false;
-          const histLen = (p.starHistory || []).length;
-          return { used: enabled && histLen > 1, partial: enabled && histLen <= 1, count: histLen, label: enabled ? `${histLen} telemetry snapshot${histLen !== 1 ? 's' : ''}` : 'Disabled in nav' };
-        }
-      },
-      {
-        key: 'missions',
-        label: 'Missions Depot',
-        icon: '🏛️',
-        desc: 'Mission items counted (> 0)',
-        check: (p) => {
-          const enabled = p.prefs?.enabledViews?.missions !== false;
-          const m = p.missions || {};
-          const hasData = Object.values(m).some(items => Object.values(items || {}).some(v => v > 0));
-          return { used: enabled && hasData, partial: enabled && !hasData, count: 0, label: enabled ? (hasData ? 'Active mission tracking' : 'Enabled, no items counted') : 'Disabled in nav' };
-        }
-      },
-      {
-        key: 'events',
-        label: 'Events Calendar',
-        icon: '📅',
-        desc: 'Events tab enabled in navigation',
-        check: (p) => {
-          const enabled = p.prefs?.enabledViews?.events !== false;
-          return { used: enabled, partial: false, count: 0, label: enabled ? 'Enabled in nav' : 'Disabled in nav' };
-        }
-      },
-      {
-        key: 'starOffsets',
-        label: 'Star Sync Offsets',
-        icon: '⭐',
-        desc: 'Manual in-game star sync offsets set',
-        check: (p) => {
-          const o = p.starOffsets || {};
-          const total = (o.ace || 0) + (o.captain || 0) + (o.expert || 0) + (o.master || 0) + (o.specialist || 0);
-          return { used: total > 0, partial: false, count: total, label: total > 0 ? `+${total} total offset stars` : 'No offsets configured' };
-        }
-      },
-      {
-        key: 'starMode',
-        label: 'Alt. Star Mode',
-        icon: '🔢',
-        desc: 'Non-default star count mode (exact or offset)',
-        check: (p) => {
-          const mode = p.prefs?.starCountMode || 'cumulative';
-          const changed = mode !== 'cumulative';
-          return { used: changed, partial: false, count: 0, label: `Mode: ${mode}` };
-        }
-      },
-      {
-        key: 'customTheme',
-        label: 'Custom Theme',
-        icon: '🎨',
-        desc: 'Non-default theme selected',
-        check: (p) => {
-          const t = p.prefs?.themeId || 'stealth-ghost';
-          const isDefault = t === 'stealth-ghost';
-          return { used: !isDefault, partial: false, count: 0, label: `Theme: ${t}` };
-        }
-      },
-      {
-        key: 'customLogo',
-        label: 'Custom Logo',
-        icon: '🏷️',
-        desc: 'Non-default brand logo selected',
-        check: (p) => {
-          const l = p.prefs?.logoId || 'opt1';
-          const isDefault = l === 'opt1';
-          return { used: !isDefault, partial: false, count: 0, label: `Logo: ${l}` };
-        }
-      },
-      {
-        key: 'gridView',
-        label: 'Grid View',
-        icon: '⊞',
-        desc: 'Grid set as default flight deck layout',
-        check: (p) => {
-          const v = p.prefs?.defaultFlightView || 'list';
-          return { used: v === 'grid', partial: false, count: 0, label: `Default: ${v} view` };
-        }
-      },
-      {
-        key: 'compactDensity',
-        label: 'Compact Density',
-        icon: '📏',
-        desc: 'Compact row density enabled',
-        check: (p) => {
-          const d = p.prefs?.density || 'comfortable';
-          return { used: d === 'compact', partial: false, count: 0, label: `Density: ${d}` };
-        }
-      },
-      {
-        key: 'focusMode',
-        label: 'Focus Mode',
-        icon: '🎯',
-        desc: 'Focus mode (collapsed header) enabled',
-        check: (p) => {
-          const f = p.prefs?.focusMode || false;
-          return { used: f, partial: false, count: 0, label: f ? 'Focus mode ON' : 'Off' };
-        }
-      },
-      {
-        key: 'recentFlights',
-        label: 'Recent Flights Bar',
-        icon: '⏱️',
-        desc: 'Recently Flown quick-jump strip enabled',
-        check: (p) => {
-          const on = p.prefs?.showRecentFlights !== false;
-          return { used: on, partial: false, count: 0, label: on ? 'Shown' : 'Hidden' };
-        }
-      },
-      {
-        key: 'eventBanner',
-        label: 'Event Banner',
-        icon: '📣',
-        desc: 'Live event banner shown on Flight Deck',
-        check: (p) => {
-          const on = p.prefs?.showActiveEventBanner !== false;
-          return { used: on, partial: false, count: 0, label: on ? 'Shown' : 'Hidden' };
-        }
-      },
-      {
-        key: 'gettingStarted',
-        label: 'Getting Started',
-        icon: '💡',
-        desc: 'Onboarding guide completed',
-        check: (p) => {
-          const seen = p.prefs?.hasSeenGettingStarted || false;
-          return { used: seen, partial: false, count: 0, label: seen ? 'Guide completed' : 'Not opened yet' };
-        }
-      },
-      {
-        key: 'multiProfile',
-        label: 'Multi-Profile',
-        icon: '👥',
-        desc: 'More than one pilot profile created',
-        check: (_p, allProfiles) => {
-          const n = allProfiles.length;
-          return { used: n > 1, partial: false, count: n, label: `${n} profile${n !== 1 ? 's' : ''} total` };
-        }
-      },
-    ];
+    const FEATURE_METADATA = {
+      flights: { name: 'Flight Deck', icon: '✈️', desc: 'Core logging — routes with flights recorded' },
+      bookmarks: { name: 'Bookmarks', icon: '🔖', desc: 'Custom prioritized route list' },
+      maps: { name: 'Map Inventory', icon: '🗺️', desc: 'Tracking active alliance/adventure map stock' },
+      airplanes: { name: 'Fleet Hangar', icon: '🛩️', desc: 'Owned aircraft in fleet hangar' },
+      stats: { name: 'Telemetry & Stats', icon: '📈', desc: 'Star velocity snapshots & telemetry history' },
+      missions: { name: 'Missions Depot', icon: '🏛️', desc: 'Item counters for prize landmarks' },
+      events: { name: 'Events Calendar', icon: '📅', desc: '12-month event schedule rotation' },
+      star_offsets: { name: 'Star Sync Offsets', icon: '⭐', desc: 'Manual in-game milestone offsets calibrated' },
+      custom_theme: { name: 'Custom Theme', icon: '🎨', desc: 'Selected non-default flight deck skin' },
+      custom_logo: { name: 'Custom Logo', icon: '🏷️', desc: 'Custom flight deck brand insignia' },
+      grid_view: { name: 'Grid View', icon: '⊞', desc: 'Compact grid flight cards layout' },
+      compact_density: { name: 'Compact Density', icon: '📏', desc: 'High-density flight table rows' },
+      focus_mode: { name: 'Focus Mode', icon: '🎯', desc: 'Minimalist cockpit header mode' },
+      getting_started: { name: 'Getting Started Guide', icon: '💡', desc: 'Pilot orientation briefing completed' },
+    };
 
-    // ─── Main data loader ─────────────────────────────────────
-    function loadData() {
+    // ─── Scope Switcher ──────────────────────────────────────
+    function switchScope(scope) {
+      currentScope = scope;
+      document.getElementById('tab-global').classList.toggle('active', scope === 'global');
+      document.getElementById('tab-local').classList.toggle('active', scope === 'local');
+      document.getElementById('storage-section').style.display = scope === 'local' ? 'block' : 'none';
+
+      if (scope === 'global') {
+        document.getElementById('view-title').textContent = 'Global Fleet Telemetry';
+        document.getElementById('view-subtitle').textContent = 'Live worldwide player metrics · Serverless cloud telemetry · Real-time feature adoption';
+        document.getElementById('feature-section-title').textContent = '🛰️ Global Feature Adoption — All Players Worldwide';
+        document.getElementById('roster-section-title').textContent = '✈️ Worldwide Pilot Roster';
+        fetchGlobalTelemetry();
+      } else {
+        document.getElementById('view-title').textContent = 'Local Browser Telemetry';
+        document.getElementById('view-subtitle').textContent = 'Local-storage profiles · Single-browser diagnostic inspect';
+        document.getElementById('feature-section-title').textContent = '🛰️ Local Feature Adoption — Profiles in This Browser';
+        document.getElementById('roster-section-title').textContent = '✈️ Local Pilot Profiles';
+        document.getElementById('global-setup-banner').style.display = 'none';
+        loadLocalData();
+      }
+    }
+
+    function refreshCurrentView() {
+      if (currentScope === 'global') {
+        fetchGlobalTelemetry();
+      } else {
+        loadLocalData();
+      }
+    }
+
+    // ─── Global Fleet Telemetry Loader ──────────────────────
+    async function fetchGlobalTelemetry() {
+      const banner = document.getElementById('global-setup-banner');
+      try {
+        const res = await fetch('/api/telemetry');
+        const data = await res.json();
+
+        if (data.status === 'setup_needed') {
+          banner.style.display = 'block';
+          renderSetupPlaceholder();
+          return;
+        }
+
+        banner.style.display = 'none';
+        renderGlobalData(data);
+      } catch (err) {
+        console.warn('API error, showing setup banner:', err);
+        banner.style.display = 'block';
+        renderSetupPlaceholder();
+      }
+    }
+
+    function renderSetupPlaceholder() {
+      // Show informative placeholder while KV is being configured
+      document.getElementById('kpi-grid').innerHTML = `
+        <div class="kpi-card">
+          <div class="kpi-label">🌍 Cloud Telemetry</div>
+          <div class="kpi-value" style="font-size:20px;color:var(--amber);">Setup Needed</div>
+          <div class="kpi-sub">Link TELEMETRY_KV in Cloudflare</div>
+        </div>
+        <div class="kpi-card kpi-green">
+          <div class="kpi-label">⚡ API Endpoint</div>
+          <div class="kpi-value" style="font-size:20px;color:var(--green);">Ready</div>
+          <div class="kpi-sub">/api/telemetry deployed</div>
+        </div>
+        <div class="kpi-card kpi-purple">
+          <div class="kpi-label">🛡️ Privacy</div>
+          <div class="kpi-value" style="font-size:20px;color:var(--purple);">100% Anon</div>
+          <div class="kpi-sub">No personal data collected</div>
+        </div>
+      `;
+
+      document.getElementById('feature-grid').innerHTML = `
+        <div class="empty" style="grid-column:1/-1;">
+          Connect Cloudflare KV above to begin seeing real-time feature adoption percentages across all players worldwide!
+        </div>
+      `;
+      document.getElementById('feature-bars').innerHTML = `<div class="empty">Waiting for KV telemetry binding.</div>`;
+      document.getElementById('pilots-container').innerHTML = `<div class="empty">Worldwide pilot roster will populate automatically once KV is connected.</div>`;
+    }
+
+    function renderGlobalData(data) {
+      const stats = data.stats || {};
+      const pilots = data.pilots || [];
+
+      // KPIs
+      document.getElementById('kpi-grid').innerHTML = `
+        <div class="kpi-card">
+          <div class="kpi-label">🌍 Global Pilots</div>
+          <div class="kpi-value">${stats.totalPilots || pilots.length}</div>
+          <div class="kpi-sub">registered worldwide</div>
+        </div>
+        <div class="kpi-card kpi-green">
+          <div class="kpi-label">🟢 Active (24h)</div>
+          <div class="kpi-value">${stats.activeToday || 0}</div>
+          <div class="kpi-sub">${stats.active7d || 0} active past 7 days</div>
+        </div>
+        <div class="kpi-card kpi-amber">
+          <div class="kpi-label">✈️ Global Flights</div>
+          <div class="kpi-value">${(stats.totalFlights || 0).toLocaleString()}</div>
+          <div class="kpi-sub">logged worldwide</div>
+        </div>
+        <div class="kpi-card kpi-purple">
+          <div class="kpi-label">⭐ Global Stars</div>
+          <div class="kpi-value">${(stats.totalStars || 0).toLocaleString()}</div>
+          <div class="kpi-sub">earned worldwide</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">🕐 Last Signal</div>
+          <div class="kpi-value" style="font-size:18px;line-height:1.4">${pilots.length && pilots[0].lastSeen ? relativeTime(pilots[0].lastSeen) : '—'}</div>
+          <div class="kpi-sub">${pilots.length && pilots[0].lastSeen ? fmtDate(pilots[0].lastSeen) : 'No signals yet'}</div>
+        </div>
+      `;
+
+      // Feature adoption
+      const adoption = stats.featureAdoption || {};
+      const totalPilots = stats.totalPilots || pilots.length || 1;
+
+      const featEntries = Object.entries(FEATURE_METADATA).map(([key, meta]) => {
+        const pct = adoption[key] || 0;
+        const count = stats.featureCounts ? (stats.featureCounts[key] || 0) : Math.round((pct / 100) * totalPilots);
+        return { key, meta, pct, count };
+      });
+
+      // Feature cards
+      document.getElementById('feature-grid').innerHTML = featEntries.map(({ meta, pct, count }) => {
+        let statusClass = pct >= 50 ? 'active' : pct > 0 ? 'partial' : 'unused';
+        let pillClass = pct >= 50 ? 'pill-active' : pct > 0 ? 'pill-partial' : 'pill-unused';
+        let barClass = pct >= 50 ? 'fill-green' : pct > 0 ? 'fill-amber' : 'fill-muted';
+
+        return `
+          <div class="feat-card ${statusClass}">
+            <div class="feat-top">
+              <div class="feat-name"><span class="feat-icon">${meta.icon}</span>${meta.name}</div>
+              <span class="status-pill ${pillClass}">${pct}%</span>
+            </div>
+            <div class="feat-bar-bg"><div class="feat-bar-fill ${barClass}" style="width:${pct}%"></div></div>
+            <div class="feat-detail">${count} of ${totalPilots} pilots worldwide</div>
+            <div class="feat-profiles">${meta.desc}</div>
+          </div>
+        `;
+      }).join('');
+
+      // Feature bars
+      const sorted = [...featEntries].sort((a, b) => b.pct - a.pct);
+      document.getElementById('feature-bars').innerHTML = sorted.map(({ meta, pct, count }) => {
+        const barColor = pct >= 50 ? 'linear-gradient(90deg,#10b981,#34d399)' : pct > 0 ? 'linear-gradient(90deg,#f59e0b,#fbbf24)' : 'rgba(100,116,139,0.3)';
+        const labelColor = pct >= 50 ? 'var(--green)' : pct > 0 ? 'var(--amber)' : 'var(--text-muted)';
+        return `
+          <div class="adoption-row">
+            <div class="adoption-label"><span>${meta.icon}</span>${meta.name}</div>
+            <div class="adoption-bar-bg">
+              <div class="adoption-bar-fill" style="width:${pct}%;background:${barColor}"></div>
+            </div>
+            <div class="adoption-count" style="color:${labelColor}">${pct}%</div>
+          </div>
+        `;
+      }).join('');
+
+      // Worldwide Pilot Roster
+      if (!pilots.length) {
+        document.getElementById('pilots-container').innerHTML = `
+          <div class="empty">No player heartbeats logged yet. As players open AC-Tracker around the world, their anonymous profiles will appear here automatically!</div>
+        `;
+      } else {
+        const rows = pilots.map(p => {
+          const avatarHtml = isAvatarImage(p.avatar)
+            ? `<div class="pilot-avatar"><img src="${p.avatar}" alt="" onerror="this.parentElement.textContent='✈️'"></div>`
+            : `<div class="pilot-avatar">${p.avatar || '✈️'}</div>`;
+          const featCount = Array.isArray(p.features) ? p.features.length : 0;
+          return `
+            <tr>
+              <td>
+                <div class="pilot-name">
+                  ${avatarHtml}
+                  <div>
+                    <div style="color:var(--accent)">${p.name || 'Anonymous Pilot'}</div>
+                    ${p.acCode ? `<span class="ac-code">${p.acCode}</span>` : ''}
+                  </div>
+                </div>
+              </td>
+              <td>${mono((p.totalFlights || 0).toLocaleString())}</td>
+              <td>${mono(p.routesCount || 0)}</td>
+              <td style="color:var(--amber)">${mono('⭐ ' + (p.totalStars || 0).toLocaleString())}</td>
+              <td><span style="font-size:11px;color:var(--text-dim)">${p.theme || 'default'}</span></td>
+              <td><span class="status-pill ${featCount >= 5 ? 'pill-active' : 'pill-partial'}">${featCount} features</span></td>
+              <td style="color:var(--text-muted);font-size:11px">${p.version || 'v2.9'}</td>
+              <td style="color:var(--text-muted);font-size:11px">${relativeTime(p.lastSeen)}</td>
+            </tr>
+          `;
+        }).join('');
+
+        document.getElementById('pilots-container').innerHTML = `
+          <table>
+            <thead>
+              <tr>
+                <th>Pilot</th>
+                <th>Flights</th>
+                <th>Routes</th>
+                <th>Stars</th>
+                <th>Theme</th>
+                <th>Feature Use</th>
+                <th>Version</th>
+                <th>Last Active</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+        `;
+      }
+    }
+
+    // ─── Local Browser Data Loader ───────────────────────────
+    function loadLocalData() {
       try {
         let profiles = [];
         try {
           const raw = localStorage.getItem('act_profiles');
           if (raw) {
             const parsed = JSON.parse(raw);
-            if (Array.isArray(parsed)) {
-              profiles = parsed;
-            } else if (parsed && typeof parsed === 'object') {
-              profiles = Object.values(parsed);
-            }
+            profiles = Array.isArray(parsed) ? parsed : Object.values(parsed);
           }
-        } catch (e) {
-          console.error('Error parsing act_profiles:', e);
-        }
-
-        // Fallback: Check legacy aeroquest keys if no profiles found
-        if (profiles.length === 0) {
-          try {
-            const legacyUserData = localStorage.getItem('aeroquest_user_data');
-            if (legacyUserData) {
-              profiles.push({
-                meta: {
-                  id: 'legacy',
-                  name: 'Captain (Legacy Profile)',
-                  emoji: '✈️',
-                  acCode: '',
-                  accentColor: '#00e5ff',
-                  createdAt: Date.now()
-                },
-                userData: JSON.parse(legacyUserData) || {},
-                airplanes: null,
-                prefs: {
-                  themeId: localStorage.getItem('aeroquest_theme_id') || 'stealth-ghost',
-                  density: localStorage.getItem('aeroquest_density') || 'compact',
-                  starCountMode: localStorage.getItem('aeroquest_star_count_mode') || 'cumulative',
-                }
-              });
-            }
-          } catch(e) {
-            console.error('Error parsing legacy data:', e);
-          }
-        }
+        } catch (e) { }
 
         const totalProfiles = profiles.length;
-
-        // KPI summary
         let totalFlights = 0, totalStars = 0, newestTs = 0;
         const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
         let recentlyActive = 0;
@@ -1223,221 +1054,127 @@
           if (Object.values(ud).some(e => e && e.lastUpdated > sevenDaysAgo)) recentlyActive++;
         });
 
-        // ── KPIs ──
+        // KPIs
         document.getElementById('kpi-grid').innerHTML = `
-        <div class="kpi-card">
-          <div class="kpi-label">👤 Pilot Profiles</div>
-          <div class="kpi-value">${totalProfiles}</div>
-          <div class="kpi-sub">in this browser</div>
-        </div>
-        <div class="kpi-card kpi-green">
-          <div class="kpi-label">🟢 Active (7-day)</div>
-          <div class="kpi-value">${recentlyActive}</div>
-          <div class="kpi-sub">profiles logged a flight</div>
-        </div>
-        <div class="kpi-card kpi-amber">
-          <div class="kpi-label">✈️ Total Flights</div>
-          <div class="kpi-value">${totalFlights.toLocaleString()}</div>
-          <div class="kpi-sub">across all profiles</div>
-        </div>
-        <div class="kpi-card kpi-purple">
-          <div class="kpi-label">⭐ Total Stars</div>
-          <div class="kpi-value">${totalStars.toLocaleString()}</div>
-          <div class="kpi-sub">from star history</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">🕐 Last Activity</div>
-          <div class="kpi-value" style="font-size:18px;line-height:1.4">${newestTs ? relativeTime(newestTs) : '—'}</div>
-          <div class="kpi-sub">${newestTs ? fmtDate(newestTs) : 'No data'}</div>
-        </div>
-      `;
+          <div class="kpi-card">
+            <div class="kpi-label">👤 Local Profiles</div>
+            <div class="kpi-value">${totalProfiles}</div>
+            <div class="kpi-sub">in this browser</div>
+          </div>
+          <div class="kpi-card kpi-green">
+            <div class="kpi-label">🟢 Active (7d)</div>
+            <div class="kpi-value">${recentlyActive}</div>
+            <div class="kpi-sub">profiles logged flights</div>
+          </div>
+          <div class="kpi-card kpi-amber">
+            <div class="kpi-label">✈️ Total Flights</div>
+            <div class="kpi-value">${totalFlights.toLocaleString()}</div>
+            <div class="kpi-sub">across local profiles</div>
+          </div>
+          <div class="kpi-card kpi-purple">
+            <div class="kpi-label">⭐ Total Stars</div>
+            <div class="kpi-value">${totalStars.toLocaleString()}</div>
+            <div class="kpi-sub">from local star history</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">🕐 Last Activity</div>
+            <div class="kpi-value" style="font-size:18px;line-height:1.4">${newestTs ? relativeTime(newestTs) : '—'}</div>
+            <div class="kpi-sub">${newestTs ? fmtDate(newestTs) : 'No data'}</div>
+          </div>
+        `;
 
-        // Always calculate storage usage regardless of profile count
-        try {
-          let actBytes = 0;
-          for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i);
-            if (key && (key.startsWith('act_') || key.startsWith('aeroquest_'))) {
+        // Local Roster
+        if (!profiles.length) {
+          document.getElementById('pilots-container').innerHTML = `
+            <div class="empty">No local profiles found in this browser's localStorage.</div>
+          `;
+        } else {
+          const rows = profiles.map(p => {
+            const meta = p.meta || {};
+            const ud = p.userData || {};
+            let flightCount = 0, lastAct = 0, dests = 0;
+            Object.values(ud).forEach(e => {
+              if (!e) return;
+              if (e.count > 0) { dests++; flightCount += e.count; }
+              if (e.lastUpdated && e.lastUpdated > lastAct) lastAct = e.lastUpdated;
+            });
+            const stars = (p.starHistory && p.starHistory.length) ? (p.starHistory[p.starHistory.length - 1].stars || 0) : 0;
+            const avatarHtml = isAvatarImage(meta.emoji)
+              ? `<div class="pilot-avatar"><img src="${meta.emoji}" alt="" onerror="this.parentElement.textContent='✈️'"></div>`
+              : `<div class="pilot-avatar">${meta.emoji || '✈️'}</div>`;
+            return `
+              <tr>
+                <td>
+                  <div class="pilot-name">
+                    ${avatarHtml}
+                    <div>
+                      <div style="color:${meta.accentColor || '#00e5ff'}">${meta.name || 'Unknown'}</div>
+                      ${meta.acCode ? `<span class="ac-code">${meta.acCode}</span>` : ''}
+                    </div>
+                  </div>
+                </td>
+                <td>${mono(flightCount.toLocaleString())}</td>
+                <td>${mono(dests)}</td>
+                <td style="color:var(--amber)">${mono('⭐ ' + stars.toLocaleString())}</td>
+                <td><span style="font-size:11px;color:var(--text-dim)">${p.prefs?.themeId || 'default'}</span></td>
+                <td><span class="status-pill pill-active">Local</span></td>
+                <td><span style="color:var(--text-muted);font-size:11px">${fmtDate(meta.createdAt)}</span></td>
+                <td style="color:var(--text-muted);font-size:11px">${lastAct ? relativeTime(lastAct) : '—'}</td>
+              </tr>
+            `;
+          }).join('');
+
+          document.getElementById('pilots-container').innerHTML = `
+            <table>
+              <thead>
+                <tr>
+                  <th>Pilot</th>
+                  <th>Flights</th>
+                  <th>Routes</th>
+                  <th>Stars</th>
+                  <th>Theme</th>
+                  <th>Type</th>
+                  <th>Created</th>
+                  <th>Last Active</th>
+                </tr>
+              </thead>
+              <tbody>${rows}</tbody>
+            </table>
+          `;
+        }
+
+        // Storage usage
+        let actBytes = 0;
+        const keyNames = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key) {
+            keyNames.push(key);
+            if (key.startsWith('act_') || key.startsWith('aeroquest_')) {
               actBytes += (key.length + (localStorage.getItem(key) || '').length) * 2;
             }
           }
-          const kb = (actBytes / 1024).toFixed(1);
-          const pct = Math.min(100, (actBytes / (5 * 1024 * 1024)) * 100);
-          document.getElementById('storage-size').textContent = `${kb} KB / ~5,120 KB`;
-          document.getElementById('storage-fill').style.width = pct + '%';
-
-          const diagEl = document.getElementById('storage-diagnostics');
-          if (diagEl) {
-            const rawProfiles = localStorage.getItem('act_profiles');
-            const activeId = localStorage.getItem('act_active_profile_id');
-            const keyNames = [];
-            for (let i = 0; i < localStorage.length; i++) {
-              keyNames.push(localStorage.key(i));
-            }
-            diagEl.innerHTML = `
-              <div style="color:var(--text-dim); margin-bottom:4px; font-weight:700;">🌐 Environment &amp; Storage Diagnostics:</div>
-              <div>• Active Origin: <span style="color:var(--accent); font-weight:600;">${window.location.origin}</span></div>
-              <div>• act_profiles: ${rawProfiles ? `<span style="color:var(--green)">✓ Found (${(rawProfiles.length * 2 / 1024).toFixed(1)} KB, ${totalProfiles} parsed profile${totalProfiles !== 1 ? 's' : ''})</span>` : '<span style="color:var(--amber)">✗ Not found</span>'}</div>
-              <div>• act_active_profile_id: <span style="color:var(--text-dim);">${activeId || 'None'}</span></div>
-              <div>• Stored keys (${keyNames.length}): <span style="color:var(--text-muted);">${keyNames.join(', ') || 'None'}</span></div>
-            `;
-          }
-        } catch (e) { }
-
-        if (!totalProfiles) {
-          document.getElementById('feature-grid').innerHTML = `<div class="empty" style="grid-column:1/-1">No pilot profiles found in localStorage on this device (${window.location.origin}).<br><span style="font-size:12px;opacity:0.8;">Open <a href="./" style="color:var(--accent);text-decoration:underline;">AC-Tracker</a> in this browser window to initialize your profile, then click <b>Refresh</b> above.</span></div>`;
-          document.getElementById('feature-bars').innerHTML = `<div class="empty">No profile data available.</div>`;
-          document.getElementById('matrix-wrap').innerHTML = `<div class="empty">No profile data available.</div>`;
-          document.getElementById('pilots-container').innerHTML = `<div class="empty">No pilot profiles found in this browser origin (${window.location.origin}).</div>`;
-          return;
         }
+        const kb = (actBytes / 1024).toFixed(1);
+        const pct = Math.min(100, (actBytes / (5 * 1024 * 1024)) * 100);
+        document.getElementById('storage-size').textContent = `${kb} KB / ~5,120 KB`;
+        document.getElementById('storage-fill').style.width = pct + '%';
 
-        // ── Evaluate all features across all profiles ──
-        const featureResults = FEATURES.map(feat => {
-          const perProfile = profiles.map(p => feat.check(p, profiles));
-          const usedCount = perProfile.filter(r => r.used).length;
-          const partialCount = perProfile.filter(r => r.partial).length;
-          const adoptionRate = totalProfiles > 0 ? usedCount / totalProfiles : 0;
-          const anyPartial = partialCount > 0 && usedCount === 0;
-          return { feat, perProfile, usedCount, partialCount, adoptionRate, anyPartial };
-        });
-
-        // ── Feature Card Grid ──
-        const featureGridHtml = featureResults.map(({ feat, usedCount, adoptionRate, anyPartial, perProfile }) => {
-          const pct = Math.round(adoptionRate * 100);
-          let statusClass, pillClass, pillLabel, barClass;
-          if (usedCount === totalProfiles) {
-            statusClass = 'active'; pillClass = 'pill-active'; pillLabel = 'All Pilots'; barClass = 'fill-green';
-          } else if (usedCount > 0) {
-            statusClass = 'active'; pillClass = 'pill-active'; pillLabel = `${usedCount}/${totalProfiles} Pilots`; barClass = 'fill-green';
-          } else if (anyPartial) {
-            statusClass = 'partial'; pillClass = 'pill-partial'; pillLabel = 'Configured'; barClass = 'fill-amber';
-          } else {
-            statusClass = 'unused'; pillClass = 'pill-unused'; pillLabel = 'Not Used'; barClass = 'fill-muted';
-          }
-
-          const firstUsed = perProfile.find(r => r.used || r.partial);
-          const detailText = firstUsed ? firstUsed.label : (perProfile[0] ? perProfile[0].label : feat.desc);
-
-          return `
-          <div class="feat-card ${statusClass}">
-            <div class="feat-top">
-              <div class="feat-name"><span class="feat-icon">${feat.icon}</span>${feat.label}</div>
-              <span class="status-pill ${pillClass}">${pillLabel}</span>
-            </div>
-            <div class="feat-bar-bg"><div class="feat-bar-fill ${barClass}" style="width:${pct}%"></div></div>
-            <div class="feat-detail">${detailText}</div>
-            <div class="feat-profiles" style="color:var(--text-muted)">${pct}% adoption · ${feat.desc}</div>
-          </div>`;
-        }).join('');
-        document.getElementById('feature-grid').innerHTML = featureGridHtml;
-
-        // ── Adoption bar chart ──
-        const sorted = [...featureResults].sort((a, b) => b.adoptionRate - a.adoptionRate);
-        const barsHtml = sorted.map(({ feat, usedCount, adoptionRate, anyPartial }) => {
-          const pct = Math.round(adoptionRate * 100);
-          let barColor, labelColor;
-          if (usedCount > 0) { barColor = 'linear-gradient(90deg,#10b981,#34d399)'; labelColor = 'var(--green)'; }
-          else if (anyPartial) { barColor = 'linear-gradient(90deg,#f59e0b,#fbbf24)'; labelColor = 'var(--amber)'; }
-          else { barColor = 'rgba(100,116,139,0.3)'; labelColor = 'var(--text-muted)'; }
-
-          return `
-          <div class="adoption-row">
-            <div class="adoption-label"><span>${feat.icon}</span>${feat.label}</div>
-            <div class="adoption-bar-bg">
-              <div class="adoption-bar-fill" style="width:${pct}%;background:${barColor}"></div>
-            </div>
-            <div class="adoption-count" style="color:${labelColor}">${pct}%</div>
-          </div>`;
-        }).join('');
-        document.getElementById('feature-bars').innerHTML = barsHtml;
-
-        // ── Per-profile matrix ──
-        const headerCells = profiles.map(p => {
-          const meta = (p && p.meta) || {};
-          const avatarHtml = isAvatarImage(meta.emoji)
-            ? `<img src="${meta.emoji}" style="width:20px;height:20px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:4px;" onerror="this.style.display='none'">`
-            : `<span style="margin-right:3px">${meta.emoji || '✈️'}</span>`;
-          const shortName = (meta.name || 'Pilot').substring(0, 10);
-          return `<th>${avatarHtml}${shortName}</th>`;
-        }).join('');
-
-        const matrixRows = featureResults.map(({ feat, perProfile }) => {
-          const cells = perProfile.map(r => {
-            if (r.used) return `<td><span class="check check-yes" title="${r.label}">✓</span></td>`;
-            if (r.partial) return `<td><span class="check check-partial" title="${r.label}">◑</span></td>`;
-            return `<td><span class="check check-no" title="${r.label}">✗</span></td>`;
-          }).join('');
-          return `<tr><td>${feat.icon} ${feat.label}</td>${cells}</tr>`;
-        }).join('');
-
-        const legendHtml = `
-        <tr style="border-top:1px solid rgba(0,229,255,0.1)">
-          <td style="padding-top:12px;color:var(--text-muted);font-size:11px;" colspan="${1 + profiles.length}">
-            <span class="check check-yes">✓</span> Active &nbsp;
-            <span class="check check-partial">◑</span> Configured / enabled but no data &nbsp;
-            <span class="check check-no">✗</span> Unused / disabled
-          </td>
-        </tr>`;
-
-        document.getElementById('matrix-wrap').innerHTML = `
-        <table>
-          <thead><tr><th>Feature</th>${headerCells}</tr></thead>
-          <tbody>${matrixRows}${legendHtml}</tbody>
-        </table>`;
-
-        // ── Pilot roster ──
-        const rows = profiles.map(p => {
-          const meta = (p && p.meta) || {};
-          const ud = (p && p.userData) || {};
-          let flightCount = 0, lastActivity = 0, destinations = 0;
-          Object.values(ud).forEach(e => {
-            if (!e) return;
-            if (e.count > 0) { destinations++; flightCount += e.count; }
-            if (e.lastUpdated && e.lastUpdated > lastActivity) lastActivity = e.lastUpdated;
-          });
-          const history = (p && p.starHistory) || [];
-          const stars = history.length ? (history[history.length - 1].stars || 0) : 0;
-          const missions = (p && p.missions) ? Object.keys(p.missions).length : 0;
-          const avatarHtml = isAvatarImage(meta.emoji)
-            ? `<div class="pilot-avatar"><img src="${meta.emoji}" alt="" onerror="this.parentElement.textContent='✈️'"></div>`
-            : `<div class="pilot-avatar">${meta.emoji || '✈️'}</div>`;
-          const accent = meta.accentColor || '#00e5ff';
-          return `
-          <tr>
-            <td><div class="pilot-name">${avatarHtml}<div><div style="color:${accent}">${meta.name || 'Unknown'}</div>${meta.acCode ? `<span class="ac-code">${meta.acCode}</span>` : ''}</div></div></td>
-            <td>${mono(flightCount.toLocaleString())}</td>
-            <td>${mono(destinations)}</td>
-            <td style="color:var(--amber)">${mono('⭐ ' + stars.toLocaleString())}</td>
-            <td>${mono(missions)}</td>
-            <td style="color:var(--text-muted);font-size:11px">${fmtDate(meta.createdAt)}</td>
-            <td style="color:var(--text-muted);font-size:11px">${lastActivity ? relativeTime(lastActivity) : '—'}</td>
-          </tr>`;
-        }).join('');
-
-        document.getElementById('pilots-container').innerHTML = `
-        <table>
-          <thead><tr>
-            <th>Pilot</th><th>Flights</th><th>Routes</th><th>Stars</th>
-            <th>Missions</th><th>Created</th><th>Last Active</th>
-          </tr></thead>
-          <tbody>${rows}</tbody>
-        </table>`;
-
-      } catch (err) {
-        console.error('Fatal loadData error:', err);
-        const kpi = document.getElementById('kpi-grid');
-        if (kpi) {
-          kpi.innerHTML = `
-            <div style="grid-column:1/-1; background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.4); border-radius:12px; padding:16px; color:#fca5a5;">
-              <div style="font-weight:700; color:#ef4444; margin-bottom:6px;">⚠️ Dashboard Telemetry Error</div>
-              <div style="font-size:12px; font-family:monospace; line-height:1.5;">${err.message || String(err)}</div>
-            </div>`;
+        const diag = document.getElementById('storage-diagnostics');
+        if (diag) {
+          diag.innerHTML = `
+            <div>• Active Origin: <span style="color:var(--accent);">${window.location.origin}</span></div>
+            <div>• act_profiles: <span style="color:${totalProfiles > 0 ? 'var(--green)' : 'var(--amber)'};">${totalProfiles} profile(s) found</span></div>
+            <div>• Stored keys (${keyNames.length}): <span style="color:var(--text-muted);">${keyNames.join(', ') || 'None'}</span></div>
+          `;
         }
+      } catch (e) {
+        console.error(e);
       }
     }
 
-    loadData();
+    // Default start in Global Fleet mode
+    switchScope('global');
   </script>
 </body>
 
