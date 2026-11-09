@@ -850,6 +850,9 @@
         </div>
         <p style="font-size:11px;color:var(--text-muted);margin-top:8px">Approximate data size (UTF-16 estimate).
           Browser localStorage limit ~5 MB.</p>
+        <div style="margin-top:14px; padding-top:12px; border-top:1px solid rgba(0,229,255,0.1); font-size:11px; font-family:'JetBrains Mono','Consolas',monospace; color:var(--text-muted); line-height:1.6;" id="storage-diagnostics">
+          <!-- Populated by JS -->
+        </div>
       </div>
     </div>
 
@@ -1153,216 +1156,286 @@
 
     // ─── Main data loader ─────────────────────────────────────
     function loadData() {
-      let profiles = [];
       try {
-        const raw = localStorage.getItem('act_profiles');
-        if (raw) profiles = JSON.parse(raw);
-      } catch (e) { }
-
-      const totalProfiles = profiles.length;
-
-      // KPI summary
-      let totalFlights = 0, totalStars = 0, newestTs = 0;
-      const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-      let recentlyActive = 0;
-
-      profiles.forEach(p => {
-        const ud = p.userData || {};
-        let pFlights = 0, lastAct = 0;
-        Object.values(ud).forEach(e => {
-          pFlights += (e.count || 0);
-          if (e.lastUpdated > lastAct) lastAct = e.lastUpdated;
-        });
-        totalFlights += pFlights;
-        const history = p.starHistory || [];
-        totalStars += history.length ? history[history.length - 1].stars : 0;
-        if (lastAct > newestTs) newestTs = lastAct;
-        if (Object.values(ud).some(e => e.lastUpdated > sevenDaysAgo)) recentlyActive++;
-      });
-
-      // ── KPIs ──
-      document.getElementById('kpi-grid').innerHTML = `
-      <div class="kpi-card">
-        <div class="kpi-label">👤 Pilot Profiles</div>
-        <div class="kpi-value">${totalProfiles}</div>
-        <div class="kpi-sub">in this browser</div>
-      </div>
-      <div class="kpi-card kpi-green">
-        <div class="kpi-label">🟢 Active (7-day)</div>
-        <div class="kpi-value">${recentlyActive}</div>
-        <div class="kpi-sub">profiles logged a flight</div>
-      </div>
-      <div class="kpi-card kpi-amber">
-        <div class="kpi-label">✈️ Total Flights</div>
-        <div class="kpi-value">${totalFlights.toLocaleString()}</div>
-        <div class="kpi-sub">across all profiles</div>
-      </div>
-      <div class="kpi-card kpi-purple">
-        <div class="kpi-label">⭐ Total Stars</div>
-        <div class="kpi-value">${totalStars.toLocaleString()}</div>
-        <div class="kpi-sub">from star history</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-label">🕐 Last Activity</div>
-        <div class="kpi-value" style="font-size:18px;line-height:1.4">${newestTs ? relativeTime(newestTs) : '—'}</div>
-        <div class="kpi-sub">${newestTs ? fmtDate(newestTs) : 'No data'}</div>
-      </div>
-    `;
-
-      if (!totalProfiles) {
-        document.getElementById('feature-grid').innerHTML = `<div class="empty" style="grid-column:1/-1">No profiles found in localStorage. <a href="./" style="color:var(--accent)">Open AC-Tracker</a> and create a profile first.</div>`;
-        document.getElementById('feature-bars').innerHTML = `<div class="empty">No data.</div>`;
-        document.getElementById('matrix-wrap').innerHTML = `<div class="empty">No data.</div>`;
-        document.getElementById('pilots-container').innerHTML = `<div class="empty">No pilot profiles found.</div>`;
-        return;
-      }
-
-      // ── Evaluate all features across all profiles ──
-      const featureResults = FEATURES.map(feat => {
-        const perProfile = profiles.map(p => feat.check(p, profiles));
-        const usedCount = perProfile.filter(r => r.used).length;
-        const partialCount = perProfile.filter(r => r.partial).length;
-        const adoptionRate = totalProfiles > 0 ? usedCount / totalProfiles : 0;
-        const anyPartial = partialCount > 0 && usedCount === 0;
-        return { feat, perProfile, usedCount, partialCount, adoptionRate, anyPartial };
-      });
-
-      // ── Feature Card Grid ──
-      const featureGridHtml = featureResults.map(({ feat, usedCount, adoptionRate, anyPartial, perProfile }) => {
-        const pct = Math.round(adoptionRate * 100);
-        let statusClass, pillClass, pillLabel, barClass;
-        if (usedCount === totalProfiles) {
-          statusClass = 'active'; pillClass = 'pill-active'; pillLabel = 'All Pilots'; barClass = 'fill-green';
-        } else if (usedCount > 0) {
-          statusClass = 'active'; pillClass = 'pill-active'; pillLabel = `${usedCount}/${totalProfiles} Pilots`; barClass = 'fill-green';
-        } else if (anyPartial) {
-          statusClass = 'partial'; pillClass = 'pill-partial'; pillLabel = 'Configured'; barClass = 'fill-amber';
-        } else {
-          statusClass = 'unused'; pillClass = 'pill-unused'; pillLabel = 'Not Used'; barClass = 'fill-muted';
+        let profiles = [];
+        try {
+          const raw = localStorage.getItem('act_profiles');
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed)) {
+              profiles = parsed;
+            } else if (parsed && typeof parsed === 'object') {
+              profiles = Object.values(parsed);
+            }
+          }
+        } catch (e) {
+          console.error('Error parsing act_profiles:', e);
         }
 
-        // Sample detail from first profile that uses it
-        const firstUsed = perProfile.find(r => r.used || r.partial);
-        const detailText = firstUsed ? firstUsed.label : (perProfile[0] ? perProfile[0].label : feat.desc);
-
-        return `
-        <div class="feat-card ${statusClass}">
-          <div class="feat-top">
-            <div class="feat-name"><span class="feat-icon">${feat.icon}</span>${feat.label}</div>
-            <span class="status-pill ${pillClass}">${pillLabel}</span>
-          </div>
-          <div class="feat-bar-bg"><div class="feat-bar-fill ${barClass}" style="width:${pct}%"></div></div>
-          <div class="feat-detail">${detailText}</div>
-          <div class="feat-profiles" style="color:var(--text-muted)">${pct}% adoption · ${feat.desc}</div>
-        </div>`;
-      }).join('');
-      document.getElementById('feature-grid').innerHTML = featureGridHtml;
-
-      // ── Adoption bar chart ──
-      const sorted = [...featureResults].sort((a, b) => b.adoptionRate - a.adoptionRate);
-      const barsHtml = sorted.map(({ feat, usedCount, adoptionRate, anyPartial }) => {
-        const pct = Math.round(adoptionRate * 100);
-        let barColor, labelColor;
-        if (usedCount > 0) { barColor = 'linear-gradient(90deg,#10b981,#34d399)'; labelColor = 'var(--green)'; }
-        else if (anyPartial) { barColor = 'linear-gradient(90deg,#f59e0b,#fbbf24)'; labelColor = 'var(--amber)'; }
-        else { barColor = 'rgba(100,116,139,0.3)'; labelColor = 'var(--text-muted)'; }
-
-        return `
-        <div class="adoption-row">
-          <div class="adoption-label"><span>${feat.icon}</span>${feat.label}</div>
-          <div class="adoption-bar-bg">
-            <div class="adoption-bar-fill" style="width:${pct}%;background:${barColor}"></div>
-          </div>
-          <div class="adoption-count" style="color:${labelColor}">${pct}%</div>
-        </div>`;
-      }).join('');
-      document.getElementById('feature-bars').innerHTML = barsHtml;
-
-      // ── Per-profile matrix ──
-      const headerCells = profiles.map(p => {
-        const meta = p.meta || {};
-        const avatarHtml = isAvatarImage(meta.emoji)
-          ? `<img src="${meta.emoji}" style="width:20px;height:20px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:4px;" onerror="this.style.display='none'">`
-          : `<span style="margin-right:3px">${meta.emoji || '✈️'}</span>`;
-        const shortName = (meta.name || 'Pilot').substring(0, 10);
-        return `<th>${avatarHtml}${shortName}</th>`;
-      }).join('');
-
-      const matrixRows = featureResults.map(({ feat, perProfile }) => {
-        const cells = perProfile.map(r => {
-          if (r.used) return `<td><span class="check check-yes" title="${r.label}">✓</span></td>`;
-          if (r.partial) return `<td><span class="check check-partial" title="${r.label}">◑</span></td>`;
-          return `<td><span class="check check-no" title="${r.label}">✗</span></td>`;
-        }).join('');
-        return `<tr><td>${feat.icon} ${feat.label}</td>${cells}</tr>`;
-      }).join('');
-
-      const legendHtml = `
-      <tr style="border-top:1px solid rgba(0,229,255,0.1)">
-        <td style="padding-top:12px;color:var(--text-muted);font-size:11px;" colspan="${1 + profiles.length}">
-          <span class="check check-yes">✓</span> Active &nbsp;
-          <span class="check check-partial">◑</span> Configured / enabled but no data &nbsp;
-          <span class="check check-no">✗</span> Unused / disabled
-        </td>
-      </tr>`;
-
-      document.getElementById('matrix-wrap').innerHTML = `
-      <table>
-        <thead><tr><th>Feature</th>${headerCells}</tr></thead>
-        <tbody>${matrixRows}${legendHtml}</tbody>
-      </table>`;
-
-      // ── Pilot roster ──
-      const rows = profiles.map(p => {
-        const meta = p.meta || {};
-        const ud = p.userData || {};
-        let flightCount = 0, lastActivity = 0, destinations = 0;
-        Object.values(ud).forEach(e => {
-          if (e.count > 0) { destinations++; flightCount += e.count; }
-          if (e.lastUpdated > lastActivity) lastActivity = e.lastUpdated;
-        });
-        const history = p.starHistory || [];
-        const stars = history.length ? history[history.length - 1].stars : 0;
-        const missions = p.missions ? Object.keys(p.missions).length : 0;
-        const avatarHtml = isAvatarImage(meta.emoji)
-          ? `<div class="pilot-avatar"><img src="${meta.emoji}" alt="" onerror="this.parentElement.textContent='✈️'"></div>`
-          : `<div class="pilot-avatar">${meta.emoji || '✈️'}</div>`;
-        const accent = meta.accentColor || '#00e5ff';
-        return `
-        <tr>
-          <td><div class="pilot-name">${avatarHtml}<div><div style="color:${accent}">${meta.name || 'Unknown'}</div>${meta.acCode ? `<span class="ac-code">${meta.acCode}</span>` : ''}</div></div></td>
-          <td>${mono(flightCount.toLocaleString())}</td>
-          <td>${mono(destinations)}</td>
-          <td style="color:var(--amber)">${mono('⭐ ' + stars.toLocaleString())}</td>
-          <td>${mono(missions)}</td>
-          <td style="color:var(--text-muted);font-size:11px">${fmtDate(meta.createdAt)}</td>
-          <td style="color:var(--text-muted);font-size:11px">${lastActivity ? relativeTime(lastActivity) : '—'}</td>
-        </tr>`;
-      }).join('');
-
-      document.getElementById('pilots-container').innerHTML = `
-      <table>
-        <thead><tr>
-          <th>Pilot</th><th>Flights</th><th>Routes</th><th>Stars</th>
-          <th>Missions</th><th>Created</th><th>Last Active</th>
-        </tr></thead>
-        <tbody>${rows}</tbody>
-      </table>`;
-
-      // ── Storage usage ──
-      try {
-        let actBytes = 0;
-        for (let i = 0; i < localStorage.length; i++) {
-          const key = localStorage.key(i);
-          if (key && key.startsWith('act_')) {
-            actBytes += (key.length + (localStorage.getItem(key) || '').length) * 2;
+        // Fallback: Check legacy aeroquest keys if no profiles found
+        if (profiles.length === 0) {
+          try {
+            const legacyUserData = localStorage.getItem('aeroquest_user_data');
+            if (legacyUserData) {
+              profiles.push({
+                meta: {
+                  id: 'legacy',
+                  name: 'Captain (Legacy Profile)',
+                  emoji: '✈️',
+                  acCode: '',
+                  accentColor: '#00e5ff',
+                  createdAt: Date.now()
+                },
+                userData: JSON.parse(legacyUserData) || {},
+                airplanes: null,
+                prefs: {
+                  themeId: localStorage.getItem('aeroquest_theme_id') || 'stealth-ghost',
+                  density: localStorage.getItem('aeroquest_density') || 'compact',
+                  starCountMode: localStorage.getItem('aeroquest_star_count_mode') || 'cumulative',
+                }
+              });
+            }
+          } catch(e) {
+            console.error('Error parsing legacy data:', e);
           }
         }
-        const kb = (actBytes / 1024).toFixed(1);
-        const pct = Math.min(100, (actBytes / (5 * 1024 * 1024)) * 100);
-        document.getElementById('storage-size').textContent = `${kb} KB / ~5,120 KB`;
-        document.getElementById('storage-fill').style.width = pct + '%';
-      } catch (e) { }
+
+        const totalProfiles = profiles.length;
+
+        // KPI summary
+        let totalFlights = 0, totalStars = 0, newestTs = 0;
+        const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+        let recentlyActive = 0;
+
+        profiles.forEach(p => {
+          if (!p) return;
+          const ud = p.userData || {};
+          let pFlights = 0, lastAct = 0;
+          Object.values(ud).forEach(e => {
+            if (!e) return;
+            pFlights += (e.count || 0);
+            if (e.lastUpdated && e.lastUpdated > lastAct) lastAct = e.lastUpdated;
+          });
+          totalFlights += pFlights;
+          const history = p.starHistory || [];
+          totalStars += history.length ? (history[history.length - 1].stars || 0) : 0;
+          if (lastAct > newestTs) newestTs = lastAct;
+          if (Object.values(ud).some(e => e && e.lastUpdated > sevenDaysAgo)) recentlyActive++;
+        });
+
+        // ── KPIs ──
+        document.getElementById('kpi-grid').innerHTML = `
+        <div class="kpi-card">
+          <div class="kpi-label">👤 Pilot Profiles</div>
+          <div class="kpi-value">${totalProfiles}</div>
+          <div class="kpi-sub">in this browser</div>
+        </div>
+        <div class="kpi-card kpi-green">
+          <div class="kpi-label">🟢 Active (7-day)</div>
+          <div class="kpi-value">${recentlyActive}</div>
+          <div class="kpi-sub">profiles logged a flight</div>
+        </div>
+        <div class="kpi-card kpi-amber">
+          <div class="kpi-label">✈️ Total Flights</div>
+          <div class="kpi-value">${totalFlights.toLocaleString()}</div>
+          <div class="kpi-sub">across all profiles</div>
+        </div>
+        <div class="kpi-card kpi-purple">
+          <div class="kpi-label">⭐ Total Stars</div>
+          <div class="kpi-value">${totalStars.toLocaleString()}</div>
+          <div class="kpi-sub">from star history</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">🕐 Last Activity</div>
+          <div class="kpi-value" style="font-size:18px;line-height:1.4">${newestTs ? relativeTime(newestTs) : '—'}</div>
+          <div class="kpi-sub">${newestTs ? fmtDate(newestTs) : 'No data'}</div>
+        </div>
+      `;
+
+        // Always calculate storage usage regardless of profile count
+        try {
+          let actBytes = 0;
+          for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && (key.startsWith('act_') || key.startsWith('aeroquest_'))) {
+              actBytes += (key.length + (localStorage.getItem(key) || '').length) * 2;
+            }
+          }
+          const kb = (actBytes / 1024).toFixed(1);
+          const pct = Math.min(100, (actBytes / (5 * 1024 * 1024)) * 100);
+          document.getElementById('storage-size').textContent = `${kb} KB / ~5,120 KB`;
+          document.getElementById('storage-fill').style.width = pct + '%';
+
+          const diagEl = document.getElementById('storage-diagnostics');
+          if (diagEl) {
+            const rawProfiles = localStorage.getItem('act_profiles');
+            const activeId = localStorage.getItem('act_active_profile_id');
+            const keyNames = [];
+            for (let i = 0; i < localStorage.length; i++) {
+              keyNames.push(localStorage.key(i));
+            }
+            diagEl.innerHTML = `
+              <div style="color:var(--text-dim); margin-bottom:4px; font-weight:700;">🌐 Environment &amp; Storage Diagnostics:</div>
+              <div>• Active Origin: <span style="color:var(--accent); font-weight:600;">${window.location.origin}</span></div>
+              <div>• act_profiles: ${rawProfiles ? `<span style="color:var(--green)">✓ Found (${(rawProfiles.length * 2 / 1024).toFixed(1)} KB, ${totalProfiles} parsed profile${totalProfiles !== 1 ? 's' : ''})</span>` : '<span style="color:var(--amber)">✗ Not found</span>'}</div>
+              <div>• act_active_profile_id: <span style="color:var(--text-dim);">${activeId || 'None'}</span></div>
+              <div>• Stored keys (${keyNames.length}): <span style="color:var(--text-muted);">${keyNames.join(', ') || 'None'}</span></div>
+            `;
+          }
+        } catch (e) { }
+
+        if (!totalProfiles) {
+          document.getElementById('feature-grid').innerHTML = `<div class="empty" style="grid-column:1/-1">No pilot profiles found in localStorage on this device (${window.location.origin}).<br><span style="font-size:12px;opacity:0.8;">Open <a href="./" style="color:var(--accent);text-decoration:underline;">AC-Tracker</a> in this browser window to initialize your profile, then click <b>Refresh</b> above.</span></div>`;
+          document.getElementById('feature-bars').innerHTML = `<div class="empty">No profile data available.</div>`;
+          document.getElementById('matrix-wrap').innerHTML = `<div class="empty">No profile data available.</div>`;
+          document.getElementById('pilots-container').innerHTML = `<div class="empty">No pilot profiles found in this browser origin (${window.location.origin}).</div>`;
+          return;
+        }
+
+        // ── Evaluate all features across all profiles ──
+        const featureResults = FEATURES.map(feat => {
+          const perProfile = profiles.map(p => feat.check(p, profiles));
+          const usedCount = perProfile.filter(r => r.used).length;
+          const partialCount = perProfile.filter(r => r.partial).length;
+          const adoptionRate = totalProfiles > 0 ? usedCount / totalProfiles : 0;
+          const anyPartial = partialCount > 0 && usedCount === 0;
+          return { feat, perProfile, usedCount, partialCount, adoptionRate, anyPartial };
+        });
+
+        // ── Feature Card Grid ──
+        const featureGridHtml = featureResults.map(({ feat, usedCount, adoptionRate, anyPartial, perProfile }) => {
+          const pct = Math.round(adoptionRate * 100);
+          let statusClass, pillClass, pillLabel, barClass;
+          if (usedCount === totalProfiles) {
+            statusClass = 'active'; pillClass = 'pill-active'; pillLabel = 'All Pilots'; barClass = 'fill-green';
+          } else if (usedCount > 0) {
+            statusClass = 'active'; pillClass = 'pill-active'; pillLabel = `${usedCount}/${totalProfiles} Pilots`; barClass = 'fill-green';
+          } else if (anyPartial) {
+            statusClass = 'partial'; pillClass = 'pill-partial'; pillLabel = 'Configured'; barClass = 'fill-amber';
+          } else {
+            statusClass = 'unused'; pillClass = 'pill-unused'; pillLabel = 'Not Used'; barClass = 'fill-muted';
+          }
+
+          const firstUsed = perProfile.find(r => r.used || r.partial);
+          const detailText = firstUsed ? firstUsed.label : (perProfile[0] ? perProfile[0].label : feat.desc);
+
+          return `
+          <div class="feat-card ${statusClass}">
+            <div class="feat-top">
+              <div class="feat-name"><span class="feat-icon">${feat.icon}</span>${feat.label}</div>
+              <span class="status-pill ${pillClass}">${pillLabel}</span>
+            </div>
+            <div class="feat-bar-bg"><div class="feat-bar-fill ${barClass}" style="width:${pct}%"></div></div>
+            <div class="feat-detail">${detailText}</div>
+            <div class="feat-profiles" style="color:var(--text-muted)">${pct}% adoption · ${feat.desc}</div>
+          </div>`;
+        }).join('');
+        document.getElementById('feature-grid').innerHTML = featureGridHtml;
+
+        // ── Adoption bar chart ──
+        const sorted = [...featureResults].sort((a, b) => b.adoptionRate - a.adoptionRate);
+        const barsHtml = sorted.map(({ feat, usedCount, adoptionRate, anyPartial }) => {
+          const pct = Math.round(adoptionRate * 100);
+          let barColor, labelColor;
+          if (usedCount > 0) { barColor = 'linear-gradient(90deg,#10b981,#34d399)'; labelColor = 'var(--green)'; }
+          else if (anyPartial) { barColor = 'linear-gradient(90deg,#f59e0b,#fbbf24)'; labelColor = 'var(--amber)'; }
+          else { barColor = 'rgba(100,116,139,0.3)'; labelColor = 'var(--text-muted)'; }
+
+          return `
+          <div class="adoption-row">
+            <div class="adoption-label"><span>${feat.icon}</span>${feat.label}</div>
+            <div class="adoption-bar-bg">
+              <div class="adoption-bar-fill" style="width:${pct}%;background:${barColor}"></div>
+            </div>
+            <div class="adoption-count" style="color:${labelColor}">${pct}%</div>
+          </div>`;
+        }).join('');
+        document.getElementById('feature-bars').innerHTML = barsHtml;
+
+        // ── Per-profile matrix ──
+        const headerCells = profiles.map(p => {
+          const meta = (p && p.meta) || {};
+          const avatarHtml = isAvatarImage(meta.emoji)
+            ? `<img src="${meta.emoji}" style="width:20px;height:20px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:4px;" onerror="this.style.display='none'">`
+            : `<span style="margin-right:3px">${meta.emoji || '✈️'}</span>`;
+          const shortName = (meta.name || 'Pilot').substring(0, 10);
+          return `<th>${avatarHtml}${shortName}</th>`;
+        }).join('');
+
+        const matrixRows = featureResults.map(({ feat, perProfile }) => {
+          const cells = perProfile.map(r => {
+            if (r.used) return `<td><span class="check check-yes" title="${r.label}">✓</span></td>`;
+            if (r.partial) return `<td><span class="check check-partial" title="${r.label}">◑</span></td>`;
+            return `<td><span class="check check-no" title="${r.label}">✗</span></td>`;
+          }).join('');
+          return `<tr><td>${feat.icon} ${feat.label}</td>${cells}</tr>`;
+        }).join('');
+
+        const legendHtml = `
+        <tr style="border-top:1px solid rgba(0,229,255,0.1)">
+          <td style="padding-top:12px;color:var(--text-muted);font-size:11px;" colspan="${1 + profiles.length}">
+            <span class="check check-yes">✓</span> Active &nbsp;
+            <span class="check check-partial">◑</span> Configured / enabled but no data &nbsp;
+            <span class="check check-no">✗</span> Unused / disabled
+          </td>
+        </tr>`;
+
+        document.getElementById('matrix-wrap').innerHTML = `
+        <table>
+          <thead><tr><th>Feature</th>${headerCells}</tr></thead>
+          <tbody>${matrixRows}${legendHtml}</tbody>
+        </table>`;
+
+        // ── Pilot roster ──
+        const rows = profiles.map(p => {
+          const meta = (p && p.meta) || {};
+          const ud = (p && p.userData) || {};
+          let flightCount = 0, lastActivity = 0, destinations = 0;
+          Object.values(ud).forEach(e => {
+            if (!e) return;
+            if (e.count > 0) { destinations++; flightCount += e.count; }
+            if (e.lastUpdated && e.lastUpdated > lastActivity) lastActivity = e.lastUpdated;
+          });
+          const history = (p && p.starHistory) || [];
+          const stars = history.length ? (history[history.length - 1].stars || 0) : 0;
+          const missions = (p && p.missions) ? Object.keys(p.missions).length : 0;
+          const avatarHtml = isAvatarImage(meta.emoji)
+            ? `<div class="pilot-avatar"><img src="${meta.emoji}" alt="" onerror="this.parentElement.textContent='✈️'"></div>`
+            : `<div class="pilot-avatar">${meta.emoji || '✈️'}</div>`;
+          const accent = meta.accentColor || '#00e5ff';
+          return `
+          <tr>
+            <td><div class="pilot-name">${avatarHtml}<div><div style="color:${accent}">${meta.name || 'Unknown'}</div>${meta.acCode ? `<span class="ac-code">${meta.acCode}</span>` : ''}</div></div></td>
+            <td>${mono(flightCount.toLocaleString())}</td>
+            <td>${mono(destinations)}</td>
+            <td style="color:var(--amber)">${mono('⭐ ' + stars.toLocaleString())}</td>
+            <td>${mono(missions)}</td>
+            <td style="color:var(--text-muted);font-size:11px">${fmtDate(meta.createdAt)}</td>
+            <td style="color:var(--text-muted);font-size:11px">${lastActivity ? relativeTime(lastActivity) : '—'}</td>
+          </tr>`;
+        }).join('');
+
+        document.getElementById('pilots-container').innerHTML = `
+        <table>
+          <thead><tr>
+            <th>Pilot</th><th>Flights</th><th>Routes</th><th>Stars</th>
+            <th>Missions</th><th>Created</th><th>Last Active</th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>`;
+
+      } catch (err) {
+        console.error('Fatal loadData error:', err);
+        const kpi = document.getElementById('kpi-grid');
+        if (kpi) {
+          kpi.innerHTML = `
+            <div style="grid-column:1/-1; background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.4); border-radius:12px; padding:16px; color:#fca5a5;">
+              <div style="font-weight:700; color:#ef4444; margin-bottom:6px;">⚠️ Dashboard Telemetry Error</div>
+              <div style="font-size:12px; font-family:monospace; line-height:1.5;">${err.message || String(err)}</div>
+            </div>`;
+        }
+      }
+    }
     }
 
     loadData();
