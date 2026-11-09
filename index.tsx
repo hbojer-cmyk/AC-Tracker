@@ -107,7 +107,7 @@ import { GettingStartedModal } from './src/components/GettingStartedModal';
 // --- App Version & Maintenance Tracker ---
 // NOTE: Always update APP_UPDATED_DATE whenever making changes in the app
 export const APP_VERSION = 'Version 2.9';
-export const APP_UPDATED_DATE = 'Nov 8, 2026';
+export const APP_UPDATED_DATE = 'Nov 9, 2026';
 
 // --- Types & Interfaces ---
 type SortField =

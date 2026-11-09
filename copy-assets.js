@@ -27,3 +27,13 @@ if (fs.existsSync(manifestSrc)) {
   console.log('Successfully copied manifest.json to dist/manifest.json');
 }
 
+// Copy Mission Control Center dashboard (act-mcc-9f2b.html is the canonical source)
+// admin.html is a local working copy — keep both in sync via: copy admin.html → act-mcc-9f2b.html
+const mccSrc = path.resolve('act-mcc-9f2b.html');
+if (fs.existsSync(mccSrc)) {
+  fs.copyFileSync(mccSrc, path.resolve('dist', 'act-mcc-9f2b.html'));
+  console.log('Successfully copied MCC dashboard to dist/act-mcc-9f2b.html');
+} else {
+  console.warn('Warning: act-mcc-9f2b.html not found — MCC dashboard will not be in dist.');
+}
+
