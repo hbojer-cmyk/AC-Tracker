@@ -916,7 +916,7 @@
 
   <script>
     // ─── Optional PIN lock ───────────────────────────────────
-    const OWNER_PIN = 'act2026'; // e.g. 'actowner2026'
+    const OWNER_PIN = ''; // Set e.g. 'act2026' to require ?pin=act2026 in URL
     if (OWNER_PIN) {
       const p = new URLSearchParams(location.search);
       if (p.get('pin') !== OWNER_PIN) {
@@ -1435,7 +1435,6 @@
             </div>`;
         }
       }
-    }
     }
 
     loadData();
