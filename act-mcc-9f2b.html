@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,38 +11,44 @@
     :root {
       --bg: #050914;
       --bg2: #0a1628;
-      --panel: rgba(10,22,50,0.85);
-      --border: rgba(0,229,255,0.15);
-      --border-bright: rgba(0,229,255,0.4);
+      --panel: rgba(10, 22, 50, 0.85);
+      --border: rgba(0, 229, 255, 0.15);
+      --border-bright: rgba(0, 229, 255, 0.4);
       --accent: #00e5ff;
-      --accent-soft: rgba(0,229,255,0.12);
+      --accent-soft: rgba(0, 229, 255, 0.12);
       --amber: #f59e0b;
-      --amber-soft: rgba(245,158,11,0.15);
+      --amber-soft: rgba(245, 158, 11, 0.15);
       --green: #10b981;
-      --green-soft: rgba(16,185,129,0.15);
+      --green-soft: rgba(16, 185, 129, 0.15);
       --red: #ef4444;
-      --red-soft: rgba(239,68,68,0.12);
+      --red-soft: rgba(239, 68, 68, 0.12);
       --text: #e2e8f0;
       --text-muted: #64748b;
       --text-dim: #94a3b8;
       --purple: #8b5cf6;
-      --purple-soft: rgba(139,92,246,0.15);
+      --purple-soft: rgba(139, 92, 246, 0.15);
       --radius: 14px;
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
     body {
-      font-family: 'Inter','Segoe UI',system-ui,sans-serif;
+      font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
       background-image:
-        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(0,229,255,0.07) 0%, transparent 70%),
-        radial-gradient(ellipse 60% 40% at 80% 80%, rgba(139,92,246,0.05) 0%, transparent 60%);
+        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(0, 229, 255, 0.07) 0%, transparent 70%),
+        radial-gradient(ellipse 60% 40% at 80% 80%, rgba(139, 92, 246, 0.05) 0%, transparent 60%);
     }
 
     /* Header */
     .header {
-      background: rgba(5,9,20,0.9);
+      background: rgba(5, 9, 20, 0.9);
       border-bottom: 1px solid var(--border);
       backdrop-filter: blur(16px);
       padding: 0 24px;
@@ -53,6 +60,7 @@
       top: 0;
       z-index: 100;
     }
+
     .header-brand {
       display: flex;
       align-items: center;
@@ -63,10 +71,17 @@
       color: var(--accent);
       text-transform: uppercase;
     }
-    .header-brand img { width:28px;height:28px;object-fit:contain;filter:drop-shadow(0 0 6px rgba(0,229,255,0.5)); }
+
+    .header-brand img {
+      width: 28px;
+      height: 28px;
+      object-fit: contain;
+      filter: drop-shadow(0 0 6px rgba(0, 229, 255, 0.5));
+    }
+
     .header-badge {
-      background: rgba(239,68,68,0.2);
-      border: 1px solid rgba(239,68,68,0.4);
+      background: rgba(239, 68, 68, 0.2);
+      border: 1px solid rgba(239, 68, 68, 0.4);
       color: #ef4444;
       font-size: 10px;
       font-weight: 700;
@@ -75,36 +90,171 @@
       letter-spacing: 0.08em;
       text-transform: uppercase;
     }
-    .header-right { display:flex; align-items:center; gap:14px; }
-    .header-time { font-family:'JetBrains Mono','Consolas',monospace; font-size:12px; color:var(--text-muted); }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .header-time {
+      font-family: 'JetBrains Mono', 'Consolas', monospace;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
 
     /* Layout */
-    .main { max-width: 1160px; margin: 0 auto; padding: 32px 24px 80px; }
-    .page-title { display:flex; align-items:center; gap:14px; margin-bottom:6px; }
-    .page-title h1 { font-size:26px; font-weight:800; letter-spacing:-0.02em; color:var(--text); }
-    .radar-dot { width:10px;height:10px;border-radius:50%;background:var(--green);box-shadow:0 0 10px var(--green);animation:ping 1.5s ease-in-out infinite; }
-    @keyframes ping { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.6;transform:scale(1.3)} }
-    .page-subtitle { color:var(--text-muted); font-size:13px; margin-bottom:32px; }
+    .main {
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 32px 24px 80px;
+    }
+
+    .page-title {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 6px;
+    }
+
+    .page-title h1 {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--text);
+    }
+
+    .radar-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 10px var(--green);
+      animation: ping 1.5s ease-in-out infinite;
+    }
+
+    @keyframes ping {
+
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1)
+      }
+
+      50% {
+        opacity: 0.6;
+        transform: scale(1.3)
+      }
+    }
+
+    .page-subtitle {
+      color: var(--text-muted);
+      font-size: 13px;
+      margin-bottom: 32px;
+    }
 
     /* Section */
-    .section { margin-bottom:32px; }
-    .section-header { display:flex; align-items:center; gap:10px; margin-bottom:14px; }
-    .section-title { font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--text-dim); white-space:nowrap; }
-    .section-line { flex:1; height:1px; background:var(--border); }
+    .section {
+      margin-bottom: 32px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .section-title {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-dim);
+      white-space: nowrap;
+    }
+
+    .section-line {
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
 
     /* KPI grid */
-    .kpi-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); gap:14px; margin-bottom:32px; }
-    .kpi-card { background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:18px 20px; backdrop-filter:blur(10px); transition:border-color 0.2s; }
-    .kpi-card:hover { border-color:var(--border-bright); }
-    .kpi-label { font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-muted); margin-bottom:8px; }
-    .kpi-value { font-family:'JetBrains Mono','Consolas',monospace; font-size:30px; font-weight:700; line-height:1; color:var(--accent); }
-    .kpi-sub { font-size:11px; color:var(--text-muted); margin-top:4px; }
-    .kpi-amber .kpi-value { color:var(--amber); } .kpi-amber { border-color:rgba(245,158,11,0.2); }
-    .kpi-green .kpi-value { color:var(--green); } .kpi-green { border-color:rgba(16,185,129,0.2); }
-    .kpi-purple .kpi-value { color:var(--purple); } .kpi-purple { border-color:rgba(139,92,246,0.2); }
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+      gap: 14px;
+      margin-bottom: 32px;
+    }
+
+    .kpi-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      backdrop-filter: blur(10px);
+      transition: border-color 0.2s;
+    }
+
+    .kpi-card:hover {
+      border-color: var(--border-bright);
+    }
+
+    .kpi-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .kpi-value {
+      font-family: 'JetBrains Mono', 'Consolas', monospace;
+      font-size: 30px;
+      font-weight: 700;
+      line-height: 1;
+      color: var(--accent);
+    }
+
+    .kpi-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .kpi-amber .kpi-value {
+      color: var(--amber);
+    }
+
+    .kpi-amber {
+      border-color: rgba(245, 158, 11, 0.2);
+    }
+
+    .kpi-green .kpi-value {
+      color: var(--green);
+    }
+
+    .kpi-green {
+      border-color: rgba(16, 185, 129, 0.2);
+    }
+
+    .kpi-purple .kpi-value {
+      color: var(--purple);
+    }
+
+    .kpi-purple {
+      border-color: rgba(139, 92, 246, 0.2);
+    }
 
     /* Feature status grid */
-    .feature-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:12px; }
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 12px;
+    }
+
     .feat-card {
       background: var(--panel);
       border: 1px solid var(--border);
@@ -116,506 +266,922 @@
       gap: 8px;
       transition: border-color 0.2s;
     }
-    .feat-card:hover { border-color: var(--border-bright); }
-    .feat-card.active  { border-color: rgba(16,185,129,0.35); background: rgba(16,185,129,0.04); }
-    .feat-card.partial { border-color: rgba(245,158,11,0.3);  background: rgba(245,158,11,0.03); }
-    .feat-card.unused  { border-color: rgba(100,116,139,0.2); opacity: 0.72; }
 
-    .feat-top { display:flex; align-items:center; justify-content:space-between; gap:8px; }
-    .feat-name { font-size:13px; font-weight:700; color:var(--text); display:flex; align-items:center; gap:7px; }
-    .feat-icon { font-size:16px; }
+    .feat-card:hover {
+      border-color: var(--border-bright);
+    }
+
+    .feat-card.active {
+      border-color: rgba(16, 185, 129, 0.35);
+      background: rgba(16, 185, 129, 0.04);
+    }
+
+    .feat-card.partial {
+      border-color: rgba(245, 158, 11, 0.3);
+      background: rgba(245, 158, 11, 0.03);
+    }
+
+    .feat-card.unused {
+      border-color: rgba(100, 116, 139, 0.2);
+      opacity: 0.72;
+    }
+
+    .feat-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .feat-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .feat-icon {
+      font-size: 16px;
+    }
 
     .status-pill {
-      font-size:10px; font-weight:700; padding:2px 8px; border-radius:20px;
-      text-transform:uppercase; letter-spacing:0.07em; white-space:nowrap; flex-shrink:0;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
-    .pill-active  { background:rgba(16,185,129,0.2);  color:var(--green);  border:1px solid rgba(16,185,129,0.35); }
-    .pill-partial { background:rgba(245,158,11,0.18); color:var(--amber);  border:1px solid rgba(245,158,11,0.35); }
-    .pill-unused  { background:rgba(100,116,139,0.15);color:var(--text-muted); border:1px solid rgba(100,116,139,0.25); }
 
-    .feat-bar-bg { width:100%; height:4px; background:rgba(255,255,255,0.07); border-radius:2px; overflow:hidden; }
-    .feat-bar-fill { height:100%; border-radius:2px; transition:width 0.5s; }
-    .fill-green  { background:linear-gradient(90deg,#10b981,#34d399); }
-    .fill-amber  { background:linear-gradient(90deg,#f59e0b,#fbbf24); }
-    .fill-muted  { background:rgba(100,116,139,0.3); }
+    .pill-active {
+      background: rgba(16, 185, 129, 0.2);
+      color: var(--green);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+    }
 
-    .feat-detail { font-size:11px; color:var(--text-muted); line-height:1.4; }
-    .feat-profiles { font-size:10px; color:var(--text-muted); font-family:'JetBrains Mono','Consolas',monospace; }
+    .pill-partial {
+      background: rgba(245, 158, 11, 0.18);
+      color: var(--amber);
+      border: 1px solid rgba(245, 158, 11, 0.35);
+    }
+
+    .pill-unused {
+      background: rgba(100, 116, 139, 0.15);
+      color: var(--text-muted);
+      border: 1px solid rgba(100, 116, 139, 0.25);
+    }
+
+    .feat-bar-bg {
+      width: 100%;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.07);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .feat-bar-fill {
+      height: 100%;
+      border-radius: 2px;
+      transition: width 0.5s;
+    }
+
+    .fill-green {
+      background: linear-gradient(90deg, #10b981, #34d399);
+    }
+
+    .fill-amber {
+      background: linear-gradient(90deg, #f59e0b, #fbbf24);
+    }
+
+    .fill-muted {
+      background: rgba(100, 116, 139, 0.3);
+    }
+
+    .feat-detail {
+      font-size: 11px;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    .feat-profiles {
+      font-size: 10px;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', 'Consolas', monospace;
+    }
 
     /* Adoption bar */
-    .adoption-row { display:flex; align-items:center; gap:10px; margin-bottom:6px; }
-    .adoption-label { font-size:12px; color:var(--text-dim); width:180px; flex-shrink:0; display:flex; align-items:center; gap:6px; }
-    .adoption-bar-bg { flex:1; height:8px; background:rgba(255,255,255,0.07); border-radius:4px; overflow:hidden; }
-    .adoption-bar-fill { height:100%; border-radius:4px; transition:width 0.5s; }
-    .adoption-count { font-size:11px; font-family:'JetBrains Mono','Consolas',monospace; color:var(--text-muted); min-width:36px; text-align:right; }
+    .adoption-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+
+    .adoption-label {
+      font-size: 12px;
+      color: var(--text-dim);
+      width: 180px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .adoption-bar-bg {
+      flex: 1;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.07);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .adoption-bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.5s;
+    }
+
+    .adoption-count {
+      font-size: 11px;
+      font-family: 'JetBrains Mono', 'Consolas', monospace;
+      color: var(--text-muted);
+      min-width: 36px;
+      text-align: right;
+    }
 
     /* Pilot table */
-    .pilots-table-wrap { background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; backdrop-filter:blur(10px); }
-    table { width:100%; border-collapse:collapse; }
-    thead th { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-muted); padding:10px 14px; text-align:left; background:rgba(0,229,255,0.04); border-bottom:1px solid var(--border); white-space:nowrap; }
-    tbody tr { border-bottom:1px solid rgba(0,229,255,0.06); transition:background 0.15s; }
-    tbody tr:last-child { border-bottom:none; }
-    tbody tr:hover { background:rgba(0,229,255,0.03); }
-    td { padding:11px 14px; font-size:12px; vertical-align:middle; }
+    .pilots-table-wrap {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+    }
 
-    .pilot-name { font-weight:700; color:var(--text); display:flex; align-items:center; gap:8px; }
-    .pilot-avatar { width:28px;height:28px;border-radius:50%;background:var(--accent-soft);border:1px solid var(--border-bright);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;overflow:hidden; }
-    .pilot-avatar img { width:100%;height:100%;object-fit:cover; }
-    .ac-code { font-family:'JetBrains Mono','Consolas',monospace; font-size:10px; color:var(--text-muted); background:rgba(255,255,255,0.05); padding:1px 5px; border-radius:4px; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead th {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      padding: 10px 14px;
+      text-align: left;
+      background: rgba(0, 229, 255, 0.04);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid rgba(0, 229, 255, 0.06);
+      transition: background 0.15s;
+    }
+
+    tbody tr:last-child {
+      border-bottom: none;
+    }
+
+    tbody tr:hover {
+      background: rgba(0, 229, 255, 0.03);
+    }
+
+    td {
+      padding: 11px 14px;
+      font-size: 12px;
+      vertical-align: middle;
+    }
+
+    .pilot-name {
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .pilot-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--accent-soft);
+      border: 1px solid var(--border-bright);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+
+    .pilot-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .ac-code {
+      font-family: 'JetBrains Mono', 'Consolas', monospace;
+      font-size: 10px;
+      color: var(--text-muted);
+      background: rgba(255, 255, 255, 0.05);
+      padding: 1px 5px;
+      border-radius: 4px;
+    }
 
     /* Feature matrix table */
-    .matrix-wrap { background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); overflow:auto; backdrop-filter:blur(10px); }
-    .matrix-wrap table { min-width:700px; }
-    .matrix-wrap thead th { text-align:center; }
-    .matrix-wrap thead th:first-child { text-align:left; min-width:160px; }
-    .matrix-wrap td { text-align:center; }
-    .matrix-wrap td:first-child { text-align:left; font-weight:600; color:var(--text-dim); font-size:12px; }
-    .check { font-size:14px; }
-    .check-yes { color:var(--green); }
-    .check-partial { color:var(--amber); }
-    .check-no { color:rgba(100,116,139,0.4); }
+    .matrix-wrap {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: auto;
+      backdrop-filter: blur(10px);
+    }
+
+    .matrix-wrap table {
+      min-width: 700px;
+    }
+
+    .matrix-wrap thead th {
+      text-align: center;
+    }
+
+    .matrix-wrap thead th:first-child {
+      text-align: left;
+      min-width: 160px;
+    }
+
+    .matrix-wrap td {
+      text-align: center;
+    }
+
+    .matrix-wrap td:first-child {
+      text-align: left;
+      font-weight: 600;
+      color: var(--text-dim);
+      font-size: 12px;
+    }
+
+    .check {
+      font-size: 14px;
+    }
+
+    .check-yes {
+      color: var(--green);
+    }
+
+    .check-partial {
+      color: var(--amber);
+    }
+
+    .check-no {
+      color: rgba(100, 116, 139, 0.4);
+    }
 
     /* Storage bar */
-    .storage-wrap { background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:18px 20px; backdrop-filter:blur(10px); }
-    .storage-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
-    .storage-bar-bg { width:100%; height:8px; background:rgba(255,255,255,0.08); border-radius:4px; overflow:hidden; }
-    .storage-bar-fill { height:100%; background:linear-gradient(90deg,var(--accent),var(--purple)); border-radius:4px; transition:width 0.6s cubic-bezier(.4,0,.2,1); }
+    .storage-wrap {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      backdrop-filter: blur(10px);
+    }
+
+    .storage-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .storage-bar-bg {
+      width: 100%;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .storage-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--purple));
+      border-radius: 4px;
+      transition: width 0.6s cubic-bezier(.4, 0, .2, 1);
+    }
 
     /* Traffic cards */
-    .traffic-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:14px; }
-    .traffic-card { background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:18px 20px; backdrop-filter:blur(10px); display:flex; flex-direction:column; gap:10px; cursor:pointer; transition:border-color 0.2s,transform 0.15s; }
-    .traffic-card:hover { border-color:var(--border-bright); transform:translateY(-2px); }
-    .traffic-card-header { display:flex; align-items:center; gap:10px; }
-    .traffic-icon { width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0; }
-    .icon-gh { background:rgba(139,92,246,0.2); border:1px solid rgba(139,92,246,0.3); }
-    .icon-cf { background:rgba(245,158,11,0.2); border:1px solid rgba(245,158,11,0.3); }
-    .icon-cf2 { background:rgba(0,229,255,0.1); border:1px solid rgba(0,229,255,0.2); }
-    .traffic-title { font-weight:700; font-size:14px; color:var(--text); }
-    .traffic-desc { font-size:12px; color:var(--text-muted); line-height:1.5; }
-    .traffic-link { font-size:11px; font-weight:600; color:var(--accent); text-decoration:none; display:flex; align-items:center; gap:4px; margin-top:4px; }
-    .traffic-link:hover { text-decoration:underline; }
-    .tbadge { font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;text-transform:uppercase;letter-spacing:0.06em; }
-    .badge-gh  { background:var(--purple-soft); color:var(--purple); border:1px solid rgba(139,92,246,0.3); }
-    .badge-cf  { background:var(--amber-soft);  color:var(--amber);  border:1px solid rgba(245,158,11,0.3); }
-    .badge-live{ background:var(--green-soft);  color:var(--green);  border:1px solid rgba(16,185,129,0.3); }
+    .traffic-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 14px;
+    }
 
-    .refresh-btn { background:var(--accent-soft); border:1px solid var(--border-bright); color:var(--accent); padding:6px 14px; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:5px; transition:background 0.15s; }
-    .refresh-btn:hover { background:rgba(0,229,255,0.2); }
+    .traffic-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      backdrop-filter: blur(10px);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      cursor: pointer;
+      transition: border-color 0.2s, transform 0.15s;
+    }
 
-    .empty { text-align:center; padding:40px 24px; color:var(--text-muted); font-size:14px; }
+    .traffic-card:hover {
+      border-color: var(--border-bright);
+      transform: translateY(-2px);
+    }
 
-    .info-box { background:rgba(0,229,255,0.05); border:1px solid rgba(0,229,255,0.12); border-radius:var(--radius); padding:14px 18px; }
-    .info-box-title { font-size:11px; font-weight:700; color:var(--accent); margin-bottom:5px; text-transform:uppercase; letter-spacing:0.06em; }
-    .info-box p { font-size:12px; color:var(--text-muted); line-height:1.6; }
+    .traffic-card-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
 
-    .footer { border-top:1px solid var(--border); padding:18px 24px; text-align:center; font-size:11px; color:var(--text-muted); font-family:'JetBrains Mono','Consolas',monospace; margin-top:40px; }
+    .traffic-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .icon-gh {
+      background: rgba(139, 92, 246, 0.2);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+    }
+
+    .icon-cf {
+      background: rgba(245, 158, 11, 0.2);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .icon-cf2 {
+      background: rgba(0, 229, 255, 0.1);
+      border: 1px solid rgba(0, 229, 255, 0.2);
+    }
+
+    .traffic-title {
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--text);
+    }
+
+    .traffic-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .traffic-link {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--accent);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 4px;
+    }
+
+    .traffic-link:hover {
+      text-decoration: underline;
+    }
+
+    .tbadge {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .badge-gh {
+      background: var(--purple-soft);
+      color: var(--purple);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+    }
+
+    .badge-cf {
+      background: var(--amber-soft);
+      color: var(--amber);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .badge-live {
+      background: var(--green-soft);
+      color: var(--green);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .refresh-btn {
+      background: var(--accent-soft);
+      border: 1px solid var(--border-bright);
+      color: var(--accent);
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: background 0.15s;
+    }
+
+    .refresh-btn:hover {
+      background: rgba(0, 229, 255, 0.2);
+    }
+
+    .empty {
+      text-align: center;
+      padding: 40px 24px;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    .info-box {
+      background: rgba(0, 229, 255, 0.05);
+      border: 1px solid rgba(0, 229, 255, 0.12);
+      border-radius: var(--radius);
+      padding: 14px 18px;
+    }
+
+    .info-box-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 5px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .info-box p {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    .footer {
+      border-top: 1px solid var(--border);
+      padding: 18px 24px;
+      text-align: center;
+      font-size: 11px;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', 'Consolas', monospace;
+      margin-top: 40px;
+    }
 
     @media (max-width:640px) {
-      .header { padding:0 16px; }
-      .main { padding:24px 16px 60px; }
-      .kpi-grid { grid-template-columns:1fr 1fr; }
-      .feature-grid { grid-template-columns:1fr; }
-      .traffic-grid { grid-template-columns:1fr; }
+      .header {
+        padding: 0 16px;
+      }
+
+      .main {
+        padding: 24px 16px 60px;
+      }
+
+      .kpi-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .feature-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .traffic-grid {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
+
 <body>
 
-<div class="header">
-  <div class="header-brand">
-    <img src="./icons/star-icon.png" alt="AC-Tracker" onerror="this.style.display='none'">
-    AC-Tracker
-    <span class="header-badge">Mission Control</span>
-  </div>
-  <div class="header-right">
-    <button class="refresh-btn" onclick="loadData()">↻ Refresh</button>
-    <div class="header-time" id="live-clock">--:--:--</div>
-  </div>
-</div>
-
-<div class="main">
-
-  <div class="page-title">
-    <div class="radar-dot"></div>
-    <h1>Owner Dashboard</h1>
-  </div>
-  <p class="page-subtitle">Local-storage profile analytics · Feature adoption · Traffic sources</p>
-
-  <!-- KPIs -->
-  <div class="kpi-grid" id="kpi-grid"></div>
-
-  <!-- ═══ FEATURE STATUS ═══ -->
-  <div class="section">
-    <div class="section-header">
-      <span class="section-title">🛰️ Feature Adoption — All Profiles</span>
-      <div class="section-line"></div>
+  <div class="header">
+    <div class="header-brand">
+      <img src="./icons/star-icon.png" alt="AC-Tracker" onerror="this.style.display='none'">
+      AC-Tracker
+      <span class="header-badge">Mission Control</span>
     </div>
-    <div class="feature-grid" id="feature-grid"></div>
-  </div>
-
-  <!-- ═══ FEATURE BAR CHART ═══ -->
-  <div class="section">
-    <div class="section-header">
-      <span class="section-title">📊 Usage Rate by Feature</span>
-      <div class="section-line"></div>
-    </div>
-    <div style="background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:20px 24px;backdrop-filter:blur(10px);">
-      <div id="feature-bars"></div>
+    <div class="header-right">
+      <button class="refresh-btn" onclick="loadData()">↻ Refresh</button>
+      <div class="header-time" id="live-clock">--:--:--</div>
     </div>
   </div>
 
-  <!-- ═══ PER-PROFILE MATRIX ═══ -->
-  <div class="section">
-    <div class="section-header">
-      <span class="section-title">🧑‍✈️ Feature Matrix — Per Pilot</span>
-      <div class="section-line"></div>
-    </div>
-    <div class="matrix-wrap" id="matrix-wrap"></div>
-  </div>
+  <div class="main">
 
-  <!-- ═══ PILOT ROSTER ═══ -->
-  <div class="section">
-    <div class="section-header">
-      <span class="section-title">✈️ Pilot Profiles</span>
-      <div class="section-line"></div>
+    <div class="page-title">
+      <div class="radar-dot"></div>
+      <h1>Owner Dashboard</h1>
     </div>
-    <div class="pilots-table-wrap" id="pilots-container"></div>
-  </div>
+    <p class="page-subtitle">Local-storage profile analytics · Feature adoption · Traffic sources</p>
 
-  <!-- ═══ STORAGE ═══ -->
-  <div class="section">
-    <div class="section-header">
-      <span class="section-title">💾 localStorage Usage</span>
-      <div class="section-line"></div>
-    </div>
-    <div class="storage-wrap">
-      <div class="storage-row">
-        <span style="font-size:13px;font-weight:600;color:var(--text-dim)">AC-Tracker Data (act_* keys)</span>
-        <span id="storage-size" style="font-size:12px;font-family:'JetBrains Mono','Consolas',monospace;color:var(--text-muted)">— KB</span>
+    <!-- KPIs -->
+    <div class="kpi-grid" id="kpi-grid"></div>
+
+    <!-- ═══ FEATURE STATUS ═══ -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-title">🛰️ Feature Adoption — All Profiles</span>
+        <div class="section-line"></div>
       </div>
-      <div class="storage-bar-bg">
-        <div class="storage-bar-fill" id="storage-fill" style="width:0%"></div>
-      </div>
-      <p style="font-size:11px;color:var(--text-muted);margin-top:8px">Approximate data size (UTF-16 estimate). Browser localStorage limit ~5 MB.</p>
+      <div class="feature-grid" id="feature-grid"></div>
     </div>
-  </div>
 
-  <!-- ═══ TRAFFIC SOURCES ═══ -->
-  <div class="section">
-    <div class="section-header">
-      <span class="section-title">📡 Live Player Traffic — External Analytics</span>
-      <div class="section-line"></div>
+    <!-- ═══ FEATURE BAR CHART ═══ -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-title">📊 Usage Rate by Feature</span>
+        <div class="section-line"></div>
+      </div>
+      <div
+        style="background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:20px 24px;backdrop-filter:blur(10px);">
+        <div id="feature-bars"></div>
+      </div>
     </div>
-    <p style="font-size:12px;color:var(--text-muted);margin-bottom:14px;">AC-Tracker is localStorage-only — no server collects visits. Use these platforms for real visitor counts.</p>
-    <div class="traffic-grid">
-      <div class="traffic-card" onclick="window.open('https://github.com','_blank')">
-        <div class="traffic-card-header">
-          <div class="traffic-icon icon-gh">🐙</div>
-          <div><div class="traffic-title">GitHub Traffic Insights</div><span class="tbadge badge-gh">GitHub Pages</span></div>
+
+    <!-- ═══ PER-PROFILE MATRIX ═══ -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-title">🧑‍✈️ Feature Matrix — Per Pilot</span>
+        <div class="section-line"></div>
+      </div>
+      <div class="matrix-wrap" id="matrix-wrap"></div>
+    </div>
+
+    <!-- ═══ PILOT ROSTER ═══ -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-title">✈️ Pilot Profiles</span>
+        <div class="section-line"></div>
+      </div>
+      <div class="pilots-table-wrap" id="pilots-container"></div>
+    </div>
+
+    <!-- ═══ STORAGE ═══ -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-title">💾 localStorage Usage</span>
+        <div class="section-line"></div>
+      </div>
+      <div class="storage-wrap">
+        <div class="storage-row">
+          <span style="font-size:13px;font-weight:600;color:var(--text-dim)">AC-Tracker Data (act_* keys)</span>
+          <span id="storage-size"
+            style="font-size:12px;font-family:'JetBrains Mono','Consolas',monospace;color:var(--text-muted)">— KB</span>
         </div>
-        <p class="traffic-desc">Views &amp; unique visitors over 14 days. Navigate to your repo → <strong>Insights → Traffic</strong>.</p>
-        <a class="traffic-link" href="https://github.com" target="_blank" rel="noopener">Open GitHub →</a>
-      </div>
-      <div class="traffic-card" onclick="window.open('https://dash.cloudflare.com','_blank')">
-        <div class="traffic-card-header">
-          <div class="traffic-icon icon-cf">🌩️</div>
-          <div><div class="traffic-title">Cloudflare Pages Analytics</div><span class="tbadge badge-cf">Cloudflare</span></div>
+        <div class="storage-bar-bg">
+          <div class="storage-bar-fill" id="storage-fill" style="width:0%"></div>
         </div>
-        <p class="traffic-desc">Real-time views, unique visitors, geographic &amp; referral breakdown for <strong>ac-tracker.pages.dev</strong>.</p>
-        <a class="traffic-link" href="https://dash.cloudflare.com" target="_blank" rel="noopener">Open Dashboard →</a>
-      </div>
-      <div class="traffic-card" onclick="window.open('https://umami.is','_blank')">
-        <div class="traffic-card-header">
-          <div class="traffic-icon icon-cf2">📊</div>
-          <div><div class="traffic-title">Add Umami Analytics</div><span class="tbadge badge-live">Free · Open Source</span></div>
-        </div>
-        <p class="traffic-desc">Lightweight privacy-friendly analytics script — tracks sessions, page views &amp; referrals with zero data selling.</p>
-        <a class="traffic-link" href="https://umami.is/docs" target="_blank" rel="noopener">Setup Guide →</a>
+        <p style="font-size:11px;color:var(--text-muted);margin-top:8px">Approximate data size (UTF-16 estimate).
+          Browser localStorage limit ~5 MB.</p>
       </div>
     </div>
+
+    <!-- ═══ TRAFFIC SOURCES ═══ -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-title">📡 Live Player Traffic — External Analytics</span>
+        <div class="section-line"></div>
+      </div>
+      <p style="font-size:12px;color:var(--text-muted);margin-bottom:14px;">AC-Tracker is localStorage-only — no server
+        collects visits. Use these platforms for real visitor counts.</p>
+      <div class="traffic-grid">
+        <div class="traffic-card" onclick="window.open('https://github.com','_blank')">
+          <div class="traffic-card-header">
+            <div class="traffic-icon icon-gh">🐙</div>
+            <div>
+              <div class="traffic-title">GitHub Traffic Insights</div><span class="tbadge badge-gh">GitHub Pages</span>
+            </div>
+          </div>
+          <p class="traffic-desc">Views &amp; unique visitors over 14 days. Navigate to your repo → <strong>Insights →
+              Traffic</strong>.</p>
+          <a class="traffic-link" href="https://github.com" target="_blank" rel="noopener">Open GitHub →</a>
+        </div>
+        <div class="traffic-card" onclick="window.open('https://dash.cloudflare.com','_blank')">
+          <div class="traffic-card-header">
+            <div class="traffic-icon icon-cf">🌩️</div>
+            <div>
+              <div class="traffic-title">Cloudflare Pages Analytics</div><span class="tbadge badge-cf">Cloudflare</span>
+            </div>
+          </div>
+          <p class="traffic-desc">Real-time views, unique visitors, geographic &amp; referral breakdown for
+            <strong>ac-tracker.pages.dev</strong>.</p>
+          <a class="traffic-link" href="https://dash.cloudflare.com" target="_blank" rel="noopener">Open Dashboard →</a>
+        </div>
+        <div class="traffic-card" onclick="window.open('https://umami.is','_blank')">
+          <div class="traffic-card-header">
+            <div class="traffic-icon icon-cf2">📊</div>
+            <div>
+              <div class="traffic-title">Add Umami Analytics</div><span class="tbadge badge-live">Free · Open
+                Source</span>
+            </div>
+          </div>
+          <p class="traffic-desc">Lightweight privacy-friendly analytics script — tracks sessions, page views &amp;
+            referrals with zero data selling.</p>
+          <a class="traffic-link" href="https://umami.is/docs" target="_blank" rel="noopener">Setup Guide →</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <div class="info-box-title">🔒 Owner Access Only</div>
+      <p>This page is not linked from the main app. Access it at <code style="color:var(--accent)">/admin.html</code>.
+        Set <code style="color:var(--accent)">const OWNER_PIN</code> in the script to lock it with <code
+          style="color:var(--accent)">?pin=YOUR_PIN</code>.</p>
+    </div>
+
   </div>
 
-  <div class="info-box">
-    <div class="info-box-title">🔒 Owner Access Only</div>
-    <p>This page is not linked from the main app. Access it at <code style="color:var(--accent)">/admin.html</code>.
-    Set <code style="color:var(--accent)">const OWNER_PIN</code> in the script to lock it with <code style="color:var(--accent)">?pin=YOUR_PIN</code>.</p>
-  </div>
+  <div class="footer">AC-Tracker Mission Control · Owner-only view · Read-only from localStorage · <span
+      id="footer-time"></span></div>
 
-</div>
-
-<div class="footer">AC-Tracker Mission Control · Owner-only view · Read-only from localStorage · <span id="footer-time"></span></div>
-
-<script>
-  // ─── Optional PIN lock ───────────────────────────────────
-  const OWNER_PIN = ''; // e.g. 'actowner2026'
-  if (OWNER_PIN) {
-    const p = new URLSearchParams(location.search);
-    if (p.get('pin') !== OWNER_PIN) {
-      document.body.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;flex-direction:column;gap:16px"><div style="font-size:48px">🔒</div><div style="font-size:18px;font-weight:700;color:#00e5ff">Mission Control — Restricted</div><div style="font-size:13px;color:#64748b">Access requires the owner PIN in the URL.</div></div>`;
-      throw new Error('Unauthorized');
+  <script>
+    // ─── Optional PIN lock ───────────────────────────────────
+    const OWNER_PIN = 'act2026'; // e.g. 'actowner2026'
+    if (OWNER_PIN) {
+      const p = new URLSearchParams(location.search);
+      if (p.get('pin') !== OWNER_PIN) {
+        document.body.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;flex-direction:column;gap:16px"><div style="font-size:48px">🔒</div><div style="font-size:18px;font-weight:700;color:#00e5ff">Mission Control — Restricted</div><div style="font-size:13px;color:#64748b">Access requires the owner PIN in the URL.</div></div>`;
+        throw new Error('Unauthorized');
+      }
     }
-  }
 
-  // ─── Live clock ──────────────────────────────────────────
-  function updateClock() {
-    const t = new Date().toLocaleTimeString('en-GB', { hour12:false });
-    const el = document.getElementById('live-clock');
-    const ft = document.getElementById('footer-time');
-    if (el) el.textContent = t;
-    if (ft) ft.textContent = 'Last refreshed: ' + new Date().toLocaleString('en-GB');
-  }
-  updateClock();
-  setInterval(updateClock, 1000);
+    // ─── Live clock ──────────────────────────────────────────
+    function updateClock() {
+      const t = new Date().toLocaleTimeString('en-GB', { hour12: false });
+      const el = document.getElementById('live-clock');
+      const ft = document.getElementById('footer-time');
+      if (el) el.textContent = t;
+      if (ft) ft.textContent = 'Last refreshed: ' + new Date().toLocaleString('en-GB');
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
 
-  // ─── Helpers ─────────────────────────────────────────────
-  const mono = (s) => `<span style="font-family:'JetBrains Mono','Consolas',monospace">${s}</span>`;
-  function relativeTime(ts) {
-    if (!ts) return '—';
-    const diff = Date.now() - ts;
-    const m = Math.floor(diff/60000);
-    if (m < 1) return 'Just now';
-    if (m < 60) return `${m}m ago`;
-    const h = Math.floor(m/60);
-    if (h < 24) return `${h}h ago`;
-    return `${Math.floor(h/24)}d ago`;
-  }
-  function fmtDate(ts) {
-    if (!ts) return '—';
-    return new Date(ts).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
-  }
-  function isAvatarImage(v) {
-    if (!v) return false;
-    return v.startsWith('icons/') || /\.(png|jpg|webp|svg)$/i.test(v);
-  }
+    // ─── Helpers ─────────────────────────────────────────────
+    const mono = (s) => `<span style="font-family:'JetBrains Mono','Consolas',monospace">${s}</span>`;
+    function relativeTime(ts) {
+      if (!ts) return '—';
+      const diff = Date.now() - ts;
+      const m = Math.floor(diff / 60000);
+      if (m < 1) return 'Just now';
+      if (m < 60) return `${m}m ago`;
+      const h = Math.floor(m / 60);
+      if (h < 24) return `${h}h ago`;
+      return `${Math.floor(h / 24)}d ago`;
+    }
+    function fmtDate(ts) {
+      if (!ts) return '—';
+      return new Date(ts).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+    }
+    function isAvatarImage(v) {
+      if (!v) return false;
+      return v.startsWith('icons/') || /\.(png|jpg|webp|svg)$/i.test(v);
+    }
 
-  // ─── Feature definitions ──────────────────────────────────
-  // Each returns { used: bool, partial: bool, detail: string, value: number 0-1 }
-  const FEATURES = [
-    {
-      key: 'flights',
-      label: 'Flight Deck',
-      icon: '✈️',
-      desc: 'Core feature — routes with flight counts > 0',
-      check: (p) => {
+    // ─── Feature definitions ──────────────────────────────────
+    // Each returns { used: bool, partial: bool, detail: string, value: number 0-1 }
+    const FEATURES = [
+      {
+        key: 'flights',
+        label: 'Flight Deck',
+        icon: '✈️',
+        desc: 'Core feature — routes with flight counts > 0',
+        check: (p) => {
+          const ud = p.userData || {};
+          const count = Object.values(ud).reduce((s, e) => s + (e.count || 0), 0);
+          return { used: count > 0, partial: false, count, label: `${count.toLocaleString()} flights logged` };
+        }
+      },
+      {
+        key: 'bookmarks',
+        label: 'Bookmarks',
+        icon: '🔖',
+        desc: 'Routes starred/bookmarked (isCustomList)',
+        check: (p) => {
+          const ud = p.userData || {};
+          const count = Object.values(ud).filter(e => e.isCustomList).length;
+          return { used: count > 0, partial: false, count, label: `${count} route${count !== 1 ? 's' : ''} bookmarked` };
+        }
+      },
+      {
+        key: 'maps',
+        label: 'Map Inventory',
+        icon: '🗺️',
+        desc: 'Maps view enabled & map counts tracked',
+        check: (p) => {
+          const enabled = p.prefs?.enabledViews?.maps !== false;
+          const ud = p.userData || {};
+          const hasMapData = Object.values(ud).some(e => (e.maps || 0) > 0);
+          return { used: enabled && hasMapData, partial: enabled && !hasMapData, count: 0, label: enabled ? (hasMapData ? 'Enabled + map counts tracked' : 'Enabled but no map counts') : 'Disabled in nav' };
+        }
+      },
+      {
+        key: 'airplanes',
+        label: 'Fleet Hangar',
+        icon: '🛩️',
+        desc: 'Aircraft added to the hangar',
+        check: (p) => {
+          const enabled = p.prefs?.enabledViews?.airplanes !== false;
+          const count = Array.isArray(p.airplanes) ? p.airplanes.length : 0;
+          return { used: enabled && count > 0, partial: enabled && count === 0, count, label: enabled ? `${count} aircraft in hangar` : 'Disabled in nav' };
+        }
+      },
+      {
+        key: 'stats',
+        label: 'Telemetry & Stats',
+        icon: '📈',
+        desc: 'Stats view enabled & star history recorded',
+        check: (p) => {
+          const enabled = p.prefs?.enabledViews?.stats !== false;
+          const histLen = (p.starHistory || []).length;
+          return { used: enabled && histLen > 1, partial: enabled && histLen <= 1, count: histLen, label: enabled ? `${histLen} telemetry snapshot${histLen !== 1 ? 's' : ''}` : 'Disabled in nav' };
+        }
+      },
+      {
+        key: 'missions',
+        label: 'Missions Depot',
+        icon: '🏛️',
+        desc: 'Mission items counted (> 0)',
+        check: (p) => {
+          const enabled = p.prefs?.enabledViews?.missions !== false;
+          const m = p.missions || {};
+          const hasData = Object.values(m).some(items => Object.values(items || {}).some(v => v > 0));
+          return { used: enabled && hasData, partial: enabled && !hasData, count: 0, label: enabled ? (hasData ? 'Active mission tracking' : 'Enabled, no items counted') : 'Disabled in nav' };
+        }
+      },
+      {
+        key: 'events',
+        label: 'Events Calendar',
+        icon: '📅',
+        desc: 'Events tab enabled in navigation',
+        check: (p) => {
+          const enabled = p.prefs?.enabledViews?.events !== false;
+          return { used: enabled, partial: false, count: 0, label: enabled ? 'Enabled in nav' : 'Disabled in nav' };
+        }
+      },
+      {
+        key: 'starOffsets',
+        label: 'Star Sync Offsets',
+        icon: '⭐',
+        desc: 'Manual in-game star sync offsets set',
+        check: (p) => {
+          const o = p.starOffsets || {};
+          const total = (o.ace || 0) + (o.captain || 0) + (o.expert || 0) + (o.master || 0) + (o.specialist || 0);
+          return { used: total > 0, partial: false, count: total, label: total > 0 ? `+${total} total offset stars` : 'No offsets configured' };
+        }
+      },
+      {
+        key: 'starMode',
+        label: 'Alt. Star Mode',
+        icon: '🔢',
+        desc: 'Non-default star count mode (exact or offset)',
+        check: (p) => {
+          const mode = p.prefs?.starCountMode || 'cumulative';
+          const changed = mode !== 'cumulative';
+          return { used: changed, partial: false, count: 0, label: `Mode: ${mode}` };
+        }
+      },
+      {
+        key: 'customTheme',
+        label: 'Custom Theme',
+        icon: '🎨',
+        desc: 'Non-default theme selected',
+        check: (p) => {
+          const t = p.prefs?.themeId || 'stealth-ghost';
+          const isDefault = t === 'stealth-ghost';
+          return { used: !isDefault, partial: false, count: 0, label: `Theme: ${t}` };
+        }
+      },
+      {
+        key: 'customLogo',
+        label: 'Custom Logo',
+        icon: '🏷️',
+        desc: 'Non-default brand logo selected',
+        check: (p) => {
+          const l = p.prefs?.logoId || 'opt1';
+          const isDefault = l === 'opt1';
+          return { used: !isDefault, partial: false, count: 0, label: `Logo: ${l}` };
+        }
+      },
+      {
+        key: 'gridView',
+        label: 'Grid View',
+        icon: '⊞',
+        desc: 'Grid set as default flight deck layout',
+        check: (p) => {
+          const v = p.prefs?.defaultFlightView || 'list';
+          return { used: v === 'grid', partial: false, count: 0, label: `Default: ${v} view` };
+        }
+      },
+      {
+        key: 'compactDensity',
+        label: 'Compact Density',
+        icon: '📏',
+        desc: 'Compact row density enabled',
+        check: (p) => {
+          const d = p.prefs?.density || 'comfortable';
+          return { used: d === 'compact', partial: false, count: 0, label: `Density: ${d}` };
+        }
+      },
+      {
+        key: 'focusMode',
+        label: 'Focus Mode',
+        icon: '🎯',
+        desc: 'Focus mode (collapsed header) enabled',
+        check: (p) => {
+          const f = p.prefs?.focusMode || false;
+          return { used: f, partial: false, count: 0, label: f ? 'Focus mode ON' : 'Off' };
+        }
+      },
+      {
+        key: 'recentFlights',
+        label: 'Recent Flights Bar',
+        icon: '⏱️',
+        desc: 'Recently Flown quick-jump strip enabled',
+        check: (p) => {
+          const on = p.prefs?.showRecentFlights !== false;
+          return { used: on, partial: false, count: 0, label: on ? 'Shown' : 'Hidden' };
+        }
+      },
+      {
+        key: 'eventBanner',
+        label: 'Event Banner',
+        icon: '📣',
+        desc: 'Live event banner shown on Flight Deck',
+        check: (p) => {
+          const on = p.prefs?.showActiveEventBanner !== false;
+          return { used: on, partial: false, count: 0, label: on ? 'Shown' : 'Hidden' };
+        }
+      },
+      {
+        key: 'gettingStarted',
+        label: 'Getting Started',
+        icon: '💡',
+        desc: 'Onboarding guide completed',
+        check: (p) => {
+          const seen = p.prefs?.hasSeenGettingStarted || false;
+          return { used: seen, partial: false, count: 0, label: seen ? 'Guide completed' : 'Not opened yet' };
+        }
+      },
+      {
+        key: 'multiProfile',
+        label: 'Multi-Profile',
+        icon: '👥',
+        desc: 'More than one pilot profile created',
+        check: (_p, allProfiles) => {
+          const n = allProfiles.length;
+          return { used: n > 1, partial: false, count: n, label: `${n} profile${n !== 1 ? 's' : ''} total` };
+        }
+      },
+    ];
+
+    // ─── Main data loader ─────────────────────────────────────
+    function loadData() {
+      let profiles = [];
+      try {
+        const raw = localStorage.getItem('act_profiles');
+        if (raw) profiles = JSON.parse(raw);
+      } catch (e) { }
+
+      const totalProfiles = profiles.length;
+
+      // KPI summary
+      let totalFlights = 0, totalStars = 0, newestTs = 0;
+      const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+      let recentlyActive = 0;
+
+      profiles.forEach(p => {
         const ud = p.userData || {};
-        const count = Object.values(ud).reduce((s,e) => s + (e.count||0), 0);
-        return { used: count > 0, partial: false, count, label: `${count.toLocaleString()} flights logged` };
-      }
-    },
-    {
-      key: 'bookmarks',
-      label: 'Bookmarks',
-      icon: '🔖',
-      desc: 'Routes starred/bookmarked (isCustomList)',
-      check: (p) => {
-        const ud = p.userData || {};
-        const count = Object.values(ud).filter(e => e.isCustomList).length;
-        return { used: count > 0, partial: false, count, label: `${count} route${count!==1?'s':''} bookmarked` };
-      }
-    },
-    {
-      key: 'maps',
-      label: 'Map Inventory',
-      icon: '🗺️',
-      desc: 'Maps view enabled & map counts tracked',
-      check: (p) => {
-        const enabled = p.prefs?.enabledViews?.maps !== false;
-        const ud = p.userData || {};
-        const hasMapData = Object.values(ud).some(e => (e.maps||0) > 0);
-        return { used: enabled && hasMapData, partial: enabled && !hasMapData, count: 0, label: enabled ? (hasMapData ? 'Enabled + map counts tracked' : 'Enabled but no map counts') : 'Disabled in nav' };
-      }
-    },
-    {
-      key: 'airplanes',
-      label: 'Fleet Hangar',
-      icon: '🛩️',
-      desc: 'Aircraft added to the hangar',
-      check: (p) => {
-        const enabled = p.prefs?.enabledViews?.airplanes !== false;
-        const count = Array.isArray(p.airplanes) ? p.airplanes.length : 0;
-        return { used: enabled && count > 0, partial: enabled && count === 0, count, label: enabled ? `${count} aircraft in hangar` : 'Disabled in nav' };
-      }
-    },
-    {
-      key: 'stats',
-      label: 'Telemetry & Stats',
-      icon: '📈',
-      desc: 'Stats view enabled & star history recorded',
-      check: (p) => {
-        const enabled = p.prefs?.enabledViews?.stats !== false;
-        const histLen = (p.starHistory||[]).length;
-        return { used: enabled && histLen > 1, partial: enabled && histLen <= 1, count: histLen, label: enabled ? `${histLen} telemetry snapshot${histLen!==1?'s':''}` : 'Disabled in nav' };
-      }
-    },
-    {
-      key: 'missions',
-      label: 'Missions Depot',
-      icon: '🏛️',
-      desc: 'Mission items counted (> 0)',
-      check: (p) => {
-        const enabled = p.prefs?.enabledViews?.missions !== false;
-        const m = p.missions || {};
-        const hasData = Object.values(m).some(items => Object.values(items||{}).some(v => v > 0));
-        return { used: enabled && hasData, partial: enabled && !hasData, count: 0, label: enabled ? (hasData ? 'Active mission tracking' : 'Enabled, no items counted') : 'Disabled in nav' };
-      }
-    },
-    {
-      key: 'events',
-      label: 'Events Calendar',
-      icon: '📅',
-      desc: 'Events tab enabled in navigation',
-      check: (p) => {
-        const enabled = p.prefs?.enabledViews?.events !== false;
-        return { used: enabled, partial: false, count: 0, label: enabled ? 'Enabled in nav' : 'Disabled in nav' };
-      }
-    },
-    {
-      key: 'starOffsets',
-      label: 'Star Sync Offsets',
-      icon: '⭐',
-      desc: 'Manual in-game star sync offsets set',
-      check: (p) => {
-        const o = p.starOffsets || {};
-        const total = (o.ace||0)+(o.captain||0)+(o.expert||0)+(o.master||0)+(o.specialist||0);
-        return { used: total > 0, partial: false, count: total, label: total > 0 ? `+${total} total offset stars` : 'No offsets configured' };
-      }
-    },
-    {
-      key: 'starMode',
-      label: 'Alt. Star Mode',
-      icon: '🔢',
-      desc: 'Non-default star count mode (exact or offset)',
-      check: (p) => {
-        const mode = p.prefs?.starCountMode || 'cumulative';
-        const changed = mode !== 'cumulative';
-        return { used: changed, partial: false, count: 0, label: `Mode: ${mode}` };
-      }
-    },
-    {
-      key: 'customTheme',
-      label: 'Custom Theme',
-      icon: '🎨',
-      desc: 'Non-default theme selected',
-      check: (p) => {
-        const t = p.prefs?.themeId || 'stealth-ghost';
-        const isDefault = t === 'stealth-ghost';
-        return { used: !isDefault, partial: false, count: 0, label: `Theme: ${t}` };
-      }
-    },
-    {
-      key: 'customLogo',
-      label: 'Custom Logo',
-      icon: '🏷️',
-      desc: 'Non-default brand logo selected',
-      check: (p) => {
-        const l = p.prefs?.logoId || 'opt1';
-        const isDefault = l === 'opt1';
-        return { used: !isDefault, partial: false, count: 0, label: `Logo: ${l}` };
-      }
-    },
-    {
-      key: 'gridView',
-      label: 'Grid View',
-      icon: '⊞',
-      desc: 'Grid set as default flight deck layout',
-      check: (p) => {
-        const v = p.prefs?.defaultFlightView || 'list';
-        return { used: v === 'grid', partial: false, count: 0, label: `Default: ${v} view` };
-      }
-    },
-    {
-      key: 'compactDensity',
-      label: 'Compact Density',
-      icon: '📏',
-      desc: 'Compact row density enabled',
-      check: (p) => {
-        const d = p.prefs?.density || 'comfortable';
-        return { used: d === 'compact', partial: false, count: 0, label: `Density: ${d}` };
-      }
-    },
-    {
-      key: 'focusMode',
-      label: 'Focus Mode',
-      icon: '🎯',
-      desc: 'Focus mode (collapsed header) enabled',
-      check: (p) => {
-        const f = p.prefs?.focusMode || false;
-        return { used: f, partial: false, count: 0, label: f ? 'Focus mode ON' : 'Off' };
-      }
-    },
-    {
-      key: 'recentFlights',
-      label: 'Recent Flights Bar',
-      icon: '⏱️',
-      desc: 'Recently Flown quick-jump strip enabled',
-      check: (p) => {
-        const on = p.prefs?.showRecentFlights !== false;
-        return { used: on, partial: false, count: 0, label: on ? 'Shown' : 'Hidden' };
-      }
-    },
-    {
-      key: 'eventBanner',
-      label: 'Event Banner',
-      icon: '📣',
-      desc: 'Live event banner shown on Flight Deck',
-      check: (p) => {
-        const on = p.prefs?.showActiveEventBanner !== false;
-        return { used: on, partial: false, count: 0, label: on ? 'Shown' : 'Hidden' };
-      }
-    },
-    {
-      key: 'gettingStarted',
-      label: 'Getting Started',
-      icon: '💡',
-      desc: 'Onboarding guide completed',
-      check: (p) => {
-        const seen = p.prefs?.hasSeenGettingStarted || false;
-        return { used: seen, partial: false, count: 0, label: seen ? 'Guide completed' : 'Not opened yet' };
-      }
-    },
-    {
-      key: 'multiProfile',
-      label: 'Multi-Profile',
-      icon: '👥',
-      desc: 'More than one pilot profile created',
-      check: (_p, allProfiles) => {
-        const n = allProfiles.length;
-        return { used: n > 1, partial: false, count: n, label: `${n} profile${n!==1?'s':''} total` };
-      }
-    },
-  ];
-
-  // ─── Main data loader ─────────────────────────────────────
-  function loadData() {
-    let profiles = [];
-    try {
-      const raw = localStorage.getItem('act_profiles');
-      if (raw) profiles = JSON.parse(raw);
-    } catch(e) {}
-
-    const totalProfiles = profiles.length;
-
-    // KPI summary
-    let totalFlights = 0, totalStars = 0, newestTs = 0;
-    const sevenDaysAgo = Date.now() - 7*24*60*60*1000;
-    let recentlyActive = 0;
-
-    profiles.forEach(p => {
-      const ud = p.userData || {};
-      let pFlights = 0, lastAct = 0;
-      Object.values(ud).forEach(e => {
-        pFlights += (e.count||0);
-        if (e.lastUpdated > lastAct) lastAct = e.lastUpdated;
+        let pFlights = 0, lastAct = 0;
+        Object.values(ud).forEach(e => {
+          pFlights += (e.count || 0);
+          if (e.lastUpdated > lastAct) lastAct = e.lastUpdated;
+        });
+        totalFlights += pFlights;
+        const history = p.starHistory || [];
+        totalStars += history.length ? history[history.length - 1].stars : 0;
+        if (lastAct > newestTs) newestTs = lastAct;
+        if (Object.values(ud).some(e => e.lastUpdated > sevenDaysAgo)) recentlyActive++;
       });
-      totalFlights += pFlights;
-      const history = p.starHistory || [];
-      totalStars += history.length ? history[history.length-1].stars : 0;
-      if (lastAct > newestTs) newestTs = lastAct;
-      if (Object.values(ud).some(e => e.lastUpdated > sevenDaysAgo)) recentlyActive++;
-    });
 
-    // ── KPIs ──
-    document.getElementById('kpi-grid').innerHTML = `
+      // ── KPIs ──
+      document.getElementById('kpi-grid').innerHTML = `
       <div class="kpi-card">
         <div class="kpi-label">👤 Pilot Profiles</div>
         <div class="kpi-value">${totalProfiles}</div>
@@ -643,43 +1209,43 @@
       </div>
     `;
 
-    if (!totalProfiles) {
-      document.getElementById('feature-grid').innerHTML = `<div class="empty" style="grid-column:1/-1">No profiles found in localStorage. <a href="./" style="color:var(--accent)">Open AC-Tracker</a> and create a profile first.</div>`;
-      document.getElementById('feature-bars').innerHTML = `<div class="empty">No data.</div>`;
-      document.getElementById('matrix-wrap').innerHTML = `<div class="empty">No data.</div>`;
-      document.getElementById('pilots-container').innerHTML = `<div class="empty">No pilot profiles found.</div>`;
-      return;
-    }
-
-    // ── Evaluate all features across all profiles ──
-    const featureResults = FEATURES.map(feat => {
-      const perProfile = profiles.map(p => feat.check(p, profiles));
-      const usedCount = perProfile.filter(r => r.used).length;
-      const partialCount = perProfile.filter(r => r.partial).length;
-      const adoptionRate = totalProfiles > 0 ? usedCount / totalProfiles : 0;
-      const anyPartial = partialCount > 0 && usedCount === 0;
-      return { feat, perProfile, usedCount, partialCount, adoptionRate, anyPartial };
-    });
-
-    // ── Feature Card Grid ──
-    const featureGridHtml = featureResults.map(({ feat, usedCount, adoptionRate, anyPartial, perProfile }) => {
-      const pct = Math.round(adoptionRate * 100);
-      let statusClass, pillClass, pillLabel, barClass;
-      if (usedCount === totalProfiles) {
-        statusClass = 'active'; pillClass = 'pill-active'; pillLabel = 'All Pilots'; barClass = 'fill-green';
-      } else if (usedCount > 0) {
-        statusClass = 'active'; pillClass = 'pill-active'; pillLabel = `${usedCount}/${totalProfiles} Pilots`; barClass = 'fill-green';
-      } else if (anyPartial) {
-        statusClass = 'partial'; pillClass = 'pill-partial'; pillLabel = 'Configured'; barClass = 'fill-amber';
-      } else {
-        statusClass = 'unused'; pillClass = 'pill-unused'; pillLabel = 'Not Used'; barClass = 'fill-muted';
+      if (!totalProfiles) {
+        document.getElementById('feature-grid').innerHTML = `<div class="empty" style="grid-column:1/-1">No profiles found in localStorage. <a href="./" style="color:var(--accent)">Open AC-Tracker</a> and create a profile first.</div>`;
+        document.getElementById('feature-bars').innerHTML = `<div class="empty">No data.</div>`;
+        document.getElementById('matrix-wrap').innerHTML = `<div class="empty">No data.</div>`;
+        document.getElementById('pilots-container').innerHTML = `<div class="empty">No pilot profiles found.</div>`;
+        return;
       }
 
-      // Sample detail from first profile that uses it
-      const firstUsed = perProfile.find(r => r.used || r.partial);
-      const detailText = firstUsed ? firstUsed.label : (perProfile[0] ? perProfile[0].label : feat.desc);
+      // ── Evaluate all features across all profiles ──
+      const featureResults = FEATURES.map(feat => {
+        const perProfile = profiles.map(p => feat.check(p, profiles));
+        const usedCount = perProfile.filter(r => r.used).length;
+        const partialCount = perProfile.filter(r => r.partial).length;
+        const adoptionRate = totalProfiles > 0 ? usedCount / totalProfiles : 0;
+        const anyPartial = partialCount > 0 && usedCount === 0;
+        return { feat, perProfile, usedCount, partialCount, adoptionRate, anyPartial };
+      });
 
-      return `
+      // ── Feature Card Grid ──
+      const featureGridHtml = featureResults.map(({ feat, usedCount, adoptionRate, anyPartial, perProfile }) => {
+        const pct = Math.round(adoptionRate * 100);
+        let statusClass, pillClass, pillLabel, barClass;
+        if (usedCount === totalProfiles) {
+          statusClass = 'active'; pillClass = 'pill-active'; pillLabel = 'All Pilots'; barClass = 'fill-green';
+        } else if (usedCount > 0) {
+          statusClass = 'active'; pillClass = 'pill-active'; pillLabel = `${usedCount}/${totalProfiles} Pilots`; barClass = 'fill-green';
+        } else if (anyPartial) {
+          statusClass = 'partial'; pillClass = 'pill-partial'; pillLabel = 'Configured'; barClass = 'fill-amber';
+        } else {
+          statusClass = 'unused'; pillClass = 'pill-unused'; pillLabel = 'Not Used'; barClass = 'fill-muted';
+        }
+
+        // Sample detail from first profile that uses it
+        const firstUsed = perProfile.find(r => r.used || r.partial);
+        const detailText = firstUsed ? firstUsed.label : (perProfile[0] ? perProfile[0].label : feat.desc);
+
+        return `
         <div class="feat-card ${statusClass}">
           <div class="feat-top">
             <div class="feat-name"><span class="feat-icon">${feat.icon}</span>${feat.label}</div>
@@ -689,19 +1255,19 @@
           <div class="feat-detail">${detailText}</div>
           <div class="feat-profiles" style="color:var(--text-muted)">${pct}% adoption · ${feat.desc}</div>
         </div>`;
-    }).join('');
-    document.getElementById('feature-grid').innerHTML = featureGridHtml;
+      }).join('');
+      document.getElementById('feature-grid').innerHTML = featureGridHtml;
 
-    // ── Adoption bar chart ──
-    const sorted = [...featureResults].sort((a,b) => b.adoptionRate - a.adoptionRate);
-    const barsHtml = sorted.map(({ feat, usedCount, adoptionRate, anyPartial }) => {
-      const pct = Math.round(adoptionRate * 100);
-      let barColor, labelColor;
-      if (usedCount > 0)      { barColor='linear-gradient(90deg,#10b981,#34d399)'; labelColor='var(--green)'; }
-      else if (anyPartial)    { barColor='linear-gradient(90deg,#f59e0b,#fbbf24)'; labelColor='var(--amber)'; }
-      else                    { barColor='rgba(100,116,139,0.3)'; labelColor='var(--text-muted)'; }
+      // ── Adoption bar chart ──
+      const sorted = [...featureResults].sort((a, b) => b.adoptionRate - a.adoptionRate);
+      const barsHtml = sorted.map(({ feat, usedCount, adoptionRate, anyPartial }) => {
+        const pct = Math.round(adoptionRate * 100);
+        let barColor, labelColor;
+        if (usedCount > 0) { barColor = 'linear-gradient(90deg,#10b981,#34d399)'; labelColor = 'var(--green)'; }
+        else if (anyPartial) { barColor = 'linear-gradient(90deg,#f59e0b,#fbbf24)'; labelColor = 'var(--amber)'; }
+        else { barColor = 'rgba(100,116,139,0.3)'; labelColor = 'var(--text-muted)'; }
 
-      return `
+        return `
         <div class="adoption-row">
           <div class="adoption-label"><span>${feat.icon}</span>${feat.label}</div>
           <div class="adoption-bar-bg">
@@ -709,72 +1275,72 @@
           </div>
           <div class="adoption-count" style="color:${labelColor}">${pct}%</div>
         </div>`;
-    }).join('');
-    document.getElementById('feature-bars').innerHTML = barsHtml;
-
-    // ── Per-profile matrix ──
-    const headerCells = profiles.map(p => {
-      const meta = p.meta || {};
-      const avatarHtml = isAvatarImage(meta.emoji)
-        ? `<img src="${meta.emoji}" style="width:20px;height:20px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:4px;" onerror="this.style.display='none'">`
-        : `<span style="margin-right:3px">${meta.emoji||'✈️'}</span>`;
-      const shortName = (meta.name||'Pilot').substring(0,10);
-      return `<th>${avatarHtml}${shortName}</th>`;
-    }).join('');
-
-    const matrixRows = featureResults.map(({ feat, perProfile }) => {
-      const cells = perProfile.map(r => {
-        if (r.used)         return `<td><span class="check check-yes" title="${r.label}">✓</span></td>`;
-        if (r.partial)      return `<td><span class="check check-partial" title="${r.label}">◑</span></td>`;
-        return `<td><span class="check check-no" title="${r.label}">✗</span></td>`;
       }).join('');
-      return `<tr><td>${feat.icon} ${feat.label}</td>${cells}</tr>`;
-    }).join('');
+      document.getElementById('feature-bars').innerHTML = barsHtml;
 
-    const legendHtml = `
+      // ── Per-profile matrix ──
+      const headerCells = profiles.map(p => {
+        const meta = p.meta || {};
+        const avatarHtml = isAvatarImage(meta.emoji)
+          ? `<img src="${meta.emoji}" style="width:20px;height:20px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:4px;" onerror="this.style.display='none'">`
+          : `<span style="margin-right:3px">${meta.emoji || '✈️'}</span>`;
+        const shortName = (meta.name || 'Pilot').substring(0, 10);
+        return `<th>${avatarHtml}${shortName}</th>`;
+      }).join('');
+
+      const matrixRows = featureResults.map(({ feat, perProfile }) => {
+        const cells = perProfile.map(r => {
+          if (r.used) return `<td><span class="check check-yes" title="${r.label}">✓</span></td>`;
+          if (r.partial) return `<td><span class="check check-partial" title="${r.label}">◑</span></td>`;
+          return `<td><span class="check check-no" title="${r.label}">✗</span></td>`;
+        }).join('');
+        return `<tr><td>${feat.icon} ${feat.label}</td>${cells}</tr>`;
+      }).join('');
+
+      const legendHtml = `
       <tr style="border-top:1px solid rgba(0,229,255,0.1)">
-        <td style="padding-top:12px;color:var(--text-muted);font-size:11px;" colspan="${1+profiles.length}">
+        <td style="padding-top:12px;color:var(--text-muted);font-size:11px;" colspan="${1 + profiles.length}">
           <span class="check check-yes">✓</span> Active &nbsp;
           <span class="check check-partial">◑</span> Configured / enabled but no data &nbsp;
           <span class="check check-no">✗</span> Unused / disabled
         </td>
       </tr>`;
 
-    document.getElementById('matrix-wrap').innerHTML = `
+      document.getElementById('matrix-wrap').innerHTML = `
       <table>
         <thead><tr><th>Feature</th>${headerCells}</tr></thead>
         <tbody>${matrixRows}${legendHtml}</tbody>
       </table>`;
 
-    // ── Pilot roster ──
-    const rows = profiles.map(p => {
-      const meta = p.meta || {};
-      const ud = p.userData || {};
-      let flightCount = 0, lastActivity = 0, destinations = 0;
-      Object.values(ud).forEach(e => {
-        if (e.count > 0) { destinations++; flightCount += e.count; }
-        if (e.lastUpdated > lastActivity) lastActivity = e.lastUpdated;
-      });
-      const history = p.starHistory || [];
-      const stars = history.length ? history[history.length-1].stars : 0;
-      const missions = p.missions ? Object.keys(p.missions).length : 0;
-      const avatarHtml = isAvatarImage(meta.emoji)
-        ? `<div class="pilot-avatar"><img src="${meta.emoji}" alt="" onerror="this.parentElement.textContent='✈️'"></div>`
-        : `<div class="pilot-avatar">${meta.emoji||'✈️'}</div>`;
-      const accent = meta.accentColor || '#00e5ff';
-      return `
+      // ── Pilot roster ──
+      const rows = profiles.map(p => {
+        const meta = p.meta || {};
+        const ud = p.userData || {};
+        let flightCount = 0, lastActivity = 0, destinations = 0;
+        Object.values(ud).forEach(e => {
+          if (e.count > 0) { destinations++; flightCount += e.count; }
+          if (e.lastUpdated > lastActivity) lastActivity = e.lastUpdated;
+        });
+        const history = p.starHistory || [];
+        const stars = history.length ? history[history.length - 1].stars : 0;
+        const missions = p.missions ? Object.keys(p.missions).length : 0;
+        const avatarHtml = isAvatarImage(meta.emoji)
+          ? `<div class="pilot-avatar"><img src="${meta.emoji}" alt="" onerror="this.parentElement.textContent='✈️'"></div>`
+          : `<div class="pilot-avatar">${meta.emoji || '✈️'}</div>`;
+        const accent = meta.accentColor || '#00e5ff';
+        return `
         <tr>
-          <td><div class="pilot-name">${avatarHtml}<div><div style="color:${accent}">${meta.name||'Unknown'}</div>${meta.acCode?`<span class="ac-code">${meta.acCode}</span>`:''}</div></div></td>
+          <td><div class="pilot-name">${avatarHtml}<div><div style="color:${accent}">${meta.name || 'Unknown'}</div>${meta.acCode ? `<span class="ac-code">${meta.acCode}</span>` : ''}</div></div></td>
           <td>${mono(flightCount.toLocaleString())}</td>
           <td>${mono(destinations)}</td>
-          <td style="color:var(--amber)">${mono('⭐ '+stars.toLocaleString())}</td>
+          <td style="color:var(--amber)">${mono('⭐ ' + stars.toLocaleString())}</td>
           <td>${mono(missions)}</td>
           <td style="color:var(--text-muted);font-size:11px">${fmtDate(meta.createdAt)}</td>
           <td style="color:var(--text-muted);font-size:11px">${lastActivity ? relativeTime(lastActivity) : '—'}</td>
         </tr>`;
-    }).join('');
+      }).join('');
 
-    document.getElementById('pilots-container').innerHTML = `
+      document.getElementById('pilots-container').innerHTML = `
       <table>
         <thead><tr>
           <th>Pilot</th><th>Flights</th><th>Routes</th><th>Stars</th>
@@ -783,23 +1349,24 @@
         <tbody>${rows}</tbody>
       </table>`;
 
-    // ── Storage usage ──
-    try {
-      let actBytes = 0;
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key && key.startsWith('act_')) {
-          actBytes += (key.length + (localStorage.getItem(key)||'').length) * 2;
+      // ── Storage usage ──
+      try {
+        let actBytes = 0;
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && key.startsWith('act_')) {
+            actBytes += (key.length + (localStorage.getItem(key) || '').length) * 2;
+          }
         }
-      }
-      const kb = (actBytes/1024).toFixed(1);
-      const pct = Math.min(100, (actBytes/(5*1024*1024))*100);
-      document.getElementById('storage-size').textContent = `${kb} KB / ~5,120 KB`;
-      document.getElementById('storage-fill').style.width = pct+'%';
-    } catch(e) {}
-  }
+        const kb = (actBytes / 1024).toFixed(1);
+        const pct = Math.min(100, (actBytes / (5 * 1024 * 1024)) * 100);
+        document.getElementById('storage-size').textContent = `${kb} KB / ~5,120 KB`;
+        document.getElementById('storage-fill').style.width = pct + '%';
+      } catch (e) { }
+    }
 
-  loadData();
-</script>
+    loadData();
+  </script>
 </body>
+
 </html>
