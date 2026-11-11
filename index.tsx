@@ -108,7 +108,7 @@ import { sendTelemetryPing } from './telemetry';
 // --- App Version & Maintenance Tracker ---
 // NOTE: Always update APP_UPDATED_DATE whenever making changes in the app
 export const APP_VERSION = 'Version 2.9';
-export const APP_UPDATED_DATE = 'Nov 9, 2026';
+export const APP_UPDATED_DATE = 'Nov 11, 2026';
 
 // --- Types & Interfaces ---
 type SortField =
@@ -2054,6 +2054,28 @@ export const ACTracker = () => {
     setView(defaultFlightView || 'list');
   };
 
+  const handleNavigateToCategoryMaps = (category: string) => {
+    setActiveCategory(category);
+    setExpandedCategory(category);
+    if (category === 'Event Flights') {
+      setHideEventDestinations(false);
+    }
+    setFilterAircraft('All');
+    setFilterGroup('All');
+    setFilterStarRank(null);
+    setShowOnlyMaps(true);
+    setHideZeroMaps(true);
+    setHide3Star(false);
+    setSearchQuery('');
+    setSelectedQuickFilters(['regular', 'adventure', 'alliance', 'event']);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setView('list');
+    return;
+
+
+    setView(defaultFlightView || 'list');
+  };
+
   // Export Active Profile to JSON
   const exportToJSON = (targetProfileId?: string) => {
     const profId = targetProfileId || activeProfileId;
@@ -2954,6 +2976,7 @@ export const ACTracker = () => {
               <MapInventoryPage
                 destinations={destinations}
                 onNavigateToDestination={handleNavigateToDestination}
+                onNavigateToCategoryMaps={handleNavigateToCategoryMaps}
                 updateMapCount={updateMapCount}
                 showMissingAlliance={showMissingAlliance}
                 setShowMissingAlliance={setShowMissingAlliance}

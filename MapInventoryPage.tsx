@@ -7,6 +7,7 @@ import {
   Search,
   X,
   Clock,
+  ChevronRight,
 } from 'lucide-react';
 import {
   BarChart,
@@ -25,6 +26,7 @@ import { EditableNumberInput } from './src/components/common/EditableNumberInput
 export interface MapInventoryPageProps {
   destinations: FlightDestination[];
   onNavigateToDestination: (destinationName: string) => void;
+  onNavigateToCategoryMaps?: (categoryName: string) => void;
   updateMapCount: (id: string, count: number) => void;
   showMissingAlliance: boolean;
   setShowMissingAlliance: (val: boolean) => void;
@@ -35,6 +37,7 @@ export interface MapInventoryPageProps {
 export const MapInventoryPage: React.FC<MapInventoryPageProps> = ({
   destinations,
   onNavigateToDestination,
+  onNavigateToCategoryMaps,
   updateMapCount,
   showMissingAlliance,
   setShowMissingAlliance,
@@ -156,15 +159,34 @@ export const MapInventoryPage: React.FC<MapInventoryPageProps> = ({
 
       {/* Collections Progress */}
       <div className="glass-panel rounded-3xl p-6 border border-[var(--border-card)] space-y-4">
-        <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] flex items-center gap-2">
-          <Compass className="w-4 h-4 theme-accent-text" /> Map Progress by Collection
-        </h3>
+        <div className="flex items-center justify-between">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] flex items-center gap-2">
+            <Compass className="w-4 h-4 theme-accent-text" /> Map Progress by Collection
+          </h3>
+          <span className="text-[11px] text-[var(--text-muted)] font-normal hidden sm:inline">
+            Click a collection to view routes in inventory
+          </span>
+        </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {mapCollectionStats.typeStats.map((col, idx) => (
-            <div key={col.name} className="bg-black/20 p-4 rounded-2xl border border-white/5 space-y-2">
+            <div
+              key={col.name}
+              onClick={() => onNavigateToCategoryMaps?.(col.cat)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={e => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  onNavigateToCategoryMaps?.(col.cat);
+                }
+              }}
+              title={`View ${col.name} flights with maps in inventory`}
+              className="bg-black/20 hover:bg-white/[0.07] p-4 rounded-2xl border border-white/5 hover:border-white/20 transition-all duration-200 cursor-pointer space-y-2 group shadow-sm hover:shadow-lg active:scale-[0.99] select-none"
+            >
               <div className="flex items-center justify-between text-xs">
-                <span className="font-heading font-medium tracking-wide text-[var(--text-main)]">
+                <span className="font-heading font-medium tracking-wide text-[var(--text-main)] group-hover:text-[var(--accent)] transition-colors flex items-center gap-1.5">
                   {col.name}
+                  <ChevronRight className="w-3.5 h-3.5 opacity-40 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all text-[var(--text-muted)] group-hover:text-[var(--accent)]" />
                 </span>
                 <span className="font-mono font-medium theme-accent-text">
                   {col.percentage}%
