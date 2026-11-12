@@ -32,7 +32,7 @@ Event walkthroughs
 
 ### 🗺️ Map Depot & Destinations
 - [ ] Active Map Countdown Timers: Live in-app countdown widget when a map is activated, showing remaining flight window
-- [ ] Route Flight Yield Estimator: Calculate max theoretical flights per map session based on aircraft flight duration and speedups
+
 
 ### 📊 Stats, Analytics & Progression
 - [ ] 

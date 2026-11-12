@@ -1147,7 +1147,7 @@ export const ACTracker = () => {
     // Check if legacy aeroquest data exists without any profiles created yet
     if (!hasProfiles && hasLegacyData()) {
       setShowMigrationModal(true);
-      return;
+  
     }
 
     if (!hasProfiles) {
@@ -1170,7 +1170,7 @@ export const ACTracker = () => {
       setActiveProfileId(defaultId);
       applyProfileState(newDefaultProfile, true);
       setIsLoaded(true);
-      return;
+  
     }
 
     // Normal profile loading
@@ -2070,7 +2070,7 @@ export const ACTracker = () => {
     setSelectedQuickFilters(['regular', 'adventure', 'alliance', 'event']);
     window.scrollTo({ top: 0, behavior: 'smooth' });
     setView('list');
-    return;
+
 
 
     setView(defaultFlightView || 'list');
@@ -2200,7 +2200,7 @@ export const ACTracker = () => {
           applyProfileState(importedProfiles[newActiveId]);
           setShowBackupModal(false);
           alert(`Successfully restored all ${Object.keys(importedProfiles).length} profiles!`);
-          return;
+      
         }
 
         // Case B: Single Profile Export format
@@ -2232,7 +2232,7 @@ export const ACTracker = () => {
           switchProfile(targetId, nextMap);
           setShowBackupModal(false);
           alert(`Successfully imported profile "${finalProfile.meta.name}"!`);
-          return;
+      
         }
 
         // Case C: Legacy single flight log backup format
@@ -2302,7 +2302,7 @@ export const ACTracker = () => {
     if (!showResetConfirm) {
       setShowResetConfirm(true);
       setTimeout(() => setShowResetConfirm(false), 4000);
-      return;
+  
     }
     setDestinations(prev =>
       prev.map(d => ({ ...d, flightsDone: 0, mapsDone: 0, lastUpdated: 0, isCustomList: false }))
@@ -2550,10 +2550,10 @@ export const ACTracker = () => {
                 {showProfileDropdown && (
                   <>
                     <div
-                      className="fixed inset-0 z-30"
+                      className="fixed inset-0 z-40"
                       onClick={() => setShowProfileDropdown(false)}
                     />
-                    <div className="absolute right-0 mt-2 w-64 bg-[var(--bg-card)] border border-[var(--border-card)] rounded-2xl shadow-2xl p-2 z-40 animate-in fade-in zoom-in-95 duration-150">
+                    <div className="absolute right-0 mt-2 w-64 bg-[var(--bg-card)] border border-[var(--border-card)] rounded-2xl shadow-2xl p-2 z-50 animate-in fade-in zoom-in-95 duration-150">
                       <div className="px-2.5 py-1.5 text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-wider">
                         Switch Pilot Profile
                       </div>
@@ -3337,7 +3337,7 @@ export const ACTracker = () => {
               )}
 
               {/* Filter & Command Controller Bar */}
-              <div className={`glass-panel rounded-2xl p-2 sm:p-2.5 border border-[var(--border-card)] ${focusMode ? 'space-y-1.5' : 'space-y-2'} relative z-40`}>
+              <div className={`glass-panel rounded-2xl p-2 sm:p-2.5 border border-[var(--border-card)] ${focusMode ? 'space-y-1.5' : 'space-y-2'} relative z-20`}>
                 {/* Top Row: Search Input + View & Deck Ergonomics Controls */}
                 <div className="flex flex-wrap items-center gap-2">
                   {/* Search Bar with Shortcut hint */}
@@ -3409,7 +3409,7 @@ export const ACTracker = () => {
                         {/* Columns Popover Menu */}
                         {showColumnsPopover && (
                           <div
-                            className="absolute left-0 sm:left-auto sm:right-0 top-full mt-2 w-64 sm:w-72 rounded-2xl border border-[var(--border-card)] shadow-2xl p-3 z-60 backdrop-blur-xl text-xs animate-in fade-in slide-in-from-top-2 duration-150 max-w-[calc(100vw-2rem)]"
+                            className="absolute left-0 sm:left-auto sm:right-0 top-full mt-2 w-64 sm:w-72 rounded-2xl border border-[var(--border-card)] shadow-2xl p-3 z-30 backdrop-blur-xl text-xs animate-in fade-in slide-in-from-top-2 duration-150 max-w-[calc(100vw-2rem)]"
                             style={{ backgroundColor: 'var(--bg-card)' }}
                           >
                             <div className="flex items-center justify-between pb-2 mb-2 border-b border-white/10">
@@ -3752,7 +3752,7 @@ export const ACTracker = () => {
                 <div className="glass-panel rounded-2xl border border-[var(--border-card)] overflow-x-auto shadow-sm">
                   {/* Sticky Table Header */}
                   <div
-                    className="hidden sm:grid items-center gap-2 px-3 py-2 text-[10px] font-mono font-semibold uppercase tracking-wider dense-table-header sticky top-0 z-30 backdrop-blur-md select-none"
+                    className="hidden sm:grid items-center gap-2 px-3 py-2 text-[10px] font-mono font-semibold uppercase tracking-wider dense-table-header sticky top-0 z-10 backdrop-blur-md select-none"
                     style={{ gridTemplateColumns: denseGridTemplate, minWidth: denseGridMinWidth }}
                   >
                     {visibleColumns.bookmark && (
