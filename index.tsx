@@ -107,8 +107,8 @@ import { sendTelemetryPing } from './telemetry';
 
 // --- App Version & Maintenance Tracker ---
 // NOTE: Always update APP_UPDATED_DATE whenever making changes in the app
-export const APP_VERSION = 'Version 2.9';
-export const APP_UPDATED_DATE = 'Nov 11, 2026';
+export const APP_VERSION = 'Version 2.9.5';
+export const APP_UPDATED_DATE = 'Nov 14, 2026';
 
 // --- Types & Interfaces ---
 type SortField =
@@ -948,15 +948,35 @@ export const ACTracker = () => {
         const star5Req = s5 && parseInt(s5) > 0 ? parseInt(s5) : undefined;
         const maxStars = star5Req ? 5 : star4Req ? 4 : 3;
 
-        const LEGACY_DEST_ALIASES: Record<string, string> = {
+        const LEGACY_DEST_ALIASES: Record<string, string | string[]> = {
           'Rovaniemi': 'Rovaneimi',
           'Los Angeles': 'Los Angees',
           'Cincinnati': 'Cincinatti',
           'Kuala Lumpur': 'Kuala Lampur',
           'Fontainebleau': 'Fountainbleau',
           'Machu Picchu (Dark Skies)': 'Machu-Pichu',
+          'Fujairah': 'Abu Dhabi',
+          'Abu Dhabi (UAE)': 'Cape Town',
+          'Ras Al Khaimah (UAE)': ['Bogotá', 'Bogota'],
+          'Sharjah (UAE)': 'Sharjah',
         };
-        const entry = savedData[dest] || (LEGACY_DEST_ALIASES[dest] ? savedData[LEGACY_DEST_ALIASES[dest]] : undefined) || savedData[id];
+        let entry = savedData[dest];
+        if (!entry && LEGACY_DEST_ALIASES[dest]) {
+          const aliasVal = LEGACY_DEST_ALIASES[dest];
+          if (Array.isArray(aliasVal)) {
+            for (const a of aliasVal) {
+              if (savedData[a] !== undefined) {
+                entry = savedData[a];
+                break;
+              }
+            }
+          } else if (savedData[aliasVal] !== undefined) {
+            entry = savedData[aliasVal];
+          }
+        }
+        if (!entry) {
+          entry = savedData[id];
+        }
         let flightsDone = 0;
         let mapsDone = 0;
         let lastUpdated = 0;

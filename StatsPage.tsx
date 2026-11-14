@@ -24,6 +24,11 @@ import {
   getMaxStars,
   getLocalDateString,
 } from './flightUtils';
+import {
+  getDestinationFlightSpec,
+  parseDurationToMinutes,
+  formatMinutesToDuration,
+} from './src/data/flightTimes';
 
 export interface StatsPageProps {
   globalStars: number;
@@ -52,6 +57,7 @@ export interface StatsPageProps {
   setHideZeroMaps?: (val: boolean) => void;
   hideEventDestinations?: boolean;
   setHideEventDestinations?: (val: boolean) => void;
+  flightDurationOverrides?: Record<string, string>;
 }
 
 export const StatsPage: React.FC<StatsPageProps> = ({
@@ -78,7 +84,10 @@ export const StatsPage: React.FC<StatsPageProps> = ({
   setHideZeroMaps,
   hideEventDestinations,
   setHideEventDestinations,
+  flightDurationOverrides,
 }) => {
+  // Lowest Hanging Fruit Sort State
+  const [lhfSortBy, setLhfSortBy] = useState<'flights' | 'fuel' | 'pax' | 'time'>('flights');
   // Radar Map & Event Filters (synchronized with props or localStorage)
   const [localHideZeroMaps, setLocalHideZeroMaps] = useState<boolean>(() => {
     try {
@@ -352,10 +361,21 @@ export const StatsPage: React.FC<StatsPageProps> = ({
         const reqs = [d.star1Req, d.star2Req, d.star3Req, d.star4Req || 0, d.star5Req || 0];
         const prevReq = stars > 0 ? reqs[stars - 1] : 0;
         const nextReq = reqs[stars] || d.star3Req;
-        const flightsRemaining = Math.max(0, nextReq - d.flightsDone);
+        const needed = Math.max(0, nextReq - d.flightsDone);
         const tierTarget = Math.max(1, nextReq - prevReq);
         const tierDone = Math.max(0, d.flightsDone - prevReq);
         const progressPct = Math.min(100, Math.round((tierDone / tierTarget) * 100));
+
+        const { spec, isEstimate } = getDestinationFlightSpec(d.destination, d.aircraft, flightDurationOverrides, d.category);
+
+        const durationMinutesPerFlight = spec.duration && spec.duration !== 'N/A' ? parseDurationToMinutes(spec.duration) : 0;
+        const fuelPerFlight = spec.fuel ?? 0;
+        const paxPerFlight = spec.pax ?? 0;
+
+        const totalTimeMinutes = needed * durationMinutesPerFlight;
+        const totalTimeDisplay = durationMinutesPerFlight > 0 ? formatMinutesToDuration(totalTimeMinutes) : 'N/A';
+        const totalFuel = needed * fuelPerFlight;
+        const totalPax = needed * paxPerFlight;
 
         return {
           destination: d,
@@ -363,13 +383,57 @@ export const StatsPage: React.FC<StatsPageProps> = ({
           maxStars,
           nextStar,
           nextReq,
-          flightsRemaining,
+          flightsRemaining: needed,
+          needed,
           progressPct,
+          spec,
+          isEstimate,
+          durationMinutesPerFlight,
+          fuelPerFlight,
+          paxPerFlight,
+          totalTimeMinutes,
+          totalTimeDisplay,
+          totalFuel,
+          totalPax,
         };
       })
-      .sort((a, b) => a.flightsRemaining - b.flightsRemaining || b.progressPct - a.progressPct)
-      .slice(0, 5);
-  }, [destinations, effectiveHideZeroMaps, effectiveHideEventDestinations]);
+      .sort((a, b) => {
+        if (lhfSortBy === 'flights') {
+          if (a.needed !== b.needed) return a.needed - b.needed;
+          const aTime = a.totalTimeMinutes > 0 ? a.totalTimeMinutes : Infinity;
+          const bTime = b.totalTimeMinutes > 0 ? b.totalTimeMinutes : Infinity;
+          if (aTime !== bTime) return aTime - bTime;
+          return a.totalFuel - b.totalFuel;
+        }
+
+        if (lhfSortBy === 'fuel') {
+          const aZero = a.totalFuel === 0 && a.destination.category !== 'Space Launches';
+          const bZero = b.totalFuel === 0 && b.destination.category !== 'Space Launches';
+          if (aZero !== bZero) return aZero ? 1 : -1;
+          if (a.totalFuel !== b.totalFuel) return a.totalFuel - b.totalFuel;
+          return a.needed - b.needed;
+        }
+
+        if (lhfSortBy === 'pax') {
+          const aZero = a.totalPax === 0 && a.destination.category !== 'Space Launches';
+          const bZero = b.totalPax === 0 && b.destination.category !== 'Space Launches';
+          if (aZero !== bZero) return aZero ? 1 : -1;
+          if (a.totalPax !== b.totalPax) return a.totalPax - b.totalPax;
+          return a.needed - b.needed;
+        }
+
+        if (lhfSortBy === 'time') {
+          const aZero = a.totalTimeMinutes <= 0;
+          const bZero = b.totalTimeMinutes <= 0;
+          if (aZero !== bZero) return aZero ? 1 : -1;
+          if (a.totalTimeMinutes !== b.totalTimeMinutes) return a.totalTimeMinutes - b.totalTimeMinutes;
+          return a.needed - b.needed;
+        }
+
+        return a.needed - b.needed;
+      })
+      .slice(0, 10);
+  }, [destinations, effectiveHideZeroMaps, effectiveHideEventDestinations, lhfSortBy, flightDurationOverrides]);
 
   // SVG Chart Geometry & Coordinates
   const chartWidth = 800;
@@ -1131,56 +1195,93 @@ export const StatsPage: React.FC<StatsPageProps> = ({
 
       {/* 4. Part 5: 🎯 "Lowest Hanging Fruit" (Next Closest Stars Radar) */}
       <div className="glass-panel rounded-3xl p-5 sm:p-7 border border-[var(--border-card)] shadow-xl relative overflow-hidden space-y-4">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-white/5">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-3 border-b border-white/5">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl theme-badge flex items-center justify-center shrink-0">
               <Crosshair className="w-4 h-4 text-amber-400" />
             </div>
             <div>
-              <h3 className="text-sm sm:text-base font-semibold uppercase tracking-wider text-[var(--text-main)] font-heading">
-                Next Closest Stars (Lowest Hanging Fruit)
-              </h3>
+              <div className="flex items-center gap-2">
+                <h3 className="text-sm sm:text-base font-semibold uppercase tracking-wider text-[var(--text-main)] font-heading">
+                  Next Closest Stars (Lowest Hanging Fruit)
+                </h3>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full theme-badge text-[var(--accent)] border border-[var(--accent)]/30 font-bold">
+                  Top 10
+                </span>
+              </div>
               <p className="text-[11px] text-[var(--text-muted)] mt-0.5">
-                Top reachable destinations closest to earning their next flight progress star rank
+                Top 10 reachable destinations closest to earning their next flight progress star rank
               </p>
             </div>
           </div>
 
-          {/* Quick Filter Checkboxes (Matches Flights toolbar) */}
-          <div className="flex flex-wrap items-center gap-3 bg-black/25 px-3 py-1.5 rounded-xl border border-white/5">
-            <label className="flex items-center gap-1.5 cursor-pointer select-none">
-              <input
-                type="checkbox"
-                checked={effectiveHideZeroMaps}
-                onChange={e => handleToggleHideZeroMaps(e.target.checked)}
-                style={{ accentColor: 'var(--accent)' }}
-                className="rounded"
-              />
-              <span
-                className={`text-xs transition-colors ${
-                  effectiveHideZeroMaps ? 'theme-accent-text font-medium' : 'text-[var(--text-muted)]'
-                }`}
-              >
-                🗺️ Hide destinations with 0 maps
+          {/* Controls: Sort Pills & Filter Checkboxes */}
+          <div className="flex flex-wrap items-center gap-2.5">
+            {/* Sort Bar */}
+            <div className="flex items-center gap-1 bg-black/25 dark:bg-black/30 p-1 rounded-xl border border-white/5 text-xs">
+              <span className="text-[10px] font-mono uppercase px-1.5 text-[var(--text-muted)] hidden sm:inline-block">
+                Sort:
               </span>
-            </label>
+              {(
+                [
+                  { id: 'flights', label: '✈️ Flights' },
+                  { id: 'time', label: '⏱️ Time' },
+                  { id: 'fuel', label: '⛽ Fuel' },
+                  { id: 'pax', label: '👥 Pax' },
+                ] as const
+              ).map(opt => (
+                <button
+                  key={opt.id}
+                  type="button"
+                  onClick={() => setLhfSortBy(opt.id)}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-mono transition-all ${
+                    lhfSortBy === opt.id
+                      ? 'theme-badge theme-accent-text border-[var(--accent)]/40 font-semibold shadow-sm'
+                      : 'text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-white/5 border border-transparent'
+                  }`}
+                  title={`Sort by ${opt.label.replace(/[^a-zA-Z]/g, '')}`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
 
-            <label className="flex items-center gap-1.5 cursor-pointer select-none">
-              <input
-                type="checkbox"
-                checked={effectiveHideEventDestinations}
-                onChange={e => handleToggleHideEventDestinations(e.target.checked)}
-                style={{ accentColor: 'var(--accent)' }}
-                className="rounded"
-              />
-              <span
-                className={`text-xs transition-colors ${
-                  effectiveHideEventDestinations ? 'text-purple-300 font-medium' : 'text-[var(--text-muted)]'
-                }`}
-              >
-                🎪 Hide Event Destinations
-              </span>
-            </label>
+            {/* Quick Filter Checkboxes (Matches Flights toolbar) */}
+            <div className="flex flex-wrap items-center gap-3 bg-black/25 dark:bg-black/30 px-3 py-1.5 rounded-xl border border-white/5">
+              <label className="flex items-center gap-1.5 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={effectiveHideZeroMaps}
+                  onChange={e => handleToggleHideZeroMaps(e.target.checked)}
+                  style={{ accentColor: 'var(--accent)' }}
+                  className="rounded"
+                />
+                <span
+                  className={`text-xs transition-colors ${
+                    effectiveHideZeroMaps ? 'theme-accent-text font-medium' : 'text-[var(--text-muted)]'
+                  }`}
+                >
+                  🗺️ Hide destinations with 0 maps
+                </span>
+              </label>
+
+              <label className="flex items-center gap-1.5 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={effectiveHideEventDestinations}
+                  onChange={e => handleToggleHideEventDestinations(e.target.checked)}
+                  style={{ accentColor: 'var(--accent)' }}
+                  className="rounded"
+                />
+                <span
+                  className={`text-xs transition-colors ${
+                    effectiveHideEventDestinations ? 'text-purple-300 font-medium' : 'text-[var(--text-muted)]'
+                  }`}
+                >
+                  🎪 Hide Event Destinations
+                </span>
+              </label>
+            </div>
           </div>
         </div>
 
@@ -1195,15 +1296,15 @@ export const StatsPage: React.FC<StatsPageProps> = ({
                 <div
                   key={item.destination.id || idx}
                   onClick={() => onNavigateToDestination?.(item.destination.destination)}
-                  className="p-3.5 sm:p-4 rounded-2xl bg-black/20 hover:bg-white/5 border border-white/5 hover:border-[var(--border-active)] transition-all cursor-pointer group flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm select-none"
+                  className="p-3.5 sm:p-4 rounded-2xl bg-black/20 hover:bg-white/5 border border-white/5 hover:border-[var(--border-active)] transition-all cursor-pointer group flex flex-col md:flex-row md:items-center justify-between gap-3.5 shadow-sm select-none"
                   title={`Click to view ${item.destination.destination} in Flights deck`}
                 >
-                  {/* Left: Destination & Aircraft */}
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-9 h-9 rounded-xl theme-badge flex items-center justify-center shrink-0 font-bold font-heading text-xs text-amber-300 border border-white/10">
+                  {/* Left: Rank, Destination info & Telemetry Strip */}
+                  <div className="flex items-start sm:items-center gap-3 min-w-0 flex-1">
+                    <div className="w-9 h-9 rounded-xl theme-badge flex items-center justify-center shrink-0 font-bold font-heading text-xs text-amber-300 border border-white/10 mt-0.5 sm:mt-0">
                       #{idx + 1}
                     </div>
-                    <div className="min-w-0">
+                    <div className="min-w-0 space-y-1.5 flex-1">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-heading font-semibold text-sm sm:text-base text-[var(--text-main)] truncate group-hover:text-[var(--accent)] transition-colors">
                           {item.destination.destination}
@@ -1212,15 +1313,60 @@ export const StatsPage: React.FC<StatsPageProps> = ({
                           {item.destination.aircraft}
                         </span>
                       </div>
-                      <div className="text-[11px] text-[var(--text-muted)] truncate mt-0.5">
+                      <div className="text-[11px] text-[var(--text-muted)] truncate">
                         {item.destination.group} • {item.destination.category}
+                      </div>
+
+                      {/* 3-stat Logistics Telemetry Strip */}
+                      <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap pt-0.5 text-[11px] font-mono">
+                        {/* ⏱️ Total Time */}
+                        <div
+                          className={`flex items-center gap-1 px-2 py-0.5 rounded-md border transition-all ${
+                            lhfSortBy === 'time'
+                              ? 'theme-badge theme-accent-text border-[var(--accent)]/50 font-semibold shadow-sm'
+                              : 'bg-[var(--well-bg)] text-[var(--text-muted)] border-[var(--border-subtle)]'
+                          }`}
+                          title="Total flight duration to reach next star"
+                        >
+                          <span>⏱️</span>
+                          <span>
+                            {item.isEstimate && item.totalTimeDisplay !== 'N/A' ? '~' : ''}
+                            {item.totalTimeDisplay}
+                          </span>
+                        </div>
+
+                        {/* ⛽ Total Fuel */}
+                        <div
+                          className={`flex items-center gap-1 px-2 py-0.5 rounded-md border transition-all ${
+                            lhfSortBy === 'fuel'
+                              ? 'theme-badge text-amber-400 dark:text-amber-300 border-amber-400/50 font-semibold shadow-sm'
+                              : 'bg-[var(--well-bg)] text-[var(--text-muted)] border-[var(--border-subtle)]'
+                          }`}
+                          title="Total fuel needed to reach next star"
+                        >
+                          <span>⛽</span>
+                          <span>{item.totalFuel.toLocaleString()}</span>
+                        </div>
+
+                        {/* 👥 Total Pax */}
+                        <div
+                          className={`flex items-center gap-1 px-2 py-0.5 rounded-md border transition-all ${
+                            lhfSortBy === 'pax'
+                              ? 'theme-badge text-cyan-400 dark:text-cyan-300 border-cyan-400/50 font-semibold shadow-sm'
+                              : 'bg-[var(--well-bg)] text-[var(--text-muted)] border-[var(--border-subtle)]'
+                          }`}
+                          title="Total passengers needed to reach next star"
+                        >
+                          <span>👥</span>
+                          <span>{item.totalPax.toLocaleString()}</span>
+                        </div>
                       </div>
                     </div>
                   </div>
 
-                  {/* Right: Star progress, Progress Bar, Remaining Counts */}
-                  <div className="flex flex-col sm:items-end gap-1.5 shrink-0 min-w-[240px]">
-                    <div className="flex items-center justify-between sm:justify-end gap-3 w-full">
+                  {/* Right: Star Progress, Count, and Progress Bar */}
+                  <div className="flex flex-col md:items-end gap-1.5 shrink-0 sm:min-w-[240px]">
+                    <div className="flex items-center justify-between md:justify-end gap-3 w-full">
                       {/* Current Star Badges */}
                       <div className="flex items-center gap-0.5">
                         {Array.from({ length: item.maxStars }).map((_, starIdx) => {
@@ -1241,8 +1387,14 @@ export const StatsPage: React.FC<StatsPageProps> = ({
                       {/* Remaining to next star text */}
                       <span className="text-xs font-mono font-medium text-[var(--text-main)]">
                         Only{' '}
-                        <strong className="text-amber-300 font-bold">
-                          {item.flightsRemaining}
+                        <strong
+                          className={`font-bold ${
+                            lhfSortBy === 'flights'
+                              ? 'text-amber-400 dark:text-amber-300 underline decoration-[var(--accent)] underline-offset-2'
+                              : 'text-amber-300'
+                          }`}
+                        >
+                          {item.needed}
                         </strong>{' '}
                         flights left for Star #{item.nextStar}
                       </span>

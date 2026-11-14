@@ -252,6 +252,13 @@ export const DESTINATION_FLIGHT_TIMES: Record<string, DestinationFlightSpec> = {
   'Beverly Hills': { duration: '16h 30m', fuel: 48, pax: 380 },
 
   // ==========================================================================
+  // SPACE LAUNCHES & MISSIONS (24h Launch Window & Missions)
+  // ==========================================================================
+  'Apogee': { duration: '24h 00m', fuel: 0, pax: 0 },
+  'Lunar': { duration: '24h 00m', fuel: 0, pax: 0 },
+  'Prometheus': { duration: '24h 00m', fuel: 0, pax: 0 },
+
+  // ==========================================================================
   // ALLIANCE TASK FLIGHTS (50 Routes across 10 Weekly Task Sets)
   // ==========================================================================
   // Swift: Carpe Diem
@@ -561,16 +568,20 @@ export function formatMinutesToDuration(totalMinutes: number): string {
 
 /**
  * Resolves the flight spec (duration, fuel, pax) for a destination:
- * 1. User custom profile overrides -> 2. Destination registry -> 3. Tier fallback
+ * 1. User custom profile overrides -> 2. Destination registry -> 3. Space launches -> 4. Event Flights (N/A) -> 5. Tier fallback
  */
 export function getDestinationFlightSpec(
   destinationName: string,
   aircraftType: string,
-  userOverrides?: Record<string, string>
+  userOverrides?: Record<string, string>,
+  category?: string
 ): { spec: DestinationFlightSpec; isEstimate: boolean } {
+  const tierFallback = TIER_BASE_DURATIONS[aircraftType] || { duration: '2h 00m', fuel: 20, pax: 100 };
+
   if (userOverrides && userOverrides[destinationName]) {
+    const baseSpec = DESTINATION_FLIGHT_TIMES[destinationName] || tierFallback;
     return {
-      spec: { duration: userOverrides[destinationName] },
+      spec: { ...baseSpec, duration: userOverrides[destinationName] },
       isEstimate: false,
     };
   }
@@ -582,9 +593,24 @@ export function getDestinationFlightSpec(
     };
   }
 
-  const fallback = TIER_BASE_DURATIONS[aircraftType] || { duration: '2h 00m', fuel: 20, pax: 100 };
+  // Space Launches are all 24h missions
+  if (category === 'Space Launches' || destinationName === 'Apogee' || destinationName === 'Lunar' || destinationName === 'Prometheus') {
+    return {
+      spec: { duration: '24h 00m', fuel: 0, pax: 0 },
+      isEstimate: false,
+    };
+  }
+
+  // Event Flights not yet verified in DESTINATION_FLIGHT_TIMES show as N/A per user request, but retain tier fuel/pax
+  if (category === 'Event Flights') {
+    return {
+      spec: { duration: 'N/A', fuel: tierFallback?.fuel, pax: tierFallback?.pax },
+      isEstimate: false,
+    };
+  }
+
   return {
-    spec: fallback,
+    spec: tierFallback,
     isEstimate: true,
   };
 }
