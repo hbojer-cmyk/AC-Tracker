@@ -1,0 +1,17 @@
+{
+  "name": "AC-Tracker | Flight Operations Hub",
+  "short_name": "AC-Tracker",
+  "description": "Companion flight tracker, map inventory, and fleet hangar for Airport City.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#050914",
+  "theme_color": "#00e5ff",
+  "icons": [
+    {
+      "src": "icons/act-logo-opt1.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

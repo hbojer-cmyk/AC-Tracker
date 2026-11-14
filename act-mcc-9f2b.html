@@ -1,0 +1,1243 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AC-Tracker | Mission Control</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/png" href="./icons/star-icon.png">
+  <style>
+    :root {
+      --bg: #050914;
+      --bg2: #0a1628;
+      --panel: rgba(10, 22, 50, 0.85);
+      --border: rgba(0, 229, 255, 0.15);
+      --border-bright: rgba(0, 229, 255, 0.4);
+      --accent: #00e5ff;
+      --accent-soft: rgba(0, 229, 255, 0.12);
+      --amber: #f59e0b;
+      --amber-soft: rgba(245, 158, 11, 0.15);
+      --green: #10b981;
+      --green-soft: rgba(16, 185, 129, 0.15);
+      --red: #ef4444;
+      --red-soft: rgba(239, 68, 68, 0.12);
+      --text: #e2e8f0;
+      --text-muted: #64748b;
+      --text-dim: #94a3b8;
+      --purple: #8b5cf6;
+      --purple-soft: rgba(139, 92, 246, 0.15);
+      --radius: 14px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      background-image:
+        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(0, 229, 255, 0.07) 0%, transparent 70%),
+        radial-gradient(ellipse 60% 40% at 80% 80%, rgba(139, 92, 246, 0.05) 0%, transparent 60%);
+    }
+
+    /* Header */
+    .header {
+      background: rgba(5, 9, 20, 0.9);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(16px);
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 60px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 800;
+      font-size: 15px;
+      letter-spacing: 0.04em;
+      color: var(--accent);
+      text-transform: uppercase;
+    }
+
+    .header-brand img {
+      width: 28px;
+      height: 28px;
+      object-fit: contain;
+      filter: drop-shadow(0 0 6px rgba(0, 229, 255, 0.5));
+    }
+
+    .header-badge {
+      background: rgba(239, 68, 68, 0.2);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #ef4444;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 20px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .header-time {
+      font-family: 'JetBrains Mono', 'Consolas', monospace;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* Layout */
+    .main {
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 32px 24px 80px;
+    }
+
+    .page-title {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 6px;
+    }
+
+    .page-title h1 {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--text);
+    }
+
+    .radar-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 10px var(--green);
+      animation: ping 1.5s ease-in-out infinite;
+    }
+
+    @keyframes ping {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.6; transform: scale(1.3); }
+    }
+
+    .page-subtitle {
+      color: var(--text-muted);
+      font-size: 13px;
+      margin-bottom: 24px;
+    }
+
+    /* Tab switcher */
+    .scope-nav {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 28px;
+      background: rgba(10, 22, 50, 0.6);
+      padding: 5px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      width: fit-content;
+      backdrop-filter: blur(8px);
+    }
+
+    .scope-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 700;
+      padding: 8px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .scope-btn:hover {
+      color: var(--text);
+    }
+
+    .scope-btn.active {
+      background: var(--accent-soft);
+      color: var(--accent);
+      border-color: var(--border-bright);
+      box-shadow: 0 0 14px rgba(0, 229, 255, 0.15);
+    }
+
+    /* Section */
+    .section {
+      margin-bottom: 32px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .section-title {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-dim);
+      white-space: nowrap;
+    }
+
+    .section-line {
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* KPI grid */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+      gap: 14px;
+      margin-bottom: 32px;
+    }
+
+    .kpi-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      backdrop-filter: blur(10px);
+      transition: border-color 0.2s;
+    }
+
+    .kpi-card:hover {
+      border-color: var(--border-bright);
+    }
+
+    .kpi-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .kpi-value {
+      font-family: 'JetBrains Mono', 'Consolas', monospace;
+      font-size: 30px;
+      font-weight: 700;
+      line-height: 1;
+      color: var(--accent);
+    }
+
+    .kpi-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .kpi-amber .kpi-value { color: var(--amber); }
+    .kpi-amber { border-color: rgba(245, 158, 11, 0.2); }
+    .kpi-green .kpi-value { color: var(--green); }
+    .kpi-green { border-color: rgba(16, 185, 129, 0.2); }
+    .kpi-purple .kpi-value { color: var(--purple); }
+    .kpi-purple { border-color: rgba(139, 92, 246, 0.2); }
+
+    /* Feature status grid */
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 12px;
+    }
+
+    .feat-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      backdrop-filter: blur(10px);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: border-color 0.2s;
+    }
+
+    .feat-card:hover { border-color: var(--border-bright); }
+    .feat-card.active { border-color: rgba(16, 185, 129, 0.35); background: rgba(16, 185, 129, 0.04); }
+    .feat-card.partial { border-color: rgba(245, 158, 11, 0.3); background: rgba(245, 158, 11, 0.03); }
+    .feat-card.unused { border-color: rgba(100, 116, 139, 0.2); opacity: 0.72; }
+
+    .feat-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .feat-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .feat-icon { font-size: 16px; }
+
+    .status-pill {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .pill-active { background: rgba(16, 185, 129, 0.2); color: var(--green); border: 1px solid rgba(16, 185, 129, 0.35); }
+    .pill-partial { background: rgba(245, 158, 11, 0.18); color: var(--amber); border: 1px solid rgba(245, 158, 11, 0.35); }
+    .pill-unused { background: rgba(100, 116, 139, 0.15); color: var(--text-muted); border: 1px solid rgba(100, 116, 139, 0.25); }
+
+    .feat-bar-bg {
+      width: 100%;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.07);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .feat-bar-fill {
+      height: 100%;
+      border-radius: 2px;
+      transition: width 0.5s;
+    }
+
+    .fill-green { background: linear-gradient(90deg, #10b981, #34d399); }
+    .fill-amber { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+    .fill-muted { background: rgba(100, 116, 139, 0.3); }
+
+    .feat-detail {
+      font-size: 11px;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    .feat-profiles {
+      font-size: 10px;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', 'Consolas', monospace;
+    }
+
+    /* Adoption bar */
+    .adoption-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+
+    .adoption-label {
+      font-size: 12px;
+      color: var(--text-dim);
+      width: 180px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .adoption-bar-bg {
+      flex: 1;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.07);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .adoption-bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.5s;
+    }
+
+    .adoption-count {
+      font-size: 11px;
+      font-family: 'JetBrains Mono', 'Consolas', monospace;
+      color: var(--text-muted);
+      min-width: 36px;
+      text-align: right;
+    }
+
+    /* Pilot table */
+    .pilots-table-wrap {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow-x: auto;
+      backdrop-filter: blur(10px);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 700px;
+    }
+
+    thead th {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      padding: 10px 14px;
+      text-align: left;
+      background: rgba(0, 229, 255, 0.04);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid rgba(0, 229, 255, 0.06);
+      transition: background 0.15s;
+    }
+
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: rgba(0, 229, 255, 0.03); }
+
+    td {
+      padding: 11px 14px;
+      font-size: 12px;
+      vertical-align: middle;
+    }
+
+    .pilot-name {
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .pilot-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--accent-soft);
+      border: 1px solid var(--border-bright);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+
+    .pilot-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .ac-code {
+      font-family: 'JetBrains Mono', 'Consolas', monospace;
+      font-size: 10px;
+      color: var(--text-muted);
+      background: rgba(255, 255, 255, 0.05);
+      padding: 1px 5px;
+      border-radius: 4px;
+    }
+
+    /* Setup Banner */
+    .setup-banner {
+      background: rgba(10, 22, 50, 0.9);
+      border: 1px solid rgba(0, 229, 255, 0.35);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 28px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 0 20px rgba(0, 229, 255, 0.08);
+    }
+
+    .setup-banner-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .setup-banner-desc {
+      font-size: 13px;
+      color: var(--text-dim);
+      line-height: 1.6;
+      margin-bottom: 18px;
+    }
+
+    .setup-steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .setup-step-card {
+      background: rgba(5, 9, 20, 0.6);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+    }
+
+    .setup-step-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .setup-step-text {
+      font-size: 12px;
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    /* Buttons */
+    .refresh-btn {
+      background: var(--accent-soft);
+      border: 1px solid var(--border-bright);
+      color: var(--accent);
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: background 0.15s;
+    }
+
+    .refresh-btn:hover {
+      background: rgba(0, 229, 255, 0.2);
+    }
+
+    .empty {
+      text-align: center;
+      padding: 40px 24px;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    .info-box {
+      background: rgba(0, 229, 255, 0.05);
+      border: 1px solid rgba(0, 229, 255, 0.12);
+      border-radius: var(--radius);
+      padding: 14px 18px;
+    }
+
+    .info-box-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 5px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .info-box p {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    .footer {
+      border-top: 1px solid var(--border);
+      padding: 18px 24px;
+      text-align: center;
+      font-size: 11px;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', 'Consolas', monospace;
+      margin-top: 40px;
+    }
+
+    @media (max-width:640px) {
+      .header { padding: 0 16px; }
+      .main { padding: 24px 16px 60px; }
+      .kpi-grid { grid-template-columns: 1fr 1fr; }
+      .feature-grid { grid-template-columns: 1fr; }
+      .setup-steps { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="header">
+    <div class="header-brand">
+      <img src="./icons/star-icon.png" alt="AC-Tracker" onerror="this.style.display='none'">
+      AC-Tracker
+      <span class="header-badge">Mission Control</span>
+    </div>
+    <div class="header-right">
+      <button class="refresh-btn" style="background:rgba(16,185,129,0.15);border-color:rgba(16,185,129,0.4);color:var(--green);" onclick="pingActivePilot()">📡 Ping My Pilot</button>
+      <button class="refresh-btn" onclick="refreshCurrentView()">↻ Refresh</button>
+      <div class="header-time" id="live-clock">--:--:--</div>
+    </div>
+  </div>
+
+  <div class="main">
+
+    <div class="page-title">
+      <div class="radar-dot"></div>
+      <h1 id="view-title">Global Fleet Telemetry</h1>
+    </div>
+    <p class="page-subtitle" id="view-subtitle">Live worldwide player metrics · Serverless cloud telemetry · Real-time feature adoption</p>
+
+    <!-- Scope Tabs: Global vs Local -->
+    <div class="scope-nav">
+      <button class="scope-btn active" id="tab-global" onclick="switchScope('global')">
+        <span>🌍</span> Global Fleet (Worldwide)
+        <span class="status-pill pill-active" id="global-pill">Cloud</span>
+      </button>
+      <button class="scope-btn" id="tab-local" onclick="switchScope('local')">
+        <span>💻</span> This Browser (Local)
+      </button>
+    </div>
+
+    <!-- Global Setup Banner (Shown if KV is not yet bound) -->
+    <div id="global-setup-banner" style="display:none;" class="setup-banner">
+      <div class="setup-banner-title">
+        <span>⚡</span> Cloudflare KV Telemetry Setup Required
+      </div>
+      <p class="setup-banner-desc">
+        The backend API function (<code>/api/telemetry</code>) is deployed and ready, but requires a free Cloudflare KV namespace binding to store global player heartbeats. Follow these 2 quick steps in your Cloudflare dashboard:
+      </p>
+      <div class="setup-steps">
+        <div class="setup-step-card">
+          <div class="setup-step-num">Step 1 — Create KV Namespace</div>
+          <div class="setup-step-text">
+            Go to <strong>Cloudflare Dashboard → Storage &amp; Databases → KV</strong>.<br>
+            Click <strong>Create a namespace</strong> and name it <code>AC_TELEMETRY</code>.
+          </div>
+        </div>
+        <div class="setup-step-card">
+          <div class="setup-step-num">Step 2 — Bind Variable</div>
+          <div class="setup-step-text">
+            Go to <strong>Workers &amp; Pages → ac-tracker → Settings → Functions</strong>.<br>
+            Scroll to <strong>KV namespace bindings</strong> → Click <strong>Add binding</strong>:<br>
+            • Variable name: <code>TELEMETRY_KV</code><br>
+            • KV namespace: <code>AC_TELEMETRY</code>
+          </div>
+        </div>
+        <div class="setup-step-card">
+          <div class="setup-step-num">Step 3 — Re-check Connection</div>
+          <div class="setup-step-text">
+            Once saved, click the test button below to verify global player tracking is live!
+            <div style="margin-top:10px;">
+              <button class="refresh-btn" onclick="fetchGlobalTelemetry()">⚡ Verify Connection Now</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpi-grid" id="kpi-grid"></div>
+
+    <!-- ═══ FEATURE ADOPTION SECTION ═══ -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-title" id="feature-section-title">🛰️ Global Feature Adoption — All Players</span>
+        <div class="section-line"></div>
+      </div>
+      <div class="feature-grid" id="feature-grid"></div>
+    </div>
+
+    <!-- ═══ FEATURE BAR CHART ═══ -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-title">📊 Usage Rate by Feature</span>
+        <div class="section-line"></div>
+      </div>
+      <div style="background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:20px 24px;backdrop-filter:blur(10px);">
+        <div id="feature-bars"></div>
+      </div>
+    </div>
+
+    <!-- ═══ PILOT ROSTER ═══ -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-title" id="roster-section-title">✈️ Worldwide Pilot Roster</span>
+        <div class="section-line"></div>
+      </div>
+      <div class="pilots-table-wrap" id="pilots-container"></div>
+    </div>
+
+    <!-- ═══ LOCALSTORAGE DIAGNOSTICS (Shown in local tab) ═══ -->
+    <div class="section" id="storage-section" style="display:none;">
+      <div class="section-header">
+        <span class="section-title">💾 localStorage Diagnostics</span>
+        <div class="section-line"></div>
+      </div>
+      <div style="background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;backdrop-filter:blur(10px);">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+          <span style="font-size:13px;font-weight:600;color:var(--text-dim)">AC-Tracker Data (act_* keys)</span>
+          <span id="storage-size" style="font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--text-muted)">— KB</span>
+        </div>
+        <div style="width:100%;height:8px;background:rgba(255,255,255,0.08);border-radius:4px;overflow:hidden;">
+          <div id="storage-fill" style="height:100%;background:linear-gradient(90deg,var(--accent),var(--purple));border-radius:4px;width:0%;transition:width 0.6s;"></div>
+        </div>
+        <p style="font-size:11px;color:var(--text-muted);margin-top:8px">Browser localStorage limit ~5 MB.</p>
+        <div style="margin-top:14px;padding-top:12px;border-top:1px solid rgba(0,229,255,0.1);font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--text-muted);line-height:1.6;" id="storage-diagnostics"></div>
+      </div>
+    </div>
+
+    <!-- ═══ EXTERNAL TRAFFIC CARDS ═══ -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-title">📡 External Cloudflare &amp; GitHub Analytics</span>
+        <div class="section-line"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;">
+        <div style="background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;cursor:pointer;display:flex;flex-direction:column;gap:10px;" onclick="window.open('https://dash.cloudflare.com','_blank')">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:36px;height:36px;border-radius:10px;background:rgba(245,158,11,0.2);border:1px solid rgba(245,158,11,0.3);display:flex;align-items:center;justify-content:center;font-size:18px;">🌩️</div>
+            <div>
+              <div style="font-weight:700;font-size:14px;color:var(--text);">Cloudflare Pages Analytics</div>
+              <span class="status-pill pill-partial" style="font-size:9px;">Live CDN</span>
+            </div>
+          </div>
+          <p style="font-size:12px;color:var(--text-muted);line-height:1.5;">Unique visitors, total requests, bandwidth, and geographic breakdown for <strong>ac-tracker.pages.dev</strong>.</p>
+          <span style="font-size:11px;color:var(--accent);font-weight:600;margin-top:auto;">Open Cloudflare Dashboard →</span>
+        </div>
+
+        <div style="background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;cursor:pointer;display:flex;flex-direction:column;gap:10px;" onclick="window.open('https://github.com/hbojer-cmyk/AC-Tracker/graphs/traffic','_blank')">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:36px;height:36px;border-radius:10px;background:rgba(139,92,246,0.2);border:1px solid rgba(139,92,246,0.3);display:flex;align-items:center;justify-content:center;font-size:18px;">🐙</div>
+            <div>
+              <div style="font-weight:700;font-size:14px;color:var(--text);">GitHub Traffic Insights</div>
+              <span class="status-pill pill-active" style="font-size:9px;background:var(--purple-soft);color:var(--purple);border-color:rgba(139,92,246,0.3);">Repo Traffic</span>
+            </div>
+          </div>
+          <p style="font-size:12px;color:var(--text-muted);line-height:1.5;">14-day views, git clones, and visitor referrers on your GitHub repository.</p>
+          <span style="font-size:11px;color:var(--accent);font-weight:600;margin-top:auto;">Open GitHub Insights →</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <div class="info-box-title">🔒 Mission Control Access</div>
+      <p>This page is private to you at <code style="color:var(--accent)">/act-mcc-9f2b.html</code>. It queries <code>/api/telemetry</code> to aggregate global fleet telemetry while keeping individual player data private and anonymous.</p>
+    </div>
+
+  </div>
+
+  <div class="footer">AC-Tracker Mission Control · Serverless Telemetry · <span id="footer-time"></span></div>
+
+  <script>
+    let currentScope = 'global';
+
+    // ─── Live Clock ──────────────────────────────────────────
+    function updateClock() {
+      const t = new Date().toLocaleTimeString('en-GB', { hour12: false });
+      const el = document.getElementById('live-clock');
+      const ft = document.getElementById('footer-time');
+      if (el) el.textContent = t;
+      if (ft) ft.textContent = 'Refreshed: ' + new Date().toLocaleString('en-GB');
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
+
+    // ─── Helpers ─────────────────────────────────────────────
+    const mono = (s) => `<span style="font-family:'JetBrains Mono',monospace">${s}</span>`;
+    function relativeTime(ts) {
+      if (!ts) return '—';
+      const diff = Date.now() - ts;
+      const m = Math.floor(diff / 60000);
+      if (m < 1) return 'Just now';
+      if (m < 60) return `${m}m ago`;
+      const h = Math.floor(m / 60);
+      if (h < 24) return `${h}h ago`;
+      return `${Math.floor(h / 24)}d ago`;
+    }
+    function fmtDate(ts) {
+      if (!ts) return '—';
+      return new Date(ts).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+    }
+    function isAvatarImage(v) {
+      if (!v) return false;
+      return v.startsWith('icons/') || /\.(png|jpg|webp|svg)$/i.test(v);
+    }
+
+    const FEATURE_METADATA = {
+      flights: { name: 'Flight Deck', icon: '✈️', desc: 'Core logging — routes with flights recorded' },
+      bookmarks: { name: 'Bookmarks', icon: '🔖', desc: 'Custom prioritized route list' },
+      maps: { name: 'Map Inventory', icon: '🗺️', desc: 'Tracking active alliance/adventure map stock' },
+      airplanes: { name: 'Fleet Hangar', icon: '🛩️', desc: 'Owned aircraft in fleet hangar' },
+      stats: { name: 'Telemetry & Stats', icon: '📈', desc: 'Star velocity snapshots & telemetry history' },
+      missions: { name: 'Missions Depot', icon: '🏛️', desc: 'Item counters for prize landmarks' },
+      events: { name: 'Events Calendar', icon: '📅', desc: '12-month event schedule rotation' },
+      star_offsets: { name: 'Star Sync Offsets', icon: '⭐', desc: 'Manual in-game milestone offsets calibrated' },
+      custom_theme: { name: 'Custom Theme', icon: '🎨', desc: 'Selected non-default flight deck skin' },
+      custom_logo: { name: 'Custom Logo', icon: '🏷️', desc: 'Custom flight deck brand insignia' },
+      grid_view: { name: 'Grid View', icon: '⊞', desc: 'Compact grid flight cards layout' },
+      compact_density: { name: 'Compact Density', icon: '📏', desc: 'High-density flight table rows' },
+      focus_mode: { name: 'Focus Mode', icon: '🎯', desc: 'Minimalist cockpit header mode' },
+      getting_started: { name: 'Getting Started Guide', icon: '💡', desc: 'Pilot orientation briefing completed' },
+    };
+
+    // ─── Scope Switcher ──────────────────────────────────────
+    function switchScope(scope) {
+      currentScope = scope;
+      document.getElementById('tab-global').classList.toggle('active', scope === 'global');
+      document.getElementById('tab-local').classList.toggle('active', scope === 'local');
+      document.getElementById('storage-section').style.display = scope === 'local' ? 'block' : 'none';
+
+      if (scope === 'global') {
+        document.getElementById('view-title').textContent = 'Global Fleet Telemetry';
+        document.getElementById('view-subtitle').textContent = 'Live worldwide player metrics · Serverless cloud telemetry · Real-time feature adoption';
+        document.getElementById('feature-section-title').textContent = '🛰️ Global Feature Adoption — All Players Worldwide';
+        document.getElementById('roster-section-title').textContent = '✈️ Worldwide Pilot Roster';
+        fetchGlobalTelemetry();
+      } else {
+        document.getElementById('view-title').textContent = 'Local Browser Telemetry';
+        document.getElementById('view-subtitle').textContent = 'Local-storage profiles · Single-browser diagnostic inspect';
+        document.getElementById('feature-section-title').textContent = '🛰️ Local Feature Adoption — Profiles in This Browser';
+        document.getElementById('roster-section-title').textContent = '✈️ Local Pilot Profiles';
+        document.getElementById('global-setup-banner').style.display = 'none';
+        loadLocalData();
+      }
+    }
+
+    function refreshCurrentView() {
+      if (currentScope === 'global') {
+        fetchGlobalTelemetry();
+      } else {
+        loadLocalData();
+      }
+    }
+
+    async function pingActivePilot() {
+      try {
+        let profiles = [];
+        const raw = localStorage.getItem('act_profiles');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          profiles = Array.isArray(parsed) ? parsed : Object.values(parsed);
+        }
+        const activeId = localStorage.getItem('act_active_profile_id');
+        const active = profiles.find(p => p.meta?.id === activeId) || profiles[0];
+        if (!active) {
+          alert('No local profile found in this browser. Open AC-Tracker first to create or load one!');
+          return;
+        }
+
+        const ud = active.userData || {};
+        let totalFlights = 0, routesCount = 0;
+        Object.values(ud).forEach(e => {
+          if (e && e.count > 0) {
+            routesCount++;
+            totalFlights += e.count;
+          }
+        });
+
+        const history = active.starHistory || [];
+        const totalStars = history.length ? (history[history.length - 1].stars || 0) : 0;
+        const missionsCount = active.missions ? Object.keys(active.missions).length : 0;
+
+        const res = await fetch('/api/telemetry', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: active.meta.id,
+            name: active.meta.name || 'Anonymous Pilot',
+            avatar: active.meta.emoji || '✈️',
+            acCode: active.meta.acCode || '',
+            totalFlights,
+            totalStars,
+            routesCount,
+            missionsCount,
+            theme: active.prefs?.themeId || 'stealth-ghost',
+            density: active.prefs?.density || 'compact',
+            starMode: active.prefs?.starCountMode || 'cumulative',
+            features: ['flights', 'bookmarks', 'maps', 'airplanes', 'stats', 'missions', 'events'],
+            version: 'v2.9'
+          })
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          fetchGlobalTelemetry();
+        } else if (data.status === 'setup_needed') {
+          alert('Cloudflare has not yet finished deploying with the new KV binding. Please wait ~1-2 minutes for the deployment to finish and try again!');
+        } else {
+          alert('Ping response: ' + JSON.stringify(data));
+        }
+      } catch (err) {
+        alert('Ping error: ' + err.message);
+      }
+    }
+
+    // ─── Global Fleet Telemetry Loader ──────────────────────
+    async function fetchGlobalTelemetry() {
+      const banner = document.getElementById('global-setup-banner');
+      try {
+        const res = await fetch('/api/telemetry');
+        const data = await res.json();
+
+        if (data.status === 'setup_needed') {
+          banner.style.display = 'block';
+          renderSetupPlaceholder();
+          return;
+        }
+
+        banner.style.display = 'none';
+        renderGlobalData(data);
+      } catch (err) {
+        console.warn('API error, showing setup banner:', err);
+        banner.style.display = 'block';
+        renderSetupPlaceholder();
+      }
+    }
+
+    function renderSetupPlaceholder() {
+      // Show informative placeholder while KV is being configured
+      document.getElementById('kpi-grid').innerHTML = `
+        <div class="kpi-card">
+          <div class="kpi-label">🌍 Cloud Telemetry</div>
+          <div class="kpi-value" style="font-size:20px;color:var(--amber);">Setup Needed</div>
+          <div class="kpi-sub">Link TELEMETRY_KV in Cloudflare</div>
+        </div>
+        <div class="kpi-card kpi-green">
+          <div class="kpi-label">⚡ API Endpoint</div>
+          <div class="kpi-value" style="font-size:20px;color:var(--green);">Ready</div>
+          <div class="kpi-sub">/api/telemetry deployed</div>
+        </div>
+        <div class="kpi-card kpi-purple">
+          <div class="kpi-label">🛡️ Privacy</div>
+          <div class="kpi-value" style="font-size:20px;color:var(--purple);">100% Anon</div>
+          <div class="kpi-sub">No personal data collected</div>
+        </div>
+      `;
+
+      document.getElementById('feature-grid').innerHTML = `
+        <div class="empty" style="grid-column:1/-1;">
+          Connect Cloudflare KV above to begin seeing real-time feature adoption percentages across all players worldwide!
+        </div>
+      `;
+      document.getElementById('feature-bars').innerHTML = `<div class="empty">Waiting for KV telemetry binding.</div>`;
+      document.getElementById('pilots-container').innerHTML = `<div class="empty">Worldwide pilot roster will populate automatically once KV is connected.</div>`;
+    }
+
+    function renderGlobalData(data) {
+      const stats = data.stats || {};
+      const pilots = data.pilots || [];
+
+      // KPIs
+      document.getElementById('kpi-grid').innerHTML = `
+        <div class="kpi-card">
+          <div class="kpi-label">🌍 Global Pilots</div>
+          <div class="kpi-value">${stats.totalPilots || pilots.length}</div>
+          <div class="kpi-sub">registered worldwide</div>
+        </div>
+        <div class="kpi-card kpi-green">
+          <div class="kpi-label">🟢 Active (24h)</div>
+          <div class="kpi-value">${stats.activeToday || 0}</div>
+          <div class="kpi-sub">${stats.active7d || 0} active past 7 days</div>
+        </div>
+        <div class="kpi-card kpi-amber">
+          <div class="kpi-label">✈️ Global Flights</div>
+          <div class="kpi-value">${(stats.totalFlights || 0).toLocaleString()}</div>
+          <div class="kpi-sub">logged worldwide</div>
+        </div>
+        <div class="kpi-card kpi-purple">
+          <div class="kpi-label">⭐ Global Stars</div>
+          <div class="kpi-value">${(stats.totalStars || 0).toLocaleString()}</div>
+          <div class="kpi-sub">earned worldwide</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">🕐 Last Signal</div>
+          <div class="kpi-value" style="font-size:18px;line-height:1.4">${pilots.length && pilots[0].lastSeen ? relativeTime(pilots[0].lastSeen) : '—'}</div>
+          <div class="kpi-sub">${pilots.length && pilots[0].lastSeen ? fmtDate(pilots[0].lastSeen) : 'No signals yet'}</div>
+        </div>
+      `;
+
+      // Feature adoption
+      const adoption = stats.featureAdoption || {};
+      const totalPilots = stats.totalPilots || pilots.length || 1;
+
+      const featEntries = Object.entries(FEATURE_METADATA).map(([key, meta]) => {
+        const pct = adoption[key] || 0;
+        const count = stats.featureCounts ? (stats.featureCounts[key] || 0) : Math.round((pct / 100) * totalPilots);
+        return { key, meta, pct, count };
+      });
+
+      // Feature cards
+      document.getElementById('feature-grid').innerHTML = featEntries.map(({ meta, pct, count }) => {
+        let statusClass = pct >= 50 ? 'active' : pct > 0 ? 'partial' : 'unused';
+        let pillClass = pct >= 50 ? 'pill-active' : pct > 0 ? 'pill-partial' : 'pill-unused';
+        let barClass = pct >= 50 ? 'fill-green' : pct > 0 ? 'fill-amber' : 'fill-muted';
+
+        return `
+          <div class="feat-card ${statusClass}">
+            <div class="feat-top">
+              <div class="feat-name"><span class="feat-icon">${meta.icon}</span>${meta.name}</div>
+              <span class="status-pill ${pillClass}">${pct}%</span>
+            </div>
+            <div class="feat-bar-bg"><div class="feat-bar-fill ${barClass}" style="width:${pct}%"></div></div>
+            <div class="feat-detail">${count} of ${totalPilots} pilots worldwide</div>
+            <div class="feat-profiles">${meta.desc}</div>
+          </div>
+        `;
+      }).join('');
+
+      // Feature bars
+      const sorted = [...featEntries].sort((a, b) => b.pct - a.pct);
+      document.getElementById('feature-bars').innerHTML = sorted.map(({ meta, pct, count }) => {
+        const barColor = pct >= 50 ? 'linear-gradient(90deg,#10b981,#34d399)' : pct > 0 ? 'linear-gradient(90deg,#f59e0b,#fbbf24)' : 'rgba(100,116,139,0.3)';
+        const labelColor = pct >= 50 ? 'var(--green)' : pct > 0 ? 'var(--amber)' : 'var(--text-muted)';
+        return `
+          <div class="adoption-row">
+            <div class="adoption-label"><span>${meta.icon}</span>${meta.name}</div>
+            <div class="adoption-bar-bg">
+              <div class="adoption-bar-fill" style="width:${pct}%;background:${barColor}"></div>
+            </div>
+            <div class="adoption-count" style="color:${labelColor}">${pct}%</div>
+          </div>
+        `;
+      }).join('');
+
+      // Worldwide Pilot Roster
+      if (!pilots.length) {
+        document.getElementById('pilots-container').innerHTML = `
+          <div class="empty">No player heartbeats logged yet. As players open AC-Tracker around the world, their anonymous profiles will appear here automatically!</div>
+        `;
+      } else {
+        const rows = pilots.map(p => {
+          const avatarHtml = isAvatarImage(p.avatar)
+            ? `<div class="pilot-avatar"><img src="${p.avatar}" alt="" onerror="this.parentElement.textContent='✈️'"></div>`
+            : `<div class="pilot-avatar">${p.avatar || '✈️'}</div>`;
+          const featCount = Array.isArray(p.features) ? p.features.length : 0;
+          return `
+            <tr>
+              <td>
+                <div class="pilot-name">
+                  ${avatarHtml}
+                  <div>
+                    <div style="color:var(--accent)">${p.name || 'Anonymous Pilot'}</div>
+                    ${p.acCode ? `<span class="ac-code">${p.acCode}</span>` : ''}
+                  </div>
+                </div>
+              </td>
+              <td>${mono((p.totalFlights || 0).toLocaleString())}</td>
+              <td>${mono(p.routesCount || 0)}</td>
+              <td style="color:var(--amber)">${mono('⭐ ' + (p.totalStars || 0).toLocaleString())}</td>
+              <td><span style="font-size:11px;color:var(--text-dim)">${p.theme || 'default'}</span></td>
+              <td><span class="status-pill ${featCount >= 5 ? 'pill-active' : 'pill-partial'}">${featCount} features</span></td>
+              <td style="color:var(--text-muted);font-size:11px">${p.version || 'v2.9'}</td>
+              <td style="color:var(--text-muted);font-size:11px">${relativeTime(p.lastSeen)}</td>
+            </tr>
+          `;
+        }).join('');
+
+        document.getElementById('pilots-container').innerHTML = `
+          <table>
+            <thead>
+              <tr>
+                <th>Pilot</th>
+                <th>Flights</th>
+                <th>Routes</th>
+                <th>Stars</th>
+                <th>Theme</th>
+                <th>Feature Use</th>
+                <th>Version</th>
+                <th>Last Active</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+        `;
+      }
+    }
+
+    // ─── Local Browser Data Loader ───────────────────────────
+    function loadLocalData() {
+      try {
+        let profiles = [];
+        try {
+          const raw = localStorage.getItem('act_profiles');
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            profiles = Array.isArray(parsed) ? parsed : Object.values(parsed);
+          }
+        } catch (e) { }
+
+        const totalProfiles = profiles.length;
+        let totalFlights = 0, totalStars = 0, newestTs = 0;
+        const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+        let recentlyActive = 0;
+
+        profiles.forEach(p => {
+          if (!p) return;
+          const ud = p.userData || {};
+          let pFlights = 0, lastAct = 0;
+          Object.values(ud).forEach(e => {
+            if (!e) return;
+            pFlights += (e.count || 0);
+            if (e.lastUpdated && e.lastUpdated > lastAct) lastAct = e.lastUpdated;
+          });
+          totalFlights += pFlights;
+          const history = p.starHistory || [];
+          totalStars += history.length ? (history[history.length - 1].stars || 0) : 0;
+          if (lastAct > newestTs) newestTs = lastAct;
+          if (Object.values(ud).some(e => e && e.lastUpdated > sevenDaysAgo)) recentlyActive++;
+        });
+
+        // KPIs
+        document.getElementById('kpi-grid').innerHTML = `
+          <div class="kpi-card">
+            <div class="kpi-label">👤 Local Profiles</div>
+            <div class="kpi-value">${totalProfiles}</div>
+            <div class="kpi-sub">in this browser</div>
+          </div>
+          <div class="kpi-card kpi-green">
+            <div class="kpi-label">🟢 Active (7d)</div>
+            <div class="kpi-value">${recentlyActive}</div>
+            <div class="kpi-sub">profiles logged flights</div>
+          </div>
+          <div class="kpi-card kpi-amber">
+            <div class="kpi-label">✈️ Total Flights</div>
+            <div class="kpi-value">${totalFlights.toLocaleString()}</div>
+            <div class="kpi-sub">across local profiles</div>
+          </div>
+          <div class="kpi-card kpi-purple">
+            <div class="kpi-label">⭐ Total Stars</div>
+            <div class="kpi-value">${totalStars.toLocaleString()}</div>
+            <div class="kpi-sub">from local star history</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">🕐 Last Activity</div>
+            <div class="kpi-value" style="font-size:18px;line-height:1.4">${newestTs ? relativeTime(newestTs) : '—'}</div>
+            <div class="kpi-sub">${newestTs ? fmtDate(newestTs) : 'No data'}</div>
+          </div>
+        `;
+
+        // Local Roster
+        if (!profiles.length) {
+          document.getElementById('pilots-container').innerHTML = `
+            <div class="empty">No local profiles found in this browser's localStorage.</div>
+          `;
+        } else {
+          const rows = profiles.map(p => {
+            const meta = p.meta || {};
+            const ud = p.userData || {};
+            let flightCount = 0, lastAct = 0, dests = 0;
+            Object.values(ud).forEach(e => {
+              if (!e) return;
+              if (e.count > 0) { dests++; flightCount += e.count; }
+              if (e.lastUpdated && e.lastUpdated > lastAct) lastAct = e.lastUpdated;
+            });
+            const stars = (p.starHistory && p.starHistory.length) ? (p.starHistory[p.starHistory.length - 1].stars || 0) : 0;
+            const avatarHtml = isAvatarImage(meta.emoji)
+              ? `<div class="pilot-avatar"><img src="${meta.emoji}" alt="" onerror="this.parentElement.textContent='✈️'"></div>`
+              : `<div class="pilot-avatar">${meta.emoji || '✈️'}</div>`;
+            return `
+              <tr>
+                <td>
+                  <div class="pilot-name">
+                    ${avatarHtml}
+                    <div>
+                      <div style="color:${meta.accentColor || '#00e5ff'}">${meta.name || 'Unknown'}</div>
+                      ${meta.acCode ? `<span class="ac-code">${meta.acCode}</span>` : ''}
+                    </div>
+                  </div>
+                </td>
+                <td>${mono(flightCount.toLocaleString())}</td>
+                <td>${mono(dests)}</td>
+                <td style="color:var(--amber)">${mono('⭐ ' + stars.toLocaleString())}</td>
+                <td><span style="font-size:11px;color:var(--text-dim)">${p.prefs?.themeId || 'default'}</span></td>
+                <td><span class="status-pill pill-active">Local</span></td>
+                <td><span style="color:var(--text-muted);font-size:11px">${fmtDate(meta.createdAt)}</span></td>
+                <td style="color:var(--text-muted);font-size:11px">${lastAct ? relativeTime(lastAct) : '—'}</td>
+              </tr>
+            `;
+          }).join('');
+
+          document.getElementById('pilots-container').innerHTML = `
+            <table>
+              <thead>
+                <tr>
+                  <th>Pilot</th>
+                  <th>Flights</th>
+                  <th>Routes</th>
+                  <th>Stars</th>
+                  <th>Theme</th>
+                  <th>Type</th>
+                  <th>Created</th>
+                  <th>Last Active</th>
+                </tr>
+              </thead>
+              <tbody>${rows}</tbody>
+            </table>
+          `;
+        }
+
+        // Storage usage
+        let actBytes = 0;
+        const keyNames = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key) {
+            keyNames.push(key);
+            if (key.startsWith('act_') || key.startsWith('aeroquest_')) {
+              actBytes += (key.length + (localStorage.getItem(key) || '').length) * 2;
+            }
+          }
+        }
+        const kb = (actBytes / 1024).toFixed(1);
+        const pct = Math.min(100, (actBytes / (5 * 1024 * 1024)) * 100);
+        document.getElementById('storage-size').textContent = `${kb} KB / ~5,120 KB`;
+        document.getElementById('storage-fill').style.width = pct + '%';
+
+        const diag = document.getElementById('storage-diagnostics');
+        if (diag) {
+          diag.innerHTML = `
+            <div>• Active Origin: <span style="color:var(--accent);">${window.location.origin}</span></div>
+            <div>• act_profiles: <span style="color:${totalProfiles > 0 ? 'var(--green)' : 'var(--amber)'};">${totalProfiles} profile(s) found</span></div>
+            <div>• Stored keys (${keyNames.length}): <span style="color:var(--text-muted);">${keyNames.join(', ') || 'None'}</span></div>
+          `;
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    // Default start in Global Fleet mode
+    switchScope('global');
+  </script>
+</body>
+
+</html>
